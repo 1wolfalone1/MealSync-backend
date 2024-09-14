@@ -1,6 +1,8 @@
-﻿namespace MealSync.Application.Common.Repositories;
+﻿using MealSync.Domain.Entities;
 
-public interface ICommissionConfigRepository
+namespace MealSync.Application.Common.Repositories;
+
+public interface ICommissionConfigRepository : IBaseRepository<CommissionConfig>
 {
     
 }
