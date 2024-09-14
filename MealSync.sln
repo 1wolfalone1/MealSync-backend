@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MealSync.API", "MealSync.API\MealSync.API.csproj", "{79E4E097-C570-4FE0-A976-CAD13E15480B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MealSync.Application", "MealSync.Application\MealSync.Application.csproj", "{B138CA7F-1062-4635-A41B-681B73EFA28C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MealSync.Domain", "MealSync.Domain\MealSync.Domain.csproj", "{EEF8DAF5-B9F5-4808-9998-C270814A9E17}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MealSync.Infrastructure", "MealSync.Infrastructure\MealSync.Infrastructure.csproj", "{CDE4B7DB-1474-4820-BFFD-5625F0A789BA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{79E4E097-C570-4FE0-A976-CAD13E15480B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79E4E097-C570-4FE0-A976-CAD13E15480B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79E4E097-C570-4FE0-A976-CAD13E15480B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79E4E097-C570-4FE0-A976-CAD13E15480B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B138CA7F-1062-4635-A41B-681B73EFA28C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B138CA7F-1062-4635-A41B-681B73EFA28C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B138CA7F-1062-4635-A41B-681B73EFA28C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B138CA7F-1062-4635-A41B-681B73EFA28C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEF8DAF5-B9F5-4808-9998-C270814A9E17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEF8DAF5-B9F5-4808-9998-C270814A9E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEF8DAF5-B9F5-4808-9998-C270814A9E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEF8DAF5-B9F5-4808-9998-C270814A9E17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDE4B7DB-1474-4820-BFFD-5625F0A789BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDE4B7DB-1474-4820-BFFD-5625F0A789BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDE4B7DB-1474-4820-BFFD-5625F0A789BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDE4B7DB-1474-4820-BFFD-5625F0A789BA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F949E68C-EA76-48AC-A710-0D922C6E15EC}
+	EndGlobalSection
+EndGlobal
