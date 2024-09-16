@@ -12,8 +12,6 @@ public class Customer : BaseEntity
 
     public long DormitoryId { get; set; }
 
-    public long WalletId { get; set; }
-
     public virtual Account Account { get; set; }
 
     public virtual Dormitory Dormitory { get; set; }
