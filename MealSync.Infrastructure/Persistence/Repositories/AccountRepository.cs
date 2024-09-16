@@ -1,5 +1,6 @@
 ﻿using MealSync.Application.Common.Repositories;
 using MealSync.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
 
@@ -9,10 +10,9 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
     {
     }
 
-    public Account GetCustomerAccount(string email, string password)
+    public Account? GetAccountByEmail(string email)
     {
-        return this.DbSet.SingleOrDefault(a => a.Email == email 
-                                               && password == password);
+        return DbSet.Include(a => a.Role).SingleOrDefault(a => a.Email == email);
     }
 }
 

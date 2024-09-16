@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Accounts.Commands;
+using MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 using MealSync.Application.UseCases.Accounts.Models;
 
 namespace MealSync.API.Controllers;
@@ -8,11 +9,8 @@ namespace MealSync.API.Controllers;
 public class AccountController : BaseApiController
 {
     [HttpPost("customer/login")]
-    public async  Task<IActionResult> Login(AccountLoginRequest loginRequest)
+    public async  Task<IActionResult> Login(LoginCommand request)
     {
-        return this.HandleResult(await this.Mediator.Send(new CustomerLoginCommand
-        {
-            AccountLogin = loginRequest
-        }));
+        return HandleResult(await Mediator.Send(request));
     }
 }

@@ -3,5 +3,5 @@
 public class LoginResponse
 {
     public AccountResponse AccountResponse { get; set; }
-    public AccessTokenResponse AccessTokenResponse { get; set; }
+    public TokenResponse TokenResponse { get; set; }
 }
