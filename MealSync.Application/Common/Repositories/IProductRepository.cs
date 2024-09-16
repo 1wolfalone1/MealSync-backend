@@ -2,7 +2,6 @@
 
 namespace MealSync.Application.Common.Repositories;
 
-public interface IDormitoryRepository : IBaseRepository<Dormitory>
+public interface IProductRepository : IBaseRepository<Product>
 {
-
 }
