@@ -17,6 +17,6 @@ public class SystemResourceRepository : BaseRepository<SystemResource>, ISystemR
     public string GetByResourceCode(string code, params object[] args)
     {
         var systemResource = DbSet.Single(sr => sr.ResourceCode == code);
-        return string.Format(systemResource.ResourceCode, args);
+        return string.Format(systemResource.ResourceContent, args);
     }
 }
