@@ -52,11 +52,11 @@ public class Account : BaseEntity
 
     public virtual StaffDelivery? StaffDelivery { get; set; }
 
-    public virtual ICollection<VerificationCode> VerificationCodes { get; set; } = new List<VerificationCode>();
-
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual ICollection<AccountPermission> AccountPermissions { get; set; } = new List<AccountPermission>();
 
     public virtual ICollection<AccountFlag> AccountFlags { get; set; } = new List<AccountFlag>();
+
+    public virtual ICollection<ActivityLog> ActivityLogs { get; set; } = new List<ActivityLog>();
 }

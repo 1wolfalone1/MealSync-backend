@@ -12,7 +12,9 @@ public class Wallet : BaseEntity
 
     public double AvailableAmount { get; set; }
 
-    public double InComingAmount { get; set; }
+    public double IncomingAmount { get; set; }
+
+    public double ReportingAmount { get; set; }
 
     public DateTimeOffset NextTransferDate { get; set; }
 

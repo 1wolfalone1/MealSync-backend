@@ -18,8 +18,6 @@ public class Dormitory : BaseEntity
 
     public virtual ICollection<Building> Buildings { get; set; } = new List<Building>();
 
-    public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
-
     public virtual ICollection<ShopDormitory> ShopDormitories { get; set; } = new List<ShopDormitory>();
 
     public virtual ICollection<ModeratorDormitory> ModeratorDormitories { get; set; } = new List<ModeratorDormitory>();

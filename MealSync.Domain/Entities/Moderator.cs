@@ -12,7 +12,5 @@ public class Moderator : BaseEntity
 
     public virtual Account Account { get; set; }
 
-    public virtual ICollection<ModeratorActivityLog> ModeratorActivityLogs { get; set; }= new List<ModeratorActivityLog>();
-
     public virtual ICollection<ModeratorDormitory> ModeratorDormitories { get; set; }= new List<ModeratorDormitory>();
 }

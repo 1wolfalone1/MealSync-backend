@@ -6,5 +6,4 @@ public enum ModeratorActionTypes
 {
     Account = 1,
     Order = 2,
-        
 }

@@ -2,6 +2,6 @@
 
 namespace MealSync.Application.Common.Repositories;
 
-public interface IVerificationCodeRepository : IBaseRepository<VerificationCode>
+public interface IActivityLogRepository : IBaseRepository<ActivityLog>
 {
 }
