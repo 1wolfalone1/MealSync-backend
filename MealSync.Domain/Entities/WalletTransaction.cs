@@ -13,6 +13,12 @@ public class WalletTransaction : BaseEntity
 
     public long WalletId { get; set; }
 
+    public double AvaiableAmountBefore { get; set; }
+
+    public double IncomingAmountBefore { get; set; }
+
+    public double ReportingAmountBefore { get; set; }
+
     public double Amount { get; set; }
 
     public WalletTransactionType Type { get; set; }

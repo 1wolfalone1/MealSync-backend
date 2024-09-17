@@ -90,3 +90,8 @@ dotnet_diagnostic.IDE0009.severity = suggestion
 dotnet_diagnostic.CA1000.severity = suggestion
 
 dotnet_diagnostic.CS0168.severity = error
+# Require each attribute to be on its own line
+dotnet_diagnostic.SA1134.severity = error
+
+# Not let space at the end line
+dotnet_diagnostic.SA1028.severity = error

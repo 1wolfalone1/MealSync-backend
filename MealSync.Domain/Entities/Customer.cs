@@ -10,13 +10,7 @@ public class Customer : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long DormitoryId { get; set; }
-
-    public long WalletId { get; set; }
-
     public virtual Account Account { get; set; }
-
-    public virtual Dormitory Dormitory { get; set; }
 
     public virtual ICollection<CustomerBuilding> CustomerBuildings { get; set; } = new List<CustomerBuilding>();
 

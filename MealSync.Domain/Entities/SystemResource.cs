@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Domain.Entities;
 
@@ -12,4 +13,6 @@ public class SystemResource : BaseEntity
     public string ResourceCode { get; set; }
 
     public string ResourceContent { get; set; }
+
+    public SystemResourceTypes ResourceType { get; set; }
 }

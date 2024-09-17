@@ -10,13 +10,17 @@ public class DeliveryOrderCombination : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long StaffDeliveryId { get; set; }
+    public long? StaffDeliveryId { get; set; }
+
+    public long? ShopOwnerId { get; set; }
 
     public int StartTime { get; set; }
 
     public int EndTime { get; set; }
 
-    public StaffDelivery StaffDelivery { get; set; }
+    public virtual StaffDelivery StaffDelivery { get; set; }
+
+    public virtual ShopOwner ShopOwner { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

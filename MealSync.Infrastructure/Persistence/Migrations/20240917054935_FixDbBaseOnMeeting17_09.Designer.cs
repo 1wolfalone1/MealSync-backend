@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealSync.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MealSyncContext))]
-    [Migration("20240913150321_FirstInitalDb")]
-    partial class FirstInitalDb
+    [Migration("20240917054935_FixDbBaseOnMeeting17_09")]
+    partial class FixDbBaseOnMeeting17_09
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,1848 +29,2278 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("AvatarUrl")
                         .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
+                        .HasColumnType("varchar(300)")
+                        .HasColumnName("avatar_url");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("DeviceToken")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("device_token");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("email");
 
                     b.Property<string>("FUserId")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("f_user_id");
 
                     b.Property<string>("FullName")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("full_name");
 
                     b.Property<int>("Genders")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("genders");
 
                     b.Property<int>("NumOfFlag")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("num_of_flag");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
+                        .HasColumnType("varchar(250)")
+                        .HasColumnName("password");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("phone_number");
 
                     b.Property<long>("RoleId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("role_id");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_account");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_account_role_id");
 
                     b.HasIndex(new[] { "Email" }, "account_email_unique")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_account_email");
 
                     b.HasIndex(new[] { "PhoneNumber" }, "account_phone_number_unique")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_account_phone_number");
 
-                    b.ToTable("account");
+                    b.ToTable("account", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.AccountFlag", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
 
                     b.Property<int>("ActionType")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("action_type");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<string>("TargetId")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("target_id");
 
                     b.Property<int>("TargetType")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("target_type");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_account_flag");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_account_flag_account_id");
 
-                    b.ToTable("account_flag");
+                    b.ToTable("account_flag", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.AccountPermission", b =>
                 {
                     b.Property<long>("PermissionId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("permission_id");
 
                     b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Endpoint")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("endpoint");
 
                     b.Property<int>("Method")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("method");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("PermissionId", "AccountId");
+                    b.HasKey("PermissionId", "AccountId")
+                        .HasName("pk_moderator_permission");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_moderator_permission_account_id");
 
-                    b.ToTable("moderator_permission");
+                    b.ToTable("moderator_permission", (string)null);
+                });
+
+            modelBuilder.Entity("MealSync.Domain.Entities.ActivityLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
+                    b.Property<string>("ActionDetail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("action_detail");
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("int")
+                        .HasColumnName("action_type");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_success");
+
+                    b.Property<long?>("TargetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("target_id");
+
+                    b.Property<int>("TargetType")
+                        .HasColumnType("int")
+                        .HasColumnName("target_type");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTimeOffset>("UpdatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_activity_log");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_activity_log_account_id");
+
+                    b.ToTable("activity_log", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Building", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long>("DomitoryId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("domitory_id");
 
                     b.Property<long>("LocationId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("location_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("name");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_building");
 
-                    b.HasIndex("DomitoryId");
+                    b.HasIndex("DomitoryId")
+                        .HasDatabaseName("ix_building_domitory_id");
 
                     b.HasIndex("LocationId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_building_location_id");
 
-                    b.ToTable("building");
+                    b.ToTable("building", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Category", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("description");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("image_url");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("name");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_category");
 
-                    b.ToTable("category");
+                    b.ToTable("category", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.CommissionConfig", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<double>("CommissionRate")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("commission_rate");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_commission_config");
 
-                    b.ToTable("commission_config");
+                    b.ToTable("commission_config", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Customer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long>("DormitoryId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.Property<long>("WalletId")
-                        .HasColumnType("bigint");
+                    b.HasKey("Id")
+                        .HasName("pk_customer");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("DormitoryId");
-
-                    b.ToTable("customer");
+                    b.ToTable("customer", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.CustomerBuilding", b =>
                 {
                     b.Property<long>("BuildingId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("building_id");
 
                     b.Property<long>("CustomerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("customer_id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_default");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("BuildingId", "CustomerId");
+                    b.HasKey("BuildingId", "CustomerId")
+                        .HasName("pk_customer_building");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_customer_building_customer_id");
 
-                    b.ToTable("customer_building");
+                    b.ToTable("customer_building", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.DeliveryOrderCombination", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<int>("EndTime")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("end_time");
 
-                    b.Property<long>("StaffDeliveryId")
-                        .HasColumnType("bigint");
+                    b.Property<long?>("ShopOwnerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_owner_id");
+
+                    b.Property<long?>("StaffDeliveryId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("staff_delivery_id");
 
                     b.Property<int>("StartTime")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("start_time");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_delivery_order_combination");
 
-                    b.HasIndex("StaffDeliveryId");
+                    b.HasIndex("ShopOwnerId")
+                        .HasDatabaseName("ix_delivery_order_combination_shop_owner_id");
 
-                    b.ToTable("delivery_order_combination");
+                    b.HasIndex("StaffDeliveryId")
+                        .HasDatabaseName("ix_delivery_order_combination_staff_delivery_id");
+
+                    b.ToTable("delivery_order_combination", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Dormitory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long>("LocationId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("location_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("name");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_dormitory");
 
                     b.HasIndex("LocationId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_dormitory_location_id");
 
-                    b.ToTable("dormitory");
+                    b.ToTable("dormitory", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Favourite", b =>
                 {
                     b.Property<long>("CustomerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("customer_id");
 
                     b.Property<long>("ShopOwnerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_owner_id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("CustomerId", "ShopOwnerId");
+                    b.HasKey("CustomerId", "ShopOwnerId")
+                        .HasName("pk_favourtite");
 
-                    b.HasIndex("ShopOwnerId");
+                    b.HasIndex("ShopOwnerId")
+                        .HasDatabaseName("ix_favourtite_shop_owner_id");
 
-                    b.ToTable("favourtite");
+                    b.ToTable("favourtite", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Location", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("address");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<double>("Latitude")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("latitude");
 
                     b.Property<double>("Longitude")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("longitude");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_location");
 
-                    b.ToTable("location");
+                    b.ToTable("location", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Moderator", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_moderator");
 
-                    b.ToTable("moderator");
-                });
-
-            modelBuilder.Entity("MealSync.Domain.Entities.ModeratorActivityLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("ActionDetail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ActionType")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<long>("ModeratorId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("TargetId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("TargetType")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ModeratorId");
-
-                    b.ToTable("moderator_activity_log");
+                    b.ToTable("moderator", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ModeratorDormitory", b =>
                 {
                     b.Property<long>("ModeratorId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("moderator_id");
 
                     b.Property<long>("DormitoryId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("dormitory_id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("ModeratorId", "DormitoryId");
+                    b.HasKey("ModeratorId", "DormitoryId")
+                        .HasName("pk_moderator_dormitory");
 
-                    b.HasIndex("DormitoryId");
+                    b.HasIndex("DormitoryId")
+                        .HasDatabaseName("ix_moderator_dormitory_dormitory_id");
 
-                    b.ToTable("moderator_dormitory");
+                    b.ToTable("moderator_dormitory", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Notification", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("content");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Data")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("data");
 
                     b.Property<int>("EntityType")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("entity_type");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("image_url");
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_read");
 
                     b.Property<long>("ReferenceId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("reference_id");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("title");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_notification");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_notification_account_id");
 
-                    b.ToTable("notification");
+                    b.ToTable("notification", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.OperatingDay", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<int>("AbleTotalOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("able_total_order");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<int>("DayOfWeek")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("day_of_week");
 
                     b.Property<bool>("IsClose")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_close");
 
                     b.Property<long>("ShopOwnerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_owner_id");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_operating_day");
 
-                    b.ToTable("operating_day");
+                    b.ToTable("operating_day", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.OperatingFrame", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<int>("AbleTotalOrderHandle")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("able_total_order_handle");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<int>("EndTime")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("end_time");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_active");
 
                     b.Property<long>("OperatingDayId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("operating_day_id");
 
                     b.Property<int>("StartTime")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("start_time");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_operating_frame");
 
-                    b.HasIndex("OperatingDayId");
+                    b.HasIndex("OperatingDayId")
+                        .HasDatabaseName("ix_operating_frame_operating_day_id");
 
-                    b.ToTable("operating_frame");
+                    b.ToTable("operating_frame", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Order", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("address");
 
                     b.Property<long>("BuildingId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("building_id");
 
                     b.Property<string>("BuildingName")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("building_name");
 
                     b.Property<double>("ChargeFee")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("charge_fee");
 
                     b.Property<DateTimeOffset?>("CompletedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("completed_at");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long>("CustomerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("customer_id");
 
                     b.Property<long>("CustomerLocationId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("customer_location_id");
 
                     b.Property<long?>("DeliveryOrderCombinationId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("delivery_order_combination_id");
 
                     b.Property<string>("DeliverySuccessImageUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("delivery_success_image_url");
 
                     b.Property<int>("EndTime")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("end_time");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("full_name");
 
                     b.Property<DateTimeOffset>("IntendedReceiveAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("intended_receive_at");
 
                     b.Property<bool>("IsRefund")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_refund");
 
                     b.Property<bool>("IsReport")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_report");
 
                     b.Property<double>("Latitude")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("latitude");
 
                     b.Property<double>("Longitude")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("longitude");
 
                     b.Property<string>("Note")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("note");
 
                     b.Property<DateTimeOffset>("OrderDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("order_date");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("phone_number");
 
                     b.Property<long>("PromotionId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("promotion_id");
 
                     b.Property<string>("Reason")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("reason");
 
                     b.Property<DateTimeOffset?>("ReceiveAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("receive_at");
 
                     b.Property<double>("ShippingFee")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("shipping_fee");
 
                     b.Property<long>("ShopLocationId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_location_id");
 
                     b.Property<long>("ShopOwnerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_owner_id");
 
                     b.Property<int>("StartTime")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("start_time");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<double>("TotalPrice")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("total_price");
 
                     b.Property<double>("TotalPromotion")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("total_promotion");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_order");
 
-                    b.HasIndex("BuildingId");
+                    b.HasIndex("BuildingId")
+                        .HasDatabaseName("ix_order_building_id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_order_customer_id");
 
                     b.HasIndex("CustomerLocationId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_order_customer_location_id");
 
-                    b.HasIndex("DeliveryOrderCombinationId");
+                    b.HasIndex("DeliveryOrderCombinationId")
+                        .HasDatabaseName("ix_order_delivery_order_combination_id");
 
-                    b.HasIndex("PromotionId");
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_order_promotion_id");
 
                     b.HasIndex("ShopLocationId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_order_shop_location_id");
 
-                    b.HasIndex("ShopOwnerId");
+                    b.HasIndex("ShopOwnerId")
+                        .HasDatabaseName("ix_order_shop_owner_id");
 
-                    b.ToTable("order");
+                    b.ToTable("order", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.OrderDetail", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long>("OrderId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_id");
 
                     b.Property<double>("Price")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("price");
 
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("product_id");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("quantity");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_order_detail");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("ix_order_detail_order_id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_order_detail_product_id");
 
-                    b.ToTable("order_detail");
+                    b.ToTable("order_detail", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.OrderDetailOption", b =>
                 {
                     b.Property<long>("OrderDetailId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_detail_id");
 
                     b.Property<long>("ToppingOptionId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("topping_option_id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<double>("Price")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("price");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("OrderDetailId", "ToppingOptionId");
+                    b.HasKey("OrderDetailId", "ToppingOptionId")
+                        .HasName("pk_order_detail_option");
 
-                    b.HasIndex("ToppingOptionId");
+                    b.HasIndex("ToppingOptionId")
+                        .HasDatabaseName("ix_order_detail_option_topping_option_id");
 
-                    b.ToTable("order_detail_option");
+                    b.ToTable("order_detail_option", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.OrderTransaction", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<double>("Amount")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("amount");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long>("OrderId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_id");
 
                     b.Property<int>("PaymentMethods")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("payment_methods");
 
                     b.Property<string>("PaymentThirdPartyContent")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("payment_third_party_content");
 
                     b.Property<string>("PaymentThirdPartyId")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("payment_third_party_id");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_order_transaction");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("ix_order_transaction_order_id");
 
-                    b.ToTable("order_transaction");
+                    b.ToTable("order_transaction", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.OrderTransactionHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<double>("Amount")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("amount");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long>("OrderId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_id");
 
                     b.Property<long>("OrderTransactionId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_transaction_id");
 
                     b.Property<int>("PaymentMethods")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("payment_methods");
 
                     b.Property<string>("PaymentThirdPartyContent")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("payment_third_party_content");
 
                     b.Property<string>("PaymentThirdPartyId")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("payment_third_party_id");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_order_transaction_history");
 
-                    b.ToTable("order_transaction_history");
+                    b.ToTable("order_transaction_history", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Permission", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("name");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_permission");
 
-                    b.ToTable("permission");
+                    b.ToTable("permission", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Product", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("description");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("image_url");
 
                     b.Property<bool>("IsSoldOut")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_sold_out");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("name");
 
                     b.Property<double>("Price")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("price");
 
                     b.Property<long>("ShopOwnerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_owner_id");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<int>("TotalOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("total_order");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_product");
 
-                    b.HasIndex("ShopOwnerId");
+                    b.HasIndex("ShopOwnerId")
+                        .HasDatabaseName("ix_product_shop_owner_id");
 
-                    b.ToTable("product");
+                    b.ToTable("product", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ProductCategory", b =>
                 {
                     b.Property<long>("CategoryId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("category_id");
 
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("product_id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("CategoryId", "ProductId");
+                    b.HasKey("CategoryId", "ProductId")
+                        .HasName("pk_product_category");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_product_category_product_id");
 
-                    b.ToTable("product_category");
+                    b.ToTable("product_category", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ProductOperatingHour", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<int>("EndTime")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("end_time");
 
                     b.Property<long>("OperatingDayId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("operating_day_id");
 
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("product_id");
 
                     b.Property<int>("StartTime")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("start_time");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_product_operating_hours");
 
-                    b.HasIndex("OperatingDayId");
+                    b.HasIndex("OperatingDayId")
+                        .HasDatabaseName("ix_product_operating_hours_operating_day_id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_product_operating_hours_product_id");
 
-                    b.ToTable("product_operating_hours");
+                    b.ToTable("product_operating_hours", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ProductQuestion", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("description");
 
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("product_id");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_topping_question");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_topping_question_product_id");
 
-                    b.ToTable("topping_question");
+                    b.ToTable("topping_question", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ProductQuestionOption", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("image_url");
 
                     b.Property<bool>("IsPricing")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_pricing");
 
                     b.Property<double>("Price")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("price");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<long>("ToppingQuestionId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("topping_question_id");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_topping_option");
 
-                    b.HasIndex("ToppingQuestionId");
+                    b.HasIndex("ToppingQuestionId")
+                        .HasDatabaseName("ix_topping_option_topping_question_id");
 
-                    b.ToTable("topping_option");
+                    b.ToTable("topping_option", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Promotion", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<double?>("AmountRate")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("amount_rate");
 
                     b.Property<double?>("AmountValue")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("amount_value");
 
                     b.Property<int>("ApplyType")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("apply_type");
 
                     b.Property<string>("BannerUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("banner_url");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("CustomerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("customer_id");
 
                     b.Property<string>("Decription")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("decription");
 
                     b.Property<DateTimeOffset>("EndDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("end_date");
 
                     b.Property<double>("MinOrdervalue")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("min_ordervalue");
 
                     b.Property<int>("NumberOfUsed")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("number_of_used");
 
                     b.Property<long?>("ShopOwnerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_owner_id");
 
                     b.Property<DateTimeOffset>("StartDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("start_date");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("title");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
                     b.Property<int>("UsageLimit")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("usage_limit");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_promotion");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_promotion_customer_id");
 
-                    b.HasIndex("ShopOwnerId");
+                    b.HasIndex("ShopOwnerId")
+                        .HasDatabaseName("ix_promotion_shop_owner_id");
 
-                    b.ToTable("promotion");
+                    b.ToTable("promotion", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Report", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("content");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("CustomerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("customer_id");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("image_url");
 
                     b.Property<long>("OrderId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_id");
 
                     b.Property<string>("Reason")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("reason");
 
                     b.Property<long?>("ShopOwnerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_owner_id");
 
                     b.Property<long?>("StaffDeliveryId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("staff_delivery_id");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("title");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_report");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_report_customer_id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("ix_report_order_id");
 
-                    b.HasIndex("ShopOwnerId");
+                    b.HasIndex("ShopOwnerId")
+                        .HasDatabaseName("ix_report_shop_owner_id");
 
-                    b.HasIndex("StaffDeliveryId");
+                    b.HasIndex("StaffDeliveryId")
+                        .HasDatabaseName("ix_report_staff_delivery_id");
 
-                    b.ToTable("report");
+                    b.ToTable("report", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Review", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Comment")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long>("CustomerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("customer_id");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("image_url");
 
                     b.Property<long>("OrderId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_id");
 
                     b.Property<int>("Rating")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("rating");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_review");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_review_customer_id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("ix_review_order_id");
 
-                    b.ToTable("review");
+                    b.ToTable("review", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Role", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("name");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_role");
 
-                    b.ToTable("role");
+                    b.ToTable("role", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ShopDormitory", b =>
                 {
                     b.Property<long>("ShopOwnerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_owner_id");
 
                     b.Property<long>("DormitoryId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("dormitory_id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("ShopOwnerId", "DormitoryId");
+                    b.HasKey("ShopOwnerId", "DormitoryId")
+                        .HasName("pk_shop_dormitory");
 
-                    b.HasIndex("DormitoryId");
+                    b.HasIndex("DormitoryId")
+                        .HasDatabaseName("ix_shop_dormitory_dormitory_id");
 
-                    b.ToTable("shop_dormitory");
+                    b.ToTable("shop_dormitory", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ShopOwner", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     b.Property<double>("AdditionalShipFee")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("additional_ship_fee");
 
                     b.Property<int>("AverageOrderHandleInFrame")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("average_order_handle_in_frame");
 
                     b.Property<string>("BankAccountNumber")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("bank_account_number");
 
                     b.Property<string>("BankCode")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("bank_code");
 
                     b.Property<string>("BankShortName")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("bank_short_name");
 
                     b.Property<string>("BannerUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("banner_url");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<bool>("IsAcceptingOrderNextDay")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_accepting_order_next_day");
 
                     b.Property<long>("LocationId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("location_id");
 
                     b.Property<string>("LogoUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("logo_url");
 
                     b.Property<int>("MaxOrderHoursInAdvance")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("max_order_hours_in_advance");
 
                     b.Property<int>("MinOrderHoursInAdvance")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("min_order_hours_in_advance");
 
                     b.Property<double>("MinValueOrderFreeShip")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("min_value_order_free_ship");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("name");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("phone_number");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<int>("TotalOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("total_order");
 
                     b.Property<int>("TotalProduct")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("total_product");
 
                     b.Property<int>("TotalRating")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("total_rating");
 
                     b.Property<int>("TotalReview")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("total_review");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
                     b.Property<long>("WalletId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("wallet_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_shop_owner");
 
                     b.HasIndex("LocationId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_shop_owner_location_id");
 
                     b.HasIndex("WalletId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_shop_owner_wallet_id");
 
-                    b.ToTable("shop_owner");
+                    b.ToTable("shop_owner", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.StaffDelivery", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long>("ShopOwnerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("shop_owner_id");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_staff_delivery");
 
-                    b.HasIndex("ShopOwnerId");
+                    b.HasIndex("ShopOwnerId")
+                        .HasDatabaseName("ix_staff_delivery_shop_owner_id");
 
-                    b.ToTable("staff_delivery");
+                    b.ToTable("staff_delivery", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.SystemConfig", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_system_config");
 
-                    b.ToTable("system_config");
+                    b.ToTable("system_config", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.SystemResource", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("ResourceCode")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("resource_code");
 
                     b.Property<string>("ResourceContent")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("resource_content");
+
+                    b.Property<int>("ResourceType")
+                        .HasColumnType("int")
+                        .HasColumnName("resource_type");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_system_resource");
 
-                    b.ToTable("system_resource");
-                });
-
-            modelBuilder.Entity("MealSync.Domain.Entities.VerificationCode", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTimeOffset>("ExpiredTịme")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("verification_code");
+                    b.ToTable("system_resource", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Wallet", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<double>("AvailableAmount")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("available_amount");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
-                    b.Property<double>("InComingAmount")
-                        .HasColumnType("double");
-
-                    b.Property<DateTimeOffset>("NextTransferDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("wallet");
-                });
-
-            modelBuilder.Entity("MealSync.Domain.Entities.WalletHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<double>("AvailableAmountAfter")
-                        .HasColumnType("double");
-
-                    b.Property<double>("AvailableAmountBefore")
-                        .HasColumnType("double");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<double>("InComingAmountAfter")
-                        .HasColumnType("double");
-
-                    b.Property<double>("InComingAmountBefore")
-                        .HasColumnType("double");
+                    b.Property<double>("IncomingAmount")
+                        .HasColumnType("double")
+                        .HasColumnName("incoming_amount");
 
                     b.Property<DateTimeOffset>("NextTransferDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("next_transfer_date");
+
+                    b.Property<double>("ReportingAmount")
+                        .HasColumnType("double")
+                        .HasColumnName("reporting_amount");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
-                    b.Property<long>("WalletId")
-                        .HasColumnType("bigint");
+                    b.HasKey("Id")
+                        .HasName("pk_wallet");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Wallet_history");
+                    b.ToTable("wallet", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.WalletTransaction", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<double>("Amount")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("amount");
+
+                    b.Property<double>("AvaiableAmountBefore")
+                        .HasColumnType("double")
+                        .HasColumnName("avaiable_amount_before");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<double>("IncomingAmountBefore")
+                        .HasColumnType("double")
+                        .HasColumnName("incoming_amount_before");
+
+                    b.Property<double>("ReportingAmountBefore")
+                        .HasColumnType("double")
+                        .HasColumnName("reporting_amount_before");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
                     b.Property<long>("WalletId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("wallet_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_wallet_transaction");
 
-                    b.HasIndex("WalletId");
+                    b.HasIndex("WalletId")
+                        .HasDatabaseName("ix_wallet_transaction_wallet_id");
 
-                    b.ToTable("wallet_transaction");
+                    b.ToTable("wallet_transaction", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.WithdrawalRequest", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<double>("Amount")
-                        .HasColumnType("double");
+                        .HasColumnType("double")
+                        .HasColumnName("amount");
 
                     b.Property<string>("BankAccountNumber")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("bank_account_number");
 
                     b.Property<string>("BankCode")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("bank_code");
 
                     b.Property<string>("BankShortName")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("bank_short_name");
 
                     b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Reason")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("reason");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("status");
 
                     b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
 
                     b.Property<long>("WalletId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("wallet_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_withdrawal_request");
 
-                    b.HasIndex("WalletId");
+                    b.HasIndex("WalletId")
+                        .HasDatabaseName("ix_withdrawal_request_wallet_id");
 
-                    b.ToTable("withdrawal_request");
+                    b.ToTable("withdrawal_request", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Account", b =>
@@ -1891,7 +2321,8 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .WithMany("AccountFlags")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_account_flag_account_account_id");
 
                     b.Navigation("Account");
                 });
@@ -1917,6 +2348,18 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.Navigation("Permission");
                 });
 
+            modelBuilder.Entity("MealSync.Domain.Entities.ActivityLog", b =>
+                {
+                    b.HasOne("MealSync.Domain.Entities.Account", "Account")
+                        .WithMany("ActivityLogs")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ActivityLog_Account");
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("MealSync.Domain.Entities.Building", b =>
                 {
                     b.HasOne("MealSync.Domain.Entities.Dormitory", "Dormitory")
@@ -1940,13 +2383,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MealSync.Domain.Entities.Customer", b =>
                 {
-                    b.HasOne("MealSync.Domain.Entities.Dormitory", "Dormitory")
-                        .WithMany("Customers")
-                        .HasForeignKey("DormitoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_Customer_Dormitory");
-
                     b.HasOne("MealSync.Domain.Entities.Account", "Account")
                         .WithOne("Customer")
                         .HasForeignKey("MealSync.Domain.Entities.Customer", "Id")
@@ -1955,8 +2391,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasConstraintName("FK_Customer_Account");
 
                     b.Navigation("Account");
-
-                    b.Navigation("Dormitory");
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.CustomerBuilding", b =>
@@ -1982,12 +2416,17 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MealSync.Domain.Entities.DeliveryOrderCombination", b =>
                 {
+                    b.HasOne("MealSync.Domain.Entities.ShopOwner", "ShopOwner")
+                        .WithMany("DeliveryOrderCombinations")
+                        .HasForeignKey("ShopOwnerId")
+                        .HasConstraintName("fk_delivery_order_combination_shop_owner_shop_owner_id");
+
                     b.HasOne("MealSync.Domain.Entities.StaffDelivery", "StaffDelivery")
                         .WithMany("DeliveryOrderCombinations")
                         .HasForeignKey("StaffDeliveryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("FK_DeliveryOrderCombination_StaffDelivery");
+
+                    b.Navigation("ShopOwner");
 
                     b.Navigation("StaffDelivery");
                 });
@@ -2035,18 +2474,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasConstraintName("FK_Moderator_Account");
 
                     b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("MealSync.Domain.Entities.ModeratorActivityLog", b =>
-                {
-                    b.HasOne("MealSync.Domain.Entities.Moderator", "Moderator")
-                        .WithMany("ModeratorActivityLogs")
-                        .HasForeignKey("ModeratorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_ModeratorActivityLog_Moderator");
-
-                    b.Navigation("Moderator");
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ModeratorDormitory", b =>
@@ -2433,18 +2860,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.Navigation("ShopOwner");
                 });
 
-            modelBuilder.Entity("MealSync.Domain.Entities.VerificationCode", b =>
-                {
-                    b.HasOne("MealSync.Domain.Entities.Account", "Account")
-                        .WithMany("VerificationCodes")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_Account_VerificationCode");
-
-                    b.Navigation("Account");
-                });
-
             modelBuilder.Entity("MealSync.Domain.Entities.WalletTransaction", b =>
                 {
                     b.HasOne("MealSync.Domain.Entities.Wallet", "Wallet")
@@ -2475,6 +2890,8 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
                     b.Navigation("AccountPermissions");
 
+                    b.Navigation("ActivityLogs");
+
                     b.Navigation("Customer");
 
                     b.Navigation("Moderator");
@@ -2484,8 +2901,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.Navigation("ShopOwner");
 
                     b.Navigation("StaffDelivery");
-
-                    b.Navigation("VerificationCodes");
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Building", b =>
@@ -2524,8 +2939,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("Buildings");
 
-                    b.Navigation("Customers");
-
                     b.Navigation("ModeratorDormitories");
 
                     b.Navigation("ShopDormitories");
@@ -2551,8 +2964,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MealSync.Domain.Entities.Moderator", b =>
                 {
-                    b.Navigation("ModeratorActivityLogs");
-
                     b.Navigation("ModeratorDormitories");
                 });
 
@@ -2617,6 +3028,8 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MealSync.Domain.Entities.ShopOwner", b =>
                 {
+                    b.Navigation("DeliveryOrderCombinations");
+
                     b.Navigation("Favourites");
 
                     b.Navigation("Orders");

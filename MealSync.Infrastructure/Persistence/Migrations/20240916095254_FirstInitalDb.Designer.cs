@@ -4,6 +4,7 @@ using MealSync.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealSync.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MealSyncContext))]
-    partial class MealSyncContextModelSnapshot : ModelSnapshot
+    [Migration("20240916095254_FirstInitalDb")]
+    partial class FirstInitalDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,65 +222,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.ToTable("moderator_permission", (string)null);
                 });
 
-            modelBuilder.Entity("MealSync.Domain.Entities.ActivityLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("account_id");
-
-                    b.Property<string>("ActionDetail")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("action_detail");
-
-                    b.Property<int>("ActionType")
-                        .HasColumnType("int")
-                        .HasColumnName("action_type");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_date");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_success");
-
-                    b.Property<long?>("TargetId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("target_id");
-
-                    b.Property<int>("TargetType")
-                        .HasColumnType("int")
-                        .HasColumnName("target_type");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("updated_by");
-
-                    b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_date");
-
-                    b.HasKey("Id")
-                        .HasName("pk_activity_log");
-
-                    b.HasIndex("AccountId")
-                        .HasDatabaseName("ix_activity_log_account_id");
-
-                    b.ToTable("activity_log", (string)null);
-                });
-
             modelBuilder.Entity("MealSync.Domain.Entities.Building", b =>
                 {
                     b.Property<long>("Id")
@@ -423,6 +367,10 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_date");
 
+                    b.Property<long>("DormitoryId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("dormitory_id");
+
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint")
                         .HasColumnName("updated_by");
@@ -431,8 +379,15 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated_date");
 
+                    b.Property<long>("WalletId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("wallet_id");
+
                     b.HasKey("Id")
                         .HasName("pk_customer");
+
+                    b.HasIndex("DormitoryId")
+                        .HasDatabaseName("ix_customer_dormitory_id");
 
                     b.ToTable("customer", (string)null);
                 });
@@ -497,11 +452,7 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasColumnName("end_time");
 
-                    b.Property<long?>("ShopOwnerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("shop_owner_id");
-
-                    b.Property<long?>("StaffDeliveryId")
+                    b.Property<long>("StaffDeliveryId")
                         .HasColumnType("bigint")
                         .HasColumnName("staff_delivery_id");
 
@@ -519,9 +470,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_delivery_order_combination");
-
-                    b.HasIndex("ShopOwnerId")
-                        .HasDatabaseName("ix_delivery_order_combination_shop_owner_id");
 
                     b.HasIndex("StaffDeliveryId")
                         .HasDatabaseName("ix_delivery_order_combination_staff_delivery_id");
@@ -679,6 +627,65 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasName("pk_moderator");
 
                     b.ToTable("moderator", (string)null);
+                });
+
+            modelBuilder.Entity("MealSync.Domain.Entities.ModeratorActivityLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActionDetail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("action_detail");
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("int")
+                        .HasColumnName("action_type");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_success");
+
+                    b.Property<long>("ModeratorId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("moderator_id");
+
+                    b.Property<long?>("TargetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("target_id");
+
+                    b.Property<int>("TargetType")
+                        .HasColumnType("int")
+                        .HasColumnName("target_type");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTimeOffset>("UpdatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_moderator_activity_log");
+
+                    b.HasIndex("ModeratorId")
+                        .HasDatabaseName("ix_moderator_activity_log_moderator_id");
+
+                    b.ToTable("moderator_activity_log", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ModeratorDormitory", b =>
@@ -2107,10 +2114,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("resource_content");
 
-                    b.Property<int>("ResourceType")
-                        .HasColumnType("int")
-                        .HasColumnName("resource_type");
-
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint")
                         .HasColumnName("updated_by");
@@ -2123,6 +2126,62 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasName("pk_system_resource");
 
                     b.ToTable("system_resource", (string)null);
+                });
+
+            modelBuilder.Entity("MealSync.Domain.Entities.VerificationCode", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("code");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
+
+                    b.Property<DateTimeOffset>("ExpiredTịme")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("expired_tịme");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTimeOffset>("UpdatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_verification_code");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_verification_code_account_id");
+
+                    b.ToTable("verification_code", (string)null);
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Wallet", b =>
@@ -2146,17 +2205,13 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_date");
 
-                    b.Property<double>("IncomingAmount")
+                    b.Property<double>("InComingAmount")
                         .HasColumnType("double")
-                        .HasColumnName("incoming_amount");
+                        .HasColumnName("in_coming_amount");
 
                     b.Property<DateTimeOffset>("NextTransferDate")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("next_transfer_date");
-
-                    b.Property<double>("ReportingAmount")
-                        .HasColumnType("double")
-                        .HasColumnName("reporting_amount");
 
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint")
@@ -2172,6 +2227,61 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.ToTable("wallet", (string)null);
                 });
 
+            modelBuilder.Entity("MealSync.Domain.Entities.WalletHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<double>("AvailableAmountAfter")
+                        .HasColumnType("double")
+                        .HasColumnName("available_amount_after");
+
+                    b.Property<double>("AvailableAmountBefore")
+                        .HasColumnType("double")
+                        .HasColumnName("available_amount_before");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
+
+                    b.Property<double>("InComingAmountAfter")
+                        .HasColumnType("double")
+                        .HasColumnName("in_coming_amount_after");
+
+                    b.Property<double>("InComingAmountBefore")
+                        .HasColumnType("double")
+                        .HasColumnName("in_coming_amount_before");
+
+                    b.Property<DateTimeOffset>("NextTransferDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("next_transfer_date");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTimeOffset>("UpdatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
+
+                    b.Property<long>("WalletId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("wallet_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_wallet_history");
+
+                    b.ToTable("Wallet_history");
+                });
+
             modelBuilder.Entity("MealSync.Domain.Entities.WalletTransaction", b =>
                 {
                     b.Property<long>("Id")
@@ -2185,10 +2295,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnType("double")
                         .HasColumnName("amount");
 
-                    b.Property<double>("AvaiableAmountBefore")
-                        .HasColumnType("double")
-                        .HasColumnName("avaiable_amount_before");
-
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint")
                         .HasColumnName("created_by");
@@ -2201,14 +2307,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
-
-                    b.Property<double>("IncomingAmountBefore")
-                        .HasColumnType("double")
-                        .HasColumnName("incoming_amount_before");
-
-                    b.Property<double>("ReportingAmountBefore")
-                        .HasColumnType("double")
-                        .HasColumnName("reporting_amount_before");
 
                     b.Property<int>("Type")
                         .HasColumnType("int")
@@ -2345,18 +2443,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.Navigation("Permission");
                 });
 
-            modelBuilder.Entity("MealSync.Domain.Entities.ActivityLog", b =>
-                {
-                    b.HasOne("MealSync.Domain.Entities.Account", "Account")
-                        .WithMany("ActivityLogs")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_ActivityLog_Account");
-
-                    b.Navigation("Account");
-                });
-
             modelBuilder.Entity("MealSync.Domain.Entities.Building", b =>
                 {
                     b.HasOne("MealSync.Domain.Entities.Dormitory", "Dormitory")
@@ -2380,6 +2466,13 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MealSync.Domain.Entities.Customer", b =>
                 {
+                    b.HasOne("MealSync.Domain.Entities.Dormitory", "Dormitory")
+                        .WithMany("Customers")
+                        .HasForeignKey("DormitoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Customer_Dormitory");
+
                     b.HasOne("MealSync.Domain.Entities.Account", "Account")
                         .WithOne("Customer")
                         .HasForeignKey("MealSync.Domain.Entities.Customer", "Id")
@@ -2388,6 +2481,8 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasConstraintName("FK_Customer_Account");
 
                     b.Navigation("Account");
+
+                    b.Navigation("Dormitory");
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.CustomerBuilding", b =>
@@ -2413,17 +2508,12 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MealSync.Domain.Entities.DeliveryOrderCombination", b =>
                 {
-                    b.HasOne("MealSync.Domain.Entities.ShopOwner", "ShopOwner")
-                        .WithMany("DeliveryOrderCombinations")
-                        .HasForeignKey("ShopOwnerId")
-                        .HasConstraintName("fk_delivery_order_combination_shop_owner_shop_owner_id");
-
                     b.HasOne("MealSync.Domain.Entities.StaffDelivery", "StaffDelivery")
                         .WithMany("DeliveryOrderCombinations")
                         .HasForeignKey("StaffDeliveryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK_DeliveryOrderCombination_StaffDelivery");
-
-                    b.Navigation("ShopOwner");
 
                     b.Navigation("StaffDelivery");
                 });
@@ -2471,6 +2561,18 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasConstraintName("FK_Moderator_Account");
 
                     b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("MealSync.Domain.Entities.ModeratorActivityLog", b =>
+                {
+                    b.HasOne("MealSync.Domain.Entities.Moderator", "Moderator")
+                        .WithMany("ModeratorActivityLogs")
+                        .HasForeignKey("ModeratorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ModeratorActivityLog_Moderator");
+
+                    b.Navigation("Moderator");
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.ModeratorDormitory", b =>
@@ -2857,6 +2959,18 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.Navigation("ShopOwner");
                 });
 
+            modelBuilder.Entity("MealSync.Domain.Entities.VerificationCode", b =>
+                {
+                    b.HasOne("MealSync.Domain.Entities.Account", "Account")
+                        .WithMany("VerificationCodes")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Account_VerificationCode");
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("MealSync.Domain.Entities.WalletTransaction", b =>
                 {
                     b.HasOne("MealSync.Domain.Entities.Wallet", "Wallet")
@@ -2887,8 +3001,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
                     b.Navigation("AccountPermissions");
 
-                    b.Navigation("ActivityLogs");
-
                     b.Navigation("Customer");
 
                     b.Navigation("Moderator");
@@ -2898,6 +3010,8 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.Navigation("ShopOwner");
 
                     b.Navigation("StaffDelivery");
+
+                    b.Navigation("VerificationCodes");
                 });
 
             modelBuilder.Entity("MealSync.Domain.Entities.Building", b =>
@@ -2936,6 +3050,8 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("Buildings");
 
+                    b.Navigation("Customers");
+
                     b.Navigation("ModeratorDormitories");
 
                     b.Navigation("ShopDormitories");
@@ -2961,6 +3077,8 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MealSync.Domain.Entities.Moderator", b =>
                 {
+                    b.Navigation("ModeratorActivityLogs");
+
                     b.Navigation("ModeratorDormitories");
                 });
 
@@ -3025,8 +3143,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MealSync.Domain.Entities.ShopOwner", b =>
                 {
-                    b.Navigation("DeliveryOrderCombinations");
-
                     b.Navigation("Favourites");
 
                     b.Navigation("Orders");

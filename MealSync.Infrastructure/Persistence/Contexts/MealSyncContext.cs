@@ -43,7 +43,6 @@ public partial class MealSyncContext : DbContext
 
     public virtual DbSet<Account> Accounts { get; set; }
     public virtual DbSet<Role> Roles { get; set; }
-    public virtual DbSet<VerificationCode> VerificationCodes { get; set; }
     public virtual DbSet<Dormitory> Dormitories { get; set; }
     public virtual DbSet<Customer> Customers { get; set; }
     public virtual DbSet<Building> Buildings { get; set; }
@@ -58,7 +57,6 @@ public partial class MealSyncContext : DbContext
     public virtual DbSet<Permission> Permissions { get; set; }
     public virtual DbSet<AccountPermission> AccountPermissions { get; set; }
     public virtual DbSet<ShopDormitory> ShopDormitories { get; set; }
-    public virtual DbSet<WalletHistory> WalletHistories { get; set; }
     public virtual DbSet<OperatingDay> OperatingDays { get; set; }
     public virtual DbSet<OperatingFrame> OperatingFrames { get; set; }
     public virtual DbSet<StaffDelivery> StaffDeliveries { get; set; }
@@ -79,13 +77,14 @@ public partial class MealSyncContext : DbContext
     public virtual DbSet<Report> Reports { get; set; }
     public virtual DbSet<CommissionConfig> CommissionConfigs { get; set; }
     public virtual DbSet<SystemResource> SystemResources { get; set; }
-    public virtual DbSet<ModeratorActivityLog> ModeratorActivityLogs { get; set; }
+    public virtual DbSet<ActivityLog> ActivityLogs { get; set; }
     public virtual DbSet<SystemConfig> SystemConfigs { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
     public virtual DbSet<Favourite> Favourites { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySql(Environment.GetEnvironmentVariable("DATABASE_URL"), ServerVersion.Parse("8.0.33-mysql"));
+        => optionsBuilder.UseMySql(Environment.GetEnvironmentVariable("DATABASE_URL"), ServerVersion.Parse("8.0.33-mysql"))
+            .UseSnakeCaseNamingConvention();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -97,23 +96,11 @@ public partial class MealSyncContext : DbContext
             .HasForeignKey(a => a.RoleId)
             .HasConstraintName("FK_Account_Role");
         
-        modelBuilder.Entity<VerificationCode>()
-            .HasOne(a => a.Account)
-            .WithMany(r => r.VerificationCodes)
-            .HasForeignKey(a => a.AccountId)
-            .HasConstraintName("FK_Account_VerificationCode");
-        
         modelBuilder.Entity<Customer>()
             .HasOne(b => b.Account)
             .WithOne(r => r.Customer)
             .HasForeignKey<Customer>(b => b.Id)
             .HasConstraintName("FK_Customer_Account");
-        
-        modelBuilder.Entity<Customer>()
-            .HasOne(b => b.Dormitory)
-            .WithMany(d => d.Customers)
-            .HasForeignKey(a => a.DormitoryId)
-            .HasConstraintName("FK_Customer_Dormitory");
         
         modelBuilder.Entity<Building>()
             .HasOne(b => b.Dormitory)
@@ -427,11 +414,11 @@ public partial class MealSyncContext : DbContext
             .HasForeignKey(r => r.OrderId)
             .HasConstraintName("FK_Report_Order");
         
-        modelBuilder.Entity<ModeratorActivityLog>()
-            .HasOne(mal => mal.Moderator)
-            .WithMany(a => a.ModeratorActivityLogs)
-            .HasForeignKey(mal => mal.ModeratorId)
-            .HasConstraintName("FK_ModeratorActivityLog_Moderator");
+        modelBuilder.Entity<ActivityLog>()
+            .HasOne(mal => mal.Account)
+            .WithMany(a => a.ActivityLogs)
+            .HasForeignKey(mal => mal.AccountId)
+            .HasConstraintName("FK_ActivityLog_Account");
 
         modelBuilder.Entity<ModeratorDormitory>()
             .HasKey(md => new { md.ModeratorId, md.DormitoryId });

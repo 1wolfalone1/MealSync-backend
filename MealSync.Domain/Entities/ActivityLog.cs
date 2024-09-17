@@ -4,14 +4,14 @@ using MealSync.Domain.Enums;
 
 namespace MealSync.Domain.Entities;
 
-[Table("moderator_activity_log")]
-public class ModeratorActivityLog : BaseEntity
+[Table("activity_log")]
+public class ActivityLog : BaseEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long ModeratorId { get; set; }
+    public long AccountId { get; set; }
 
     public ModeratorActionTypes ActionType { get; set; }
 
@@ -24,5 +24,5 @@ public class ModeratorActivityLog : BaseEntity
 
     public bool IsSuccess { get; set; }
 
-    public virtual Moderator Moderator { get; set; }
+    public virtual Account Account { get; set; }
 }

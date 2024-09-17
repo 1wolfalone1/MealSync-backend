@@ -42,7 +42,7 @@ public class ShopOwner : BaseEntity
 
     public ShopStatus Status { get; set; } = ShopStatus.UnActive;
 
-    public bool IsAcceptingOrderNextDay { get; set; } = false;
+    public bool IsAcceptingOrderNextDay { get; set; }
 
     public double MinValueOrderFreeShip { get; set; }
 
@@ -73,4 +73,7 @@ public class ShopOwner : BaseEntity
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
+
+    public virtual ICollection<DeliveryOrderCombination> DeliveryOrderCombinations { get; set; } =
+        new List<DeliveryOrderCombination>();
 }
