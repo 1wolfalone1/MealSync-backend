@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
+using MealSync.Application.Common.Enums;
+using MealSync.Application.Shared;
+using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
-using MealSync.Domain.Shared;
 using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -14,6 +16,7 @@ public class ExceptionMiddleware
 {
     private readonly ILogger<ExceptionMiddleware> _logger;
     private readonly RequestDelegate _next;
+
     public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
         _next = next;
@@ -53,7 +56,7 @@ public class ExceptionMiddleware
 
     private async Task HandleValidationExceptionASync(HttpContext context, ValidationException exception)
     {
-        await HandleClientExceptionAsync(context, HttpStatusCode.BadRequest, new ExceptionResponse(exception));
+        await HandleValidateClientExceptionAsync(context, HttpStatusCode.BadRequest, new ExceptionResponse(exception));
     }
 
     private async Task HandleApiExceptionAsync(HttpContext context, ApiException exception)
@@ -63,7 +66,7 @@ public class ExceptionMiddleware
 
     private async Task HandleInValidBusinessExceptionAsync(HttpContext context, InvalidBusinessException exception)
     {
-        await HandleClientExceptionAsync(context, HttpStatusCode.BadRequest, new ExceptionResponse(exception));
+        await HandleClientExceptionAsync(context, exception.HttpStatusCode, new ExceptionResponse(exception));
     }
 
     private async Task HandleClientExceptionAsync(HttpContext context, HttpStatusCode code, ExceptionResponse response)
@@ -71,9 +74,22 @@ public class ExceptionMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)code;
 
-        var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true};  
-        await context.Response.WriteAsync(JsonSerializer.Serialize(Result.Failure(new Error(response.ErrorCode.ToString(),
-            response.Details != null ? JsonConvert.SerializeObject( response.Details ) : response.Message)), options));
+        var options = new JsonSerializerOptions
+            { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(Result.Failure(new Error(
+            response.Message)), options));
+    }
+
+    private async Task HandleValidateClientExceptionAsync(HttpContext context, HttpStatusCode code,
+        ExceptionResponse response)
+    {
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = (int)code;
+
+        var options = new JsonSerializerOptions
+            { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(Result.Failure<Dictionary<string, List<string>>>
+            (response.Details, new Error(ResponseCode.ValidationError.GetDescription(), string.Empty)), options));
     }
 
     private async Task HandleSystemExceptionAsync(HttpContext context, HttpStatusCode code, ExceptionResponse response)
@@ -81,8 +97,11 @@ public class ExceptionMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)code;
 
-        var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true};  
-        await context.Response.WriteAsync(JsonSerializer.Serialize(Result.Failure(new Error(response.ErrorCode.ToString(),
-            response.Details != null ? JsonConvert.SerializeObject( response.Details ) : response.Message, true)), options));
+        var options = new JsonSerializerOptions
+            { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(Result.Failure(new Error(
+                response.ErrorCode.ToString(),
+                response.Details != null ? JsonConvert.SerializeObject(response.Details) : response.Message, true)),
+            options));
     }
 }

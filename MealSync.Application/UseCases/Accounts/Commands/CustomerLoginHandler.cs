@@ -5,7 +5,7 @@ using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.UseCases.Accounts.Models;
 using MealSync.Domain.Enums;
-using MealSync.Domain.Shared;
+using MealSync.Application.Shared;
 
 namespace MealSync.Application.UseCases.Accounts.Commands;
 
