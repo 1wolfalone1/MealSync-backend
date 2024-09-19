@@ -6,6 +6,8 @@ public class InvalidBusinessException : Exception
 {
     public HttpStatusCode HttpStatusCode { get; private set; }
 
+    public object[] Args { get; private set; } = Array.Empty<object>();
+
     // Default constructor
     public InvalidBusinessException()
         : base()
@@ -17,6 +19,13 @@ public class InvalidBusinessException : Exception
         : base(message)
     {
         HttpStatusCode = httpStatusCode;
+    }
+
+    public InvalidBusinessException(string message, object[] args, HttpStatusCode httpStatusCode = HttpStatusCode.BadRequest)
+        : base(message)
+    {
+        HttpStatusCode = httpStatusCode;
+        Args = args;
     }
 
     // Constructor that accepts a message and an inner exception
