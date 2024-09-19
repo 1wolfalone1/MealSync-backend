@@ -8,7 +8,6 @@ namespace MealSync.Domain.Entities;
 public class ShopOwner : BaseEntity
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
     public long LocationId { get; set; }
