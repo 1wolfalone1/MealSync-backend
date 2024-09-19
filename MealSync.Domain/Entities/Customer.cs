@@ -7,7 +7,6 @@ namespace MealSync.Domain.Entities;
 public class Customer : BaseEntity
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
     public virtual Account Account { get; set; }

@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using MealSync.Domain.Shared;
+using MealSync.Application.Shared;
 
 namespace MealSync.Application.Common.Abstractions.Messaging;
 

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Accounts.Queries;
 using MealSync.Application.UseCases.Roles.Commands.CreateRole;
 using MealSync.Application.UseCases.Roles.Commands.UpdateRole;
+using MealSync.Application.UseCases.Test.Commands.TestValidateError;
+using MealSync.Application.UseCases.Test.Queries.TestError;
 using MealSync.Domain.Entities;
 
 namespace MealSync.API.Controllers;
@@ -49,5 +51,17 @@ public class TestController : BaseApiController
     {
         await _cacheService.RemoveCacheResponseAsync("/api/v1/Test/hello");
         return Ok("delete");
+    }
+
+    [HttpGet("test/error")]
+    public async Task<IActionResult> TestError()
+    {
+        return this.HandleResult(await this.Mediator.Send(new GetTestErrorQuery()));
+    }
+
+    [HttpPost("test/validate-error")]
+    public async Task<IActionResult> TestValidateError(TestValidateErrorCommand command)
+    {
+        return this.HandleResult(await this.Mediator.Send(command));
     }
 }

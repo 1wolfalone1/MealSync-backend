@@ -4,7 +4,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.UseCases.Roles.Commands.CreateRole;
 using MealSync.Domain.Entities;
-using MealSync.Domain.Shared;
+using MealSync.Application.Shared;
 
 namespace MealSync.Application.UseCases.Roles.Commands.CreateRole;
 

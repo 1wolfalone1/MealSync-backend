@@ -12,6 +12,7 @@ using MealSync.Infrastructure.Services;
 using MealSync.Application.Common.Services.Dapper;
 using MealSync.Infrastructure.Services.Dapper;
 using System.Text.Json.Serialization;
+using MealSync.Application.Shared;
 using MealSync.Infrastructure.Common.Data.ApplicationInitialData;
 
 namespace MealSync.API.Extensions;
@@ -82,6 +83,10 @@ public static class ApplicationServiceExtensions
         //Add unit of work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDapperService, DapperService>();
+        
+        // Add Error Config
+        var resourceRepository = services.BuildServiceProvider().GetService<ISystemResourceRepository>();
+        Error.Configure(resourceRepository);
 
         return services;
     }

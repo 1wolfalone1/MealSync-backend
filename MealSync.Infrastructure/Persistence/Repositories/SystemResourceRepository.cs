@@ -8,4 +8,15 @@ public class SystemResourceRepository : BaseRepository<SystemResource>, ISystemR
     public SystemResourceRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
+
+    public string? GetByResourceCode(string code)
+    {
+        return DbSet.SingleOrDefault(sr => sr.ResourceCode == code)?.ResourceContent;
+    }
+
+    public string GetByResourceCode(string code, params object[] args)
+    {
+        var systemResource = DbSet.Single(sr => sr.ResourceCode == code);
+        return string.Format(systemResource.ResourceContent, args);
+    }
 }

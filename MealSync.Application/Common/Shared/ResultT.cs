@@ -1,4 +1,4 @@
-﻿namespace MealSync.Domain.Shared;
+﻿namespace MealSync.Application.Shared;
 
 public class Result<TValue> : Result
 {
@@ -8,9 +8,7 @@ public class Result<TValue> : Result
         : base(isSuccess, error) =>
         _value = value;
 
-    public TValue Value => IsSuccess
-        ? _value!
-        : throw new InvalidOperationException("The value of a failure result can not be accessed.");
+    public TValue Value => _value;
 
     public static implicit operator Result<TValue>(TValue? value) => Create(value);
 }

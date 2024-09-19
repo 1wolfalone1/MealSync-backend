@@ -6,7 +6,7 @@ public enum ResponseCode
 {
     [Description("Common Error")] CommonError = 1,
 
-    [Description("Validation Error")] ValidationError = 2,
+    [Description("2")] ValidationError = 2,
 
     [Description("Mapping Error")] MappingError = 3,
 
