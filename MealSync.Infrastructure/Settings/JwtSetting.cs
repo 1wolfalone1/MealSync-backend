@@ -16,4 +16,8 @@ public class JwtSetting
     [Required]
     [Range(1, Int32.MaxValue)]
     public int TokenExpire { get; set; }
+
+    [Required]
+    [Range(1, Int32.MaxValue)]
+    public int RefreshTokenExpire { get; set; }
 }

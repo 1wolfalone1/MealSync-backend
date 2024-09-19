@@ -14,17 +14,12 @@ namespace MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 public class LoginHandler : ICommandHandler<LoginCommand, Result>
 {
     private readonly IAccountRepository _accountRepository;
-    private readonly ICustomerBuildingRepository _customerBuildingRepository;
-    private readonly IBuildingRepository _buildingRepository;
     private readonly IJwtTokenService _jwtTokenService;
 
-    public LoginHandler(IAccountRepository accountRepository, ICustomerBuildingRepository customerBuildingRepository,
-        IJwtTokenService jwtTokenService, IBuildingRepository buildingRepository)
+    public LoginHandler(IAccountRepository accountRepository, IJwtTokenService jwtTokenService)
     {
         _accountRepository = accountRepository;
-        _customerBuildingRepository = customerBuildingRepository;
         _jwtTokenService = jwtTokenService;
-        _buildingRepository = buildingRepository;
     }
 
     public async Task<Result<Result>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -32,7 +27,12 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         var account = _accountRepository.GetAccountByEmail(request.Email);
         if (account == null || !BCrypUnitls.Verify(request.Password, account.Password))
         {
-            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_USERNAME_PASSWORD.GetDescription(), HttpStatusCode.Unauthorized);
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_USERNAME_PASSWORD.GetDescription(),
+                HttpStatusCode.Unauthorized);
+        }
+        else if (account.RoleId != request.Role)
+        {
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
         }
         else if (account.Status == AccountStatus.UnVerify)
         {
@@ -44,32 +44,14 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         }
         else
         {
-            var token = _jwtTokenService.GenerateJwtToken(account);
-            var customerBuilding = _customerBuildingRepository.GetDefaultByCustomerId(account.Id);
-            BuildingResponse? buildingResponse = null;
-            if (customerBuilding != null)
-            {
-                var building = _buildingRepository.GetBuildingById(customerBuilding.BuildingId);
-                buildingResponse = new BuildingResponse
-                {
-                    Id = building.Id,
-                    Name = building.Name,
-                    Latitude = building.Location.Latitude,
-                    Longitude = building.Location.Longitude,
-                    Dormitory = new DormitoryResponse
-                    {
-                        Id = building.Dormitory.Id,
-                        Name = building.Dormitory.Name,
-                        Latitude = building.Dormitory.Location.Latitude,
-                        Longitude = building.Dormitory.Location.Longitude,
-                    }
-                };
-            }
+            var accessToken = _jwtTokenService.GenerateJwtToken(account);
+            var refreshToken = _jwtTokenService.GenerateJwtToken(account);
 
             LoginResponse loginResponse = new LoginResponse();
             loginResponse.TokenResponse = new TokenResponse
             {
-                AccessToken = token
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
             };
             loginResponse.AccountResponse = new AccountResponse
             {
@@ -78,7 +60,6 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
                 RoleName = account.Role.Name,
                 AvatarUrl = account.AvatarUrl,
                 FullName = account.FullName,
-                Building = buildingResponse
             };
             return Result.Success(loginResponse);
         }

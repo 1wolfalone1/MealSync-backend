@@ -6,8 +6,12 @@ public enum Roles
 {
     [Description("Customer")]
     Customer = 1,
-    [Description("Shop")]
-    Shop = 2,
+    [Description("ShopOwner")]
+    ShopOwner = 2,
+    [Description("ShopDelivery")]
+    ShopDelivery = 3,
+    [Description("Manager")]
+    Manager = 4,
     [Description("Admin")]
-    Admin = 3
+    Admin = 5
 }
