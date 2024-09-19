@@ -5,5 +5,5 @@ namespace MealSync.Application.Common.Repositories;
 public interface ISystemResourceRepository : IBaseRepository<SystemResource>
 {
     string? GetByResourceCode(string code);
-    string GetByResourceCode(string code, params object[] args);
+    string? GetByResourceCode(string code, params object[] args);
 }

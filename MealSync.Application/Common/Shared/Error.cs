@@ -21,6 +21,14 @@ public class Error : IEquatable<Error>
         IsSystemError = false;
     }
 
+    public Error(string code, params object[] args)
+    {
+        Code = code;
+        Message = _resourceRepository.GetByResourceCode(code, args) ?? "Message not found.";
+        IsClientError = true;
+        IsSystemError = false;
+    }
+
     public Error(string code, string message)
     {
         Code = code;

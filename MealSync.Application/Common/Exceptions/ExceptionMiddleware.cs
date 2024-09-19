@@ -61,23 +61,28 @@ public class ExceptionMiddleware
 
     private async Task HandleApiExceptionAsync(HttpContext context, ApiException exception)
     {
-        await HandleClientExceptionAsync(context, HttpStatusCode.BadRequest, new ExceptionResponse(exception));
+        await HandleClientExceptionAsync(context, HttpStatusCode.BadRequest, Array.Empty<object>(), new ExceptionResponse(exception));
     }
 
     private async Task HandleInValidBusinessExceptionAsync(HttpContext context, InvalidBusinessException exception)
     {
-        await HandleClientExceptionAsync(context, exception.HttpStatusCode, new ExceptionResponse(exception));
+        await HandleClientExceptionAsync(context, exception.HttpStatusCode, exception.Args, new ExceptionResponse(exception));
     }
 
-    private async Task HandleClientExceptionAsync(HttpContext context, HttpStatusCode code, ExceptionResponse response)
+    private async Task HandleClientExceptionAsync(HttpContext context, HttpStatusCode code, object[] args,
+        ExceptionResponse response)
     {
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)code;
+        var error = args.Length > 0
+            ? new Error(
+                response.Message, args)
+            : new Error(
+                response.Message);
 
         var options = new JsonSerializerOptions
             { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
-        await context.Response.WriteAsync(JsonSerializer.Serialize(Result.Failure(new Error(
-            response.Message)), options));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(Result.Failure(error), options));
     }
 
     private async Task HandleValidateClientExceptionAsync(HttpContext context, HttpStatusCode code,
