@@ -411,7 +411,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("MealSync.Domain.Entities.Customer", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
@@ -655,7 +654,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("MealSync.Domain.Entities.Moderator", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
@@ -1889,7 +1887,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("MealSync.Domain.Entities.ShopOwner", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
@@ -2012,7 +2009,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("MealSync.Domain.Entities.StaffDelivery", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 

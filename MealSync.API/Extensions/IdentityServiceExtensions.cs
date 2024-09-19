@@ -5,6 +5,7 @@ using MealSync.Application.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MealSync.Infrastructure.Settings;
+using StackExchange.Redis;
 
 namespace MealSync.API.Extensions;
 
@@ -85,6 +86,23 @@ public static class IdentityServiceExtensions
 
         // Register the JwtSettings instance as a singleton
         services.AddSingleton<JwtSetting>(jwtSetting);
+
+        //Set Redis Setting
+        var redidSetting = new RedisSetting()
+        {
+            ConnectionString = config["REDIS_URL"]
+        };
+
+        // Validate the RedisSettings instance using DataAnnotations
+        var validationRedisContext = new ValidationContext(redidSetting);
+        Validator.ValidateObject(redidSetting, validationRedisContext, validateAllProperties: true);
+
+        // Register the RedisSettings instance as a singleton
+        services.AddSingleton<RedisSetting>(redidSetting);
+
+        services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redidSetting.ConnectionString));
+        services.AddStackExchangeRedisCache(option => option.Configuration = redidSetting.ConnectionString);
+
         return services;
     }
 }

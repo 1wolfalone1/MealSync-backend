@@ -10,13 +10,20 @@ namespace MealSync.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.DropColumn(
+                name: "wallet_id",
+                table: "customer");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.AddColumn<long>(
+                name: "wallet_id",
+                table: "customer",
+                type: "bigint",
+                nullable: false,
+                defaultValue: 0L);
         }
     }
 }

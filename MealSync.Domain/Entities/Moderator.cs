@@ -7,7 +7,6 @@ namespace MealSync.Domain.Entities;
 public class Moderator : BaseEntity
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
     public virtual Account Account { get; set; }
