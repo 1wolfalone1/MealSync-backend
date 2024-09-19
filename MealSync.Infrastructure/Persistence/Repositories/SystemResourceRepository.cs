@@ -9,9 +9,9 @@ public class SystemResourceRepository : BaseRepository<SystemResource>, ISystemR
     {
     }
 
-    public string GetByResourceCode(string code)
+    public string? GetByResourceCode(string code)
     {
-        return DbSet.Single(sr => sr.ResourceCode == code).ResourceContent;
+        return DbSet.SingleOrDefault(sr => sr.ResourceCode == code)?.ResourceContent;
     }
 
     public string GetByResourceCode(string code, params object[] args)

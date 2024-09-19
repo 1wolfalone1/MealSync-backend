@@ -1,5 +1,5 @@
 using MealSync.Application.Common.Abstractions.Messaging;
-using MealSync.Domain.Shared;
+using MealSync.Application.Shared;
 
 namespace MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 

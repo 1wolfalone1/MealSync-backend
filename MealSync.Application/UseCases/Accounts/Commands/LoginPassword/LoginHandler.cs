@@ -3,9 +3,9 @@ using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Utils;
+using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Accounts.Models;
 using MealSync.Domain.Enums;
-using MealSync.Domain.Shared;
 
 namespace MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 
@@ -14,18 +14,15 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
     private readonly IAccountRepository _accountRepository;
     private readonly ICustomerBuildingRepository _customerBuildingRepository;
     private readonly IBuildingRepository _buildingRepository;
-    private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IJwtTokenService _jwtTokenService;
 
     public LoginHandler(IAccountRepository accountRepository, ICustomerBuildingRepository customerBuildingRepository,
-        IJwtTokenService jwtTokenService, IBuildingRepository buildingRepository,
-        ISystemResourceRepository systemResourceRepository)
+        IJwtTokenService jwtTokenService, IBuildingRepository buildingRepository)
     {
         _accountRepository = accountRepository;
         _customerBuildingRepository = customerBuildingRepository;
         _jwtTokenService = jwtTokenService;
         _buildingRepository = buildingRepository;
-        _systemResourceRepository = systemResourceRepository;
     }
 
     public async Task<Result<Result>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -33,18 +30,15 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         var account = _accountRepository.GetAccountByEmail(request.Email);
         if (account == null || !BCrypUnitls.Verify(request.Password, account.Password))
         {
-            return Result.Failure(new Error(StatusCode.UNAUTHORIZED.GetDescription(),
-                _systemResourceRepository.GetByResourceCode(MessageCode.BU00001.ToString())));
+            return Result.Failure(new Error(StatusCode.UNAUTHORIZED.GetDescription(), MessageCode.BU00001.ToString()));
         }
         else if (account.Status == AccountStatus.UnVerify)
         {
-            return Result.Failure(new Error(StatusCode.UNAUTHORIZED.GetDescription(),
-                _systemResourceRepository.GetByResourceCode(MessageCode.BU00002.ToString())));
+            return Result.Failure(new Error(StatusCode.UNAUTHORIZED.GetDescription(), MessageCode.BU00002.ToString()));
         }
         else if (account.Status == AccountStatus.Ban)
         {
-            return Result.Failure(new Error(StatusCode.UNAUTHORIZED.GetDescription(),
-                _systemResourceRepository.GetByResourceCode(MessageCode.BU00003.ToString())));
+            return Result.Failure(new Error(StatusCode.UNAUTHORIZED.GetDescription(), MessageCode.BU00003.ToString()));
         }
         else
         {

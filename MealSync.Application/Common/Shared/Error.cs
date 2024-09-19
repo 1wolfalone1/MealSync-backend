@@ -1,16 +1,24 @@
-﻿namespace MealSync.Domain.Shared;
+﻿using MealSync.Application.Common.Repositories;
+
+namespace MealSync.Application.Shared;
 
 public class Error : IEquatable<Error>
 {
+    private static ISystemResourceRepository _resourceRepository;
     public static readonly Error None = new(string.Empty, string.Empty, true, false);
     public static readonly Error NullValue = new("Error.NullValue", "The specified result value is null.", true, false);
 
-    public Error(string code, string message, bool isClientError, bool isSystemError)
+    public static void Configure(ISystemResourceRepository resourceRepository)
+    {
+        _resourceRepository = resourceRepository;
+    }
+
+    public Error(string code)
     {
         Code = code;
-        Message = message;
-        IsClientError = isClientError;
-        IsSystemError = isSystemError;
+        Message = _resourceRepository.GetByResourceCode(code) ?? "Message not found.";
+        IsClientError = true;
+        IsSystemError = false;
     }
 
     public Error(string code, string message)
@@ -26,6 +34,14 @@ public class Error : IEquatable<Error>
         Code = code;
         Message = message;
         IsClientError = false;
+        IsSystemError = isSystemError;
+    }
+    
+    public Error(string code, string message, bool isClientError, bool isSystemError)
+    {
+        Code = code;
+        Message = message;
+        IsClientError = isClientError;
         IsSystemError = isSystemError;
     }
 

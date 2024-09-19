@@ -2,7 +2,7 @@
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.UseCases.Roles.Commands.CreateRole;
 using MealSync.Application.UseCases.Roles.Commands.UpdateRole;
-using MealSync.Domain.Shared;
+using MealSync.Application.Shared;
 
 namespace MealSync.Application.UseCases.Roles.Commands.UpdateRole
 {

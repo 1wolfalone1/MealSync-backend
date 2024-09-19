@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using MealSync.Domain.Shared;
+using MealSync.Application.Shared;
 
 namespace MealSync.API.Controllers;
 
