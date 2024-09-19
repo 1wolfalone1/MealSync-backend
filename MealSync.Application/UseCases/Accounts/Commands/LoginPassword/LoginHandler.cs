@@ -1,3 +1,4 @@
+using System.Net;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
@@ -6,6 +7,7 @@ using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Accounts.Models;
 using MealSync.Domain.Enums;
+using MealSync.Domain.Exceptions.Base;
 
 namespace MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 
@@ -30,15 +32,15 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         var account = _accountRepository.GetAccountByEmail(request.Email);
         if (account == null || !BCrypUnitls.Verify(request.Password, account.Password))
         {
-            return Result.Failure(new Error(StatusCode.UNAUTHORIZED.GetDescription(), MessageCode.BU00001.ToString()));
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_USERNAME_PASSWORD.GetDescription(), HttpStatusCode.Unauthorized);
         }
         else if (account.Status == AccountStatus.UnVerify)
         {
-            return Result.Failure(new Error(StatusCode.UNAUTHORIZED.GetDescription(), MessageCode.BU00002.ToString()));
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_UNVERIFIED.GetDescription());
         }
         else if (account.Status == AccountStatus.Ban)
         {
-            return Result.Failure(new Error(StatusCode.UNAUTHORIZED.GetDescription(), MessageCode.BU00003.ToString()));
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_BANNED.GetDescription());
         }
         else
         {

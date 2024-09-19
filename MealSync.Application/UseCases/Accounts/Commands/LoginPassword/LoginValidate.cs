@@ -1,18 +1,17 @@
 using FluentValidation;
 using MealSync.Application.Common.Enums;
-using MealSync.Application.Common.Repositories;
 
 namespace MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 
 public class LoginValidate : AbstractValidator<LoginCommand>
 {
-    public LoginValidate(ISystemResourceRepository systemResourceRepository)
+    public LoginValidate()
     {
         RuleFor(e => e.Email)
             .NotEmpty()
-            .WithMessage(systemResourceRepository.GetByResourceCode(MessageCode.VL00001.ToString()));
+            .WithMessage("Email bắt buộc nhập");
         RuleFor(e => e.Password)
             .NotEmpty()
-            .WithMessage(systemResourceRepository.GetByResourceCode(MessageCode.VL00002.ToString()));
+            .WithMessage("Password bắt buộc nhập");
     }
 }
