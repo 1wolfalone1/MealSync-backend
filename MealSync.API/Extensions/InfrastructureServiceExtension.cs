@@ -1,11 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using MealSync.Application.Common.Repositories;
-using MealSync.Application.Common.Services;
-using MealSync.Application.Common.Services.Dapper;
-using MealSync.Infrastructure.Common.Data.ApplicationInitialData;
-using MealSync.Infrastructure.Persistence.Repositories;
-using MealSync.Infrastructure.Services;
-using MealSync.Infrastructure.Services.Dapper;
+﻿using MealSync.Infrastructure.Common.Data.ApplicationInitialData;
 
 namespace MealSync.API.Extensions;
 
@@ -24,7 +17,7 @@ public static class InfrastructureServiceExtension
         }
         return services;
     }
-    
+
     private static bool IsDevelopment()
     {
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");

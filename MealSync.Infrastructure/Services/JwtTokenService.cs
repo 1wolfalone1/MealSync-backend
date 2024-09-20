@@ -14,12 +14,13 @@ public class JwtTokenService : IJwtTokenService, IBaseService
 {
     private JwtSetting _jwtSetting;
     private IRoleRepository _roleRepository;
+
     public JwtTokenService(IConfiguration configuration, JwtSetting jwtSetting, IRoleRepository roleRepository)
     {
         _jwtSetting = jwtSetting;
         _roleRepository = roleRepository;
     }
-    
+
     private string GenerateJwtToken(Account account, int expireInMinutes)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.Key));
@@ -29,6 +30,7 @@ public class JwtTokenService : IJwtTokenService, IBaseService
                        ?? throw new UnauthorizedAccessException($"Role id of account id: {account.Id} not correct");
         var claims = new[]
         {
+            new Claim(ClaimTypes.Sid, account.Id.ToString()),
             new Claim(ClaimTypes.NameIdentifier, account.Email),
             new Claim(ClaimTypes.Name, account.FullName),
             new Claim(ClaimTypes.Role, role.Name)
@@ -44,7 +46,7 @@ public class JwtTokenService : IJwtTokenService, IBaseService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-    
+
     public string GenerateJwtToken(Account account)
     {
         return GenerateJwtToken(account, _jwtSetting.TokenExpire);

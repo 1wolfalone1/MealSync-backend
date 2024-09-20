@@ -1,7 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Json;
+using MealSync.Application.Common.Repositories;
+using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Dapper;
 using MealSync.Application.Shared;
+using MealSync.Infrastructure.Persistence.Interceptors;
+using MealSync.Infrastructure.Persistence.Repositories;
+using MealSync.Infrastructure.Services;
+using MealSync.Infrastructure.Services.Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MealSync.Infrastructure.Settings;
@@ -13,7 +20,7 @@ public static class IdentityServiceExtensions
 {
     public static IServiceCollection AddIdentityService(this IServiceCollection services, IConfiguration config)
     {
-        //config authen
+        // Config authentication
         services.AddAuthentication(x =>
         {
             x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -32,7 +39,7 @@ public static class IdentityServiceExtensions
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
             };
-            
+
             // Customize the response for unauthorized requests
             x.Events = new JwtBearerEvents
             {
@@ -67,10 +74,10 @@ public static class IdentityServiceExtensions
                 }
             };
         });
-        
+
         // Add authorization
         services.AddAuthorization();
-        
+
         //Set Jwt Setting
         var jwtSetting = new JwtSetting
         {
@@ -102,6 +109,27 @@ public static class IdentityServiceExtensions
 
         services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redidSetting.ConnectionString));
         services.AddStackExchangeRedisCache(option => option.Configuration = redidSetting.ConnectionString);
+
+        //Config service
+        var assembly = typeof(BaseService).Assembly;
+        services.Scan(scan => scan
+            .FromAssembliesOf(typeof(BaseService))
+            .AddClasses(classes => classes.AssignableTo(typeof(IBaseService)))
+            .AsImplementedInterfaces()
+            .WithTransientLifetime()
+            .FromAssembliesOf(typeof(AccountRepository)) // Infrastructure Layer
+            .AddClasses(classes => classes.AssignableTo(typeof(IBaseRepository<>)))
+            .AsImplementedInterfaces()
+            .WithTransientLifetime());
+
+        //Add unit of work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IDapperService, DapperService>();
+        services.AddScoped<CustomSaveChangesInterceptor>();
+
+        // Add Error Config
+        var resourceRepository = services.BuildServiceProvider().GetService<ISystemResourceRepository>();
+        Error.Configure(resourceRepository);
 
         return services;
     }

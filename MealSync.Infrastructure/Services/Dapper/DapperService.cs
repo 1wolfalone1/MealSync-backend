@@ -20,6 +20,7 @@ public class DapperService : IDapperService
     private readonly IDbConnection db;
     private readonly IMemoryCache cache;
     private readonly Assembly assembly;
+
     public DapperService(IDbConnection db, IMemoryCache cache)
     {
         this.db = db;

@@ -2,6 +2,7 @@
 
 using Microsoft.OpenApi.Models;
 using MealSync.API.Extensions;
+using MealSync.API.Middleware;
 using MealSync.Application.Common.Exceptions;
 
 DotNetEnv.Env.Load();
@@ -10,8 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddApplicationService(builder.Configuration);
-builder.Services.ConfigureInfrastructureServices(builder.Configuration);
 builder.Services.AddIdentityService(builder.Configuration);
+builder.Services.ConfigureInfrastructureServices(builder.Configuration);
 builder.Services.AddControllers();
 
 //loging
@@ -54,6 +55,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Add auto save activity log
+app.UseMiddleware<ActivityLoggingMiddleware>();
 
 app.UseMiddleware<ExceptionMiddleware>();
 

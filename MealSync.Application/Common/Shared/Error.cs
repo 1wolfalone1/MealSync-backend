@@ -44,7 +44,7 @@ public class Error : IEquatable<Error>
         IsClientError = false;
         IsSystemError = isSystemError;
     }
-    
+
     public Error(string code, string message, bool isClientError, bool isSystemError)
     {
         Code = code;

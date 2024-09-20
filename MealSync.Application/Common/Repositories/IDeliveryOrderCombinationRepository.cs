@@ -4,5 +4,4 @@ namespace MealSync.Application.Common.Repositories;
 
 public interface IDeliveryOrderCombinationRepository : IBaseRepository<DeliveryOrderCombination>
 {
-    
 }

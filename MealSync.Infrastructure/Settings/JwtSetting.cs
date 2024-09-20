@@ -12,7 +12,7 @@ public class JwtSetting
 
     [Required]
     public string Audience { get; set; } = default!;
-    
+
     [Required]
     [Range(1, Int32.MaxValue)]
     public int TokenExpire { get; set; }
