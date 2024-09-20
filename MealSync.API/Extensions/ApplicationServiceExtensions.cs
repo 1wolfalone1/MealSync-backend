@@ -5,15 +5,7 @@ using System.Data;
 using MySql.Data.MySqlClient;
 using MediatR;
 using MealSync.Application.Behaviors;
-using MealSync.Application.Common.Repositories;
-using MealSync.Application.Common.Services;
-using MealSync.Infrastructure.Persistence.Repositories;
-using MealSync.Infrastructure.Services;
-using MealSync.Application.Common.Services.Dapper;
-using MealSync.Infrastructure.Services.Dapper;
 using System.Text.Json.Serialization;
-using MealSync.Application.Shared;
-using MealSync.Infrastructure.Common.Data.ApplicationInitialData;
 
 namespace MealSync.API.Extensions;
 
@@ -21,8 +13,10 @@ public static class ApplicationServiceExtensions
 {
     public static IServiceCollection AddApplicationService(this IServiceCollection services, IConfiguration config)
     {
+        // Register
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        services.AddHttpContextAccessor();
 
         //Add memory cache
         services.AddMemoryCache();
@@ -54,43 +48,23 @@ public static class ApplicationServiceExtensions
         // FluentAPI validation
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(applicationAssembly);
-        
+
         // Fix disable 400 request filter auto
         services.AddControllers()
             .ConfigureApiBehaviorOptions(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
             });
-        
+
         // Config Json Convert
         services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
-        //Config service
-        var assembly = typeof(BaseService).Assembly;
-        services.Scan(scan => scan
-            .FromAssembliesOf(typeof(BaseService))
-            .AddClasses(classes => classes.AssignableTo(typeof(IBaseService)))
-            .AsImplementedInterfaces()
-            .WithTransientLifetime()
-            .FromAssembliesOf(typeof(AccountRepository)) // Infrastructure Layer
-            .AddClasses(classes => classes.AssignableTo(typeof(IBaseRepository<>)))
-            .AsImplementedInterfaces()
-            .WithTransientLifetime());
-
-        //Add unit of work
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IDapperService, DapperService>();
-        
-        // Add Error Config
-        var resourceRepository = services.BuildServiceProvider().GetService<ISystemResourceRepository>();
-        Error.Configure(resourceRepository);
-
         return services;
     }
-    
+
     private static bool IsDevelopment()
     {
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");

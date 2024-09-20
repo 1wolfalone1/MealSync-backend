@@ -95,3 +95,9 @@ dotnet_diagnostic.SA1134.severity = error
 
 # Not let space at the end line
 dotnet_diagnostic.SA1028.severity = error
+
+#Elements should be separated by blank line
+dotnet_diagnostic.SA1516.severity = error
+
+#Braces should not be omitted
+dotnet_diagnostic.SA1503.severity = warning

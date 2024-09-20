@@ -6,8 +6,8 @@ namespace MealSync.Application.UseCases.Test.Commands.TestValidateError;
 
 public class TestValidateErrorCommand : ICommand<Result>
 {
-    public int Id { get; set; }
-    
+    public long Id { get; set; }
+
     public string Email { get; set; }
 }
 

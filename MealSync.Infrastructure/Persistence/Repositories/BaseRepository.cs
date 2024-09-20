@@ -6,7 +6,6 @@ using MealSync.Infrastructure.Persistence.Contexts;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
 
-
 public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : BaseEntity
 {
     private const string ErrorMessage = "Haven't any transaction";
@@ -127,7 +126,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
     {
         return await this.DbSet.FindAsync(id);
     }
-    
+
     public TEntity? GetById(object id)
     {
         return this.DbSet.Find(id);

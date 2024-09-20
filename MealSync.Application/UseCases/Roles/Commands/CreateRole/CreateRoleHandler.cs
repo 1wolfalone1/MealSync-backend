@@ -29,8 +29,7 @@ public class CreateRoleHandler : ICommandHandler<CreateRoleCommand, Unit>
         await this.unitOfWork.CommitTransactionAsync();
 
         return Result.Success(Unit.Value);
-        
-    } 
+    }
 }
 
 public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>

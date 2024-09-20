@@ -1,18 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MealSync.Application.Common.Repositories;
 using MealSync.Infrastructure.Persistence.Contexts;
+using MealSync.Infrastructure.Persistence.Interceptors;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
+
 public class UnitOfWork : IUnitOfWork
 {
     private const string ErrorNotOpenTransaction = "You not open transaction yet!";
     private const string ErrorAlreadyOpenTransaction = "Transaction already open";
     private bool isTransaction;
     private MealSyncContext context;
+    private readonly CustomSaveChangesInterceptor _customSaveChangesInterceptor;
 
-    public UnitOfWork()
+    public UnitOfWork(CustomSaveChangesInterceptor customSaveChangesInterceptor)
     {
-        this.context = new MealSyncContext();
+        this.context = new MealSyncContext(customSaveChangesInterceptor);
     }
 
     public bool IsTransaction
@@ -42,7 +45,7 @@ public class UnitOfWork : IUnitOfWork
             throw new Exception(ErrorNotOpenTransaction);
         }
 
-        await this.context.SaveChangeAsync().ConfigureAwait(false);
+        await this.context.SaveChangesAsync().ConfigureAwait(false);
         this.isTransaction = false;
     }
 

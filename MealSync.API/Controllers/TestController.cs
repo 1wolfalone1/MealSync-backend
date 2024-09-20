@@ -1,13 +1,14 @@
 ﻿using MealSync.API.Attributes;
+using MealSync.API.Identites;
 using MealSync.Application.Common.Services;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Accounts.Queries;
 using MealSync.Application.UseCases.Roles.Commands.CreateRole;
 using MealSync.Application.UseCases.Roles.Commands.UpdateRole;
+using MealSync.Application.UseCases.Test.Commands.TestModeratorCreateLog;
 using MealSync.Application.UseCases.Test.Commands.TestValidateError;
 using MealSync.Application.UseCases.Test.Queries.TestError;
-using MealSync.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MealSync.API.Controllers;
 
@@ -28,7 +29,7 @@ public class TestController : BaseApiController
 
     [HttpPost("role")]
     public async Task<IActionResult> CreateRole([FromBody] string name)
-    { 
+    {
         return this.HandleResult(await this.Mediator.Send(new CreateRoleCommand { Name = name}));
     }
 
@@ -61,6 +62,13 @@ public class TestController : BaseApiController
 
     [HttpPost("test/validate-error")]
     public async Task<IActionResult> TestValidateError(TestValidateErrorCommand command)
+    {
+        return this.HandleResult(await this.Mediator.Send(command));
+    }
+
+    [HttpPost("/api/v1/moderator/order")]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> TestModeratorLogError(TestModeratorLogCommand command)
     {
         return this.HandleResult(await this.Mediator.Send(command));
     }
