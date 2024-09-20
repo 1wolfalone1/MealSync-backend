@@ -14,6 +14,6 @@ public class LoginValidate : AbstractValidator<LoginCommand>
             .WithMessage("Email bắt buộc nhập");
         RuleFor(e => e.Password)
             .NotEmpty()
-            .WithMessage("Password bắt buộc nhập");
+            .WithMessage("Mật khẩu bắt buộc nhập");
     }
 }
