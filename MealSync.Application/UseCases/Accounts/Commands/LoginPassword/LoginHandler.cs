@@ -8,6 +8,7 @@ using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Accounts.Models;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
+using Microsoft.Extensions.Logging;
 
 namespace MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 
@@ -15,11 +16,16 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
 {
     private readonly IAccountRepository _accountRepository;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<LoginHandler> _logger;
 
-    public LoginHandler(IAccountRepository accountRepository, IJwtTokenService jwtTokenService)
+    public LoginHandler(IAccountRepository accountRepository, IJwtTokenService jwtTokenService,
+        IUnitOfWork unitOfWork, ILogger<LoginHandler> logger)
     {
         _accountRepository = accountRepository;
         _jwtTokenService = jwtTokenService;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<Result<Result>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -46,6 +52,19 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         {
             var accessToken = _jwtTokenService.GenerateJwtToken(account);
             var refreshToken = _jwtTokenService.GenerateJwtToken(account);
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+                account.RefreshToken = refreshToken;
+                _accountRepository.Update(account);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.RollbackTransaction();
+                _logger.LogError(e, e.Message);
+                throw new("Internal Server Error");
+            }
 
             LoginResponse loginResponse = new LoginResponse();
             loginResponse.TokenResponse = new TokenResponse

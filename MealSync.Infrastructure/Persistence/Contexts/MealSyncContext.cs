@@ -23,7 +23,7 @@ public partial class MealSyncContext : DbContext
     {
         foreach (var entry in this.ChangeTracker.Entries().Where(x => x.State == EntityState.Added || x.State == EntityState.Modified))
         {
-            var now = DateTime.Now;
+            var now = DateTimeOffset.Now;
             entry.Property("UpdatedDate").CurrentValue = now;
             if (entry.State == EntityState.Modified)
             {

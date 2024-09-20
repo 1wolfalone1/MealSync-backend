@@ -2,6 +2,6 @@
 
 public class LoginResponse
 {
-    public AccountResponse AccountResponse { get; set; }
-    public TokenResponse TokenResponse { get; set; }
+    public AccountResponse AccountResponse { get; set; } = null!;
+    public TokenResponse TokenResponse { get; set; } = null!;
 }
