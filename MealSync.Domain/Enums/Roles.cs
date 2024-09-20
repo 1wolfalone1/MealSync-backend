@@ -10,8 +10,8 @@ public enum Roles
     ShopOwner = 2,
     [Description("ShopDelivery")]
     ShopDelivery = 3,
-    [Description("Manager")]
-    Manager = 4,
+    [Description("Moderator")]
+    Moderator = 4,
     [Description("Admin")]
     Admin = 5
 }
