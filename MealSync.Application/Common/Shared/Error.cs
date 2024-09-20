@@ -5,7 +5,7 @@ namespace MealSync.Application.Shared;
 public class Error : IEquatable<Error>
 {
     private static ISystemResourceRepository _resourceRepository;
-    public static readonly Error None = new(string.Empty, string.Empty, true, false);
+    public static readonly Error None = new(string.Empty, string.Empty, false, false);
     public static readonly Error NullValue = new("Error.NullValue", "The specified result value is null.", true, false);
 
     public static void Configure(ISystemResourceRepository resourceRepository)
