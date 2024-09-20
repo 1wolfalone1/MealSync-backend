@@ -33,10 +33,21 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         var account = _accountRepository.GetAccountByEmail(request.Email);
         if (account == null || !BCrypUnitls.Verify(request.Password, account.Password))
         {
-            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_USERNAME_PASSWORD.GetDescription(),
-                HttpStatusCode.Unauthorized);
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_USERNAME_PASSWORD.GetDescription(), HttpStatusCode.Unauthorized);
         }
-        else if (account.RoleId != request.Role)
+        else if (request.LoginContext == LoginContextType.AppForUser && account.RoleId != (int)Domain.Enums.Roles.Customer)
+        {
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
+        }
+        else if (request.LoginContext == LoginContextType.AppForShopOwnerOrDelivery && (account.RoleId != (int)Domain.Enums.Roles.ShopOwner || account.RoleId != (int)Domain.Enums.Roles.ShopDelivery))
+        {
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
+        }
+        else if (request.LoginContext == LoginContextType.WebForShop && account.RoleId != (int)Domain.Enums.Roles.ShopOwner)
+        {
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
+        }
+        else if (request.LoginContext == LoginContextType.WebForAdminOrModerator && (account.RoleId != (int)Domain.Enums.Roles.Admin || account.RoleId != (int)Domain.Enums.Roles.Moderator))
         {
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
         }
