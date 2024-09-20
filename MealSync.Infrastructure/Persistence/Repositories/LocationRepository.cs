@@ -8,4 +8,9 @@ public class LocationRepository : BaseRepository<Location>, ILocationRepository
     public LocationRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
+
+    public Location GetById(long id)
+    {
+        return DbSet.Single(l => l.Id == id);
+    }
 }

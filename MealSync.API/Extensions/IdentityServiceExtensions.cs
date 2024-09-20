@@ -84,7 +84,8 @@ public static class IdentityServiceExtensions
             Key = config["TOKEN_KEY"],
             Audience = config["TOKEN_AUDIENCE"],
             Issuer = config["TOKEN_ISSUER"],
-            TokenExpire = int.Parse(config["TOKEN_TIME_EXPIRED_IN_HOURS"])
+            TokenExpire = int.Parse(config["TOKEN_TIME_EXPIRED_IN_HOURS"]),
+            RefreshTokenExpire = int.Parse(config["REFRESH_TOKEN_TIME_EXPIRED_IN_HOURS"])
         };
 
         // Validate the JwtSettings instance using DataAnnotations

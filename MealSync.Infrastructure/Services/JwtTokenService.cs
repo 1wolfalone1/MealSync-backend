@@ -51,4 +51,9 @@ public class JwtTokenService : IJwtTokenService, IBaseService
     {
         return GenerateJwtToken(account, _jwtSetting.TokenExpire);
     }
+
+    public string GenerateJwtRefreshToken(Account account)
+    {
+        return GenerateJwtToken(account, _jwtSetting.RefreshTokenExpire);
+    }
 }

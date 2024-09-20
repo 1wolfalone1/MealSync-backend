@@ -1,18 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MealSync.Application.UseCases.Accounts.Commands;
-using MealSync.Application.UseCases.Accounts.Models;
+﻿using MealSync.API.Shared;
+using Microsoft.AspNetCore.Mvc;
+using MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 
 namespace MealSync.API.Controllers;
 
-[Route("/api/v1/")]
+[Route(Endpoints.BASE)]
 public class AccountController : BaseApiController
 {
-    [HttpPost("customer/login")]
-    public async  Task<IActionResult> Login(AccountLoginRequest loginRequest)
+    [HttpPost(Endpoints.LOGIN_USERNAME_PASS)]
+    public async Task<IActionResult> LoginUsernamePass(LoginCommand request)
     {
-        return this.HandleResult(await this.Mediator.Send(new CustomerLoginCommand
-        {
-            AccountLogin = loginRequest
-        }));
+        return HandleResult(await Mediator.Send(request));
     }
 }

@@ -2,15 +2,13 @@
 
 public class AccountResponse
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
 
-    public string FirstName { get; set; }
+    public string Email { get; set; } = null!;
 
-    public string LastName { get; set; }
+    public string? FullName { get; set; }
 
-    public string RoleName { get; set; }
+    public string? AvatarUrl { get; set; }
 
-    public string Email { get; set; }
-
-    public string AvatarUrl { get; set; }
+    public string RoleName { get; set; } = null!;
 }
