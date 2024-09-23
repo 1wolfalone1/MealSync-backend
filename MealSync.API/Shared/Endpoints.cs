@@ -3,5 +3,5 @@ namespace MealSync.API.Shared;
 public static class Endpoints
 {
     public const string BASE = "/api/v1";
-    public const string LOGIN_USERNAME_PASS = "login";
+    public const string LOGIN_USERNAME_PASS = "auth/login";
 }
