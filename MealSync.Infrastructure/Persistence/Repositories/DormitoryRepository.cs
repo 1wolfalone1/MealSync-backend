@@ -17,6 +17,6 @@ public class DormitoryRepository : BaseRepository<Dormitory>, IDormitoryReposito
 
     public bool CheckExistedById(long id)
     {
-        return DbSet.All(d => d.Id == id);
+        return DbSet.Any(d => d.Id == id);
     }
 }
