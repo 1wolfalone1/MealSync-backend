@@ -10,11 +10,19 @@ public class BuildingRepository : BaseRepository<Building>, IBuildingRepository
     {
     }
 
-    public Building GetBuildingById(long id)
+    public Building GetById(long id)
     {
         return DbSet.Include(b => b.Dormitory)
             .ThenInclude(d => d.Location)
             .Include(b => b.Location)
             .Single(b => b.Id == id);
+    }
+
+    public List<Building> GetByDormitoryIdAndName(long dormitoryId, string name)
+    {
+        return DbSet.Include(b => b.Dormitory)
+            .ThenInclude(d => d.Location)
+            .Include(b => b.Location)
+            .Where(b => b.DomitoryId == dormitoryId && b.Name.Contains(name)).ToList();
     }
 }

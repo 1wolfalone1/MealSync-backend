@@ -4,5 +4,7 @@ namespace MealSync.Application.Common.Repositories;
 
 public interface IBuildingRepository : IBaseRepository<Building>
 {
-    Building GetBuildingById(long id);
+    Building GetById(long id);
+
+    List<Building> GetByDormitoryIdAndName(long dormitoryId, string name);
 }
