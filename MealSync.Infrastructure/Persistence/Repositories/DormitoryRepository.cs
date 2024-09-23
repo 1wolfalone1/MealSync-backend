@@ -1,5 +1,6 @@
 using MealSync.Application.Common.Repositories;
 using MealSync.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
 
@@ -7,5 +8,10 @@ public class DormitoryRepository : BaseRepository<Dormitory>, IDormitoryReposito
 {
     public DormitoryRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
+    }
+
+    public List<Dormitory> GetAll()
+    {
+        return DbSet.Include(d => d.Location).ToList();
     }
 }
