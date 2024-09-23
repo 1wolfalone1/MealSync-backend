@@ -15,4 +15,7 @@ public enum MessageCode
 
     [Description("E-Account-InvalidRole")]
     E_ACCOUNT_INVALID_ROLE,
+
+    [Description("E-Dormitory-NotFound")]
+    E_DORMITORY_NOT_FOUND,
 }
