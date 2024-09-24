@@ -10,57 +10,63 @@ public class UnitOfWork : IUnitOfWork
     private const string ErrorNotOpenTransaction = "You not open transaction yet!";
     private const string ErrorAlreadyOpenTransaction = "Transaction already open";
     private bool isTransaction;
-    private MealSyncContext context;
-    private readonly CustomSaveChangesInterceptor _customSaveChangesInterceptor;
+    private readonly MealSyncContext context;
 
-    public UnitOfWork(CustomSaveChangesInterceptor customSaveChangesInterceptor)
+    public UnitOfWork(MealSyncContext context)
     {
-        this.context = new MealSyncContext(customSaveChangesInterceptor);
+        this.context = context;
     }
 
-    public bool IsTransaction
-    {
-        get
-        {
-            return this.isTransaction;
-        }
-    }
+    public bool IsTransaction => isTransaction;
 
-    internal MealSyncContext Context { get => this.context; }
+    internal MealSyncContext Context => context;
 
     public async Task BeginTransactionAsync()
     {
-        if (this.isTransaction)
+        if (isTransaction)
         {
             throw new Exception(ErrorAlreadyOpenTransaction);
         }
 
         isTransaction = true;
+        await context.Database.BeginTransactionAsync();
     }
 
     public async Task CommitTransactionAsync()
     {
-        if (!this.isTransaction)
+        if (!isTransaction)
         {
             throw new Exception(ErrorNotOpenTransaction);
         }
 
-        await this.context.SaveChangesAsync().ConfigureAwait(false);
-        this.isTransaction = false;
+        await context.SaveChangesAsync().ConfigureAwait(false);
+        await context.Database.CommitTransactionAsync();
+        isTransaction = false;
     }
 
     public void RollbackTransaction()
     {
-        if (!this.isTransaction)
+        if (!isTransaction)
         {
             throw new Exception(ErrorNotOpenTransaction);
         }
 
-        this.isTransaction = false;
+        context.Database.RollbackTransaction();
+        isTransaction = false;
 
-        foreach (var entry in this.context.ChangeTracker.Entries())
+        foreach (var entry in context.ChangeTracker.Entries())
         {
             entry.State = EntityState.Detached;
         }
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        if (!isTransaction)
+        {
+            throw new InvalidOperationException(ErrorNotOpenTransaction);
+        }
+
+        await context.SaveChangesAsync().ConfigureAwait(false);
     }
 }

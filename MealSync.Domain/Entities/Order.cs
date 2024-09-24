@@ -61,6 +61,9 @@ public class Order : BaseEntity
 
     public int EndTime { get; set; }
 
+    [Column(TypeName = "text")]
+    public string? QrScanToDeliveried { get; set; }
+
     public string? DeliverySuccessImageUrl { get; set; }
 
     public bool IsRefund { get; set; } = false;

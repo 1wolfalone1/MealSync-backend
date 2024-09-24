@@ -37,6 +37,8 @@
     <Folder Include="UseCases\Buildings\Commands\" />
     <Folder Include="UseCases\Dormitories\Commands\" />
     <Folder Include="UseCases\Roles\Queries\" />
+    <Folder Include="UseCases\ShopOwners\Models\" />
+    <Folder Include="UseCases\ShopOwners\Queries\" />
   </ItemGroup>
 
 </Project>

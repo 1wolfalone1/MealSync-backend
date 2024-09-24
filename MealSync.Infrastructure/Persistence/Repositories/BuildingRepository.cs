@@ -23,6 +23,6 @@ public class BuildingRepository : BaseRepository<Building>, IBuildingRepository
         return DbSet.Include(b => b.Dormitory)
             .ThenInclude(d => d.Location)
             .Include(b => b.Location)
-            .Where(b => b.DomitoryId == dormitoryId && b.Name.Contains(name)).ToList();
+            .Where(b => b.DormitoryId == dormitoryId && b.Name.Contains(name)).ToList();
     }
 }

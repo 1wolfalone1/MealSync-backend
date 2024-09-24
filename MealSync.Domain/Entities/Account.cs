@@ -42,7 +42,7 @@ public class Account : BaseEntity
 
     public long RoleId { get; set; }
 
-    public string RefreshToken { get; set; }
+    public string? RefreshToken { get; set; }
 
     public virtual Role Role { get; set; }
 

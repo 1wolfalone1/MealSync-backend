@@ -1,6 +1,7 @@
 ﻿using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
+using MealSync.Application.UseCases.Accounts.Commands.ShopRegister;
 using MealSync.Application.UseCases.Accounts.Commands.SignupCustomer;
 
 namespace MealSync.API.Controllers;
@@ -18,5 +19,11 @@ public class AccountController : BaseApiController
     public async Task<IActionResult> RegisterCustomer(SignupCustomerCommand request)
     {
         return HandleResult(await Mediator.Send(request));
+    }
+
+    [HttpPost(Endpoints.SHOP_REGISTER)]
+    public async Task<IActionResult> ShopRegister(ShopRegisterCommand command)
+    {
+        return HandleResult(await Mediator.Send(command));
     }
 }
