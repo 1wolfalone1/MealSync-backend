@@ -25,15 +25,15 @@ public class EmailService : IEmailService, IBaseService
     public bool SendVerificationCodeRegister(string email, string code)
     {
         return SendEmail(email,
-            _systemResourceRepository.GetByResourceCode(MessageCode.I_EMAIL_SUBJECT_REGISTER_VERIFICATION.GetDescription(), code),
-            _systemResourceRepository.GetByResourceCode(MessageCode.I_EMAIL_REGISTER_VERIFICATION.GetDescription(), code));
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_REGISTER_VERIFICATION.GetDescription(), code),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_REGISTER_VERIFICATION.GetDescription(), code));
     }
 
     public bool SendVerificationCodeForgotPassword(string email, string code)
     {
         return SendEmail(email,
-            _systemResourceRepository.GetByResourceCode(MessageCode.I_EMAIL_SUBJECT_FORGOT_PASSWORD_VERIFICATION.GetDescription(), code),
-            _systemResourceRepository.GetByResourceCode(MessageCode.I_EMAIL_FORGOT_PASSWORD_VERIFICATION.GetDescription(), code));
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_FORGOT_PASSWORD_VERIFICATION.GetDescription(), code),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_FORGOT_PASSWORD_VERIFICATION.GetDescription(), code));
     }
 
     private bool SendEmail(string toEmail, string subject, string body)

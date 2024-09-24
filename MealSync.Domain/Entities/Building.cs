@@ -10,7 +10,7 @@ public class Building : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long DomitoryId { get; set; }
+    public long DormitoryId { get; set; }
 
     public long LocationId { get; set; }
 

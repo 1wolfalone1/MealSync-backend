@@ -4,6 +4,7 @@ namespace MealSync.Application.Common.Enums;
 
 public enum MessageCode
 {
+    // Account
     [Description("E-Account-InvalidUserNamePassword")]
     E_ACCOUNT_INVALID_USERNAME_PASSWORD,
 
@@ -27,19 +28,4 @@ public enum MessageCode
 
     [Description("I-Account-RegisterSuccessfully")]
     I_ACCOUNT_REGISTER_SUCCESSFULLY,
-
-    [Description("I-Email-SubjectRegisterVerification")]
-    I_EMAIL_SUBJECT_REGISTER_VERIFICATION,
-
-    [Description("I-Email-RegisterVerification")]
-    I_EMAIL_REGISTER_VERIFICATION,
-
-    [Description("I-Email-ForgotPasswordVerification")]
-    I_EMAIL_FORGOT_PASSWORD_VERIFICATION,
-
-    [Description("I-Email-SubjectForgotPasswordVerification")]
-    I_EMAIL_SUBJECT_FORGOT_PASSWORD_VERIFICATION,
-
-    [Description("I-Account-Avatar")]
-    I_ACCOUNT_AVATAR,
 }

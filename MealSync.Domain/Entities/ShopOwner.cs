@@ -39,7 +39,7 @@ public class ShopOwner : BaseEntity
 
     public int TotalRating { get; set; }
 
-    public ShopStatus Status { get; set; } = ShopStatus.UnActive;
+    public ShopStatus Status { get; set; } = ShopStatus.UnApprove;
 
     public bool IsAcceptingOrderNextDay { get; set; }
 
@@ -52,6 +52,8 @@ public class ShopOwner : BaseEntity
     public int MinOrderHoursInAdvance { get; set; }
 
     public int AverageOrderHandleInFrame { get; set; }
+
+    public int AverageTotalOrderHandleInDay { get; set; }
 
     public virtual Account Account { get; set; }
 

@@ -8,11 +8,6 @@ public partial class MealSyncContext : DbContext
 {
     private readonly CustomSaveChangesInterceptor _customSaveChangesInterceptor;
 
-    public MealSyncContext(CustomSaveChangesInterceptor customSaveChangesInterceptor)
-    {
-        _customSaveChangesInterceptor = customSaveChangesInterceptor;
-    }
-
     public MealSyncContext(DbContextOptions<MealSyncContext> options, CustomSaveChangesInterceptor customSaveChangesInterceptor)
         : base(options)
     {
@@ -100,9 +95,7 @@ public partial class MealSyncContext : DbContext
     public virtual DbSet<Favourite> Favourites { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.AddInterceptors(_customSaveChangesInterceptor)
-            .UseMySql(Environment.GetEnvironmentVariable("DATABASE_URL"), ServerVersion.Parse("8.0.33-mysql"))
-            .UseSnakeCaseNamingConvention();
+        => optionsBuilder.AddInterceptors(_customSaveChangesInterceptor);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -123,7 +116,7 @@ public partial class MealSyncContext : DbContext
         modelBuilder.Entity<Building>()
             .HasOne(b => b.Dormitory)
             .WithMany(d => d.Buildings)
-            .HasForeignKey(b => b.DomitoryId)
+            .HasForeignKey(b => b.DormitoryId)
             .HasConstraintName("FK_Building_Dormitory");
 
         modelBuilder.Entity<Building>()

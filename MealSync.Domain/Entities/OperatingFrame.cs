@@ -16,8 +16,6 @@ public class OperatingFrame : BaseEntity
 
     public int EndTime { get; set; }
 
-    public int AbleTotalOrderHandle { get; set; }
-
     public bool IsActive { get; set; }
 
     public virtual OperatingDay OperatingDay { get; set; }
