@@ -1,4 +1,5 @@
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
@@ -21,7 +22,6 @@ public class SignupCustomerHandler : ICommandHandler<SignupCustomerCommand, Resu
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly ICacheService _cacheService;
-    private const int TIME_TO_LIVE = 120;
 
     public SignupCustomerHandler(
         ILogger<SignupCustomerHandler> logger, IJwtTokenService jwtTokenService,
@@ -131,7 +131,7 @@ public class SignupCustomerHandler : ICommandHandler<SignupCustomerCommand, Resu
         var code = new Random().Next(1000, 10000).ToString();
         _cacheService.SetCacheResponseAsync(
             GenerateCacheKey(VerificationCodeTypes.Register, email),
-            code, TimeSpan.FromSeconds(TIME_TO_LIVE));
+            code, TimeSpan.FromSeconds(RedisConstant.TIME_VERIFY_CODE_LIVE));
 
         var isSendMail = _emailService.SendVerificationCodeRegister(email, code);
         if (!isSendMail)
