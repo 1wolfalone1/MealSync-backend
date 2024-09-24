@@ -4,4 +4,5 @@ public enum SystemResourceTypes
 {
     Message = 1,
     OrderReason = 2,
+    Resource = 3,
 }

@@ -4,12 +4,14 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
+using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Accounts.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
+using Microsoft.Extensions.Logging;
 
 namespace MealSync.Application.UseCases.Accounts.Commands.ShopRegister;
 
@@ -22,10 +24,14 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
     private readonly IShopDormitoryRepository _shopDormitoryRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IOperatingDayRepository _operatingDayRepository;
+    private readonly ILogger<ShopRegisterHandler> _logger;
+    private readonly IEmailService _emailService;
+    private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
 
     public ShopRegisterHandler(IUnitOfWork unitOfWork, IAccountRepository accountRepository, IShopOwnerRepository shopOwnerRepository, IMapper mapper, IDormitoryRepository dormitoryRepository,
-        IShopDormitoryRepository shopDormitoryRepository, ISystemResourceRepository systemResourceRepository, IOperatingDayRepository operatingDayRepository)
+        IShopDormitoryRepository shopDormitoryRepository, ISystemResourceRepository systemResourceRepository, IOperatingDayRepository operatingDayRepository, ILogger<ShopRegisterHandler> logger, IEmailService emailService,
+        ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _accountRepository = accountRepository;
@@ -35,46 +41,83 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
         _shopDormitoryRepository = shopDormitoryRepository;
         _systemResourceRepository = systemResourceRepository;
         _operatingDayRepository = operatingDayRepository;
+        _logger = logger;
+        _emailService = emailService;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<Result>> Handle(ShopRegisterCommand request, CancellationToken cancellationToken)
     {
-        // Validate Bussiness
-        ValidateAccount(request);
+        // Validate Business
+        Validate(request);
 
-        try
+        var accountTemp = _accountRepository.GetAccountByEmail(request.Email);
+
+        // If account exist
+        if (accountTemp != default && accountTemp.Status == AccountStatus.UnVerify)
         {
-            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-            var account = await CreateAccountAsync(request);
-            var shopOwner = await CreateShopOwnerAsync(account.Id, request).ConfigureAwait(false);
-            var shopDormitories = await CreateShopOwnerDormitoryAsync(shopOwner.Id, request.DormitoryIds).ConfigureAwait(false);
-            await CreateOperatingDayAndFrameAsync(shopOwner.Id).ConfigureAwait(false);
-
-            await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+            accountTemp.PhoneNumber = request.PhoneNumber;
+            accountTemp.Password = BCrypUnitls.Hash(request.Password);
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+                _accountRepository.Update(accountTemp);
+                SendAndSaveVerificationCode(request.Email);
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+                return Result.Create(new RegisterResponse()
+                {
+                    Email = request.Email,
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ACCOUNT_REGISTER_SUCCESSFULLY.GetDescription()) ?? string.Empty,
+                });
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.RollbackTransaction();
+                _logger.LogError(e, e.Message);
+                throw;
+            }
         }
-        catch (Exception e)
+        else
         {
-            _unitOfWork.RollbackTransaction();
-            Console.WriteLine(e);
-            throw;
-        }
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+                var account = await CreateAccountAsync(request);
+                var shopOwner = await CreateShopOwnerAsync(account.Id, request).ConfigureAwait(false);
+                var shopDormitories = await CreateShopOwnerDormitoryAsync(shopOwner.Id, request.DormitoryIds).ConfigureAwait(false);
+                await CreateOperatingDayAndFrameAsync(shopOwner.Id).ConfigureAwait(false);
+                SendAndSaveVerificationCode(request.Email);
 
-        return Result.Create(new RegisterResponse()
-        {
-            Email = request.Email,
-            Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ACCOUNT_REGISTER_SUCCESSFULLY.GetDescription()) ?? string.Empty,
-        });
+                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+                return Result.Create(new RegisterResponse()
+                {
+                    Email = request.Email,
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ACCOUNT_REGISTER_SUCCESSFULLY.GetDescription()) ?? string.Empty,
+                });
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.RollbackTransaction();
+                _logger.LogError(e, e.Message);
+                throw;
+            }
+        }
     }
 
-    private void ValidateAccount(ShopRegisterCommand register)
+    private void Validate(ShopRegisterCommand register)
     {
         var account = _accountRepository.GetAccountByEmail(register.Email);
-        if (account != default)
+        if (account != default && account.Status != AccountStatus.UnVerify)
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_EMAIL_EXIST.GetDescription(), HttpStatusCode.Conflict);
+
+        if (account != default && account.PhoneNumber != register.PhoneNumber && _accountRepository.CheckExistByPhoneNumber(register.PhoneNumber))
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_PHONE_NUMBER_EXIST.GetDescription(), HttpStatusCode.Conflict);
 
         account = _accountRepository.GetAccountByPhoneNumber(register.PhoneNumber);
         if (account != default)
+        {
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_PHONE_NUMBER_EXIST.GetDescription(), HttpStatusCode.Conflict);
+        }
 
         foreach (var dormitoryId in register.DormitoryIds)
         {
@@ -156,6 +199,25 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
         };
 
         var operatingDays = operatingDay.CreateListOperatingDayForNewShop();
-        await this._operatingDayRepository.AddRangeAsync(operatingDays).ConfigureAwait(false);
+        await _operatingDayRepository.AddRangeAsync(operatingDays).ConfigureAwait(false);
+    }
+
+    private void SendAndSaveVerificationCode(string email)
+    {
+        var code = new Random().Next(1000, 10000).ToString();
+        _cacheService.SetCacheResponseAsync(
+            GenerateCacheKey(VerificationCodeTypes.Register, email),
+            code, TimeSpan.FromSeconds(RedisConstant.TIME_VERIFY_CODE_LIVE));
+
+        var isSendMail = _emailService.SendVerificationCodeRegister(email, code);
+        if (!isSendMail)
+        {
+            throw new Exception("Internal Server Error");
+        }
+    }
+
+    private string GenerateCacheKey(VerificationCodeTypes verificationCodeType, string email)
+    {
+        return verificationCodeType.GetDescription() + "-" + email;
     }
 }
