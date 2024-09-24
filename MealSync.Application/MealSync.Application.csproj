@@ -34,7 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UseCases\Accounts\Commands\SignupCustomer\" />
     <Folder Include="UseCases\Buildings\Commands\" />
     <Folder Include="UseCases\Dormitories\Commands\" />
     <Folder Include="UseCases\Roles\Queries\" />
