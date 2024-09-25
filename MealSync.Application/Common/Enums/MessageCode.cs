@@ -28,4 +28,19 @@ public enum MessageCode
 
     [Description("I-Account-RegisterSuccessfully")]
     I_ACCOUNT_REGISTER_SUCCESSFULLY,
+
+    // Category
+    [Description("E-Category-NotFound")]
+    E_CATEGORY_NOT_FOUND,
+
+    // Operating Day
+    [Description("E-OperatingDay-NotFound")]
+    E_OPERATING_DAY_NOT_FOUND,
+
+    // Operating Frame
+    [Description("E-OperatingFrame-HasOverlapping")]
+    E_OPERATING_FRAME_HAS_OVERLAPPING,
+
+    [Description("E-OperatingFrame-HasNotActiveTime")]
+    E_OPERATING_FRAME_HAS_NOT_ACTIVE_TIME,
 }
