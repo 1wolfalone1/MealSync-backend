@@ -13,6 +13,9 @@ public class ProductQuestionOption : BaseEntity
 
     public long ToppingQuestionId { get; set; }
 
+    [Column(TypeName = "text")]
+    public string Description { get; set; }
+
     public bool IsPricing { get; set; }
 
     public string? ImageUrl { get; set; }
