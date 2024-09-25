@@ -39,7 +39,7 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         {
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
         }
-        else if (request.LoginContext == LoginContextType.AppForShopOwnerOrDelivery && (account.RoleId != (int)Domain.Enums.Roles.ShopOwner || account.RoleId != (int)Domain.Enums.Roles.ShopDelivery))
+        else if (request.LoginContext == LoginContextType.AppForShopOwnerOrDelivery && account.RoleId != (int)Domain.Enums.Roles.ShopOwner && account.RoleId != (int)Domain.Enums.Roles.ShopDelivery)
         {
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
         }
@@ -47,7 +47,7 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         {
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
         }
-        else if (request.LoginContext == LoginContextType.WebForAdminOrModerator && (account.RoleId != (int)Domain.Enums.Roles.Admin || account.RoleId != (int)Domain.Enums.Roles.Moderator))
+        else if (request.LoginContext == LoginContextType.WebForAdminOrModerator && account.RoleId != (int)Domain.Enums.Roles.Admin && account.RoleId != (int)Domain.Enums.Roles.Moderator)
         {
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
         }
