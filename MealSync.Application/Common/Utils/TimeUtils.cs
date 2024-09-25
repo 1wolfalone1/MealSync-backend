@@ -1,9 +1,9 @@
+using MealSync.Application.Common.Constants;
+
 namespace MealSync.Application.Common.Utils;
 
 public static class TimeUtils
 {
-    private const int TIME_FRAME_IN_MINUTES = 30;
-
     public static bool IsValidTime(int time)
     {
         int hours = time / 100; // Extract hours (first two digits)
@@ -36,7 +36,7 @@ public static class TimeUtils
         int endMinutes = ConvertToMinutes(endTime);
 
         // Check if EndTime is greater than StartTime and the difference is a multiple of TIME_FRAME_IN_MINUTES minutes
-        return endMinutes > startMinutes && (endMinutes - startMinutes) % TIME_FRAME_IN_MINUTES == 0;
+        return endMinutes > startMinutes && (endMinutes - startMinutes) % FrameConstant.TIME_FRAME_IN_MINUTES == 0;
     }
 
     public static List<(int SegmentStart, int SegmentEnd)> ConvertToTimeSegment(int startTime, int endTime)
@@ -48,7 +48,7 @@ public static class TimeUtils
 
         while (currentMinutes < endMinutes)
         {
-            int nextSegmentEndMinutes = Math.Min(currentMinutes + TIME_FRAME_IN_MINUTES, endMinutes);
+            int nextSegmentEndMinutes = Math.Min(currentMinutes + FrameConstant.TIME_FRAME_IN_MINUTES, endMinutes);
             int segmentStart = ConvertFromMinutes(currentMinutes);
             int segmentEnd = ConvertFromMinutes(nextSegmentEndMinutes);
             timeSegments.Add((segmentStart, segmentEnd));
