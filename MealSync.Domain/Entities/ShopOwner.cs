@@ -77,4 +77,6 @@ public class ShopOwner : BaseEntity
 
     public virtual ICollection<DeliveryOrderCombination> DeliveryOrderCombinations { get; set; } =
         new List<DeliveryOrderCombination>();
+
+    public virtual ICollection<OperatingDay> OperatingDays { get; set; } = new List<OperatingDay>();
 }

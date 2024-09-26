@@ -445,5 +445,11 @@ public partial class MealSyncContext : DbContext
             .WithMany(m => m.ModeratorDormitories)
             .HasForeignKey(mal => mal.DormitoryId)
             .HasConstraintName("FK_ModeratorDormitory_Dormitory");
+
+        modelBuilder.Entity<OperatingDay>()
+            .HasOne(od => od.ShopOwner)
+            .WithMany(so => so.OperatingDays)
+            .HasForeignKey(od => od.ShopOwnerId)
+            .HasConstraintName("FK_OperatingDay_ShopOwner");
     }
 }

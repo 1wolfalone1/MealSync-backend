@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MealSync.Application.UseCases.Dormitories.Models;
 using MealSync.Application.UseCases.Buildings.Models;
+using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Application.UseCases.Products.Models;
 using MealSync.Domain.Entities;
 
@@ -12,6 +13,23 @@ public class MappingProfile : Profile
     {
         CreateMap<Dormitory, DormitoryResponse>();
         CreateMap<Building, BuildingResponse>();
+        CreateMap<OperatingFrame, OperatingFrameResponse>();
+        CreateMap<OperatingDay, OperatingDayResponse>();
+        CreateMap<Location, LocationResponse>();
+        CreateMap<ShopDormitory, ShopDormitoryResponse>()
+            .ForMember(dest => dest.Name,
+                opt => opt.MapFrom(
+                    src => src.Dormitory != default ? src.Dormitory.Name : string.Empty));
+        CreateMap<ShopOwner, ShopConfigurationResponse>()
+            .ForMember(dest => dest.OperatingDays,
+                opt => opt.MapFrom(
+                    src => src.OperatingDays))
+            .ForMember(dest => dest.Location,
+                opt => opt.MapFrom(
+                    src => src.Location))
+            .ForMember(dest => dest.ShopDormitoryies,
+                opt => opt.MapFrom(
+                    src => src.ShopDormitories));
         CreateMap<Product, ProductDetailResponse>()
             .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.ProductCategories))
             .ForMember(dest => dest.OperatingHours, opt => opt.MapFrom(src => src.ProductOperatingHours))
