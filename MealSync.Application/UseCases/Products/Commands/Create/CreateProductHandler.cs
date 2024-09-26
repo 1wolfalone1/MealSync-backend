@@ -1,4 +1,3 @@
-using System.Net;
 using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
@@ -164,7 +163,7 @@ public class CreateProductHandler : ICommandHandler<CreateProductCommand, Result
             {
                 throw new InvalidBusinessException(
                     MessageCode.E_OPERATING_DAY_NOT_FOUND.GetDescription(),
-                    [operatingDayId]
+                    new object [] {operatingDayId}
                 );
             }
             else
@@ -175,7 +174,7 @@ public class CreateProductHandler : ICommandHandler<CreateProductCommand, Result
                 {
                     throw new InvalidBusinessException(
                         MessageCode.E_OPERATING_FRAME_HAS_OVERLAPPING.GetDescription(),
-                        [operatingDayId]
+                        new object [] {operatingDayId}
                     );
                 }
                 timeSegmentList.ForEach(timeSegment =>
@@ -191,7 +190,7 @@ public class CreateProductHandler : ICommandHandler<CreateProductCommand, Result
                     {
                         throw new InvalidBusinessException(
                             MessageCode.E_OPERATING_FRAME_HAS_NOT_ACTIVE_TIME.GetDescription(),
-                            [operatingDayId]
+                            new object [] {operatingDayId}
                         );
                     }
                 });
