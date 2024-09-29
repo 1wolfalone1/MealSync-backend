@@ -24,8 +24,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Build, tag, and push docker image to Amazon ECR
+      - name: Build, tag, and push docker image to Docker hub
         run: |
+          echo "${{ secrets.DOCKER_HUB_SECRETS }}" | docker login -u 1wolfalone1 --password-stdin
           docker build -t 1wolfalone1/mealsync-api:latest .
           docker push 1wolfalone1/mealsync-api:latest
 
