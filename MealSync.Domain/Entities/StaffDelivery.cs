@@ -10,16 +10,16 @@ public class StaffDelivery : BaseEntity
     [Key]
     public long Id { get; set; }
 
-    public long ShopOwnerId { get; set; }
+    public long ShopId { get; set; }
 
     public StaffDeliveryStatus Status { get; set; }
 
     public virtual Account Account { get; set; }
 
-    public virtual ShopOwner ShopOwner { get; set; }
+    public virtual Shop Shop { get; set; }
 
-    public virtual ICollection<DeliveryOrderCombination> DeliveryOrderCombinations { get; set; } =
-        new List<DeliveryOrderCombination>();
+    public virtual ICollection<DeliveryPackage> DeliveryPackages { get; set; } =
+        new List<DeliveryPackage>();
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 }

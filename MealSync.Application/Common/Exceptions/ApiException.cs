@@ -1,5 +1,4 @@
-﻿
-using MealSync.Application.Common.Enums;
+﻿using MealSync.Application.Common.Enums;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Application.Common.Exceptions;

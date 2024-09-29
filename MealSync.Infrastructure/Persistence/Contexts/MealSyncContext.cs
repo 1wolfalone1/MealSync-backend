@@ -26,7 +26,7 @@ public partial class MealSyncContext : DbContext
 
     public virtual DbSet<CustomerBuilding> CustomerBuildings { get; set; }
 
-    public virtual DbSet<ShopOwner> ShopOwners { get; set; }
+    public virtual DbSet<Shop> Shops { get; set; }
 
     public virtual DbSet<Moderator> Moderators { get; set; }
 
@@ -46,37 +46,35 @@ public partial class MealSyncContext : DbContext
 
     public virtual DbSet<ShopDormitory> ShopDormitories { get; set; }
 
-    public virtual DbSet<OperatingDay> OperatingDays { get; set; }
-
-    public virtual DbSet<OperatingFrame> OperatingFrames { get; set; }
+    public virtual DbSet<OperatingSlot> OperatingSlots { get; set; }
 
     public virtual DbSet<StaffDelivery> StaffDeliveries { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
 
-    public virtual DbSet<ProductOperatingHour> ProductOperatingHours { get; set; }
+    public virtual DbSet<ProductVariant> ProductVariants { get; set; }
 
-    public virtual DbSet<ProductQuestion> ProductQuestions { get; set; }
+    public virtual DbSet<ProductVariantOption> ProductVariantOptions { get; set; }
 
-    public virtual DbSet<ProductQuestionOption> ProductQuestionOptions { get; set; }
+    public virtual DbSet<ProductOperatingSlot> ProductOperatingSlots { get; set; }
 
     public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+    public virtual DbSet<ShopCategory> ShopCategories { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
 
-    public virtual DbSet<OrderDetailOption> OrderDetailOptions { get; set; }
+    public virtual DbSet<OrderDetailProductVariant> OrderDetailProductVariants { get; set; }
 
     public virtual DbSet<Promotion> Promotions { get; set; }
 
-    public virtual DbSet<OrderTransaction> OrderTransactions { get; set; }
+    public virtual DbSet<Payment> Payments { get; set; }
 
-    public virtual DbSet<OrderTransactionHistory> OrderTransactionHistories { get; set; }
+    public virtual DbSet<PaymentHistory> PaymentHistories { get; set; }
 
-    public virtual DbSet<DeliveryOrderCombination> DeliveryOrderCombinations { get; set; }
+    public virtual DbSet<DeliveryPackage> DeliveryPackages { get; set; }
 
     public virtual DbSet<Review> Reviews { get; set; }
 
@@ -95,7 +93,9 @@ public partial class MealSyncContext : DbContext
     public virtual DbSet<Favourite> Favourites { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.AddInterceptors(_customSaveChangesInterceptor);
+    {
+        optionsBuilder.AddInterceptors(_customSaveChangesInterceptor);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -140,23 +140,29 @@ public partial class MealSyncContext : DbContext
             .HasForeignKey(bb => bb.CustomerId)
             .HasConstraintName("FK_CustomerBuilding_Customer");
 
-        modelBuilder.Entity<ShopOwner>()
+        modelBuilder.Entity<Shop>()
             .HasOne(so => so.Account)
-            .WithOne(a => a.ShopOwner)
-            .HasForeignKey<ShopOwner>(so => so.Id)
-            .HasConstraintName("FK_ShopOwner_Account");
+            .WithOne(a => a.Shop)
+            .HasForeignKey<Shop>(so => so.Id)
+            .HasConstraintName("FK_Shop_Account");
 
-        modelBuilder.Entity<ShopOwner>()
+        modelBuilder.Entity<Shop>()
             .HasOne(so => so.Location)
-            .WithOne(l => l.ShopOwner)
-            .HasForeignKey<ShopOwner>(so => so.LocationId)
-            .HasConstraintName("FK_ShopOwner_Location");
+            .WithOne(l => l.Shop)
+            .HasForeignKey<Shop>(so => so.LocationId)
+            .HasConstraintName("FK_Shop_Location");
 
-        modelBuilder.Entity<ShopOwner>()
+        modelBuilder.Entity<Shop>()
             .HasOne(so => so.Wallet)
-            .WithOne(w => w.ShopOwner)
-            .HasForeignKey<ShopOwner>(b => b.WalletId)
-            .HasConstraintName("FK_ShopOwner_Wallet");
+            .WithOne(w => w.Shop)
+            .HasForeignKey<Shop>(b => b.WalletId)
+            .HasConstraintName("FK_Shop_Wallet");
+
+        modelBuilder.Entity<ShopCategory>()
+            .HasOne(sc => sc.Shop)
+            .WithMany(w => w.ShopCategories)
+            .HasForeignKey(sc => sc.ShopId)
+            .HasConstraintName("FK_ShopCategory_Shop");
 
         modelBuilder.Entity<Dormitory>()
             .HasOne(d => d.Location)
@@ -176,6 +182,18 @@ public partial class MealSyncContext : DbContext
             .HasForeignKey(wt => wt.WalletId)
             .HasConstraintName("FK_WalletTransaction_Wallet");
 
+        modelBuilder.Entity<WalletTransaction>()
+            .HasOne(wt => wt.WithdrawalRequest)
+            .WithOne(wr => wr.WalletTransaction)
+            .HasForeignKey<WalletTransaction>(wt => wt.WithdrawalRequestId)
+            .HasConstraintName("FK_WalletTransaction_WithdrawalRequest");
+
+        modelBuilder.Entity<WalletTransaction>()
+            .HasOne(wt => wt.Payment)
+            .WithOne(p => p.WalletTransaction)
+            .HasForeignKey<WalletTransaction>(wt => wt.PaymentId)
+            .HasConstraintName("FK_WalletTransaction_Payment");
+
         modelBuilder.Entity<WithdrawalRequest>()
             .HasOne(wr => wr.Wallet)
             .WithMany(w => w.WithdrawalRequests)
@@ -183,7 +201,7 @@ public partial class MealSyncContext : DbContext
             .HasConstraintName("FK_WithdrawalRequest_Wallet");
 
         modelBuilder.Entity<Favourite>()
-            .HasKey(f => new { f.CustomerId, f.ShopOwnerId });
+            .HasKey(f => new { f.CustomerId, f.ShopId });
 
         modelBuilder.Entity<Favourite>()
             .HasOne(f => f.Customer)
@@ -192,10 +210,10 @@ public partial class MealSyncContext : DbContext
             .HasConstraintName("FK_Favourite_Customer");
 
         modelBuilder.Entity<Favourite>()
-            .HasOne(f => f.ShopOwner)
+            .HasOne(f => f.Shop)
             .WithMany(b => b.Favourites)
-            .HasForeignKey(f => f.ShopOwnerId)
-            .HasConstraintName("FK_Favourite_ShopOwner");
+            .HasForeignKey(f => f.ShopId)
+            .HasConstraintName("FK_Favourite_Shop");
 
         modelBuilder.Entity<Notification>()
             .HasOne(n => n.Account)
@@ -219,13 +237,13 @@ public partial class MealSyncContext : DbContext
             .HasConstraintName("FK_AccountPermission_Permission");
 
         modelBuilder.Entity<ShopDormitory>()
-            .HasKey(sd => new { sd.ShopOwnerId, sd.DormitoryId });
+            .HasKey(sd => new { sd.ShopId, sd.DormitoryId });
 
         modelBuilder.Entity<ShopDormitory>()
-            .HasOne(sd => sd.ShopOwner)
+            .HasOne(sd => sd.Shop)
             .WithMany(s => s.ShopDormitories)
-            .HasForeignKey(sd => sd.ShopOwnerId)
-            .HasConstraintName("FK_ShopDormitory_ShopOwner");
+            .HasForeignKey(sd => sd.ShopId)
+            .HasConstraintName("FK_ShopDormitory_Shop");
 
         modelBuilder.Entity<ShopDormitory>()
             .HasOne(sd => sd.Dormitory)
@@ -233,17 +251,11 @@ public partial class MealSyncContext : DbContext
             .HasForeignKey(sd => sd.DormitoryId)
             .HasConstraintName("FK_ShopDormitory_Dormitory");
 
-        modelBuilder.Entity<OperatingFrame>()
-            .HasOne(of => of.OperatingDay)
-            .WithMany(od => od.OperatingFrames)
-            .HasForeignKey(of => of.OperatingDayId)
-            .HasConstraintName("FK_OperatingFrame_OperatingDay");
-
         modelBuilder.Entity<StaffDelivery>()
-            .HasOne(sd => sd.ShopOwner)
+            .HasOne(sd => sd.Shop)
             .WithMany(so => so.StaffDeliveries)
-            .HasForeignKey(sd => sd.ShopOwnerId)
-            .HasConstraintName("FK_StaffDelivery_ShopOwner");
+            .HasForeignKey(sd => sd.ShopId)
+            .HasConstraintName("FK_StaffDelivery_Shop");
 
         modelBuilder.Entity<StaffDelivery>()
             .HasOne(sd => sd.Account)
@@ -252,49 +264,55 @@ public partial class MealSyncContext : DbContext
             .HasConstraintName("FK_StaffDelivery_Account");
 
         modelBuilder.Entity<Product>()
-            .HasOne(p => p.ShopOwner)
+            .HasOne(p => p.Category)
+            .WithMany(c => c.Products)
+            .HasForeignKey(p => p.CategoryId)
+            .HasConstraintName("FK_Product_Category");
+
+        modelBuilder.Entity<Product>()
+            .HasOne(p => p.ParentProduct)
+            .WithOne()
+            .HasForeignKey<Product>(p => p.ParentId)
+            .HasConstraintName("FK_Product_ParentProduct");
+
+        modelBuilder.Entity<Product>()
+            .HasOne(p => p.Shop)
             .WithMany(s => s.Products)
-            .HasForeignKey(p => p.ShopOwnerId)
-            .HasConstraintName("FK_Product_ShopOwner");
+            .HasForeignKey(p => p.ShopId)
+            .HasConstraintName("FK_Product_Shop");
 
-        modelBuilder.Entity<ProductOperatingHour>()
-            .HasOne(poh => poh.Product)
-            .WithMany(p => p.ProductOperatingHours)
-            .HasForeignKey(poh => poh.ProductId)
-            .HasConstraintName("FK_ProductOperatingHour_Product");
+        modelBuilder.Entity<Product>()
+            .HasOne(p => p.ShopCategory)
+            .WithMany(sc => sc.Products)
+            .HasForeignKey(p => p.ShopCategoryId)
+            .HasConstraintName("FK_Product_ShopCategory");
 
-        modelBuilder.Entity<ProductOperatingHour>()
-            .HasOne(poh => poh.OperatingDay)
-            .WithMany(p => p.ProductOperatingHours)
-            .HasForeignKey(poh => poh.OperatingDayId)
-            .HasConstraintName("FK_ProductOperatingHour_OperatingDay");
-
-        modelBuilder.Entity<ProductQuestion>()
+        modelBuilder.Entity<ProductVariant>()
             .HasOne(tq => tq.Product)
-            .WithMany(p => p.ProductQuestions)
+            .WithMany(p => p.ProductVariants)
             .HasForeignKey(tq => tq.ProductId)
-            .HasConstraintName("FK_ProductQuestion_Product");
+            .HasConstraintName("FK_ProductVariant_Product");
 
-        modelBuilder.Entity<ProductQuestionOption>()
-            .HasOne(to => to.ProductQuestion)
-            .WithMany(tq => tq.ProductQuestionOptions)
-            .HasForeignKey(to => to.ToppingQuestionId)
-            .HasConstraintName("FK_ToppingOption_ToppingQuestion");
+        modelBuilder.Entity<ProductVariantOption>()
+            .HasOne(to => to.ProductVariant)
+            .WithMany(tq => tq.ProductVariantOptions)
+            .HasForeignKey(to => to.ProductVariantId)
+            .HasConstraintName("FK_ProductVariantOption_ProductVariant");
 
-        modelBuilder.Entity<ProductCategory>()
-            .HasKey(pc => new { pc.CategoryId, pc.ProductId });
+        modelBuilder.Entity<ProductOperatingSlot>()
+            .HasKey(pc => new { pc.OperatingSlotId, pc.ProductId });
 
-        modelBuilder.Entity<ProductCategory>()
-            .HasOne(pc => pc.Product)
-            .WithMany(p => p.ProductCategories)
+        modelBuilder.Entity<ProductOperatingSlot>()
+            .HasOne(pos => pos.Product)
+            .WithMany(p => p.ProductOperatingSlots)
             .HasForeignKey(pc => pc.ProductId)
-            .HasConstraintName("FK_ProductCategory_Product");
+            .HasConstraintName("FK_ProductOperatingSlot_Product");
 
-        modelBuilder.Entity<ProductCategory>()
-            .HasOne(pc => pc.Category)
-            .WithMany(c => c.ProductCategories)
-            .HasForeignKey(pc => pc.CategoryId)
-            .HasConstraintName("FK_ProductCategory_Category");
+        modelBuilder.Entity<ProductOperatingSlot>()
+            .HasOne(pos => pos.OperatingSlot)
+            .WithMany(os => os.ProductOperatingSlots)
+            .HasForeignKey(pc => pc.OperatingSlotId)
+            .HasConstraintName("FK_ProductOperatingSlot_OperatingSlot");
 
         modelBuilder.Entity<OrderDetail>()
             .HasOne(od => od.Product)
@@ -308,20 +326,30 @@ public partial class MealSyncContext : DbContext
             .HasForeignKey(od => od.OrderId)
             .HasConstraintName("FK_OrderDetail_Order");
 
-        modelBuilder.Entity<OrderDetailOption>()
-            .HasKey(odo => new { odo.OrderDetailId, odo.ToppingOptionId });
+        modelBuilder.Entity<OrderDetail>()
+            .HasOne(od => od.ParentOrderDetail)
+            .WithOne()
+            .HasForeignKey<OrderDetail>(od => od.ParentOrderDetailId)
+            .HasConstraintName("FK_OrderDetail_ParentOrderDetail");
 
-        modelBuilder.Entity<OrderDetailOption>()
+        modelBuilder.Entity<OrderDetailProductVariant>()
+            .HasKey(odo => new
+            {
+                odo.OrderDetailId,
+                odo.PVariantOptionId,
+            });
+
+        modelBuilder.Entity<OrderDetailProductVariant>()
             .HasOne(odo => odo.OrderDetail)
-            .WithMany(od => od.OrderDetailOptions)
+            .WithMany(od => od.OrderDetailProductVariants)
             .HasForeignKey(odo => odo.OrderDetailId)
-            .HasConstraintName("FK_OrderDetailOption_OrderDetail");
+            .HasConstraintName("FK_OrderDetailProductVariant_OrderDetail");
 
-        modelBuilder.Entity<OrderDetailOption>()
-            .HasOne(odo => odo.ProductQuestionOption)
-            .WithMany(tp => tp.OrderDetailOptions)
-            .HasForeignKey(odo => odo.ToppingOptionId)
-            .HasConstraintName("FK_OrderDetailOption_ToppingOption");
+        modelBuilder.Entity<OrderDetailProductVariant>()
+            .HasOne(odo => odo.ProductVariantOption)
+            .WithMany(tp => tp.OrderDetailProductVariants)
+            .HasForeignKey(odo => odo.PVariantOptionId)
+            .HasConstraintName("FK_OrderDetailProductVariant_ProductVariantOption");
 
         modelBuilder.Entity<Promotion>()
             .HasOne(p => p.Customer)
@@ -330,10 +358,10 @@ public partial class MealSyncContext : DbContext
             .HasConstraintName("FK_Promotion_Customer");
 
         modelBuilder.Entity<Promotion>()
-            .HasOne(p => p.ShopOwner)
+            .HasOne(p => p.Shop)
             .WithMany(s => s.Promotions)
-            .HasForeignKey(p => p.ShopOwnerId)
-            .HasConstraintName("FK_Promotion_ShopOwner");
+            .HasForeignKey(p => p.ShopId)
+            .HasConstraintName("FK_Promotion_Shop");
 
         modelBuilder.Entity<Order>()
             .HasOne(o => o.Promotion)
@@ -342,10 +370,10 @@ public partial class MealSyncContext : DbContext
             .HasConstraintName("FK_Order_Promotion");
 
         modelBuilder.Entity<Order>()
-            .HasOne(o => o.ShopOwner)
+            .HasOne(o => o.Shop)
             .WithMany(so => so.Orders)
-            .HasForeignKey(o => o.ShopOwnerId)
-            .HasConstraintName("FK_Order_ShopOwner");
+            .HasForeignKey(o => o.ShopId)
+            .HasConstraintName("FK_Order_Shop");
 
         modelBuilder.Entity<Order>()
             .HasOne(o => o.Customer)
@@ -354,10 +382,10 @@ public partial class MealSyncContext : DbContext
             .HasConstraintName("FK_Order_Customer");
 
         modelBuilder.Entity<Order>()
-            .HasOne(o => o.DeliveryOrderCombination)
+            .HasOne(o => o.DeliveryPackage)
             .WithMany(doc => doc.Orders)
-            .HasForeignKey(o => o.DeliveryOrderCombinationId)
-            .HasConstraintName("FK_Order_DeliveryOrderCombination");
+            .HasForeignKey(o => o.DeliveryPackageId)
+            .HasConstraintName("FK_Order_DeliveryPackage");
 
         modelBuilder.Entity<Order>()
             .HasOne(o => o.ShopLocation)
@@ -377,17 +405,17 @@ public partial class MealSyncContext : DbContext
             .HasForeignKey(o => o.BuildingId)
             .HasConstraintName("FK_Order_Building");
 
-        modelBuilder.Entity<OrderTransaction>()
+        modelBuilder.Entity<Payment>()
             .HasOne(ot => ot.Order)
-            .WithMany(o => o.OrderTransactions)
+            .WithMany(o => o.Payments)
             .HasForeignKey(ot => ot.OrderId)
-            .HasConstraintName("FK_OrderTransaction_Order");
+            .HasConstraintName("FK_Payment_Order");
 
-        modelBuilder.Entity<DeliveryOrderCombination>()
+        modelBuilder.Entity<DeliveryPackage>()
             .HasOne(doc => doc.StaffDelivery)
-            .WithMany(sd => sd.DeliveryOrderCombinations)
+            .WithMany(sd => sd.DeliveryPackages)
             .HasForeignKey(doc => doc.StaffDeliveryId)
-            .HasConstraintName("FK_DeliveryOrderCombination_StaffDelivery");
+            .HasConstraintName("FK_DeliveryPackage_StaffDelivery");
 
         modelBuilder.Entity<Review>()
             .HasOne(r => r.Customer)
@@ -402,10 +430,10 @@ public partial class MealSyncContext : DbContext
             .HasConstraintName("FK_Review_Order");
 
         modelBuilder.Entity<Report>()
-            .HasOne(r => r.ShopOwner)
+            .HasOne(r => r.Shop)
             .WithMany(so => so.Reports)
-            .HasForeignKey(r => r.ShopOwnerId)
-            .HasConstraintName("FK_Report_ShopOwner");
+            .HasForeignKey(r => r.ShopId)
+            .HasConstraintName("FK_Report_Shop");
 
         modelBuilder.Entity<Report>()
             .HasOne(r => r.Customer)
@@ -446,10 +474,10 @@ public partial class MealSyncContext : DbContext
             .HasForeignKey(mal => mal.DormitoryId)
             .HasConstraintName("FK_ModeratorDormitory_Dormitory");
 
-        modelBuilder.Entity<OperatingDay>()
-            .HasOne(od => od.ShopOwner)
-            .WithMany(so => so.OperatingDays)
-            .HasForeignKey(od => od.ShopOwnerId)
-            .HasConstraintName("FK_OperatingDay_ShopOwner");
+        modelBuilder.Entity<OperatingSlot>()
+            .HasOne(od => od.Shop)
+            .WithMany(so => so.OperatingSlots)
+            .HasForeignKey(od => od.ShopId)
+            .HasConstraintName("FK_OperatingSlot_Shop");
     }
 }

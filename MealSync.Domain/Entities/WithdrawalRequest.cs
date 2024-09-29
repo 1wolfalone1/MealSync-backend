@@ -26,4 +26,6 @@ public class WithdrawalRequest : BaseEntity
     public string? Reason { get; set; }
 
     public virtual Wallet Wallet { get; set; }
+
+    public virtual WalletTransaction? WalletTransaction { get; set; }
 }

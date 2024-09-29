@@ -46,7 +46,7 @@ public class ProductDetailResponse
 
         public string Description { get; set; } = null!;
 
-        public QuestionStatus Status { get; set; }
+        public ProductVariantStatus Status { get; set; }
 
         public List<OptionResponse> Options { get; set; }
     }
@@ -63,7 +63,7 @@ public class ProductDetailResponse
 
         public float Price { get; set; }
 
-        public ToppingOptionStatus Status { get; set; }
+        public ProductVariantOptionStatus Status { get; set; }
 
     }
 }

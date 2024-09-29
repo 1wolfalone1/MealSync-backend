@@ -1,6 +1,7 @@
 @MealSync.API_HostAddress = http://localhost:5063
 
-GET {{MealSync.API_HostAddress}}/weatherforecast/
+GET
+{{MealSync.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###

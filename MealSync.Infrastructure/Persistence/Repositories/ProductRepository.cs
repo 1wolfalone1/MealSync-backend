@@ -12,10 +12,7 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
 
     public Product GetByIdIncludeAllInfo(long id)
     {
-        return DbSet.Include(p => p.ProductCategories)
-            .ThenInclude(pc => pc.Category)
-            .Include(p => p.ProductOperatingHours)
-            .Include(p => p.ProductQuestions)
+        return DbSet.Include(p => p.Category)
             .First(p => p.Id == id);
     }
 }

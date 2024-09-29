@@ -12,9 +12,12 @@ public class Category : BaseEntity
 
     public string Name { get; set; }
 
+    [Column(TypeName = "text")]
     public string? Description { get; set; }
 
     public string? ImageUrl { get; set; }
 
-    public virtual ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
+    public int DisplayOrder { get; set; }
+
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

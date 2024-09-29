@@ -37,7 +37,7 @@ public class FirebaseNotificationService : BaseService, IFirebaseNotificationSer
                 Title = title,
                 Body = body,
                 ImageUrl = imageUrl == string.Empty
-                    ? String.Empty
+                    ? string.Empty
                     : imageUrl,
             },
             Token = deviceToken,

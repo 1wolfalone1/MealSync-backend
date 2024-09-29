@@ -19,17 +19,18 @@ public class UpdateRoleHandler : ICommandHandler<UpdateRoleCommand, Result>
 
     public async Task<Result<Result>> Handle(UpdateRoleCommand request, CancellationToken cancellationToken)
     {
-        await this.unitOfWork.BeginTransactionAsync();
+        await unitOfWork.BeginTransactionAsync();
         try
         {
-            Role role = await this.roleRepository.GetByIdAsync(request.Role.Id);
+            var role = await roleRepository.GetByIdAsync(request.Role.Id);
             role.Name = request.Role.Name;
-            this.roleRepository.Update(role);
-            await this.unitOfWork.CommitTransactionAsync();
+            roleRepository.Update(role);
+            await unitOfWork.CommitTransactionAsync();
             return Result.Success(Unit.Value);
-        }catch
+        }
+        catch
         {
-            this.unitOfWork.RollbackTransaction();
+            unitOfWork.RollbackTransaction();
             return Result.Failure(new Error("500", "Fail"));
         }
     }

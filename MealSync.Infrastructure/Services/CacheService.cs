@@ -26,11 +26,11 @@ public class CacheService : ICacheService, IBaseService
 
         var serializerResponse = JsonConvert.SerializeObject(response, new JsonSerializerSettings()
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
         });
         await _distributedCache.SetStringAsync(key, serializerResponse, new DistributedCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = timeout
+            AbsoluteExpirationRelativeToNow = timeout,
         });
     }
 

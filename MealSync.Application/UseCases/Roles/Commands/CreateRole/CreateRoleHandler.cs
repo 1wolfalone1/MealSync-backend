@@ -22,11 +22,11 @@ public class CreateRoleHandler : ICommandHandler<CreateRoleCommand, Unit>
 
     public async Task<Result<Unit>> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
     {
-        Role role = new Role();
+        var role = new Role();
         role.Name = request.Name;
-        await this.unitOfWork.BeginTransactionAsync();
-        await this.roleRepository.AddAsync(role);
-        await this.unitOfWork.CommitTransactionAsync();
+        await unitOfWork.BeginTransactionAsync();
+        await roleRepository.AddAsync(role);
+        await unitOfWork.CommitTransactionAsync();
 
         return Result.Success(Unit.Value);
     }

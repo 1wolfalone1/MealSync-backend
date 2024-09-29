@@ -13,5 +13,5 @@ public enum Roles
     [Description("Moderator")]
     Moderator = 4,
     [Description("Admin")]
-    Admin = 5
+    Admin = 5,
 }

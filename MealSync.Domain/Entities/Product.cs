@@ -11,7 +11,13 @@ public class Product : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long ShopOwnerId { get; set; }
+    public long ShopId { get; set; }
+
+    public long CategoryId { get; set; }
+
+    public long? ParentId { get; set; }
+
+    public long? ShopCategoryId { get; set; }
 
     public string Name { get; set; }
 
@@ -25,15 +31,21 @@ public class Product : BaseEntity
 
     public ProductStatus Status { get; set; }
 
-    public bool IsSoldOut { get; set; } = false;
+    public bool IsSoldOut { get; set; }
 
-    public virtual ShopOwner ShopOwner { get; set; }
+    public bool IsTopping { get; set; }
 
-    public virtual ICollection<ProductOperatingHour> ProductOperatingHours { get; set; } = new List<ProductOperatingHour>();
+    public virtual Shop Shop { get; set; }
 
-    public virtual ICollection<ProductQuestion> ProductQuestions { get; set; } = new List<ProductQuestion>();
+    public virtual Category Category { get; set; }
 
-    public virtual ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
+    public virtual Product? ParentProduct { get; set; }
+
+    public virtual ShopCategory? ShopCategory { get; set; }
+
+    public virtual ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+    public virtual ICollection<ProductOperatingSlot> ProductOperatingSlots { get; set; } = new List<ProductOperatingSlot>();
 }
