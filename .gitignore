@@ -278,3 +278,6 @@ __pycache__/
 
 appsettings.Development.json
 firebase_credentials.json
+
+
+out
