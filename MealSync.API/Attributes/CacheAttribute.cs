@@ -32,7 +32,7 @@ public class CacheAttribute : Attribute, IAsyncActionFilter
             {
                 Content = cachedResponse,
                 ContentType = "application/json",
-                StatusCode = 200
+                StatusCode = 200,
             };
 
             // Return the cached response for the current request to the client without executing the endpoint

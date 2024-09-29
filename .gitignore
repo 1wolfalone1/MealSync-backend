@@ -277,3 +277,7 @@ __pycache__/
 # End of https://www.toptal.com/developers/gitignore/api/aspnetcore,dotenv
 
 appsettings.Development.json
+firebase_credentials.json
+
+
+out

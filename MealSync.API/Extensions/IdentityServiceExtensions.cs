@@ -5,6 +5,7 @@ using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Dapper;
 using MealSync.Application.Shared;
+using MealSync.Infrastructure.Persistence.Contexts;
 using MealSync.Infrastructure.Persistence.Interceptors;
 using MealSync.Infrastructure.Persistence.Repositories;
 using MealSync.Infrastructure.Services;
@@ -12,6 +13,7 @@ using MealSync.Infrastructure.Services.Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MealSync.Infrastructure.Settings;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 namespace MealSync.API.Extensions;
@@ -127,6 +129,11 @@ public static class IdentityServiceExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDapperService, DapperService>();
         services.AddScoped<CustomSaveChangesInterceptor>();
+        services.AddDbContext<MealSyncContext>(options =>
+        {
+            options.UseMySql(config["DATABASE_URL"], ServerVersion.Parse("8.0.33-mysql"))
+                .UseSnakeCaseNamingConvention();
+        });
 
         // Add Error Config
         var resourceRepository = services.BuildServiceProvider().GetService<ISystemResourceRepository>();

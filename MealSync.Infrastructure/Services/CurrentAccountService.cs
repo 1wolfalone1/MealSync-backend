@@ -11,13 +11,13 @@ public class CurrentAccountService : ICurrentAccountService, IBaseService
 
     public CurrentAccountService(ICurrentPrincipalService currentPrincipalService, IAccountRepository accountRepository)
     {
-        this._currentPrincipalService = currentPrincipalService;
-        this._accountRepository = accountRepository;
+        _currentPrincipalService = currentPrincipalService;
+        _accountRepository = accountRepository;
     }
 
     public Account GetCurrentAccount()
     {
-        var curerntAccountEmail = this._currentPrincipalService.CurrentPrincipal;
-        return this._accountRepository.GetAccountByEmail(curerntAccountEmail);
+        var curerntAccountEmail = _currentPrincipalService.CurrentPrincipal;
+        return _accountRepository.GetAccountByEmail(curerntAccountEmail);
     }
 }

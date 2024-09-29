@@ -16,7 +16,7 @@ public class Location : BaseEntity
 
     public double Longitude { get; set; }
 
-    public virtual ShopOwner ShopOwner { get; set; }
+    public virtual Shop Shop { get; set; }
 
     public virtual Building Building { get; set; }
 

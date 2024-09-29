@@ -27,10 +27,10 @@ public class GetAllAccountHandler : IQueryHandler<GetAllAccountQuery, Result<Lis
 
     public async Task<Result<Result<List<Account>>>> Handle(GetAllAccountQuery request, CancellationToken cancellationToken)
     {
-        var test = this.dapperService.SingleOrDefault<int>(QueryName.TestQuery, null);
-        var test1 = await this.dapperService.SingleOrDefaultAsync<int>(QueryName.TestQuery, null).ConfigureAwait(false);
+        var test = dapperService.SingleOrDefault<int>(QueryName.TestQuery, null);
+        var test1 = await dapperService.SingleOrDefaultAsync<int>(QueryName.TestQuery, null).ConfigureAwait(false);
         accountService.TestWriteLog();
         testService.TestWriteLog();
-        return Result.Success(await this.accountRepository.Get(acc => acc != null).ToListAsync<Account>());
+        return Result.Success(await accountRepository.Get(acc => acc != null).ToListAsync<Account>());
     }
 }

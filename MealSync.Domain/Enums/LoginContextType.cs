@@ -4,7 +4,7 @@ public enum LoginContextType
 {
     AppForUser = 1,
 
-    AppForShopOwnerOrDelivery = 2,
+    AppForShopOrDelivery = 2,
 
     WebForShop = 3,
 

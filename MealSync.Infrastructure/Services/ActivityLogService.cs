@@ -19,13 +19,13 @@ public class ActivityLogService : BaseService, IActivityLogService
     {
         try
         {
-            await this._unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-            await this._activityLogRepository.AddAsync(log).ConfigureAwait(false);
-            await this._unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+            await _activityLogRepository.AddAsync(log).ConfigureAwait(false);
+            await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
         }
         catch
         {
-            this._unitOfWork.RollbackTransaction();
+            _unitOfWork.RollbackTransaction();
             throw;
         }
     }

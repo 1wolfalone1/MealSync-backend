@@ -25,5 +25,5 @@ public interface IDapperService
 
 public enum QueryName
 {
-    TestQuery
+    TestQuery,
 }

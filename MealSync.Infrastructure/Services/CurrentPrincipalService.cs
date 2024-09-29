@@ -64,7 +64,7 @@ public class CurrentPrincipalService : ICurrentPrincipalService, IBaseService
             ValidateIssuerSigningKey = true,
             ValidIssuer = _jwtSetting.Issuer,
             ValidAudience = _jwtSetting.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.Key))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.Key)),
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

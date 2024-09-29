@@ -9,4 +9,8 @@ public class SystemConfig : BaseEntity
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
+
+    public int TimeFrameDuration { get; set; }
+
+    public int MaxFlagsBeforeBan { get; set; }
 }

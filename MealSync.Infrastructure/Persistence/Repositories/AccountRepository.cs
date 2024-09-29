@@ -14,5 +14,15 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
     {
         return DbSet.Include(a => a.Role).SingleOrDefault(a => a.Email == email);
     }
+
+    public Account GetAccountByPhoneNumber(string registerPhoneNumber)
+    {
+        return this.DbSet.SingleOrDefault(a => a.PhoneNumber == registerPhoneNumber);
+    }
+
+    public bool CheckExistByPhoneNumber(string phoneNumber)
+    {
+        return DbSet.Any(a => a.PhoneNumber == phoneNumber);
+    }
 }
 

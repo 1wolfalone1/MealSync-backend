@@ -1,1 +1,2 @@
-﻿select id from account;
+﻿select id
+from account;
