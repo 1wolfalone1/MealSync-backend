@@ -9,4 +9,6 @@ public interface IUnitOfWork
     Task CommitTransactionAsync();
 
     void RollbackTransaction();
+
+    Task SaveChangesAsync();
 }

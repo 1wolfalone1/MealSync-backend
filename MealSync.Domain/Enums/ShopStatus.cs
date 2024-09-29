@@ -2,8 +2,10 @@ namespace MealSync.Domain.Enums;
 
 public enum ShopStatus
 {
-    Active = 1,
-    UnActive = 2,
-    Ban = 3,
-    Delete = 4,
+    UnApprove = 1,
+    Active = 2,
+    InActive = 3,
+    Banning = 4,
+    Banned = 5,
+    Deleted = 6,
 }

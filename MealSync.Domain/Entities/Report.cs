@@ -11,7 +11,7 @@ public class Report : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long? ShopOwnerId { get; set; }
+    public long? ShopId { get; set; }
 
     public long? CustomerId { get; set; }
 
@@ -29,7 +29,7 @@ public class Report : BaseEntity
 
     public string? Reason { get; set; }
 
-    public virtual ShopOwner? ShopOwner { get; set; }
+    public virtual Shop? Shop { get; set; }
 
     public virtual Customer? Customer { get; set; }
 

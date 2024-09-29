@@ -8,7 +8,7 @@ public class LoginValidate : AbstractValidator<LoginCommand>
     {
         RuleFor(e => e.LoginContext)
             .IsInEnum()
-            .WithMessage("Giá trị hợp lệ");
+            .WithMessage("Giá trị không hợp lệ");
         RuleFor(e => e.Email)
             .NotEmpty()
             .WithMessage("Email bắt buộc nhập");

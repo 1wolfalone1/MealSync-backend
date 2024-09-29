@@ -42,13 +42,13 @@ public class Account : BaseEntity
 
     public long RoleId { get; set; }
 
-    public string RefreshToken { get; set; }
+    public string? RefreshToken { get; set; }
 
     public virtual Role Role { get; set; }
 
     public virtual Customer? Customer { get; set; }
 
-    public virtual ShopOwner? ShopOwner { get; set; }
+    public virtual Shop? Shop { get; set; }
 
     public virtual Moderator? Moderator { get; set; }
 
