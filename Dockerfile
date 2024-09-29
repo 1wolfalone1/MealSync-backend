@@ -15,3 +15,4 @@ WORKDIR /App
 COPY --from=build-env /App/out .
 
 ENTRYPOINT ["dotnet", "MealSync.API.dll"]
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
