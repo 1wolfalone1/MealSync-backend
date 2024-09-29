@@ -30,6 +30,7 @@ jobs:
           docker build -t 1wolfalone1/mealsync-api:latest .
           docker push 1wolfalone1/mealsync-api:latest
   sync-argocd:
+    needs: update_images
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
