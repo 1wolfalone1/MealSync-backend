@@ -48,7 +48,7 @@ public class Account : BaseEntity
 
     public virtual Customer? Customer { get; set; }
 
-    public virtual ShopOwner? ShopOwner { get; set; }
+    public virtual Shop? Shop { get; set; }
 
     public virtual Moderator? Moderator { get; set; }
 

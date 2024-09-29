@@ -19,28 +19,29 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAccountRepository _accountRepository;
-    private readonly IShopOwnerRepository _shopOwnerRepository;
+    private readonly IShopRepository _shopRepository;
     private readonly IDormitoryRepository _dormitoryRepository;
     private readonly IShopDormitoryRepository _shopDormitoryRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
-    private readonly IOperatingDayRepository _operatingDayRepository;
+    private readonly IOperatingSlotRepository _operatingSlotRepository;
     private readonly ILogger<ShopRegisterHandler> _logger;
     private readonly IEmailService _emailService;
     private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
 
-    public ShopRegisterHandler(IUnitOfWork unitOfWork, IAccountRepository accountRepository, IShopOwnerRepository shopOwnerRepository, IMapper mapper, IDormitoryRepository dormitoryRepository,
-        IShopDormitoryRepository shopDormitoryRepository, ISystemResourceRepository systemResourceRepository, IOperatingDayRepository operatingDayRepository, ILogger<ShopRegisterHandler> logger, IEmailService emailService,
+    public ShopRegisterHandler(IUnitOfWork unitOfWork, IAccountRepository accountRepository, IShopRepository shopRepository
+        , IMapper mapper, IDormitoryRepository dormitoryRepository,
+        IShopDormitoryRepository shopDormitoryRepository, ISystemResourceRepository systemResourceRepository, IOperatingSlotRepository operatingSlotRepository, ILogger<ShopRegisterHandler> logger, IEmailService emailService,
         ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _accountRepository = accountRepository;
-        _shopOwnerRepository = shopOwnerRepository;
+        _shopRepository = shopRepository;
         _mapper = mapper;
         _dormitoryRepository = dormitoryRepository;
         _shopDormitoryRepository = shopDormitoryRepository;
         _systemResourceRepository = systemResourceRepository;
-        _operatingDayRepository = operatingDayRepository;
+        _operatingSlotRepository = operatingSlotRepository;
         _logger = logger;
         _emailService = emailService;
         _cacheService = cacheService;
@@ -83,9 +84,9 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
             {
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
                 var account = await CreateAccountAsync(request);
-                var shopOwner = await CreateShopOwnerAsync(account.Id, request).ConfigureAwait(false);
-                var shopDormitories = await CreateShopOwnerDormitoryAsync(shopOwner.Id, request.DormitoryIds).ConfigureAwait(false);
-                await CreateOperatingDayAndFrameAsync(shopOwner.Id).ConfigureAwait(false);
+                var shop = await CreateShopAsync(account.Id, request).ConfigureAwait(false);
+                var shopDormitories = await CreateShopDormitoryAsync(shop.Id, request.DormitoryIds).ConfigureAwait(false);
+                await CreateOperatingDayAndFrameAsync(shop.Id).ConfigureAwait(false);
                 SendAndSaveVerificationCode(request.Email);
 
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
@@ -148,7 +149,7 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
         return account;
     }
 
-    private async Task<ShopOwner> CreateShopOwnerAsync(long shopOwnerId, ShopRegisterCommand register)
+    private async Task<Shop> CreateShopAsync(long shopId, ShopRegisterCommand register)
     {
         var location = new Location()
         {
@@ -159,9 +160,9 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
 
         var shopWallet = new Wallet();
 
-        var shopOwner = new ShopOwner()
+        var shop = new Shop()
         {
-            Id = shopOwnerId,
+            Id = shopId,
             Name = register.ShopName,
             PhoneNumber = register.PhoneNumber,
             LogoUrl = _systemResourceRepository.GetByResourceCode(ResourceCode.SHOP_LOGO.GetDescription()) ?? string.Empty,
@@ -169,21 +170,19 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
             Location = location,
             MaxOrderHoursInAdvance = ShopConfigurationConstant.MAX_ORDER_HOURS_IN_ADVANCE,
             MinOrderHoursInAdvance = ShopConfigurationConstant.MIN_ORDER_HOURS_IN_ADVANCE,
-            AverageOrderHandleInFrame = ShopConfigurationConstant.AVERAGE_ORDER_HANDLE_IN_FRAME,
-            AverageTotalOrderHandleInDay = ShopConfigurationConstant.AVERAGE_TOTAL_ORDER_HANDLE_IN_DAY,
             Wallet = shopWallet,
         };
 
-        await _shopOwnerRepository.AddAsync(shopOwner).ConfigureAwait(false);
+        await _shopRepository.AddAsync(shop).ConfigureAwait(false);
         await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-        return shopOwner;
+        return shop;
     }
 
-    private async Task<List<ShopDormitory>> CreateShopOwnerDormitoryAsync(long shopId, long[] dormitoryIds)
+    private async Task<List<ShopDormitory>> CreateShopDormitoryAsync(long shopId, long[] dormitoryIds)
     {
         var shopDormitories = dormitoryIds.Select(d => new ShopDormitory()
         {
-            ShopOwnerId = shopId,
+            ShopId = shopId,
             DormitoryId = d,
         }).ToList();
 
@@ -193,13 +192,14 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
 
     private async Task CreateOperatingDayAndFrameAsync(long shopId)
     {
-        var operatingDay = new OperatingDay()
+        var operatingDay = new OperatingSlot()
         {
-            ShopOwnerId = shopId,
+            ShopId = shopId,
         };
 
-        var operatingDays = operatingDay.CreateListOperatingDayForNewShop();
-        await _operatingDayRepository.AddRangeAsync(operatingDays).ConfigureAwait(false);
+        // TODO: Remove operating frame
+        // var operatingDays = operatingDay.CreateListOperatingDayForNewShop();
+        // await _operatingDayRepository.AddRangeAsync(operatingDays).ConfigureAwait(false);
     }
 
     private void SendAndSaveVerificationCode(string email)

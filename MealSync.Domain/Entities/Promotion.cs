@@ -13,7 +13,7 @@ public class Promotion : BaseEntity
 
     public long? CustomerId { get; set; }
 
-    public long? ShopOwnerId { get; set; }
+    public long? ShopId { get; set; }
 
     public string Title { get; set; }
 
@@ -43,7 +43,7 @@ public class Promotion : BaseEntity
 
     public virtual Customer? Customer { get; set; }
 
-    public virtual ShopOwner? ShopOwner { get; set; }
+    public virtual Shop? Shop { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

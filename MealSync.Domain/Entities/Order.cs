@@ -13,11 +13,11 @@ public class Order : BaseEntity
 
     public long PromotionId { get; set; }
 
-    public long ShopOwnerId { get; set; }
+    public long ShopId { get; set; }
 
     public long CustomerId { get; set; }
 
-    public long? DeliveryOrderCombinationId { get; set; }
+    public long? DeliveryPackageId { get; set; }
 
     public long ShopLocationId { get; set; }
 
@@ -74,7 +74,7 @@ public class Order : BaseEntity
 
     public virtual Promotion? Promotion { get; set; }
 
-    public virtual ShopOwner ShopOwner { get; set; }
+    public virtual Shop Shop { get; set; }
 
     public virtual Customer Customer { get; set; }
 
@@ -84,11 +84,11 @@ public class Order : BaseEntity
 
     public virtual Building Building { get; set; }
 
-    public virtual DeliveryOrderCombination DeliveryOrderCombination { get; set; }
+    public virtual DeliveryPackage DeliveryPackage { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
-    public virtual ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 

@@ -12,6 +12,8 @@ public class OrderDetail : BaseEntity
 
     public long ProductId { get; set; }
 
+    public long? ParentOrderDetailId { get; set; }
+
     public long OrderId { get; set; }
 
     public int Quantity { get; set; }
@@ -22,5 +24,7 @@ public class OrderDetail : BaseEntity
 
     public virtual Order Order { get; set; }
 
-    public virtual ICollection<OrderDetailOption> OrderDetailOptions { get; set; } = new List<OrderDetailOption>();
+    public virtual OrderDetail? ParentOrderDetail { get; set; }
+
+    public virtual ICollection<OrderDetailProductVariant> OrderDetailProductVariants { get; set; } = new List<OrderDetailProductVariant>();
 }

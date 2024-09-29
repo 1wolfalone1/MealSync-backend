@@ -33,7 +33,7 @@ public class FirebaseFirestoreService : BaseService, IFirebaseFirestoreService
 
     public async Task<bool> AddNewNotifyCollectionToUser(string email, string type, int status, string message)
     {
-        CollectionReference notificationsCollection = _database.Collection("Notify").Document($"{email}:user").Collection("Notification");
+        var notificationsCollection = _database.Collection("Notify").Document($"{email}:user").Collection("Notification");
 
         var notification = new Dictionary<string, object>()
         {
@@ -50,7 +50,7 @@ public class FirebaseFirestoreService : BaseService, IFirebaseFirestoreService
 
     public async Task<bool> AddNewNotifyCollectionToShop(string email, string type, int status, string message)
     {
-        CollectionReference notificationsCollection = _database.Collection("Notify").Document($"{email}:shop").Collection("Notification");
+        var notificationsCollection = _database.Collection("Notify").Document($"{email}:shop").Collection("Notification");
 
         var notification = new Dictionary<string, object>()
         {

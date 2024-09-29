@@ -13,33 +13,32 @@ public class MappingProfile : Profile
     {
         CreateMap<Dormitory, DormitoryResponse>();
         CreateMap<Building, BuildingResponse>();
-        CreateMap<OperatingFrame, OperatingFrameResponse>();
-        CreateMap<OperatingDay, OperatingDayResponse>();
+        CreateMap<OperatingSlot, OperatingDayResponse>();
         CreateMap<Location, LocationResponse>();
         CreateMap<ShopDormitory, ShopDormitoryResponse>()
             .ForMember(dest => dest.Name,
                 opt => opt.MapFrom(
                     src => src.Dormitory != default ? src.Dormitory.Name : string.Empty));
-        CreateMap<ShopOwner, ShopConfigurationResponse>()
+        CreateMap<Shop, ShopConfigurationResponse>()
             .ForMember(dest => dest.OperatingDays,
                 opt => opt.MapFrom(
-                    src => src.OperatingDays))
+                    src => src.OperatingSlots))
             .ForMember(dest => dest.Location,
                 opt => opt.MapFrom(
                     src => src.Location))
             .ForMember(dest => dest.ShopDormitoryies,
                 opt => opt.MapFrom(
                     src => src.ShopDormitories));
-        CreateMap<Product, ProductDetailResponse>()
-            .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.ProductCategories))
-            .ForMember(dest => dest.OperatingHours, opt => opt.MapFrom(src => src.ProductOperatingHours))
-            .ForMember(dest => dest.Questions, opt => opt.MapFrom(src => src.ProductQuestions));
-        CreateMap<ProductCategory, ProductDetailResponse.CategoryResponse>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.CategoryId))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Category.Name));
-        CreateMap<ProductOperatingHour, ProductDetailResponse.OperatingHourResponse>();
-        CreateMap<ProductQuestion, ProductDetailResponse.QuestionResponse>()
-            .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.ProductQuestionOptions));
-        CreateMap<ProductQuestionOption, ProductDetailResponse.OptionResponse>();
+        // CreateMap<Product, ProductDetailResponse>()
+        //     .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.ProductCategories))
+        //     .ForMember(dest => dest.OperatingHours, opt => opt.MapFrom(src => src.ProductOperatingHours))
+        //     .ForMember(dest => dest.Questions, opt => opt.MapFrom(src => src.ProductQuestions));
+        // CreateMap<ProductCategory, ProductDetailResponse.CategoryResponse>()
+        //     .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.CategoryId))
+        //     .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Category.Name));
+        // CreateMap<ProductOperatingHour, ProductDetailResponse.OperatingHourResponse>();
+        // CreateMap<ProductVariant, ProductDetailResponse.QuestionResponse>()
+        //     .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.ProductQuestionOptions));
+        // CreateMap<ProductVariantOption, ProductDetailResponse.OptionResponse>();
     }
 }
