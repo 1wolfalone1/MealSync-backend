@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MealSync.Domain.Entities;
 
-[Table("category")]
-public class Category : BaseEntity
+[Table("platform_category")]
+public class PlatformCategory : BaseEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -19,5 +19,5 @@ public class Category : BaseEntity
 
     public int DisplayOrder { get; set; }
 
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+    public virtual ICollection<Food> Foods { get; set; } = new List<Food>();
 }

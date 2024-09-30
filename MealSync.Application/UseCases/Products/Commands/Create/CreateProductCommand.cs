@@ -31,7 +31,7 @@ public class CreateProductCommand : ICommand<Result>
 
     public class CreateQuestionCommand
     {
-        public QuestionTypes Type { get; set; }
+        public OptionGroupTypes Type { get; set; }
 
         public string Description { get; set; } = null!;
 

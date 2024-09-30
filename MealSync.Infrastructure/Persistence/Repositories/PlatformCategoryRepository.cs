@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
 
-public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
+public class PlatformCategoryRepository : BaseRepository<PlatformCategory>, IPlatformCategoryRepository
 {
-    public CategoryRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
+    public PlatformCategoryRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
 

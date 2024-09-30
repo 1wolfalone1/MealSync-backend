@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace MealSync.Domain.Enums;
 
-public enum QuestionTypes
+public enum OptionGroupTypes
 {
     [Description("Radio")]
     Radio = 1,

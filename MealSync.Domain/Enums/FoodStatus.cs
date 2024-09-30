@@ -1,6 +1,6 @@
 namespace MealSync.Domain.Enums;
 
-public enum ProductVariantOptionStatus
+public enum FoodStatus
 {
     Active = 1,
     UnActive = 2,

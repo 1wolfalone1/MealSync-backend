@@ -42,11 +42,11 @@ public class ProductDetailResponse
     {
         public long Id { get; set; }
 
-        public QuestionTypes Type { get; set; }
+        public OptionGroupTypes Type { get; set; }
 
         public string Description { get; set; } = null!;
 
-        public ProductVariantStatus Status { get; set; }
+        public OptionGroupStatus Status { get; set; }
 
         public List<OptionResponse> Options { get; set; }
     }
@@ -63,7 +63,7 @@ public class ProductDetailResponse
 
         public float Price { get; set; }
 
-        public ProductVariantOptionStatus Status { get; set; }
+        public OptionStatus Status { get; set; }
 
     }
 }
