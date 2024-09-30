@@ -12,5 +12,5 @@ public static class Endpoints
     public const string REGISTER_CUSTOMER = "auth/customer-register";
 
     // Shop Owner
-    public const string CREATE_PRODUCT = "shop-owner/product/create";
+    public const string CREATE_FOOD = "shop-owner/food/create";
 }
