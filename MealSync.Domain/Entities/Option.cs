@@ -4,27 +4,29 @@ using MealSync.Domain.Enums;
 
 namespace MealSync.Domain.Entities;
 
-[Table("product_variant_option")]
-public class ProductVariantOption : BaseEntity
+[Table("option")]
+public class Option : BaseEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long ProductVariantId { get; set; }
+    public long OptionGroupId { get; set; }
 
     public bool IsDefault { get; set; }
 
     [Column(TypeName = "text")]
-    public string Name { get; set; }
+    public string Title { get; set; }
 
     public string? ImageUrl { get; set; }
 
+    public bool IsCalculatePrice { get; set; }
+
     public double Price { get; set; }
 
-    public ProductVariantOptionStatus Status { get; set; }
+    public OptionStatus Status { get; set; }
 
-    public virtual ProductVariant ProductVariant { get; set; }
+    public virtual OptionGroup OptionGroup { get; set; }
 
-    public virtual ICollection<OrderDetailProductVariant> OrderDetailProductVariants { get; set; } = new List<OrderDetailProductVariant>();
+    public virtual ICollection<OrderDetailOption> OrderDetailOptions { get; set; } = new List<OrderDetailOption>();
 }

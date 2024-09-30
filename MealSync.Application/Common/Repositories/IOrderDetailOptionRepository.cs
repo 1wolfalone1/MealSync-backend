@@ -2,6 +2,6 @@
 
 namespace MealSync.Application.Common.Repositories;
 
-public interface IProductVariantOptionRepository : IBaseRepository<ProductVariantOption>
+public interface IOrderDetailOptionRepository : IBaseRepository<OrderDetailOption>
 {
 }

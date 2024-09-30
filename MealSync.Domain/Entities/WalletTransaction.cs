@@ -11,7 +11,9 @@ public class WalletTransaction : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long WalletId { get; set; }
+    public long WalletFromId { get; set; }
+
+    public long? WalletToId { get; set; }
 
     public long? WithdrawalRequestId { get; set; }
 
@@ -30,7 +32,9 @@ public class WalletTransaction : BaseEntity
     [Column(TypeName = "text")]
     public string Description { get; set; }
 
-    public virtual Wallet Wallet { get; set; }
+    public virtual Wallet WalletFrom { get; set; }
+
+    public virtual Wallet? WalletTo { get; set; }
 
     public virtual WithdrawalRequest? WithdrawalRequest { get; set; }
 

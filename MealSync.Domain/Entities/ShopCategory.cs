@@ -23,5 +23,5 @@ public class ShopCategory : BaseEntity
 
     public virtual Shop Shop { get; set; }
 
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+    public virtual ICollection<Food> Foods { get; set; } = new List<Food>();
 }

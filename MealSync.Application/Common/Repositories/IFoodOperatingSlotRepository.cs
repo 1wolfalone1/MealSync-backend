@@ -2,6 +2,6 @@
 
 namespace MealSync.Application.Common.Repositories;
 
-public interface IProductOperatingSlotRepository : IBaseRepository<ProductOperatingSlot>
+public interface IFoodOperatingSlotRepository : IBaseRepository<FoodOperatingSlot>
 {
 }

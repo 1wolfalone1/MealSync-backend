@@ -18,8 +18,8 @@ namespace MealSync.Application.UseCases.Products.Commands.Create;
 public class CreateProductHandler : ICommandHandler<CreateProductCommand, Result>
 {
     private readonly ILogger<CreateProductHandler> _logger;
-    private readonly ICategoryRepository _categoryRepository;
-    private readonly IProductRepository _productRepository;
+    private readonly IPlatformCategoryRepository _platformCategoryRepository;
+    private readonly IFoodRepository _foodRepository;
     private readonly IShopRepository _shopRepository;
     private readonly IOperatingSlotRepository _operatingSlotRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
@@ -27,14 +27,14 @@ public class CreateProductHandler : ICommandHandler<CreateProductCommand, Result
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateProductHandler(
-        ILogger<CreateProductHandler> logger, ICategoryRepository categoryRepository,
-        IProductRepository productRepository, IShopRepository shopRepository,
+        ILogger<CreateProductHandler> logger, IPlatformCategoryRepository platformCategoryRepository,
+        IFoodRepository foodRepository, IShopRepository shopRepository,
         IOperatingSlotRepository operatingSlotRepository, ICurrentPrincipalService currentPrincipalService,
         IUnitOfWork unitOfWork, IMapper mapper)
     {
         _logger = logger;
-        _categoryRepository = categoryRepository;
-        _productRepository = productRepository;
+        _platformCategoryRepository = platformCategoryRepository;
+        _foodRepository = foodRepository;
         _shopRepository = shopRepository;
         _operatingSlotRepository = operatingSlotRepository;
         _currentPrincipalService = currentPrincipalService;

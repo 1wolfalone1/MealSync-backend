@@ -4,8 +4,8 @@ using MealSync.Domain.Enums;
 
 namespace MealSync.Domain.Entities;
 
-[Table("product")]
-public class Product : BaseEntity
+[Table("food")]
+public class Food : BaseEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -13,9 +13,7 @@ public class Product : BaseEntity
 
     public long ShopId { get; set; }
 
-    public long CategoryId { get; set; }
-
-    public long? ParentId { get; set; }
+    public long PlatformCategoryId { get; set; }
 
     public long? ShopCategoryId { get; set; }
 
@@ -29,23 +27,19 @@ public class Product : BaseEntity
 
     public int TotalOrder { get; set; }
 
-    public ProductStatus Status { get; set; }
+    public FoodStatus Status { get; set; }
 
     public bool IsSoldOut { get; set; }
 
-    public bool IsTopping { get; set; }
-
     public virtual Shop Shop { get; set; }
 
-    public virtual Category Category { get; set; }
-
-    public virtual Product? ParentProduct { get; set; }
+    public virtual PlatformCategory PlatformCategory { get; set; }
 
     public virtual ShopCategory? ShopCategory { get; set; }
 
-    public virtual ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
-
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
-    public virtual ICollection<ProductOperatingSlot> ProductOperatingSlots { get; set; } = new List<ProductOperatingSlot>();
+    public virtual ICollection<FoodOperatingSlot> FoodOperatingSlots { get; set; } = new List<FoodOperatingSlot>();
+
+    public virtual ICollection<FoodOptionGroup> FoodOptionGroups { get; set; } = new List<FoodOptionGroup>();
 }
