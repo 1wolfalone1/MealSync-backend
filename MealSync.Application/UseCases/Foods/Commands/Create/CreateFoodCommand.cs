@@ -19,5 +19,12 @@ public class CreateFoodCommand : ICommand<Result>
 
     public List<long> OperatingSlots { get; set; }
 
-    public List<long>? OptionGroups { get; set; }
+    public List<FoodOptionGroupCommand>? FoodOptionGroups { get; set; }
+
+    public class FoodOptionGroupCommand
+    {
+        public long OptionGroupId { get; set; }
+
+        public int DisplayOrder { get; set; }
+    }
 }

@@ -34,6 +34,28 @@ public class CreateProductHandler : ICommandHandler<CreateFoodCommand, Result>
         // Create new product
         var shop = await _shopRepository.GetByAccountId(accountId.Value).ConfigureAwait(false);
 
+        List<FoodOperatingSlot> operatingSlots = new List<FoodOperatingSlot>();
+        request.OperatingSlots.ForEach(operatingSlotId =>
+        {
+            operatingSlots.Add(new FoodOperatingSlot
+            {
+                OperatingSlotId = operatingSlotId,
+            });
+        });
+
+        List<FoodOptionGroup> foodOptionGroups = new List<FoodOptionGroup>();
+        if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count != 0)
+        {
+            request.FoodOptionGroups.ForEach(foodOptionGroup =>
+            {
+                foodOptionGroups.Add(new FoodOptionGroup
+                {
+                    OptionGroupId = foodOptionGroup.OptionGroupId,
+                    DisplayOrder = foodOptionGroup.DisplayOrder,
+                });
+            });
+        }
+
         var food = new Food
         {
             ShopId = shop.Id,
@@ -46,6 +68,8 @@ public class CreateProductHandler : ICommandHandler<CreateFoodCommand, Result>
             TotalOrder = 0,
             IsSoldOut = false,
             Status = FoodStatus.Active,
+            FoodOperatingSlots = operatingSlots,
+            FoodOptionGroups = foodOptionGroups,
         };
 
         // Save product
@@ -109,16 +133,16 @@ public class CreateProductHandler : ICommandHandler<CreateFoodCommand, Result>
         });
 
         // Check existed option groups if present
-        if (request.OptionGroups != null && request.OptionGroups.Count > 0)
+        if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count > 0)
         {
-            request.OptionGroups.ForEach(id =>
+            request.FoodOptionGroups.ForEach(foodOptionGroup =>
             {
-                var existedOptionGroup = _optionGroupRepository.CheckExistedByIdAndShopId(id, accountId);
+                var existedOptionGroup = _optionGroupRepository.CheckExistedByIdAndShopId(foodOptionGroup.OptionGroupId, accountId);
                 if (!existedOptionGroup)
                 {
                     throw new InvalidBusinessException(
                         MessageCode.E_OPTION_GROUP_NOT_FOUND.GetDescription(),
-                        new object[] { id }
+                        new object[] { foodOptionGroup.OptionGroupId }
                     );
                 }
             });
