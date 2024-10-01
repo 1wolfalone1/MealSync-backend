@@ -127,14 +127,17 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
         }
 
         // Check existed shop category
-        var existedShopCategory = _shopCategoryRepository.CheckExistedByIdAndShopId(request.ShopCategoryId, accountId);
-
-        if (!existedShopCategory)
+        if (request.ShopCategoryId != null)
         {
-            throw new InvalidBusinessException(
-                MessageCode.E_SHOP_CATEGORY_NOT_FOUND.GetDescription(),
-                new object[] { request.ShopCategoryId }
-            );
+            var existedShopCategory = _shopCategoryRepository.CheckExistedByIdAndShopId(request.ShopCategoryId.Value, accountId);
+
+            if (!existedShopCategory)
+            {
+                throw new InvalidBusinessException(
+                    MessageCode.E_SHOP_CATEGORY_NOT_FOUND.GetDescription(),
+                    new object[] { request.ShopCategoryId }
+                );
+            }
         }
 
         // Check existed operating slots

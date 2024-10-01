@@ -15,7 +15,7 @@ public class CreateFoodCommand : ICommand<Result>
 
     public long PlatformCategoryId { get; set; }
 
-    public long ShopCategoryId { get; set; }
+    public long? ShopCategoryId { get; set; }
 
     public List<long> OperatingSlots { get; set; }
 
