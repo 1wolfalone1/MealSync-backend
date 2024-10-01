@@ -25,6 +25,6 @@ public class CreateFoodCommand : ICommand<Result>
     {
         public long OptionGroupId { get; set; }
 
-        public int DisplayOrder { get; set; }
+        // public int DisplayOrder { get; set; }
     }
 }

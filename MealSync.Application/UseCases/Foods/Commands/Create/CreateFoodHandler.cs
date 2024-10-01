@@ -64,14 +64,14 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
         List<FoodOptionGroup> foodOptionGroups = new List<FoodOptionGroup>();
         if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count != 0)
         {
-            request.FoodOptionGroups.ForEach(foodOptionGroup =>
+            for (var i = 0; i < request.FoodOptionGroups.Count; i++)
             {
                 foodOptionGroups.Add(new FoodOptionGroup
                 {
-                    OptionGroupId = foodOptionGroup.OptionGroupId,
-                    DisplayOrder = foodOptionGroup.DisplayOrder,
+                    OptionGroupId = request.FoodOptionGroups[i].OptionGroupId,
+                    DisplayOrder = i + 1,
                 });
-            });
+            }
         }
 
         var food = new Food
