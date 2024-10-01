@@ -29,18 +29,19 @@ public enum MessageCode
     [Description("I-Account-RegisterSuccessfully")]
     I_ACCOUNT_REGISTER_SUCCESSFULLY,
 
-    // Category
-    [Description("E-Category-NotFound")]
-    E_CATEGORY_NOT_FOUND,
+    // Platform Category
+    [Description("E-PlatformCategory-NotFound")]
+    E_PLATFORM_CATEGORY_NOT_FOUND,
 
-    // Operating Day
-    [Description("E-OperatingDay-NotFound")]
-    E_OPERATING_DAY_NOT_FOUND,
+    // Shop Category
+    [Description("E-ShopCategory-NotFound")]
+    E_SHOP_CATEGORY_NOT_FOUND,
 
-    // Operating Frame
-    [Description("E-OperatingFrame-HasOverlapping")]
-    E_OPERATING_FRAME_HAS_OVERLAPPING,
+    // Operating Slot
+    [Description("E-OperatingSlot-NotFound")]
+    E_OPERATING_SLOT_NOT_FOUND,
 
-    [Description("E-OperatingFrame-HasNotActiveTime")]
-    E_OPERATING_FRAME_HAS_NOT_ACTIVE_TIME,
+    // Option Group
+    [Description("E-OptionGroup-NotFound")]
+    E_OPTION_GROUP_NOT_FOUND,
 }

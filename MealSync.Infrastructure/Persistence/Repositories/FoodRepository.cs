@@ -12,7 +12,10 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
     public Food GetByIdIncludeAllInfo(long id)
     {
-        return DbSet.Include(p => p.PlatformCategory)
-            .First(p => p.Id == id);
+        return DbSet.Include(f => f.PlatformCategory)
+            .Include(f => f.ShopCategory)
+            .Include(f => f.FoodOperatingSlots).ThenInclude(op => op.OperatingSlot)
+            .Include(f => f.FoodOptionGroups).ThenInclude(fog => fog.OptionGroup).ThenInclude(og => og.Options)
+            .First(f => f.Id == id);
     }
 }

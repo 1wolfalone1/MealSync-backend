@@ -10,12 +10,8 @@ public class PlatformCategoryRepository : BaseRepository<PlatformCategory>, IPla
     {
     }
 
-    public async Task<bool> CheckExistedByIds(List<long> ids)
+    public bool CheckExistedById(long id)
     {
-        // Count the number of categories that have an ID in the given list
-        var matchingCount = await DbSet.CountAsync(category => ids.Contains(category.Id));
-
-        // Return true if the count of matching categories is the same as the count of IDs in the input list
-        return matchingCount == ids.Count;
+        return DbSet.Any(pc => pc.Id == id);
     }
 }

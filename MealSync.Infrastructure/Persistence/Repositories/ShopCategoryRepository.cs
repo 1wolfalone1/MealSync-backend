@@ -8,4 +8,9 @@ public class ShopCategoryRepository : BaseRepository<ShopCategory>, IShopCategor
     public ShopCategoryRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
+
+    public bool CheckExistedByIdAndShopId(long id, long shopId)
+    {
+        return DbSet.Any(s => s.Id == id && s.ShopId == shopId);
+    }
 }

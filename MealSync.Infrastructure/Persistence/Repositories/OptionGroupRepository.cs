@@ -8,4 +8,9 @@ public class OptionGroupRepository : BaseRepository<OptionGroup>, IOptionGroupRe
     public OptionGroupRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
+
+    public bool CheckExistedByIdAndShopId(long id, long shopId)
+    {
+        return DbSet.Any(og => og.Id == id && og.ShopId == shopId);
+    }
 }
