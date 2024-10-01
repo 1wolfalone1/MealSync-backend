@@ -26,6 +26,9 @@ public enum MessageCode
     [Description("E-Account-EmailExist")]
     E_ACCOUNT_EMAIL_EXIST,
 
+    [Description("E-Account-EmailExistInOtherRole")]
+    E_ACCOUNT_EMAIL_EXIST_IN_ORTHER_ROLE,
+
     [Description("I-Account-RegisterSuccessfully")]
     I_ACCOUNT_REGISTER_SUCCESSFULLY,
 

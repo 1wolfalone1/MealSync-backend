@@ -14,14 +14,14 @@ public class MappingProfile : Profile
     {
         CreateMap<Dormitory, DormitoryResponse>();
         CreateMap<Building, BuildingResponse>();
-        CreateMap<OperatingSlot, OperatingDayResponse>();
+        CreateMap<OperatingSlot, ShopOperatingSlotResponse>();
         CreateMap<Location, LocationResponse>();
         CreateMap<ShopDormitory, ShopDormitoryResponse>()
             .ForMember(dest => dest.Name,
                 opt => opt.MapFrom(
                     src => src.Dormitory != default ? src.Dormitory.Name : string.Empty));
         CreateMap<Shop, ShopConfigurationResponse>()
-            .ForMember(dest => dest.OperatingDays,
+            .ForMember(dest => dest.OperatingSlots,
                 opt => opt.MapFrom(
                     src => src.OperatingSlots))
             .ForMember(dest => dest.Location,
