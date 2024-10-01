@@ -1,12 +1,10 @@
 ﻿using MealSync.Application.Common.Utils;
-using MealSync.Domain.Enums;
-using Newtonsoft.Json;
 
 namespace MealSync.Application.UseCases.ShopOwners.Models;
 
 public class ShopConfigurationResponse
 {
-    public string Id { get; set; }
+    public long Id { get; set; }
 
     public string Name { get; set; }
 
@@ -35,7 +33,7 @@ public class ShopConfigurationResponse
 
 public class LocationResponse
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
 
     public string Address { get; set; }
 
