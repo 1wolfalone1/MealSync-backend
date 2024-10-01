@@ -13,4 +13,9 @@ public class ShopCategoryRepository : BaseRepository<ShopCategory>, IShopCategor
     {
         return DbSet.Any(s => s.Id == id && s.ShopId == shopId);
     }
+
+    public ShopCategory? GetLastedByShopId(long shopId)
+    {
+        return DbSet.Where(sc => sc.ShopId == shopId).OrderByDescending(sc => sc.DisplayOrder).FirstOrDefault();
+    }
 }
