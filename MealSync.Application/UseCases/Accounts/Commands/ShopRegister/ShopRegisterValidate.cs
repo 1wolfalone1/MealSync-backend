@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using MealSync.Application.Common.Constants;
 
 namespace MealSync.Application.UseCases.Accounts.Commands.ShopRegister;
 
@@ -15,7 +16,7 @@ public class ShopRegisterValidate : AbstractValidator<ShopRegisterCommand>
         RuleFor(x => x.Password)
             .NotEmpty()
             .WithMessage("Mật khẩu không thể để trống")
-            .Matches(@"^(?=.*[A-Z])(?=.*\W).{8,}$")
+            .Matches(RegularPatternConstant.PASSWORD_PATTERN)
             .WithMessage("Mật khẩu phải từ 8 ký tự chứa 1 từ viết hoa, 1 ký tự đặc biệt");
 
         RuleFor(x => x.FullName)
@@ -45,7 +46,7 @@ public class ShopRegisterValidate : AbstractValidator<ShopRegisterCommand>
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
             .WithMessage("Số điện thoại không thể để trống")
-            .Matches(@"^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-4|6-9])[0-9]{7}$")
+            .Matches(RegularPatternConstant.VN_PHONE_NUMBER_PATTERN)
             .WithMessage("Vui lòng cung cấp đúng số điện thoại");
 
         RuleFor(x => x.DormitoryIds)

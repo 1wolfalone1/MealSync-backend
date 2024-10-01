@@ -1,10 +1,9 @@
-﻿using MealSync.Application.Common.Abstractions.Messaging;
-using MealSync.Application.Shared;
+﻿namespace MealSync.Application.UseCases.ShopOwners.Models;
 
-namespace MealSync.Application.UseCases.ShopOwners.Commands.ShopConfiguration;
-
-public class ShopConfigurationCommand : ICommand<Result>
+public class ShopProfileResponse
 {
+    public long Id { get; set; }
+
     public string Name { get; set; }
 
     public string LogoUrl { get; set; }
@@ -20,8 +19,4 @@ public class ShopConfigurationCommand : ICommand<Result>
     public int MinOrderHoursInAdvance { get; set; }
 
     public int MaxOrderHoursInAdvance { get; set; }
-
-    public int AverageOrderHandleInFrame { get; set; }
-
-    public int AverageOrderHandlerInDay { get; set; }
 }

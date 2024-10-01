@@ -52,5 +52,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
         CreateMap<Option, OptionGroupResponse.OptionResponse>();
         CreateMap<ShopCategory, ShopCategoryResponse>();
+        CreateMap<Shop, ShopProfileResponse>();
     }
 }
