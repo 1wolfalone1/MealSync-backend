@@ -2,6 +2,7 @@
 using MealSync.Application.UseCases.Dormitories.Models;
 using MealSync.Application.UseCases.Buildings.Models;
 using MealSync.Application.UseCases.Foods.Models;
+using MealSync.Application.UseCases.OptionGroups.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Domain.Entities;
 
@@ -46,5 +47,8 @@ public class MappingProfile : Profile
         CreateMap<OptionGroup, FoodDetailResponse.OptionGroupResponse>()
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
         CreateMap<Option, FoodDetailResponse.OptionResponse>();
+        CreateMap<OptionGroup, OptionGroupResponse>()
+            .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
+        CreateMap<Option, OptionGroupResponse.OptionResponse>();
     }
 }

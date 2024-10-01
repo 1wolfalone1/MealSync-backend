@@ -37,6 +37,7 @@
         <Folder Include="UseCases\Buildings\Commands\"/>
         <Folder Include="UseCases\Dormitories\Commands\"/>
         <Folder Include="UseCases\Foods\Queries\" />
+        <Folder Include="UseCases\OptionGroups\Queries\" />
         <Folder Include="UseCases\Roles\Queries\"/>
     </ItemGroup>
 
