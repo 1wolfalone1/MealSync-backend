@@ -12,9 +12,9 @@ using Microsoft.Extensions.Logging;
 
 namespace MealSync.Application.UseCases.Foods.Commands.Create;
 
-public class CreateProductHandler : ICommandHandler<CreateFoodCommand, Result>
+public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
 {
-    private readonly ILogger<CreateProductHandler> _logger;
+    private readonly ILogger<CreateFoodHandler> _logger;
     private readonly IPlatformCategoryRepository _platformCategoryRepository;
     private readonly IShopCategoryRepository _shopCategoryRepository;
     private readonly IOperatingSlotRepository _operatingSlotRepository;
@@ -24,6 +24,24 @@ public class CreateProductHandler : ICommandHandler<CreateFoodCommand, Result>
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
+
+    public CreateFoodHandler(ILogger<CreateFoodHandler> logger, IPlatformCategoryRepository platformCategoryRepository,
+        IShopCategoryRepository shopCategoryRepository, IOperatingSlotRepository operatingSlotRepository,
+        IOptionGroupRepository optionGroupRepository, IFoodRepository foodRepository,
+        IShopRepository shopRepository, ICurrentPrincipalService currentPrincipalService, IMapper mapper, IUnitOfWork unitOfWork
+    )
+    {
+        _logger = logger;
+        _platformCategoryRepository = platformCategoryRepository;
+        _shopCategoryRepository = shopCategoryRepository;
+        _operatingSlotRepository = operatingSlotRepository;
+        _optionGroupRepository = optionGroupRepository;
+        _foodRepository = foodRepository;
+        _shopRepository = shopRepository;
+        _currentPrincipalService = currentPrincipalService;
+        _mapper = mapper;
+        _unitOfWork = unitOfWork;
+    }
 
     public async Task<Result<Result>> Handle(CreateFoodCommand request, CancellationToken cancellationToken)
     {
