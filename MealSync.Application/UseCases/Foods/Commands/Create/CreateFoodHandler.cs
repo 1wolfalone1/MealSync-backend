@@ -64,14 +64,14 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
         List<FoodOptionGroup> foodOptionGroups = new List<FoodOptionGroup>();
         if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count != 0)
         {
-            request.FoodOptionGroups.ForEach(foodOptionGroup =>
+            for (var i = 0; i < request.FoodOptionGroups.Count; i++)
             {
                 foodOptionGroups.Add(new FoodOptionGroup
                 {
-                    OptionGroupId = foodOptionGroup.OptionGroupId,
-                    DisplayOrder = foodOptionGroup.DisplayOrder,
+                    OptionGroupId = request.FoodOptionGroups[i].OptionGroupId,
+                    DisplayOrder = i + 1,
                 });
-            });
+            }
         }
 
         var food = new Food
@@ -127,14 +127,17 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
         }
 
         // Check existed shop category
-        var existedShopCategory = _shopCategoryRepository.CheckExistedByIdAndShopId(request.ShopCategoryId, accountId);
-
-        if (!existedShopCategory)
+        if (request.ShopCategoryId != null)
         {
-            throw new InvalidBusinessException(
-                MessageCode.E_SHOP_CATEGORY_NOT_FOUND.GetDescription(),
-                new object[] { request.ShopCategoryId }
-            );
+            var existedShopCategory = _shopCategoryRepository.CheckExistedByIdAndShopId(request.ShopCategoryId.Value, accountId);
+
+            if (!existedShopCategory)
+            {
+                throw new InvalidBusinessException(
+                    MessageCode.E_SHOP_CATEGORY_NOT_FOUND.GetDescription(),
+                    new object[] { request.ShopCategoryId }
+                );
+            }
         }
 
         // Check existed operating slots

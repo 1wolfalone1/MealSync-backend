@@ -30,19 +30,23 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.ShopDormitoryies,
                 opt => opt.MapFrom(
                     src => src.ShopDormitories));
-        CreateMap<PlatformCategory, FoodDetailResponse.PlatformCategoryResponse>();
-        CreateMap<ShopCategory, FoodDetailResponse.ShopCategoryResponse>();
-        CreateMap<OperatingSlot, FoodDetailResponse.OperatingSlotResponse>();
-        CreateMap<FoodOptionGroup, FoodDetailResponse.FoodOptionGroupResponse>()
-            .ForMember(dest => dest.OptionGroup, opt => opt.MapFrom(src => src.OptionGroup));
-        CreateMap<OptionGroup, FoodDetailResponse.OptionGroupResponse>()
-            .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
-        CreateMap<Option, FoodDetailResponse.OptionResponse>();
         CreateMap<Food, FoodDetailResponse>()
             .ForMember(dest => dest.PlatformCategory, opt => opt.MapFrom(src => src.PlatformCategory))
             .ForMember(dest => dest.ShopCategory, opt => opt.MapFrom(src => src.ShopCategory))
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.FoodOperatingSlots))
             .ForMember(dest => dest.FoodOptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups));
+        CreateMap<PlatformCategory, FoodDetailResponse.PlatformCategoryResponse>();
+        CreateMap<ShopCategory, FoodDetailResponse.ShopCategoryResponse>();
+        CreateMap<OperatingSlot, FoodDetailResponse.OperatingSlotResponse>();
+        CreateMap<FoodOperatingSlot, FoodDetailResponse.OperatingSlotResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.OperatingSlot.Id))
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.OperatingSlot.StartTime))
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime));
+        CreateMap<FoodOptionGroup, FoodDetailResponse.FoodOptionGroupResponse>()
+            .ForMember(dest => dest.OptionGroup, opt => opt.MapFrom(src => src.OptionGroup));
+        CreateMap<OptionGroup, FoodDetailResponse.OptionGroupResponse>()
+            .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
+        CreateMap<Option, FoodDetailResponse.OptionResponse>();
         CreateMap<OptionGroup, OptionGroupResponse>()
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
         CreateMap<Option, OptionGroupResponse.OptionResponse>();
