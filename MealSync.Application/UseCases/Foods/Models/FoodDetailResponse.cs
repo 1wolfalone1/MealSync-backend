@@ -66,7 +66,7 @@ public class FoodDetailResponse
     {
         public long Id { get; set; }
 
-        public string Name { get; set; } = null!;
+        public string Title { get; set; } = null!;
 
         public bool IsRequire { get; set; }
 
@@ -83,7 +83,7 @@ public class FoodDetailResponse
 
         public bool IsDefault { get; set; }
 
-        public string Name { get; set; } = null!;
+        public string Title { get; set; } = null!;
 
         public bool IsCalculatePrice { get; set; }
 
