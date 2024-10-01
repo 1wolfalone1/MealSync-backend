@@ -18,4 +18,14 @@ public class ShopCategoryRepository : BaseRepository<ShopCategory>, IShopCategor
     {
         return DbSet.Where(sc => sc.ShopId == shopId).OrderByDescending(sc => sc.DisplayOrder).FirstOrDefault();
     }
+
+    public ShopCategory? GetByIdAndShopId(long id, long shopId)
+    {
+        return DbSet.FirstOrDefault(sc => sc.Id == id && sc.ShopId == shopId);
+    }
+
+    public List<ShopCategory> GetAllByShopId(long shopId)
+    {
+        return DbSet.Where(sc => sc.ShopId == shopId).OrderBy(sc => sc.DisplayOrder).ToList();
+    }
 }
