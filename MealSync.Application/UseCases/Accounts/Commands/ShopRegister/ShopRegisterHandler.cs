@@ -55,7 +55,7 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
         var accountTemp = _accountRepository.GetAccountByEmail(request.Email);
 
         // If account exist
-        if (accountTemp != default && accountTemp.Status == AccountStatus.UnVerify)
+        if (accountTemp != default && accountTemp.Status == AccountStatus.UnVerify && accountTemp.RoleId == (int)Domain.Enums.Roles.ShopOwner)
         {
             accountTemp.PhoneNumber = request.PhoneNumber;
             accountTemp.Password = BCrypUnitls.Hash(request.Password);
@@ -110,6 +110,9 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
         var account = _accountRepository.GetAccountByEmail(register.Email);
         if (account != default && account.Status != AccountStatus.UnVerify)
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_EMAIL_EXIST.GetDescription(), HttpStatusCode.Conflict);
+
+        if (account != default && account.Status == AccountStatus.UnVerify && account.RoleId != (int)Domain.Enums.Roles.ShopOwner)
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_EMAIL_EXIST_IN_ORTHER_ROLE.GetDescription(), HttpStatusCode.Conflict);
 
         if (account != default && account.PhoneNumber != register.PhoneNumber && _accountRepository.CheckExistByPhoneNumber(register.PhoneNumber))
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_PHONE_NUMBER_EXIST.GetDescription(), HttpStatusCode.Conflict);

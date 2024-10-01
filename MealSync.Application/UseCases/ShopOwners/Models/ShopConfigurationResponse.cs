@@ -1,5 +1,6 @@
 ﻿using MealSync.Application.Common.Utils;
 using MealSync.Domain.Enums;
+using Newtonsoft.Json;
 
 namespace MealSync.Application.UseCases.ShopOwners.Models;
 
@@ -17,19 +18,19 @@ public class ShopConfigurationResponse
 
     public bool IsAcceptingOrderNextDay { get; set; }
 
+    public bool IsReceivingOrderPaused { get; set; }
+
+    public bool IsAutoOrderConfirmation { get; set; }
+
     public int MaxOrderHoursInAdvance { get; set; }
 
     public int MinOrderHoursInAdvance { get; set; }
-
-    public int AverageOrderHandleInFrame { get; set; }
-
-    public int AverageTotalOrderHandleInDay { get; set; }
 
     public LocationResponse Location { get; set; }
 
     public List<ShopDormitoryResponse> ShopDormitoryies { get; set; }
 
-    public List<OperatingDayResponse> OperatingDays { get; set; } = new();
+    public List<ShopOperatingSlotResponse> OperatingSlots { get; set; } = new();
 }
 
 public class LocationResponse
@@ -50,22 +51,16 @@ public class ShopDormitoryResponse
     public string Name { get; set; }
 }
 
-public class OperatingDayResponse
+public class ShopOperatingSlotResponse
 {
-    public DayOfWeeks DayOfWeeks { get; set; }
+    public long Id { get; set; }
 
-    public bool IsClose { get; set; }
-
-    public List<OperatingFrameResponse> OperatingFrames { get; set; }
-}
-
-public class OperatingFrameResponse
-{
     public int StartTime { get; set; }
 
     public int EndTime { get; set; }
 
-    public bool IsActive { get; set; }
-
-    public string FrameTime => TimeFrameUtils.GetTimeFrameString(StartTime, EndTime);
+    public string TimeSlot
+    {
+        get => TimeFrameUtils.GetTimeFrameString(StartTime, EndTime);
+    }
 }
