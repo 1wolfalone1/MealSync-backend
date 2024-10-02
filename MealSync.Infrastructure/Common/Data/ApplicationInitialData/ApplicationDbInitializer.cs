@@ -24,10 +24,10 @@ public class ApplicationDbInitializer
         await this._unitOfWork.BeginTransactionAsync();
         try
         {
-            //if (!_buildingRepository.Any())
-            //{
-            //    await this._roleRepository.AddRangeAsync(Seed.DefaultRoles);
-            //}
+            // if (!_roleRepository.Any())
+            // {
+            //     await this._roleRepository.AddRangeAsync(Seed.DefaultRoles);
+            // }
 
             //if (!_buildingRepository.Any())
             //{

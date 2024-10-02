@@ -5,21 +5,34 @@ namespace MealSync.Infrastructure.Common.Data.Seeds;
 
 public class Seed
 {
-    //public static IList<Role> DefaultRoles => new List<Role>()
-    //{
-    //    new()
-    //    {
-    //        Name = Roles.Customer.GetDescription()
-    //    },
-    //    new()
-    //    {
-    //        Name = Roles.Shop.GetDescription()
-    //    },
-    //    new Role()
-    //    {
-    //        Name = Roles.Admin.GetDescription()
-    //    }
-    //};
+    public static IList<Role> DefaultRoles => new List<Role>()
+    {
+        new()
+        {
+            Id = (int)Roles.Customer,
+            Name = Roles.Customer.GetDescription(),
+        },
+        new()
+        {
+            Id = (int)Roles.ShopOwner,
+            Name = Roles.ShopOwner.GetDescription(),
+        },
+        new()
+        {
+            Id = (int)Roles.ShopDelivery,
+            Name = Roles.ShopDelivery.GetDescription(),
+        },
+        new()
+        {
+            Id = (int)Roles.Moderator,
+            Name = Roles.Moderator.GetDescription(),
+        },
+        new()
+        {
+            Id = (int)Roles.Admin,
+            Name = Roles.Admin.GetDescription(),
+        },
+    };
 
     //public static IList<Building> DefaultBuildings = new List<Building>()
     //{

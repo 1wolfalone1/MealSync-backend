@@ -18,9 +18,11 @@ public class Wallet : BaseEntity
 
     public DateTimeOffset NextTransferDate { get; set; }
 
-    public virtual Shop Shop { get; set; }
+    public virtual Shop? Shop { get; set; }
 
-    public virtual ICollection<WalletTransaction> WalletTransactions { get; set; } = new List<WalletTransaction>();
+    public virtual ICollection<WalletTransaction> WalletTransactionFroms { get; set; } = new List<WalletTransaction>();
+
+    public virtual ICollection<WalletTransaction> WalletTransactionTos { get; set; } = new List<WalletTransaction>();
 
     public virtual ICollection<WithdrawalRequest> WithdrawalRequests { get; set; } = new List<WithdrawalRequest>();
 }

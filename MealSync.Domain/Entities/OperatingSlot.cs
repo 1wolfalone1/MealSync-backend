@@ -18,5 +18,5 @@ public class OperatingSlot : BaseEntity
 
     public virtual Shop Shop { get; set; }
 
-    public virtual ICollection<ProductOperatingSlot> ProductOperatingSlots { get; set; } = new List<ProductOperatingSlot>();
+    public virtual ICollection<FoodOperatingSlot> FoodOperatingSlots { get; set; } = new List<FoodOperatingSlot>();
 }

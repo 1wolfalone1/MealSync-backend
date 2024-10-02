@@ -36,8 +36,10 @@
     <ItemGroup>
         <Folder Include="UseCases\Buildings\Commands\"/>
         <Folder Include="UseCases\Dormitories\Commands\"/>
-        <Folder Include="UseCases\Products\Queries\"/>
+        <Folder Include="UseCases\Foods\Queries\" />
+        <Folder Include="UseCases\OptionGroups\Queries\" />
         <Folder Include="UseCases\Roles\Queries\"/>
+        <Folder Include="UseCases\ShopCategories\Queries\" />
     </ItemGroup>
 
 </Project>

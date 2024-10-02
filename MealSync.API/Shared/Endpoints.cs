@@ -12,5 +12,15 @@ public static class Endpoints
     public const string REGISTER_CUSTOMER = "auth/customer-register";
 
     // Shop Owner
-    public const string CREATE_PRODUCT = "shop-owner/product/create";
+    public const string CREATE_FOOD = "shop-owner/food/create";
+    public const string GET_SHOP_PROFILE = "shop-owner/profile";
+    public const string UPDATE_SHOP_PROFILE = "shop-owner/profile";
+
+    // Option Group
+    public const string CREATE_OPTION_GROUP = "shop-owner/option-group/create";
+
+    // Shop Category
+    public const string CREATE_SHOP_CATEGORY = "shop-owner/category/create";
+
+    public const string REARRANGE_SHOP_CATEGORY = "shop-owner/category/re-arrange";
 }

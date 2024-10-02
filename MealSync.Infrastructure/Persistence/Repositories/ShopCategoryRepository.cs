@@ -8,4 +8,24 @@ public class ShopCategoryRepository : BaseRepository<ShopCategory>, IShopCategor
     public ShopCategoryRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
+
+    public bool CheckExistedByIdAndShopId(long id, long shopId)
+    {
+        return DbSet.Any(s => s.Id == id && s.ShopId == shopId);
+    }
+
+    public ShopCategory? GetLastedByShopId(long shopId)
+    {
+        return DbSet.Where(sc => sc.ShopId == shopId).OrderByDescending(sc => sc.DisplayOrder).FirstOrDefault();
+    }
+
+    public ShopCategory? GetByIdAndShopId(long id, long shopId)
+    {
+        return DbSet.FirstOrDefault(sc => sc.Id == id && sc.ShopId == shopId);
+    }
+
+    public List<ShopCategory> GetAllByShopId(long shopId)
+    {
+        return DbSet.Where(sc => sc.ShopId == shopId).OrderBy(sc => sc.DisplayOrder).ToList();
+    }
 }

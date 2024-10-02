@@ -26,21 +26,31 @@ public enum MessageCode
     [Description("E-Account-EmailExist")]
     E_ACCOUNT_EMAIL_EXIST,
 
+    [Description("E-Account-EmailExistInOtherRole")]
+    E_ACCOUNT_EMAIL_EXIST_IN_ORTHER_ROLE,
+
     [Description("I-Account-RegisterSuccessfully")]
     I_ACCOUNT_REGISTER_SUCCESSFULLY,
 
-    // Category
-    [Description("E-Category-NotFound")]
-    E_CATEGORY_NOT_FOUND,
+    // Platform Category
+    [Description("E-PlatformCategory-NotFound")]
+    E_PLATFORM_CATEGORY_NOT_FOUND,
 
-    // Operating Day
-    [Description("E-OperatingDay-NotFound")]
-    E_OPERATING_DAY_NOT_FOUND,
+    // Shop Category
+    [Description("E-ShopCategory-NotFound")]
+    E_SHOP_CATEGORY_NOT_FOUND,
 
-    // Operating Frame
-    [Description("E-OperatingFrame-HasOverlapping")]
-    E_OPERATING_FRAME_HAS_OVERLAPPING,
+    [Description("E-ShopCategory-NotEnough")]
+    E_SHOP_CATEGORY_NOT_ENOUGH,
 
-    [Description("E-OperatingFrame-HasNotActiveTime")]
-    E_OPERATING_FRAME_HAS_NOT_ACTIVE_TIME,
+    // Operating Slot
+    [Description("E-OperatingSlot-NotFound")]
+    E_OPERATING_SLOT_NOT_FOUND,
+
+    // Option Group
+    [Description("E-OptionGroup-NotFound")]
+    E_OPTION_GROUP_NOT_FOUND,
+
+    [Description("E-OptionGroup-RadioValidate")]
+    E_OPTION_GROUP_RADIO_VALIDATE,
 }

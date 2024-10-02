@@ -2,6 +2,6 @@
 
 public enum WalletTransactionType
 {
-    Credit,
-    Debit,
+    Withdrawal = 1,
+    Transfer = 2,
 }

@@ -33,7 +33,7 @@ public class Shop : BaseEntity
 
     public int TotalOrder { get; set; }
 
-    public int TotalProduct { get; set; }
+    public int TotalFood { get; set; }
 
     public int TotalReview { get; set; }
 
@@ -69,7 +69,7 @@ public class Shop : BaseEntity
 
     public virtual ICollection<StaffDelivery> StaffDeliveries { get; set; } = new List<StaffDelivery>();
 
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+    public virtual ICollection<Food> Foods { get; set; } = new List<Food>();
 
     public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
 
@@ -83,4 +83,6 @@ public class Shop : BaseEntity
     public virtual ICollection<OperatingSlot> OperatingSlots { get; set; } = new List<OperatingSlot>();
 
     public virtual ICollection<ShopCategory> ShopCategories { get; set; } = new List<ShopCategory>();
+
+    public virtual ICollection<OptionGroup> OptionGroups { get; set; } = new List<OptionGroup>();
 }
