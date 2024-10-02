@@ -19,7 +19,7 @@ public static class TimeUtils
         int minutes = time % 100;  // Extract minutes (last two digits)
 
         // Check if the time is in a valid range (hours: 00-23, minutes: 00 or 30)
-        return hours >= 0 && hours <= 23 && (minutes == 0 || minutes == 30);
+        return hours >= 0 && hours <= 23 && (minutes == 0 || minutes == FrameConstant.TIME_FRAME_IN_MINUTES);
     }
 
     public static int ConvertToMinutes(int time)

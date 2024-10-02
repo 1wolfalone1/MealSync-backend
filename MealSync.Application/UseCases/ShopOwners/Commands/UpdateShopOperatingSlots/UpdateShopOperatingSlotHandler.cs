@@ -56,8 +56,8 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
                 var operatingSlot = _operatingSlotRepository.GetById(request.Id);
                 var message = _systemResourceRepository.GetByResourceCode(MessageCode.W_OPERATING_SLOT_CHANGE_INCLUDE_PRODUCT.GetDescription(), new object[]
                 {
-                    operatingSlot.StartTime,
-                    operatingSlot.EndTime,
+                    TimeFrameUtils.GetTimeHoursFormat(operatingSlot.StartTime),
+                    TimeFrameUtils.GetTimeHoursFormat(operatingSlot.EndTime),
                     listProduct.Count,
                 });
 
