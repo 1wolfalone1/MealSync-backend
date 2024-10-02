@@ -28,6 +28,8 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
 
     public async Task<int> CountTopShop(long dormitoryId)
     {
+        // Query to count the number of shops that are associated with the given dormitory ID
+        // The shop must also be active and not have paused receiving orders
         return await DbSet
             .CountAsync(
                 shop => shop.ShopDormitories.Select(shopDormitory => shopDormitory.DormitoryId).Contains(dormitoryId)
@@ -38,6 +40,8 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
 
     public async Task<IEnumerable<Shop>> GetTopShop(long dormitoryId, int pageIndex, int pageSize)
     {
+        // Query to get a paginated list of shops associated with the given dormitory ID
+        // The shop must be active and not paused for receiving orders
         return await DbSet
             .Include(shop => shop.ShopDormitories)
             .Where(
