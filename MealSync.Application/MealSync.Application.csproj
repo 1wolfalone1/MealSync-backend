@@ -40,6 +40,7 @@
         <Folder Include="UseCases\OptionGroups\Queries\" />
         <Folder Include="UseCases\Roles\Queries\"/>
         <Folder Include="UseCases\ShopCategories\Queries\" />
+        <Folder Include="UseCases\Shops\Commands\" />
     </ItemGroup>
 
 </Project>

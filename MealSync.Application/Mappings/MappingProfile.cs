@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.OptionGroups.Models;
 using MealSync.Application.UseCases.ShopCategories.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
+using MealSync.Application.UseCases.Shops.Models;
 using MealSync.Domain.Entities;
 
 namespace MealSync.Application.Mappings;
@@ -53,5 +54,7 @@ public class MappingProfile : Profile
         CreateMap<Option, OptionGroupResponse.OptionResponse>();
         CreateMap<ShopCategory, ShopCategoryResponse>();
         CreateMap<Shop, ShopProfileResponse>();
+        CreateMap<Shop, ShopSummaryResponse>()
+            .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0));
     }
 }
