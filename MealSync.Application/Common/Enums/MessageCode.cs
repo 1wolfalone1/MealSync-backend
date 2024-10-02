@@ -17,9 +17,6 @@ public enum MessageCode
     [Description("E-Account-InvalidRole")]
     E_ACCOUNT_INVALID_ROLE,
 
-    [Description("E-Dormitory-NotFound")]
-    E_DORMITORY_NOT_FOUND,
-
     [Description("E-Account-PhoneNumberExist")]
     E_ACCOUNT_PHONE_NUMBER_EXIST,
 
@@ -53,4 +50,12 @@ public enum MessageCode
 
     [Description("E-OptionGroup-RadioValidate")]
     E_OPTION_GROUP_RADIO_VALIDATE,
+
+    // Building
+    [Description("E-Building-NotSelect")]
+    E_BUILDING_NOT_SELECT,
+
+    // Dormitory
+    [Description("E-Dormitory-NotFound")]
+    E_DORMITORY_NOT_FOUND,
 }
