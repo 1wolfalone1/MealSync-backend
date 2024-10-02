@@ -55,6 +55,9 @@ public enum MessageCode
     [Description("E-Building-NotSelect")]
     E_BUILDING_NOT_SELECT,
 
+    [Description("I-Building-Selected")]
+    E_BUILDING_SELECTED,
+
     // Dormitory
     [Description("E-Dormitory-NotFound")]
     E_DORMITORY_NOT_FOUND,
