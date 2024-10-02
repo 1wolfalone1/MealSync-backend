@@ -8,4 +8,9 @@ public class FavouriteRepository : BaseRepository<Favourite>, IFavouriteReposito
     public FavouriteRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
+
+    public Favourite? GetByShopIdAndAccountId(long shopId, long accountId)
+    {
+        return DbSet.FirstOrDefault(f => f.ShopId == shopId && f.CustomerId == accountId);
+    }
 }

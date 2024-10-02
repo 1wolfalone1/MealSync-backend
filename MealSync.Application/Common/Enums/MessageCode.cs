@@ -68,4 +68,14 @@ public enum MessageCode
 
     [Description("E-OptionGroup-RadioValidate")]
     E_OPTION_GROUP_RADIO_VALIDATE,
+
+    // Shop
+    [Description("E-Shop-NotFound")]
+    E_SHOP_NOT_FOUND,
+
+    [Description("E-Shop-MarkFavourite")]
+    E_SHOP_MARK_FAVOURITE,
+
+    [Description("E-Shop-UnMarkFavourite")]
+    E_SHOP_UN_MARK_FAVOURITE,
 }
