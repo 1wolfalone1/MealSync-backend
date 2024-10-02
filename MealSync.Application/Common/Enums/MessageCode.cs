@@ -40,6 +40,9 @@ public enum MessageCode
     [Description("E-ShopCategory-NotFound")]
     E_SHOP_CATEGORY_NOT_FOUND,
 
+    [Description("E-ShopCategory-NotEnough")]
+    E_SHOP_CATEGORY_NOT_ENOUGH,
+
     // Operating Slot
     [Description("E-OperatingSlot-NotFound")]
     E_OPERATING_SLOT_NOT_FOUND,
