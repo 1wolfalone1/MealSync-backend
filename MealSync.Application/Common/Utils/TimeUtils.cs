@@ -13,6 +13,15 @@ public static class TimeUtils
         return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
     }
 
+    public static bool IsValidOperatingSlot(int time)
+    {
+        int hours = time / 100;    // Extract hours (first two digits)
+        int minutes = time % 100;  // Extract minutes (last two digits)
+
+        // Check if the time is in a valid range (hours: 00-23, minutes: 00 or 30)
+        return hours >= 0 && hours <= 23 && (minutes == 0 || minutes == 30);
+    }
+
     public static int ConvertToMinutes(int time)
     {
         int hours = time / 100; // Extract hours

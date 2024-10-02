@@ -26,4 +26,8 @@ public static class Endpoints
 
     // Shop
     public const string GET_TOP_SHOP = "shop/top";
+
+    // Operating Slot
+    public const string ADD_OPERATING_SLOT = "shop-owner/operating-slot";
+    public const string UPDATE_OPERATING_SLOT = "shop-owner/operating-slot/{id}";
 }

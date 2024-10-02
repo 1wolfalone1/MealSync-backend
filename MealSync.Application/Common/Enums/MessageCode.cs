@@ -47,6 +47,21 @@ public enum MessageCode
     [Description("E-OperatingSlot-NotFound")]
     E_OPERATING_SLOT_NOT_FOUND,
 
+    [Description("E-OperatingSlot-CodeConfirmNotCorrect")]
+    E_OPERATING_SLOT_CODE_CONFIRM_NOT_CORRECT,
+
+    [Description("E-OperatingSlot-Overlap")]
+    E_OPERATING_SLOT_OVERLAP,
+
+    [Description("W-OperatingSlot-ChangeIncludeProduct")]
+    W_OPERATING_SLOT_CHANGE_INCLUDE_PRODUCT,
+
+    [Description("I-OperatingSlot-ChangeSuccess")]
+    I_OPERATING_SLOT_CHANGE_SUCCESS,
+
+    [Description("I-OperatingSlot-AddSuccess")]
+    I_OPERATING_SLOT_ADD_SUCCESS,
+
     // Option Group
     [Description("E-OptionGroup-NotFound")]
     E_OPTION_GROUP_NOT_FOUND,
