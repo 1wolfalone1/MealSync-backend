@@ -31,4 +31,8 @@ public static class Endpoints
     // Building
     public const string GET_BUILDING_BY_DORMITORY = "dormitory/{id}/building";
     public const string CHECK_BUILDING_SELECTION = "customer/building/selected/check";
+
+    // Operating Slot
+    public const string ADD_OPERATING_SLOT = "shop-owner/operating-slot";
+    public const string UPDATE_OPERATING_SLOT = "shop-owner/operating-slot/{id}";
 }
