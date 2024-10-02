@@ -29,16 +29,16 @@ jobs:
           echo "${{ secrets.DOCKER_HUB_SECRETS }}" | docker login -u 1wolfalone1 --password-stdin
           docker build -t 1wolfalone1/mealsync-api:latest .
           docker push 1wolfalone1/mealsync-api:latest
-  sync-argocd:
-    needs: update_images
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Sync ArgoCD Application
-        uses: omegion/argocd-actions@v1
-        with:
-          address: "argocd-system.mealsync.org"
-          token: ${{ secrets.ARGOCD_TOKEN }}
-          action: sync
-          appName: "backend-api"
-
+  # sync-argocd:
+  #   needs: update_images
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Sync ArgoCD Application
+  #       uses: omegion/argocd-actions@v1
+  #       with:
+  #         address: "argocd-system.mealsync.org"
+  #         token: ${{ secrets.ARGOCD_TOKEN }}
+  #         action: sync
+  #         appName: "backend-api"
+  #
