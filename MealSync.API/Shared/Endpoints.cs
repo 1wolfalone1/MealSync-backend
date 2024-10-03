@@ -6,8 +6,6 @@ public static class Endpoints
 
     // Auth
     public const string LOGIN_USERNAME_PASS = "auth/login";
-    public const string ALL_DORMITORY = "dormitory/all";
-    public const string GET_BUILDING_BY_DORMITORY = "dormitory/{id}/building";
     public const string SHOP_REGISTER = "auth/shop-register";
     public const string REGISTER_CUSTOMER = "auth/customer-register";
 
@@ -26,6 +24,13 @@ public static class Endpoints
 
     // Shop
     public const string GET_TOP_SHOP = "shop/top";
+
+    // Dormitory
+    public const string ALL_DORMITORY = "dormitory/all";
+
+    // Building
+    public const string GET_BUILDING_BY_DORMITORY = "dormitory/{id}/building";
+    public const string CHECK_BUILDING_SELECTION = "customer/building/selected/check";
 
     // Operating Slot
     public const string ADD_OPERATING_SLOT = "shop-owner/operating-slot";
