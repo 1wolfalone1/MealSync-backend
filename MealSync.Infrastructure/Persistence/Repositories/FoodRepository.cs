@@ -1,3 +1,4 @@
+using System.Collections;
 using MealSync.Application.Common.Repositories;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
@@ -20,38 +21,32 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
             .First(f => f.Id == id);
     }
 
-    public async Task<int> CountTopFood(long dormitoryId)
+    public async Task<(int TotalCount, IEnumerable<Food> Foods)> GetTopFood(long dormitoryId, int pageIndex, int pageSize)
     {
-        // Counts the number of active food items in a specific dormitory
-        return await DbSet
-            .CountAsync(
-                food => food.Status == FoodStatus.Active // The food item must be active
-                        && !food.IsSoldOut // The food item must not be sold out
-                        && food.Shop.ShopDormitories
-                            .Select(shopDormitory => shopDormitory.DormitoryId)
-                            .Contains(dormitoryId) // The shop must belong to the specified dormitory
-                        && !food.Shop.IsReceivingOrderPaused // The shop must be accepting orders
-                        && food.Shop.Status == ShopStatus.Active // The shop must be active
-            ).ConfigureAwait(false);
-    }
+        var query = DbSet.Where(food => food.Status == FoodStatus.Active // The food item must be active
+                                        && !food.IsSoldOut // The food item must not be sold out
+                                        && food.Shop.ShopDormitories
+                                            .Select(shopDormitory => shopDormitory.DormitoryId)
+                                            .Contains(dormitoryId) // The shop must be in the specified dormitory
+                                        && !food.Shop.IsReceivingOrderPaused // The shop must be accepting orders
+                                        && food.Shop.Status == ShopStatus.Active // The shop must be active
+        ).AsQueryable();
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+        List<Food> foods;
 
-    public async Task<IEnumerable<Food>> GetTopFood(long dormitoryId, int pageIndex, int pageSize)
-    {
-        // Filters food items based on various conditions
-        return await DbSet
-            .Where(food => food.Status == FoodStatus.Active // The food item must be active
-                           && !food.IsSoldOut // The food item must not be sold out
-                           && food.Shop.ShopDormitories
-                               .Select(shopDormitory => shopDormitory.DormitoryId)
-                               .Contains(dormitoryId) // The shop must be in the specified dormitory
-                           && !food.Shop.IsReceivingOrderPaused // The shop must be accepting orders
-                           && food.Shop.Status == ShopStatus.Active // The shop must be active
-            )
-            .OrderByDescending(food => food.TotalOrder) // Orders the result by the number of total orders in descending order
-            .Skip((pageIndex - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync()
-            .ConfigureAwait(false);
-    }
+        if (totalCount == 0)
+        {
+            foods = new List<Food>();
+        }
+        else
+        {
+            foods = await query.OrderByDescending(food => food.TotalOrder) // Orders the result by the number of total orders in descending order
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync()
+                .ConfigureAwait(false);
+        }
 
+        return (totalCount, foods);
+    }
 }

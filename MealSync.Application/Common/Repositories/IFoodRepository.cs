@@ -6,7 +6,5 @@ public interface IFoodRepository : IBaseRepository<Food>
 {
     Food GetByIdIncludeAllInfo(long id);
 
-    Task<int> CountTopFood(long dormitoryId);
-
-    Task<IEnumerable<Food>> GetTopFood(long dormitoryId, int pageIndex, int pageSize);
+    Task<(int TotalCount, IEnumerable<Food> Foods)> GetTopFood(long dormitoryId, int pageIndex, int pageSize);
 }

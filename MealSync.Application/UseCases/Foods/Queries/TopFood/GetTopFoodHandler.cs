@@ -43,27 +43,14 @@ public class GetTopFoodHandler : IQueryHandler<GetTopFoodQuery, Result>
         }
         else
         {
-            var totalTopFoods = await _foodRepository.CountTopFood(defaultBuilding.Building.DormitoryId).ConfigureAwait(false);
+            var topFoods = await _foodRepository.GetTopFood(
+                defaultBuilding.Building.DormitoryId, request.PageIndex, request.PageSize
+            ).ConfigureAwait(false);
+            var result = new PaginationResponse<FoodSummaryResponse>(
+                _mapper.Map<List<FoodSummaryResponse>>(topFoods.Foods), topFoods.TotalCount, request.PageIndex, request.PageSize
+            );
 
-            if (totalTopFoods == 0)
-            {
-                var result = new PaginationResponse<FoodSummaryResponse>(
-                    new List<FoodSummaryResponse>(), totalTopFoods, request.PageIndex, request.PageSize
-                );
-
-                return Result.Success(result);
-            }
-            else
-            {
-                var topFoods = await _foodRepository.GetTopFood(
-                    defaultBuilding.Building.DormitoryId, request.PageIndex, request.PageSize
-                ).ConfigureAwait(false);
-                var result = new PaginationResponse<FoodSummaryResponse>(
-                    _mapper.Map<List<FoodSummaryResponse>>(topFoods), totalTopFoods, request.PageIndex, request.PageSize
-                );
-
-                return Result.Success(result);
-            }
+            return Result.Success(result);
         }
     }
 }
