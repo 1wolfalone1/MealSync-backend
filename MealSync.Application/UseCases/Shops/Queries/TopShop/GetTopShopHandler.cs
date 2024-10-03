@@ -38,7 +38,7 @@ public class GetTopShopHandler : IQueryHandler<GetTopShopQuery, Result>
         if (defaultBuilding == null)
         {
             throw new InvalidBusinessException(
-                MessageCode.E_DORMITORY_NOT_FOUND.GetDescription()
+                MessageCode.E_BUILDING_NOT_SELECT.GetDescription()
             );
         }
         else
