@@ -53,11 +53,17 @@ public enum MessageCode
     [Description("W-OperatingSlot-ChangeIncludeProduct")]
     W_OPERATING_SLOT_CHANGE_INCLUDE_PRODUCT,
 
+    [Description("W-OperatingSlot-DeleteIncludeProduct")]
+    W_OPERATING_SLOT_DELETE_INCLUDE_PRODUCT,
+
     [Description("I-OperatingSlot-ChangeSuccess")]
     I_OPERATING_SLOT_CHANGE_SUCCESS,
 
     [Description("I-OperatingSlot-AddSuccess")]
     I_OPERATING_SLOT_ADD_SUCCESS,
+
+    [Description("I-OperatingSlot-DeleteSuccess")]
+    I_OPERATING_SLOT_DELETE_SUCCESS,
 
     // Option Group
     [Description("E-OptionGroup-NotFound")]

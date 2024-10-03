@@ -38,4 +38,5 @@ public static class Endpoints
 
     // Food
     public const string GET_TOP_FOOD = "food/top";
+    public const string DELETE_OPERATING_SLOT = "shop-owner/operating-slot/{id}";
 }

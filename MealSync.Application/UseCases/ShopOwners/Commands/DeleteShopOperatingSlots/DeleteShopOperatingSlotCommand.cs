@@ -1,5 +1,11 @@
-﻿namespace MealSync.Application.UseCases.ShopOwners.Commands.DeleteShopOperatingSlots;
+﻿using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Shared;
 
-public class DeleteShopOperatingSlot
+namespace MealSync.Application.UseCases.ShopOwners.Commands.DeleteShopOperatingSlots;
+
+public class DeleteShopOperatingSlotCommand : ICommand<Result>
 {
+    public long Id { get; set; }
+
+    public string? CodeConfirm { get; set; }
 }

@@ -101,20 +101,20 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
 
     private async Task ValidateAsync(UpdateShopOperatingSlotCommand request)
     {
-        var getCode = await _cacheService.GetCachedResponseAsync(string.Format(KEY_CACHE_CODE, _currentAccountService.GetCurrentAccount().Email)).ConfigureAwait(false);
-        if (getCode != null || !string.IsNullOrEmpty(request.CodeConfirm))
+        var operatingSlot = _operatingSlotRepository.Get(op => op.Id == request.Id
+                                                               && op.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
+        if (operatingSlot == default)
+            throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(), HttpStatusCode.NotFound);
+
+        if (!string.IsNullOrEmpty(request.CodeConfirm))
         {
+            var getCode = await _cacheService.GetCachedResponseAsync(string.Format(KEY_CACHE_CODE, _currentAccountService.GetCurrentAccount().Email)).ConfigureAwait(false);
             var requestCodeConfirm = JsonConvert.DeserializeObject<string>(getCode ?? string.Empty);
             if (requestCodeConfirm != request.CodeConfirm)
             {
                 throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_CODE_CONFIRM_NOT_CORRECT.GetDescription(), HttpStatusCode.Conflict);
             }
         }
-
-        var operatingSlot = _operatingSlotRepository.Get(op => op.Id == request.Id
-                                                               && op.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
-        if (operatingSlot == default)
-            throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(), HttpStatusCode.NotFound);
 
         var listOperatingSlot = _operatingSlotRepository.Get(x => x.ShopId == _currentPrincipalService.CurrentPrincipalId).ToList();
         if (listOperatingSlot != null && listOperatingSlot.Count > 1)
