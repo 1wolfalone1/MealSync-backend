@@ -56,5 +56,6 @@ public class MappingProfile : Profile
         CreateMap<Shop, ShopProfileResponse>();
         CreateMap<Shop, ShopSummaryResponse>()
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0));
+        CreateMap<Food, FoodSummaryResponse>();
     }
 }
