@@ -17,9 +17,6 @@ public enum MessageCode
     [Description("E-Account-InvalidRole")]
     E_ACCOUNT_INVALID_ROLE,
 
-    [Description("E-Dormitory-NotFound")]
-    E_DORMITORY_NOT_FOUND,
-
     [Description("E-Account-PhoneNumberExist")]
     E_ACCOUNT_PHONE_NUMBER_EXIST,
 
@@ -56,11 +53,17 @@ public enum MessageCode
     [Description("W-OperatingSlot-ChangeIncludeProduct")]
     W_OPERATING_SLOT_CHANGE_INCLUDE_PRODUCT,
 
+    [Description("W-OperatingSlot-DeleteIncludeProduct")]
+    W_OPERATING_SLOT_DELETE_INCLUDE_PRODUCT,
+
     [Description("I-OperatingSlot-ChangeSuccess")]
     I_OPERATING_SLOT_CHANGE_SUCCESS,
 
     [Description("I-OperatingSlot-AddSuccess")]
     I_OPERATING_SLOT_ADD_SUCCESS,
+
+    [Description("I-OperatingSlot-DeleteSuccess")]
+    I_OPERATING_SLOT_DELETE_SUCCESS,
 
     // Option Group
     [Description("E-OptionGroup-NotFound")]
@@ -78,4 +81,15 @@ public enum MessageCode
 
     [Description("E-Shop-UnMarkFavourite")]
     E_SHOP_UN_MARK_FAVOURITE,
+
+    // Building
+    [Description("E-Building-NotSelect")]
+    E_BUILDING_NOT_SELECT,
+
+    [Description("I-Building-Selected")]
+    E_BUILDING_SELECTED,
+
+    // Dormitory
+    [Description("E-Dormitory-NotFound")]
+    E_DORMITORY_NOT_FOUND,
 }
