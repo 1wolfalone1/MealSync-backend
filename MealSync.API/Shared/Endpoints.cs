@@ -40,4 +40,8 @@ public static class Endpoints
 
     // Food
     public const string GET_TOP_FOOD = "food/top";
+
+    // Storage
+    public const string UPLOAD_FILE = "storage/file/upload";
+    public const string DELETE_FILE = "storage/file/delete";
 }
