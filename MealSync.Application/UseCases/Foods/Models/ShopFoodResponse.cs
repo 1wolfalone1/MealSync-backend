@@ -4,6 +4,8 @@ public class ShopFoodResponse
 {
     public long CategoryId { get; set; }
 
+    public string CategoryName { get; set; } = null!;
+
     public List<FoodResponse> Foods { get; set; }
 
     public class FoodResponse
