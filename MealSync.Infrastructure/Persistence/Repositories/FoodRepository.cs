@@ -49,4 +49,19 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
         return (totalCount, foods);
     }
+
+    public async Task<List<(long CategoryId, IEnumerable<Food> Foods)>> GetShopFood(long shopId)
+    {
+        var groupedFoods = await DbSet
+            .Where(f => f.ShopId == shopId && f.Status == FoodStatus.Active && f.ShopCategoryId.HasValue)
+            .GroupBy(f => new { f.ShopCategoryId, f.ShopCategory!.DisplayOrder }) // Group by ShopCategoryId and include DisplayOrder
+            .OrderBy(g => g.Key.DisplayOrder) // Order by DisplayOrder of ShopCategory
+            .Select(g => new { CategoryId = g.Key.ShopCategoryId!.Value, Foods = g.ToList() })
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        return groupedFoods
+            .Select(g => (g.CategoryId, g.Foods.AsEnumerable()))
+            .ToList();
+    }
 }

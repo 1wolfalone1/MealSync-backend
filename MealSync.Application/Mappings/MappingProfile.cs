@@ -66,5 +66,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location))
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.OperatingSlots))
             .ForMember(dest => dest.Dormitories, opt => opt.MapFrom(src => src.ShopDormitories.Select(sd => sd.Dormitory)));
+        CreateMap<Food, ShopFoodResponse.FoodResponse>();
     }
 }
