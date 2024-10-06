@@ -57,5 +57,12 @@ public class MappingProfile : Profile
         CreateMap<Shop, ShopSummaryResponse>()
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0));
         CreateMap<Food, FoodSummaryResponse>();
+        CreateMap<Location, ShopInfoResponse.ShopLocationResponse>();
+        CreateMap<OperatingSlot, ShopInfoResponse.ShopOperatingSlotResponse>();
+        CreateMap<Dormitory, ShopInfoResponse.ShopDormitoryResponse>();
+        CreateMap<Shop, ShopInfoResponse>()
+            .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location))
+            .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.OperatingSlots))
+            .ForMember(dest => dest.Dormitories, opt => opt.MapFrom(src => src.ShopDormitories.Select(sd => sd.Dormitory)));
     }
 }
