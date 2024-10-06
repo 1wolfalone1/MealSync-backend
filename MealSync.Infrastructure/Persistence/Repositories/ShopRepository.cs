@@ -56,4 +56,13 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             .ToListAsync()
             .ConfigureAwait(false);
     }
+
+    public async Task<Shop?> GetShopInfoById(long id)
+    {
+        return await DbSet.Include(s => s.OperatingSlots)
+            .Include(s => s.Location)
+            .Include(s => s.ShopDormitories)
+            .ThenInclude(sd => sd.Dormitory)
+            .FirstOrDefaultAsync(s => s.Id == id && s.Status != ShopStatus.Deleted && s.Status != ShopStatus.UnApprove).ConfigureAwait(false);
+    }
 }
