@@ -43,25 +43,14 @@ public class GetTopShopHandler : IQueryHandler<GetTopShopQuery, Result>
         }
         else
         {
-            var totalTopShops = await _shopRepository.CountTopShop(defaultBuilding.Building.DormitoryId).ConfigureAwait(false);
+            var data = await _shopRepository.GetTopShop(
+                    defaultBuilding.Building.DormitoryId, request.PageIndex, request.PageSize)
+                .ConfigureAwait(false);
+            var result = new PaginationResponse<ShopSummaryResponse>(
+                _mapper.Map<List<ShopSummaryResponse>>(data.Shops), data.TotalCount, request.PageIndex, request.PageSize
+            );
 
-            if (totalTopShops == 0)
-            {
-                var result = new PaginationResponse<ShopSummaryResponse>(
-                    new List<ShopSummaryResponse>(), totalTopShops, request.PageIndex, request.PageSize
-                );
-
-                return Result.Success(result);
-            }
-            else
-            {
-                var topShops = await _shopRepository.GetTopShop(defaultBuilding.Building.DormitoryId, request.PageIndex, request.PageSize).ConfigureAwait(false);
-                var result = new PaginationResponse<ShopSummaryResponse>(
-                    _mapper.Map<List<ShopSummaryResponse>>(topShops), totalTopShops, request.PageIndex, request.PageSize
-                );
-
-                return Result.Success(result);
-            }
+            return Result.Success(result);
         }
     }
 }
