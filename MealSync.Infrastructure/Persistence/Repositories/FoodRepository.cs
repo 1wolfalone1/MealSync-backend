@@ -64,4 +64,9 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
             .Select(g => (g.CategoryId, g.Foods.AsEnumerable()))
             .ToList();
     }
+
+    public async Task<bool> CheckExistedAndActiveById(long id)
+    {
+        return await DbSet.AnyAsync(f => f.Id == id && f.Status == FoodStatus.Active);
+    }
 }

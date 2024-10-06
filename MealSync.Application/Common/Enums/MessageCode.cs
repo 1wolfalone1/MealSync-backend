@@ -95,4 +95,8 @@ public enum MessageCode
     // Dormitory
     [Description("E-Dormitory-NotFound")]
     E_DORMITORY_NOT_FOUND,
+
+    // Food
+    [Description("E-Food-NotFound")]
+    E_FOOD_NOT_FOUND,
 }

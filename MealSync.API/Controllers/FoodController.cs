@@ -1,6 +1,7 @@
 ﻿using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Foods.Commands.Create;
+using MealSync.Application.UseCases.Foods.Queries.FoodDetail;
 using MealSync.Application.UseCases.Foods.Queries.ShopFood;
 using MealSync.Application.UseCases.Foods.Queries.TopFood;
 
@@ -31,6 +32,15 @@ public class FoodController : BaseApiController
         return HandleResult(await Mediator.Send(new GetShopFoodQuery
         {
             ShopId = id,
+        }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_FOOD_DETAIL)]
+    public async Task<IActionResult> GetFoodDetail(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetFoodDetailQuery()
+        {
+            Id = id,
         }).ConfigureAwait(false));
     }
 }
