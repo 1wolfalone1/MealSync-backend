@@ -25,6 +25,7 @@ public static class Endpoints
     // Shop
     public const string GET_TOP_SHOP = "shop/top";
     public const string FAVOURITE_SHOP = "shop/{id}/favourite";
+    public const string GET_FAVOURITE_SHOP = "shop/favourite";
     public const string GET_SHOP_INFO = "shop/{id}/info";
 
     // Dormitory
