@@ -8,7 +8,7 @@ public interface IShopRepository : IBaseRepository<Shop>
 
     Task<Shop> GetByAccountId(long id);
 
-    Task<int> CountTopShop(long dormitoryId);
+    Task<Shop?> GetShopInfoById(long id);
 
-    Task<IEnumerable<Shop>> GetTopShop(long dormitoryId, int pageIndex, int pageSize);
+    Task<(int TotalCount, IEnumerable<Shop> Shops)> GetTopShop(long dormitoryId, int pageIndex, int pageSize);
 }

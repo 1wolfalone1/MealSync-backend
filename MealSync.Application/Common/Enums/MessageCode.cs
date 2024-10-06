@@ -82,6 +82,9 @@ public enum MessageCode
     [Description("E-Shop-UnMarkFavourite")]
     E_SHOP_UN_MARK_FAVOURITE,
 
+    [Description("E-Shop-Banned")]
+    E_SHOP_BANNED,
+
     // Building
     [Description("E-Building-NotSelect")]
     E_BUILDING_NOT_SELECT,
