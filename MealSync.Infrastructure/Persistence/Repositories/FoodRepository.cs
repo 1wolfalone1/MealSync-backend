@@ -65,8 +65,8 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
             .ToList();
     }
 
-    public async Task<bool> CheckExistedAndActiveById(long id)
+    public async Task<bool> CheckExistedAndActiveByIdAndShopId(long id, long shopId)
     {
-        return await DbSet.AnyAsync(f => f.Id == id && f.Status == FoodStatus.Active);
+        return await DbSet.AnyAsync(f => f.Id == id && f.ShopId == shopId && f.Status == FoodStatus.Active);
     }
 }

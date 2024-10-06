@@ -11,5 +11,5 @@ public interface IFoodRepository : IBaseRepository<Food>
 
     Task<List<(long CategoryId, IEnumerable<Food> Foods)>> GetShopFood(long shopId);
 
-    Task<bool> CheckExistedAndActiveById(long id);
+    Task<bool> CheckExistedAndActiveByIdAndShopId(long id, long shopId);
 }

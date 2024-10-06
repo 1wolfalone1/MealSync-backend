@@ -12,24 +12,38 @@ namespace MealSync.Application.UseCases.Foods.Queries.FoodDetail;
 public class GetFoodDetailHandler : IQueryHandler<GetFoodDetailQuery, Result>
 {
     private readonly IFoodRepository _foodRepository;
+    private readonly IShopRepository _shopRepository;
     private readonly IMapper _mapper;
 
-    public GetFoodDetailHandler(IFoodRepository foodRepository, IMapper mapper)
+    public GetFoodDetailHandler(IFoodRepository foodRepository, IMapper mapper, IShopRepository shopRepository)
     {
         _foodRepository = foodRepository;
         _mapper = mapper;
+        _shopRepository = shopRepository;
     }
 
     public async Task<Result<Result>> Handle(GetFoodDetailQuery request, CancellationToken cancellationToken)
     {
-        var existed = await _foodRepository.CheckExistedAndActiveById(request.Id).ConfigureAwait(false);
-        if (existed)
+        var shop = _shopRepository.GetById(request.ShopId);
+        if (shop == default)
         {
-            return Result.Success(_mapper.Map<FoodDetailResponse>(_foodRepository.GetByIdIncludeAllInfo(request.Id)));
+            throw new InvalidBusinessException(MessageCode.E_SHOP_NOT_FOUND.GetDescription(), new object[] { request.ShopId });
+        }
+        else if (shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned)
+        {
+            throw new InvalidBusinessException(MessageCode.E_SHOP_BANNED.GetDescription(), new object[] { request.ShopId });
         }
         else
         {
-            throw new InvalidBusinessException(MessageCode.E_FOOD_NOT_FOUND.GetDescription(), new object[] { request.Id });
+            var existed = await _foodRepository.CheckExistedAndActiveByIdAndShopId(request.FoodId, request.ShopId).ConfigureAwait(false);
+            if (existed)
+            {
+                return Result.Success(_mapper.Map<FoodDetailResponse>(_foodRepository.GetByIdIncludeAllInfo(request.FoodId)));
+            }
+            else
+            {
+                throw new InvalidBusinessException(MessageCode.E_FOOD_NOT_FOUND.GetDescription(), new object[] { request.FoodId });
+            }
         }
     }
 }

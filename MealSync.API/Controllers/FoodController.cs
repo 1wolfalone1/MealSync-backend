@@ -36,11 +36,12 @@ public class FoodController : BaseApiController
     }
 
     [HttpGet(Endpoints.GET_FOOD_DETAIL)]
-    public async Task<IActionResult> GetFoodDetail(long id)
+    public async Task<IActionResult> GetFoodDetail(long foodId, long shopId)
     {
-        return HandleResult(await Mediator.Send(new GetFoodDetailQuery()
+        return HandleResult(await Mediator.Send(new GetFoodDetailQuery
         {
-            Id = id,
+            FoodId = foodId,
+            ShopId = shopId,
         }).ConfigureAwait(false));
     }
 }
