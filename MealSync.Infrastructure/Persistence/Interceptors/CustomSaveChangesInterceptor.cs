@@ -40,8 +40,10 @@ public class CustomSaveChangesInterceptor : SaveChangesInterceptor
                 if (property.PropertyInfo.PropertyType == typeof(DateTimeOffset))
                 {
                     var currentValue = (DateTimeOffset)entry.CurrentValues[property];
+
                     // Adjust to UTC+7
-                    entry.CurrentValues[property] = currentValue.AddHours(7);
+                    if (currentValue != null)
+                        entry.CurrentValues[property] = currentValue.AddHours(7);
                 }
             }
         }
