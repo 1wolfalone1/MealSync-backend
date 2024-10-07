@@ -13,16 +13,13 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
 
     public async Task<IEnumerable<Promotion>> GetShopAvailablePromotionsByShopId(long id)
     {
-        // Get UTC+7 timezone
-        var utcPlus7 = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-        // Convert current time to UTC+7
-        var currentTimeInUtcPlus7 = TimeZoneInfo.ConvertTime(DateTimeOffset.Now, utcPlus7);
+        var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
 
         return await DbSet.Where(
             p => p.ShopId == id
                  && p.Status == PromotionStatus.Active
                  && p.NumberOfUsed < p.UsageLimit
-                 && p.EndDate >= currentTimeInUtcPlus7)
-            .ToListAsync();
+                 && p.EndDate >= now)
+            .ToListAsync().ConfigureAwait(false);
     }
 }

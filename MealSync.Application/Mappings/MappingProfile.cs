@@ -71,7 +71,9 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.OperatingSlots))
             .ForMember(dest => dest.Dormitories, opt => opt.MapFrom(src => src.ShopDormitories.Select(sd => sd.Dormitory)));
         CreateMap<Food, ShopFoodResponse.FoodResponse>();
-        CreateMap<Promotion, PromotionSummaryResponse>();
+        CreateMap<Promotion, PromotionSummaryResponse>()
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.ToUnixTimeMilliseconds()))
+            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToUnixTimeMilliseconds()));
         CreateMap<PlatformCategory, PlatformCategoryResponse>();
     }
 }
