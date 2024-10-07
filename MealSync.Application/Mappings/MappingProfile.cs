@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.Buildings.Models;
 using MealSync.Application.UseCases.Favourites.Models;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.OptionGroups.Models;
+using MealSync.Application.UseCases.Promotions.Models;
 using MealSync.Application.UseCases.PlatformCategory.Models;
 using MealSync.Application.UseCases.ShopCategories.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
@@ -70,6 +71,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.OperatingSlots))
             .ForMember(dest => dest.Dormitories, opt => opt.MapFrom(src => src.ShopDormitories.Select(sd => sd.Dormitory)));
         CreateMap<Food, ShopFoodResponse.FoodResponse>();
+        CreateMap<Promotion, PromotionSummaryResponse>();
         CreateMap<PlatformCategory, PlatformCategoryResponse>();
     }
 }

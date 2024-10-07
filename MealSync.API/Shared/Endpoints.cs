@@ -29,6 +29,7 @@ public static class Endpoints
     public const string GET_FAVOURITE_SHOP = "shop/favourite";
     public const string GET_SHOP_INFO = "shop/{id}/info";
     public const string GET_SHOP_FOOD = "shop/{id}/food";
+    public const string GET_SHOP_PROMOTION = "shop/{id}/promotion";
 
     // Dormitory
     public const string ALL_DORMITORY = "dormitory/all";
@@ -44,6 +45,7 @@ public static class Endpoints
 
     // Food
     public const string GET_TOP_FOOD = "food/top";
+    public const string GET_FOOD_DETAIL = "shop/{shopId}/food/{foodId}";
 
     // Storage
     public const string UPLOAD_FILE = "storage/file/upload";

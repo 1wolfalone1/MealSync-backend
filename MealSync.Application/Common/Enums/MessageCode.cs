@@ -96,6 +96,10 @@ public enum MessageCode
     [Description("E-Dormitory-NotFound")]
     E_DORMITORY_NOT_FOUND,
 
+    // Food
+    [Description("E-Food-NotFound")]
+    E_FOOD_NOT_FOUND,
+
     // Shop
     [Description("E-Shop-NotAbleToInActive")]
     E_SHOP_NOT_ABLE_TO_IN_ACTIVE,
