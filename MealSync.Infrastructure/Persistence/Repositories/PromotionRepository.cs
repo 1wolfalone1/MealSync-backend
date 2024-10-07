@@ -13,11 +13,13 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
 
     public async Task<IEnumerable<Promotion>> GetShopAvailablePromotionsByShopId(long id)
     {
+        var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+
         return await DbSet.Where(
             p => p.ShopId == id
                  && p.Status == PromotionStatus.Active
                  && p.NumberOfUsed < p.UsageLimit
-                 && p.EndDate >= DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7)))
+                 && p.EndDate >= now)
             .ToListAsync().ConfigureAwait(false);
     }
 }
