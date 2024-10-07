@@ -51,6 +51,9 @@ public static class Endpoints
     public const string UPLOAD_FILE = "storage/file/upload";
     public const string DELETE_FILE = "storage/file/delete";
 
-    //Platform category
+    // Platform category
     public const string GET_ALL_PLATFORM_CATEGORY = "platform-category";
+
+    // Customer Building
+    public const string UPDATE_CUSTOMER_BUILDING = "customer/building/update";
 }
