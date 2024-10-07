@@ -39,6 +39,7 @@ public class GetShopFoodHandler : IQueryHandler<GetShopFoodQuery, Result>
             var response = data.Select(g => new ShopFoodResponse
             {
                 CategoryId = g.CategoryId,
+                CategoryName = g.CategoryName,
                 Foods = _mapper.Map<List<ShopFoodResponse.FoodResponse>>(g.Foods),
             }).ToList();
             return Result.Success(response);
