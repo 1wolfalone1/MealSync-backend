@@ -12,6 +12,7 @@ public class CustomerBuildingRepository : BaseRepository<CustomerBuilding>, ICus
 
     public CustomerBuilding? GetDefaultByCustomerId(long id)
     {
-        return DbSet.SingleOrDefault(cb => cb.CustomerId == id && cb.IsDefault);
+        return DbSet.Include(cb => cb.Building)
+            .SingleOrDefault(cb => cb.CustomerId == id && cb.IsDefault);
     }
 }
