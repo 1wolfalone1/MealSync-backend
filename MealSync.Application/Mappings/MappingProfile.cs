@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Application.UseCases.Dormitories.Models;
 using MealSync.Application.UseCases.Buildings.Models;
 using MealSync.Application.UseCases.Favourites.Models;
@@ -58,6 +59,7 @@ public class MappingProfile : Profile
         CreateMap<Shop, ShopProfileResponse>();
         CreateMap<Shop, ShopSummaryResponse>()
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0));
+        CreateMap<Order, OrderNotification>();
         CreateMap<Food, FoodSummaryResponse>();
         CreateMap<Shop, ShopFavouriteResponse>();
         CreateMap<Location, ShopInfoResponse.ShopLocationResponse>();

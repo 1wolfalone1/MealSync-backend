@@ -59,4 +59,14 @@ public class CacheService : ICacheService, IBaseService
             }
         }
     }
+
+    public async Task<string> GenerateAndSetCodeToCacheAsync(string key, int secondsToExpire)
+    {
+        // Generate code an set to cache
+        var code = new Random().Next(1000, 10000).ToString();
+        // Set to cache
+        await SetCacheResponseAsync(key, code, TimeSpan.FromSeconds(secondsToExpire))
+            .ConfigureAwait(false);
+        return code;
+    }
 }
