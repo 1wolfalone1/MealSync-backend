@@ -42,6 +42,7 @@ builder.Services.AddSwaggerGen(opt =>
         Scheme = "bearer"
     });
 });
+builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 

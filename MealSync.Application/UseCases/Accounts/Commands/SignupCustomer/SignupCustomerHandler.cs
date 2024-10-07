@@ -18,6 +18,7 @@ public class SignupCustomerHandler : ICommandHandler<SignupCustomerCommand, Resu
     private readonly ILogger<SignupCustomerHandler> _logger;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IAccountRepository _accountRepository;
+    private readonly ICustomerRepository _customerRepository;
     private readonly IEmailService _emailService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISystemResourceRepository _systemResourceRepository;
@@ -26,8 +27,7 @@ public class SignupCustomerHandler : ICommandHandler<SignupCustomerCommand, Resu
     public SignupCustomerHandler(
         ILogger<SignupCustomerHandler> logger, IJwtTokenService jwtTokenService,
         IAccountRepository accountRepository, IEmailService emailService, IUnitOfWork unitOfWork,
-        ISystemResourceRepository systemResourceRepository, ICacheService cacheService
-    )
+        ISystemResourceRepository systemResourceRepository, ICacheService cacheService, ICustomerRepository customerRepository)
     {
         _logger = logger;
         _jwtTokenService = jwtTokenService;
@@ -36,6 +36,7 @@ public class SignupCustomerHandler : ICommandHandler<SignupCustomerCommand, Resu
         _unitOfWork = unitOfWork;
         _systemResourceRepository = systemResourceRepository;
         _cacheService = cacheService;
+        _customerRepository = customerRepository;
     }
 
     public async Task<Result<Result>> Handle(SignupCustomerCommand request, CancellationToken cancellationToken)
@@ -105,10 +106,12 @@ public class SignupCustomerHandler : ICommandHandler<SignupCustomerCommand, Resu
 
             var refreshToken = _jwtTokenService.GenerateJwtToken(newAccount);
             newAccount.RefreshToken = refreshToken;
+            Customer customer = new Customer();
+            customer.Account = newAccount;
             try
             {
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-                await _accountRepository.AddAsync(newAccount);
+                await _customerRepository.AddAsync(customer);
                 SendAndSaveVerificationCode(request.Email);
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
             }

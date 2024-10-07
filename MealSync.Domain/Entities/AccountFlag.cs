@@ -23,4 +23,30 @@ public class AccountFlag : BaseEntity
     public string Description { get; set; }
 
     public virtual Account Account { get; set; }
+
+    public AccountFlag()
+    {
+    }
+
+    public AccountFlag(AccountActionTypes actionType, long accountId, object? data = null)
+    {
+        AccountId = accountId;
+        ActionType = actionType;
+
+        switch (actionType)
+        {
+            case AccountActionTypes.CancelConfirmOrder:
+            {
+                TargetId = string.Empty;
+                Description = "Bạn bị đánh cờ vì đạt 5 lần cảnh báo từ sàn";
+                break;
+            }
+
+            default:
+            {
+                Description = ActionType.ToString();
+                break;
+            }
+        }
+    }
 }

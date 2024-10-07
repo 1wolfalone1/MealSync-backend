@@ -1,6 +1,7 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopProfile;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopStatus;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
 using MealSync.Application.UseCases.Shops.Queries.ShopInfo;
 using MealSync.Application.UseCases.Shops.Queries.TopShop;
@@ -27,6 +28,7 @@ public class ShopController : BaseApiController
     }
 
     [HttpGet(Endpoints.GET_TOP_SHOP)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
     public async Task<IActionResult> GetTopShop(int pageIndex, int pageSize)
     {
         return HandleResult(await Mediator.Send(new GetTopShopQuery
@@ -36,7 +38,15 @@ public class ShopController : BaseApiController
         }).ConfigureAwait(false));
     }
 
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpPut(Endpoints.UPDATE_SHOP_ACTIVE_INACTIVE)]
+    public async Task<IActionResult> UpdateShopStatusActiveInactive([FromBody] UpdateShopStatusInactiveActiveCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
     [HttpGet(Endpoints.GET_SHOP_INFO)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
     public async Task<IActionResult> GetTopShop(long id)
     {
         return HandleResult(await Mediator.Send(new GetShopInfoQuery()

@@ -50,7 +50,7 @@ public static class TimeUtils
 
     public static List<(int SegmentStart, int SegmentEnd)> ConvertToTimeSegment(int startTime, int endTime)
     {
-        List<(int SegmentStart, int SegmentEnd)> timeSegments = [];
+        List<(int SegmentStart, int SegmentEnd)> timeSegments = new List<(int SegmentStart, int SegmentEnd)>();
 
         int currentMinutes = ConvertToMinutes(startTime);
         int endMinutes = ConvertToMinutes(endTime);

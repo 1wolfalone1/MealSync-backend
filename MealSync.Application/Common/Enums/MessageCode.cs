@@ -95,4 +95,27 @@ public enum MessageCode
     // Dormitory
     [Description("E-Dormitory-NotFound")]
     E_DORMITORY_NOT_FOUND,
+
+    // Food
+    [Description("E-Food-NotFound")]
+    E_FOOD_NOT_FOUND,
+
+    // Shop
+    [Description("E-Shop-NotAbleToInActive")]
+    E_SHOP_NOT_ABLE_TO_IN_ACTIVE,
+
+    [Description("E-Shop-NotAbleToActive")]
+    E_SHOP_NOT_ABLE_TO_ACTIVE,
+
+    [Description("W-Shop-HaveOrderToInActive")]
+    W_SHOP_HAVE_ORDER_TO_INACTIVE,
+
+    [Description("E-Shop-CodeConfirmNotCorrect")]
+    E_SHOP_CODE_CONFIRM_NOT_CORRECT,
+
+    [Description("I-Shop-ChangeStatusToActiveSuccess")]
+    I_SHOP_CHANGE_STATUS_TO_ACTIVE_SUCC,
+
+    [Description("I-Shop-ChangeStatusToInActiveSuccess")]
+    I_SHOP_CHANGE_STATUS_TO_INAC_SUCC,
 }

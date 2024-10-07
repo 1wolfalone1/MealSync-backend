@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Configuration;
+using Microsoft.EntityFrameworkCore;
 using MealSync.Domain.Entities;
 using MealSync.Infrastructure.Persistence.Interceptors;
 
 namespace MealSync.Infrastructure.Persistence.Contexts;
 
-public partial class MealSyncContext : DbContext
+public class MealSyncContext : DbContext
 {
     private readonly CustomSaveChangesInterceptor _customSaveChangesInterceptor;
 
