@@ -11,10 +11,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="CorePush" Version="4.2.1" />
         <PackageReference Include="AWSSDK.S3" Version="3.7.404.1" />
         <PackageReference Include="Dapper" Version="2.1.35"/>
         <PackageReference Include="FirebaseAdmin" Version="3.0.1"/>
-        <PackageReference Include="Google.Cloud.Firestore" Version="3.8.0"/>
+        <PackageReference Include="Google.Cloud.Firestore" Version="3.9.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.5"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.12.0-2.final">
             <PrivateAssets>all</PrivateAssets>
@@ -45,6 +46,7 @@
     <ItemGroup>
         <Folder Include="Common\Exceptions\"/>
         <Folder Include="Persistence\Migrations\"/>
+        <Folder Include="Services\Notifications\SignalR\" />
     </ItemGroup>
 
     <ItemGroup>

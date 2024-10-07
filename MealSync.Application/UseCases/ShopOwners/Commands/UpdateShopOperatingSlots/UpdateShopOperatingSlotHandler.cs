@@ -26,8 +26,6 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
     private readonly ICurrentAccountService _currentAccountService;
     private readonly ILogger<UpdateShopOperatingSlotHandler> _logger;
 
-    private const string KEY_CACHE_CODE = "{0}-CodeConfirmChangeOperatingSlot";
-
     public UpdateShopOperatingSlotHandler(IShopRepository shopRepository, IOperatingSlotRepository operatingSlotRepository, IUnitOfWork unitOfWork, ILogger<UpdateShopOperatingSlotHandler> logger,
         IFoodOperatingSlotRepository foodOperatingSlotRepository, ISystemResourceRepository systemResourceRepository, ICurrentPrincipalService currentPrincipalService, ICacheService cacheService,
         ICurrentAccountService currentAccountService)
@@ -48,7 +46,7 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
         // Validate
         await ValidateAsync(request).ConfigureAwait(false);
 
-        if (string.IsNullOrEmpty(request.CodeConfirm))
+        if (!request.IsConfirm)
         {
             var listProduct = _foodOperatingSlotRepository.Get(op => op.OperatingSlotId == request.Id).ToList();
             if (listProduct != null && listProduct.Count > 0)
@@ -61,16 +59,10 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
                     listProduct.Count,
                 });
 
-                // Generate code an set to cache
-                var code = new Random().Next(1000, 10000).ToString();
-                // Set to cache
-                await _cacheService.SetCacheResponseAsync(string.Format(KEY_CACHE_CODE, _currentAccountService.GetCurrentAccount().Email), code, TimeSpan.FromSeconds(RedisConstant.TIME_ACCEPT_CHANGE_OPERATING_SLOT))
-                    .ConfigureAwait(false);
-
                 return Result.Warning(new
                 {
+                    Code = MessageCode.W_OPERATING_SLOT_CHANGE_INCLUDE_PRODUCT.GetDescription(),
                     Message = message,
-                    CodeConfirm = code,
                 });
             }
         }
@@ -84,7 +76,6 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
             _operatingSlotRepository.Update(operatingSlot);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
-            await this._cacheService.RemoveCacheResponseAsync(string.Format(KEY_CACHE_CODE, _currentAccountService.GetCurrentAccount().Email)).ConfigureAwait(false);
             return Result.Success(new
             {
                 Code = MessageCode.I_OPERATING_SLOT_CHANGE_SUCCESS.GetDescription(),
@@ -105,16 +96,6 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
                                                                && op.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
         if (operatingSlot == default)
             throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(), HttpStatusCode.NotFound);
-
-        if (!string.IsNullOrEmpty(request.CodeConfirm))
-        {
-            var getCode = await _cacheService.GetCachedResponseAsync(string.Format(KEY_CACHE_CODE, _currentAccountService.GetCurrentAccount().Email)).ConfigureAwait(false);
-            var requestCodeConfirm = JsonConvert.DeserializeObject<string>(getCode ?? string.Empty);
-            if (requestCodeConfirm != request.CodeConfirm)
-            {
-                throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_CODE_CONFIRM_NOT_CORRECT.GetDescription(), HttpStatusCode.Conflict);
-            }
-        }
 
         var listOperatingSlot = _operatingSlotRepository.Get(x => x.ShopId == _currentPrincipalService.CurrentPrincipalId).ToList();
         if (listOperatingSlot != null && listOperatingSlot.Count > 1)

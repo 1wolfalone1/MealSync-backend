@@ -2,6 +2,5 @@
 
 public enum AccountActionTypes
 {
-    Cancel = 1,
-    Refund = 2,
+    CancelConfirmOrder = 1,
 }

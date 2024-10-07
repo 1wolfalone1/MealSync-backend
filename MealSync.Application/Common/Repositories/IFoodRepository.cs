@@ -9,7 +9,7 @@ public interface IFoodRepository : IBaseRepository<Food>
 
     Task<(int TotalCount, IEnumerable<Food> Foods)> GetTopFood(long dormitoryId, int pageIndex, int pageSize);
 
-    Task<List<(long CategoryId, IEnumerable<Food> Foods)>> GetShopFood(long shopId);
-
     Task<bool> CheckExistedAndActiveByIdAndShopId(long id, long shopId);
+
+    Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopFood(long shopId);
 }

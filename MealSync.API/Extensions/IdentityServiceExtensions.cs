@@ -4,17 +4,21 @@ using System.Text.Json;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Dapper;
+using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Shared;
 using MealSync.Infrastructure.Persistence.Contexts;
 using MealSync.Infrastructure.Persistence.Interceptors;
 using MealSync.Infrastructure.Persistence.Repositories;
 using MealSync.Infrastructure.Services;
 using MealSync.Infrastructure.Services.Dapper;
+using MealSync.Infrastructure.Services.Notifications;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MealSync.Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using StackExchange.Redis;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace MealSync.API.Extensions;
 
@@ -90,6 +94,9 @@ public static class IdentityServiceExtensions
             RefreshTokenExpire = int.Parse(config["REFRESH_TOKEN_TIME_EXPIRED_IN_HOURS"])
         };
 
+        // Set Firebase Setting
+        FirebaseConfigLoader.LoadFirebaseCredentials(config["GOOGLE_APPLICATION_CREDENTIALS"]);
+
         // Validate the JwtSettings instance using DataAnnotations
         var validationContext = new ValidationContext(jwtSetting);
         Validator.ValidateObject(jwtSetting, validationContext, validateAllProperties: true);
@@ -134,6 +141,12 @@ public static class IdentityServiceExtensions
             options.UseMySql(config["DATABASE_URL"], ServerVersion.Parse("8.0.33-mysql"))
                 .UseSnakeCaseNamingConvention();
         });
+
+        // Add notification service
+        services.AddSingleton<IMobileNotificationService, FirebaseNotificationService>();
+        services.AddSingleton<INotificationProvider, NotificationProvider>();
+        services.AddSingleton<INotifierSerivce, NotifierSerivce>();
+        services.AddSingleton<INotificationFactory, NotificationFactory>();
 
         // Add Error Config
         var resourceRepository = services.BuildServiceProvider().GetService<ISystemResourceRepository>();

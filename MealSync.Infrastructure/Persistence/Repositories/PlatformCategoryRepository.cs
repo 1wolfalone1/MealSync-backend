@@ -14,4 +14,9 @@ public class PlatformCategoryRepository : BaseRepository<PlatformCategory>, IPla
     {
         return DbSet.Any(pc => pc.Id == id);
     }
+
+    public async Task<IEnumerable<PlatformCategory>> GetAll()
+    {
+        return await DbSet.OrderBy(p => p.DisplayOrder).ToListAsync().ConfigureAwait(false);
+    }
 }

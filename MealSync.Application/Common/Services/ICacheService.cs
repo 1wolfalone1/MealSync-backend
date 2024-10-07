@@ -7,4 +7,6 @@ public interface ICacheService
     Task<string?> GetCachedResponseAsync(string key);
 
     Task RemoveCacheResponseAsync(string pattern);
+
+    Task<string> GenerateAndSetCodeToCacheAsync(string key, int secondsToExpire);
 }
