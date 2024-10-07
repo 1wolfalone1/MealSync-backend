@@ -27,6 +27,7 @@ public class ShopController : BaseApiController
     }
 
     [HttpGet(Endpoints.GET_TOP_SHOP)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
     public async Task<IActionResult> GetTopShop(int pageIndex, int pageSize)
     {
         return HandleResult(await Mediator.Send(new GetTopShopQuery
@@ -37,6 +38,7 @@ public class ShopController : BaseApiController
     }
 
     [HttpGet(Endpoints.GET_SHOP_INFO)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
     public async Task<IActionResult> GetTopShop(long id)
     {
         return HandleResult(await Mediator.Send(new GetShopInfoQuery()
