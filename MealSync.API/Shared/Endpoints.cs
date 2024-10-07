@@ -47,4 +47,7 @@ public static class Endpoints
     // Storage
     public const string UPLOAD_FILE = "storage/file/upload";
     public const string DELETE_FILE = "storage/file/delete";
+
+    //Platform category
+    public const string GET_ALL_PLATFORM_CATEGORY = "platform-category";
 }
