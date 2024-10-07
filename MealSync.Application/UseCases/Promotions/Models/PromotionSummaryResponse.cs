@@ -20,9 +20,9 @@ public class PromotionSummaryResponse
 
     public double MinOrdervalue { get; set; }
 
-    public DateTimeOffset StartDate { get; set; }
+    public long StartDate { get; set; }
 
-    public DateTimeOffset EndDate { get; set; }
+    public long EndDate { get; set; }
 
     public PromotionApplyTypes ApplyType { get; set; }
 }

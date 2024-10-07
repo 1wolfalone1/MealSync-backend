@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MealSync.API.Controllers;
 
-[Microsoft.AspNetCore.Components.Route(Endpoints.BASE)]
+[Route(Endpoints.BASE)]
 public class PromotionController : BaseApiController
 {
     [HttpGet(Endpoints.GET_SHOP_PROMOTION)]
