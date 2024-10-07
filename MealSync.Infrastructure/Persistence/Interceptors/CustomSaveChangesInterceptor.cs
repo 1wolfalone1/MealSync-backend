@@ -41,7 +41,7 @@ public class CustomSaveChangesInterceptor : SaveChangesInterceptor
                 {
                     var currentValue = (DateTimeOffset)entry.CurrentValues[property];
                     // Adjust to UTC+7
-                    entry.CurrentValues[property] = currentValue.ToOffset(TimeSpan.FromHours(7));
+                    entry.CurrentValues[property] = currentValue.AddHours(7);
                 }
             }
         }
