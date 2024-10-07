@@ -24,7 +24,13 @@ public class Notification : BaseEntity
     [Column(TypeName = "text")]
     public string Data { get; set; }
 
-    public NotificationEntityType EntityType { get; set; }
+    public NotificationEntityTypes EntityType { get; set; }
+
+    [NotMapped]
+    public NotificationTypes Type { get; set; }
+
+    [NotMapped]
+    public bool IsSave { get; set; }
 
     public bool IsRead { get; set; }
 

@@ -7,5 +7,5 @@ public class DeleteShopOperatingSlotCommand : ICommand<Result>
 {
     public long Id { get; set; }
 
-    public string? CodeConfirm { get; set; }
+    public bool IsConfirm { get; set; }
 }

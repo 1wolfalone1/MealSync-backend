@@ -14,7 +14,7 @@ public class AccountPermission : BaseEntity
 
     public AccountPermissionMethods Method { get; set; }
 
-    public Permission Permission { get; set; }
+    public virtual Permission Permission { get; set; }
 
-    public Account Account { get; set; }
+    public virtual Account Account { get; set; }
 }

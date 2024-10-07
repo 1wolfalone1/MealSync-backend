@@ -1,6 +1,6 @@
 ﻿namespace MealSync.Domain.Enums;
 
-public enum NotificationEntityType
+public enum NotificationEntityTypes
 {
     Account = 0,
     Order = 1,

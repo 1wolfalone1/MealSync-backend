@@ -13,6 +13,7 @@ public static class Endpoints
     public const string CREATE_FOOD = "shop-owner/food/create";
     public const string GET_SHOP_PROFILE = "shop-owner/profile";
     public const string UPDATE_SHOP_PROFILE = "shop-owner/profile";
+    public const string UPDATE_SHOP_ACTIVE_INACTIVE = "shop-owner/shop-owner/active-inactive";
 
     // Option Group
     public const string CREATE_OPTION_GROUP = "shop-owner/option-group/create";
