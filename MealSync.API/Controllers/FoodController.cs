@@ -2,6 +2,7 @@
 using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Foods.Commands.Create;
+using MealSync.Application.UseCases.Foods.Commands.Update;
 using MealSync.Application.UseCases.Foods.Queries.FoodDetail;
 using MealSync.Application.UseCases.Foods.Queries.ShopFood;
 using MealSync.Application.UseCases.Foods.Queries.TopFood;
@@ -48,5 +49,12 @@ public class FoodController : BaseApiController
             FoodId = foodId,
             ShopId = shopId,
         }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_FOOD)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateFood(UpdateFoodCommand request)
+    {
+        return HandleResult(await Mediator.Send(request));
     }
 }
