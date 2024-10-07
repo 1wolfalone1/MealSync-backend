@@ -11,6 +11,6 @@ public class UpdateShopOperatingSlotCommand : ICommand<Result>
 
     public int EndTime { get; set; }
 
-    public string? CodeConfirm { get; set; }
+    public bool IsConfirm { get; set; }
 
 }

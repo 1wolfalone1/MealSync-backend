@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Application.UseCases.Dormitories.Models;
 using MealSync.Application.UseCases.Buildings.Models;
 using MealSync.Application.UseCases.Favourites.Models;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.OptionGroups.Models;
+using MealSync.Application.UseCases.PlatformCategory.Models;
 using MealSync.Application.UseCases.ShopCategories.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Application.UseCases.Shops.Models;
@@ -57,6 +59,7 @@ public class MappingProfile : Profile
         CreateMap<Shop, ShopProfileResponse>();
         CreateMap<Shop, ShopSummaryResponse>()
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0));
+        CreateMap<Order, OrderNotification>();
         CreateMap<Food, FoodSummaryResponse>();
         CreateMap<Shop, ShopFavouriteResponse>();
         CreateMap<Location, ShopInfoResponse.ShopLocationResponse>();
@@ -67,5 +70,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.OperatingSlots))
             .ForMember(dest => dest.Dormitories, opt => opt.MapFrom(src => src.ShopDormitories.Select(sd => sd.Dormitory)));
         CreateMap<Food, ShopFoodResponse.FoodResponse>();
+        CreateMap<PlatformCategory, PlatformCategoryResponse>();
     }
 }
