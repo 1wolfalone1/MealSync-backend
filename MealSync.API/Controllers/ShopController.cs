@@ -1,6 +1,7 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopProfile;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopStatus;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
 using MealSync.Application.UseCases.Shops.Queries.ShopInfo;
 using MealSync.Application.UseCases.Shops.Queries.TopShop;
@@ -35,6 +36,13 @@ public class ShopController : BaseApiController
             PageIndex = pageIndex,
             PageSize = pageSize,
         }).ConfigureAwait(false));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpPut(Endpoints.UPDATE_SHOP_ACTIVE_INACTIVE)]
+    public async Task<IActionResult> UpdateShopStatusActiveInactive([FromBody] UpdateShopStatusInactiveActiveCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
     [HttpGet(Endpoints.GET_SHOP_INFO)]

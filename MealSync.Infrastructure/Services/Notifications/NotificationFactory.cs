@@ -1,0 +1,62 @@
+﻿using AutoMapper;
+using MealSync.Application.Common.Constants;
+using MealSync.Application.Common.Enums;
+using MealSync.Application.Common.Repositories;
+using MealSync.Application.Common.Services.Notifications;
+using MealSync.Application.Common.Services.Notifications.Models;
+using MealSync.Domain.Entities;
+using MealSync.Domain.Enums;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+
+namespace MealSync.Infrastructure.Services.Notifications;
+
+public class NotificationFactory : INotificationFactory
+{
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public NotificationFactory(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
+
+    public Notification CreateOrderRejectedNotification(Order order, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_REJECT.GetDescription(), order.Id),
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateOrderCancelNotification(Order order, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_CANCEL.GetDescription(), order.Id),
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+}

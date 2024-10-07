@@ -26,8 +26,6 @@ public class DeleteShopOperatingSlotHandler : ICommandHandler<DeleteShopOperatin
     private readonly IFoodRepository _foodRepository;
     private readonly ICacheService _cacheService;
 
-    private const string KEY_CACHE_CODE = "{0}-CodeConfirmDeleteOperatingSlot";
-
     public DeleteShopOperatingSlotHandler(IOperatingSlotRepository operatingSlotRepository, IUnitOfWork unitOfWork, ICurrentPrincipalService currentPrincipalService, IFoodOperatingSlotRepository foodOperatingSlotRepository,
         ILogger<DeleteShopOperatingSlotHandler> logger, ICacheService cacheService, ICurrentAccountService currentAccountService, ISystemResourceRepository systemResourceRepository, IFoodRepository foodRepository)
     {
@@ -47,7 +45,7 @@ public class DeleteShopOperatingSlotHandler : ICommandHandler<DeleteShopOperatin
         // Validate
         await ValidateAsync(request).ConfigureAwait(false);
 
-        if (string.IsNullOrEmpty(request.CodeConfirm))
+        if (!request.IsConfirm)
         {
             var listProduct = _foodOperatingSlotRepository.Get(op => op.OperatingSlotId == request.Id).ToList();
             if (listProduct != null && listProduct.Count > 0)
@@ -60,16 +58,10 @@ public class DeleteShopOperatingSlotHandler : ICommandHandler<DeleteShopOperatin
                     listProduct.Count,
                 });
 
-                // Generate code an set to cache
-                var code = new Random().Next(1000, 10000).ToString();
-                // Set to cache
-                await _cacheService.SetCacheResponseAsync(string.Format(KEY_CACHE_CODE, _currentAccountService.GetCurrentAccount().Email), code, TimeSpan.FromSeconds(RedisConstant.TIME_ACCEPT_CHANGE_OPERATING_SLOT))
-                    .ConfigureAwait(false);
-
                 return Result.Warning(new
                 {
+                    Code = MessageCode.W_OPERATING_SLOT_DELETE_INCLUDE_PRODUCT.GetDescription(),
                     Message = message,
-                    CodeConfirm = code,
                 });
             }
         }
@@ -99,7 +91,6 @@ public class DeleteShopOperatingSlotHandler : ICommandHandler<DeleteShopOperatin
                 _operatingSlotRepository.Remove(operatingSlot);
 
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-                await _cacheService.RemoveCacheResponseAsync(string.Format(KEY_CACHE_CODE, _currentAccountService.GetCurrentAccount().Email)).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -141,15 +132,5 @@ public class DeleteShopOperatingSlotHandler : ICommandHandler<DeleteShopOperatin
                                                                && op.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
         if (operatingSlot == default)
             throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(), HttpStatusCode.NotFound);
-
-        if (!string.IsNullOrEmpty(request.CodeConfirm))
-        {
-            var getCode = await _cacheService.GetCachedResponseAsync(string.Format(KEY_CACHE_CODE, _currentAccountService.GetCurrentAccount().Email)).ConfigureAwait(false);
-            var requestCodeConfirm = JsonConvert.DeserializeObject<string>(getCode ?? string.Empty);
-            if (requestCodeConfirm != request.CodeConfirm)
-            {
-                throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_CODE_CONFIRM_NOT_CORRECT.GetDescription(), HttpStatusCode.Conflict);
-            }
-        }
     }
 }

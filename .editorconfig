@@ -104,3 +104,8 @@ dotnet_diagnostic.SA1503.severity = warning
 
 # The keyword 'if' should be followed by a space
 dotnet_diagnostic.SA1000.severity = error
+
+
+
+dotnet_diagnostic.SA1101.severity = none
+dotnet_diagnostic.CA1305.severity = none

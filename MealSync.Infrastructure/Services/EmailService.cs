@@ -36,6 +36,20 @@ public class EmailService : IEmailService, IBaseService
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_FORGOT_PASSWORD_VERIFICATION.GetDescription(), code));
     }
 
+    public bool SendEmailToAnnounceWarningForShop(string email, int numberOfWarning)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_ANNOUCE_WARNING_FOR_SHOP.GetDescription(), numberOfWarning),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ANNOUCE_WARNING_FOR_SHOP.GetDescription(), numberOfWarning));
+    }
+
+    public bool SendEmailToAnnounceApplyFlagForShop(string email, int flag)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_ANNOUCE_APPLY_FLAG_FOR_SHOP.GetDescription(), flag),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ANNOUCE_APPLY_FLAG_FOR_SHOP.GetDescription(), flag));
+    }
+
     private bool SendEmail(string toEmail, string subject, string body)
     {
         try
