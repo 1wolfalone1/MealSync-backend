@@ -37,6 +37,7 @@
         <Folder Include="UseCases\Buildings\Commands\"/>
         <Folder Include="UseCases\Dormitories\Commands\"/>
         <Folder Include="UseCases\OptionGroups\Queries\" />
+        <Folder Include="UseCases\Promotions\Commands\" />
         <Folder Include="UseCases\PlatformCategory\Commands\" />
         <Folder Include="UseCases\Roles\Queries\"/>
         <Folder Include="UseCases\ShopCategories\Queries\" />
