@@ -1,10 +1,12 @@
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Shared;
 
-namespace MealSync.Application.UseCases.Foods.Commands.Create;
+namespace MealSync.Application.UseCases.Foods.Commands.Update;
 
-public class CreateFoodCommand : ICommand<Result>
+public class UpdateFoodCommand : ICommand<Result>
 {
+    public long Id { get; set; }
+
     public string Name { get; set; } = null!;
 
     public string? Description { get; set; } = null!;
@@ -15,7 +17,7 @@ public class CreateFoodCommand : ICommand<Result>
 
     public long PlatformCategoryId { get; set; }
 
-    public long? ShopCategoryId { get; set; }
+    public long ShopCategoryId { get; set; }
 
     public List<long> OperatingSlots { get; set; }
 
