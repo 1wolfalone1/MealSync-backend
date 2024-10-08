@@ -11,7 +11,7 @@ public class Order : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long PromotionId { get; set; }
+    public long? PromotionId { get; set; }
 
     public long ShopId { get; set; }
 
