@@ -62,4 +62,5 @@ public static class Endpoints
 
     //Customer
     public const string GET_CUSTOMER_INFO = "customer/profile";
+    public const string GET_ALL_CUSTOMER_BUILDING = "customer/building";
 }
