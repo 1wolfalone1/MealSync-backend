@@ -9,4 +9,6 @@ public interface ICustomerBuildingRepository : IBaseRepository<CustomerBuilding>
     CustomerBuilding? GetByBuildingIdAndCustomerId(long buildingId, long customerId);
 
     CustomerBuilding GetByBuildingIdAndCustomerIdIncludeBuilding(long buildingId, long customerId);
+
+    Task<List<CustomerBuilding>> GetByCustomerIdIncludeBuilding(long customerId);
 }

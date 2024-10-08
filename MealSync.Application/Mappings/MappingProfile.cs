@@ -3,6 +3,7 @@ using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Application.UseCases.Dormitories.Models;
 using MealSync.Application.UseCases.Buildings.Models;
 using MealSync.Application.UseCases.CustomerBuildings.Models;
+using MealSync.Application.UseCases.Customers.Models;
 using MealSync.Application.UseCases.Favourites.Models;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.OptionGroups.Models;
@@ -88,5 +89,15 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.BuildingId, opt => opt.MapFrom(src => src.BuildingId))
             .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Building.Name));
         CreateMap<Food, FoodCartSummaryResponse>();
+        CreateMap<Account, CustomerInfoResponse>();
+        CreateMap<Food, FoodDetailOfShopResponse>()
+            .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.FoodOperatingSlots))
+            .ForMember(dest => dest.OptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups));
+        CreateMap<FoodOperatingSlot, FoodDetailOfShopResponse.OperatingSlotOfShopResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.OperatingSlot.Id))
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.OperatingSlot.Title))
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.OperatingSlot.StartTime))
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime));
+        CreateMap<FoodOptionGroup, FoodDetailOfShopResponse.OptionGroupOfShopResponse>();
     }
 }

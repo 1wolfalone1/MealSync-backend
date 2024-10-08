@@ -10,11 +10,13 @@ public static class Endpoints
     public const string REGISTER_CUSTOMER = "auth/customer-register";
 
     // Shop Owner
+    public const string GET_FOOD = "shop-owner/food";
     public const string CREATE_FOOD = "shop-owner/food/create";
     public const string UPDATE_FOOD = "shop-owner/food/update";
     public const string GET_SHOP_PROFILE = "shop-owner/full-infor";
     public const string UPDATE_SHOP_PROFILE = "shop-owner/profile";
     public const string UPDATE_SHOP_ACTIVE_INACTIVE = "shop-owner/shop-owner/active-inactive";
+    public const string GET_SHOP_FOOD_DETAIL = "shop-owner/food/{id}/detail";
 
     // Option Group
     public const string CREATE_OPTION_GROUP = "shop-owner/option-group/create";
@@ -59,4 +61,8 @@ public static class Endpoints
 
     // Customer Building
     public const string UPDATE_CUSTOMER_BUILDING = "customer/building/update";
+
+    // Customer
+    public const string GET_CUSTOMER_INFO = "customer/profile";
+    public const string GET_ALL_CUSTOMER_BUILDING = "customer/building";
 }

@@ -11,12 +11,25 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
     {
     }
 
-    public Food GetByIdIncludeAllInfo(long id)
+    public Food GetByIdIncludeAllInfoForCustomer(long id)
     {
         return DbSet.Include(f => f.PlatformCategory)
             .Include(f => f.ShopCategory)
             .Include(f => f.FoodOperatingSlots).ThenInclude(op => op.OperatingSlot)
-            .Include(f => f.FoodOptionGroups).ThenInclude(fog => fog.OptionGroup).ThenInclude(og => og.Options)
+            .Include(f => f.FoodOptionGroups.Where(fog => fog.OptionGroup.Status == OptionGroupStatus.Active))
+            .ThenInclude(fog => fog.OptionGroup)
+            .ThenInclude(og => og.Options.Where(o => o.Status == OptionStatus.Active))
+            .First(f => f.Id == id);
+    }
+
+    public Food GetByIdIncludeAllInfoForShop(long id)
+    {
+        return DbSet.Include(f => f.PlatformCategory)
+            .Include(f => f.ShopCategory)
+            .Include(f => f.FoodOperatingSlots).ThenInclude(op => op.OperatingSlot)
+            .Include(f => f.FoodOptionGroups.Where(fog => fog.OptionGroup.Status != OptionGroupStatus.Delete))
+            .ThenInclude(fog => fog.OptionGroup)
+            .ThenInclude(og => og.Options.Where(o => o.Status != OptionStatus.Delete))
             .First(f => f.Id == id);
     }
 
@@ -69,7 +82,7 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
         return await DbSet.AnyAsync(f => f.Id == id && f.ShopId == shopId && f.Status == FoodStatus.Active).ConfigureAwait(false);
     }
 
-    public async Task<bool> CheckForUpdateByIdAndShopId(long id, long shopId)
+    public async Task<bool> CheckExistedByIdAndShopId(long id, long shopId)
     {
         return await DbSet.AnyAsync(f => f.Id == id && f.ShopId == shopId && f.Status != FoodStatus.Delete).ConfigureAwait(false);
     }
@@ -111,5 +124,26 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
         // If the distinct list contains only one ShopId, return true (all ids belong to the same shop)
         return foods.Count == 1;
+    }
+
+    public async Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopOwnerFood(long shopId)
+    {
+        var groupedFoods = await DbSet
+            .Where(f => f.ShopId == shopId && (f.Status == FoodStatus.Active || f.Status == FoodStatus.UnActive) && f.ShopCategoryId.HasValue)
+            .Include(f => f.ShopCategory)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        var result = groupedFoods
+            .GroupBy(f => new {f.ShopCategoryId, f.ShopCategory.DisplayOrder, f.ShopCategory.Name})
+            .Select(group => (
+                CategoryId: group.Key.ShopCategoryId.Value,        // Assuming ShopCategoryId is nullable, use .Value
+                CategoryName: group.Key.Name,                     // Use the category name
+                Foods: group.AsEnumerable()                       // The foods in the group
+            ))
+            .OrderBy(g => g.Foods.FirstOrDefault()?.ShopCategory.DisplayOrder) // Sort by DisplayOrder if needed
+            .ToList();
+
+        return result;
     }
 }

@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MealSync.Application.UseCases.OptionGroups.Commands.Create;
+namespace MealSync.Application.UseCases.OptionGroups.Commands.CreateOptionGroup;
 
 public class CreateOptionGroupValidate : AbstractValidator<CreateOptionGroupCommand>
 {
