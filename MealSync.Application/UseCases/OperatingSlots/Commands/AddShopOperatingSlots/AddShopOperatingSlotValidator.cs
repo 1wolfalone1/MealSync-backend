@@ -2,15 +2,15 @@
 using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Utils;
 
-namespace MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopOperatingSlots;
+namespace MealSync.Application.UseCases.OperatingSlots.Commands.AddShopOperatingSlots;
 
-public class UpdateShopOperatingSlotValidator : AbstractValidator<UpdateShopOperatingSlotCommand>
+public class AddShopOperatingSlotValidator : AbstractValidator<AddShopOperatingSlotCommand>
 {
-    public UpdateShopOperatingSlotValidator()
+    public AddShopOperatingSlotValidator()
     {
-        RuleFor(x => x.Id)
+        RuleFor(x => x.Title)
             .NotEmpty()
-            .WithMessage("Vui lòng cung cấp id của khung thời gian");
+            .WithMessage("Vui lòng cung cấp tiêu đề cho khung thời gian");
 
         RuleFor(x => x.StartTime)
             .Must(TimeUtils.IsValidOperatingSlot)
@@ -19,7 +19,7 @@ public class UpdateShopOperatingSlotValidator : AbstractValidator<UpdateShopOper
         RuleFor(x => x.EndTime)
             .Must(TimeUtils.IsValidOperatingSlot)
             .WithMessage("Vui lòng cung cấp thời gian kết thúc đúng định dạng hhMM")
-            .GreaterThanOrEqualTo(x => x.StartTime + FrameConstant.TIME_FRAME_IN_MINUTES)
+            .GreaterThanOrEqualTo(x => x.StartTime  + FrameConstant.TIME_FRAME_IN_MINUTES)
             .WithMessage($"Thời gian kết thúc phải lớn hơn thời gian bắt đầu {FrameConstant.TIME_FRAME_IN_MINUTES} phút");
     }
 }

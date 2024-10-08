@@ -1,9 +1,8 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
-using MealSync.Application.UseCases.ShopOwners.Commands.AddShopOperatingSlots;
-using MealSync.Application.UseCases.ShopOwners.Commands.DeleteShopOperatingSlots;
-using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopOperatingSlots;
-using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
+using MealSync.Application.UseCases.OperatingSlots.Commands.AddShopOperatingSlots;
+using MealSync.Application.UseCases.OperatingSlots.Commands.DeleteShopOperatingSlots;
+using MealSync.Application.UseCases.OperatingSlots.Commands.UpdateShopOperatingSlots;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
