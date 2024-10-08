@@ -1,4 +1,5 @@
 ﻿using MealSync.Application.Common.Utils;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.ShopOwners.Models;
 
@@ -8,15 +9,23 @@ public class ShopConfigurationResponse
 
     public string Name { get; set; }
 
+    public string ShopOwnerName { get; set; }
+
     public string LogoUrl { get; set; }
 
     public string BannerUrl { get; set; }
 
     public string PhoneNumber { get; set; }
 
+    public ShopStatus Status { get; set; } = ShopStatus.UnApprove;
+
     public bool IsAcceptingOrderNextDay { get; set; }
 
     public bool IsReceivingOrderPaused { get; set; }
+
+    public double MinValueOrderFreeShip { get; set; }
+
+    public double AdditionalShipFee { get; set; }
 
     public bool IsAutoOrderConfirmation { get; set; }
 
@@ -26,9 +35,20 @@ public class ShopConfigurationResponse
 
     public LocationResponse Location { get; set; }
 
-    public List<ShopDormitoryResponse> ShopDormitoryies { get; set; }
+    public List<ShopDormitoryResponse> ShopDormitories { get; set; }
 
-    public List<ShopOperatingSlotResponse> OperatingSlots { get; set; } = new();
+    private List<ShopOperatingSlotResponse> _operatingSlots;
+
+    public List<ShopOperatingSlotResponse> OperatingSlots
+    {
+        set => _operatingSlots = value;
+        get
+        {
+            if (_operatingSlots != default)
+                return _operatingSlots.OrderBy(os => os.StartTime).ToList();
+            return new List<ShopOperatingSlotResponse>();
+        }
+    }
 }
 
 public class LocationResponse
@@ -44,7 +64,7 @@ public class LocationResponse
 
 public class ShopDormitoryResponse
 {
-    public long Id { get; set; }
+    public long DormitoryId { get; set; }
 
     public string Name { get; set; }
 }
@@ -52,6 +72,8 @@ public class ShopDormitoryResponse
 public class ShopOperatingSlotResponse
 {
     public long Id { get; set; }
+
+    public string Title { get; set; }
 
     public int StartTime { get; set; }
 

@@ -34,9 +34,12 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Location,
                 opt => opt.MapFrom(
                     src => src.Location))
-            .ForMember(dest => dest.ShopDormitoryies,
+            .ForMember(dest => dest.ShopDormitories,
                 opt => opt.MapFrom(
-                    src => src.ShopDormitories));
+                    src => src.ShopDormitories))
+            .ForMember(dest => dest.ShopOwnerName,
+                opt => opt.MapFrom(
+                    src => src.Account != default ? src.Account.FullName : string.Empty));
         CreateMap<Food, FoodDetailResponse>()
             .ForMember(dest => dest.PlatformCategory, opt => opt.MapFrom(src => src.PlatformCategory))
             .ForMember(dest => dest.ShopCategory, opt => opt.MapFrom(src => src.ShopCategory))
@@ -59,7 +62,10 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
         CreateMap<Option, OptionGroupResponse.OptionResponse>();
         CreateMap<ShopCategory, ShopCategoryResponse>();
-        CreateMap<Shop, ShopProfileResponse>();
+        CreateMap<Shop, ShopProfileResponse>()
+            .ForMember(dest => dest.ShopOwnerName,
+                opt => opt.MapFrom(
+                    src => src.Account != default ? src.Account.FullName : string.Empty));
         CreateMap<Shop, ShopSummaryResponse>()
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0));
         CreateMap<Order, OrderNotification>();

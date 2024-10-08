@@ -131,6 +131,6 @@ public class DeleteShopOperatingSlotHandler : ICommandHandler<DeleteShopOperatin
         var operatingSlot = _operatingSlotRepository.Get(op => op.Id == request.Id
                                                                && op.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
         if (operatingSlot == default)
-            throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(), HttpStatusCode.NotFound);
+            throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(), new object[] {request.Id}, HttpStatusCode.NotFound);
     }
 }

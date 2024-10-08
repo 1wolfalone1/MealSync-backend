@@ -8,6 +8,10 @@ public class AddShopOperatingSlotValidator : AbstractValidator<AddShopOperatingS
 {
     public AddShopOperatingSlotValidator()
     {
+        RuleFor(x => x.Title)
+            .NotEmpty()
+            .WithMessage("Vui lòng cung cấp tiêu đề cho khung thời gian");
+
         RuleFor(x => x.StartTime)
             .Must(TimeUtils.IsValidOperatingSlot)
             .WithMessage("Vui lòng cung cấp thời gian bắt đầu đúng định dạng hhMM");

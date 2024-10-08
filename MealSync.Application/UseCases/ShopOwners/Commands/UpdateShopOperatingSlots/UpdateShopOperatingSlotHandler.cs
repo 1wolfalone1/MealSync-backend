@@ -71,6 +71,7 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             var operatingSlot = _operatingSlotRepository.GetById(request.Id);
+            operatingSlot.Title = request.Title;
             operatingSlot.StartTime = request.StartTime;
             operatingSlot.EndTime = request.EndTime;
             _operatingSlotRepository.Update(operatingSlot);
@@ -95,7 +96,7 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
         var operatingSlot = _operatingSlotRepository.Get(op => op.Id == request.Id
                                                                && op.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
         if (operatingSlot == default)
-            throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(), HttpStatusCode.NotFound);
+            throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(), new object[] {request.Id}, HttpStatusCode.NotFound);
 
         var listOperatingSlot = _operatingSlotRepository.Get(x => x.ShopId == _currentPrincipalService.CurrentPrincipalId).ToList();
         if (listOperatingSlot != null && listOperatingSlot.Count > 1)
