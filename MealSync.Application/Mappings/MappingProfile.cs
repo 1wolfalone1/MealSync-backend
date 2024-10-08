@@ -3,6 +3,7 @@ using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Application.UseCases.Dormitories.Models;
 using MealSync.Application.UseCases.Buildings.Models;
 using MealSync.Application.UseCases.CustomerBuildings.Models;
+using MealSync.Application.UseCases.Customers.Models;
 using MealSync.Application.UseCases.Favourites.Models;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.OptionGroups.Models;
@@ -88,5 +89,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.BuildingId, opt => opt.MapFrom(src => src.BuildingId))
             .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Building.Name));
         CreateMap<Food, FoodCartSummaryResponse>();
+        CreateMap<Account, CustomerInfoResponse>();
     }
 }

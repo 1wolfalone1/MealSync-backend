@@ -1,5 +1,6 @@
 ﻿using MealSync.Application.Common.Repositories;
 using MealSync.Domain.Entities;
+using MealSync.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
@@ -24,5 +25,10 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
     {
         return DbSet.Any(a => a.PhoneNumber == phoneNumber);
     }
-}
 
+    public Account? GetCustomerById(long id)
+    {
+        return DbSet.Include(a => a.Customer)
+            .FirstOrDefault(a => a.Id == id && a.RoleId == (int)Roles.Customer && a.Status == AccountStatus.Verify);
+    }
+}
