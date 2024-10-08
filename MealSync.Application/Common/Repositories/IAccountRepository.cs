@@ -9,4 +9,6 @@ public interface IAccountRepository : IBaseRepository<Account>
     Account GetAccountByPhoneNumber(string registerPhoneNumber);
 
     bool CheckExistByPhoneNumber(string phoneNumber);
+
+    Account? GetCustomerById(long id);
 }

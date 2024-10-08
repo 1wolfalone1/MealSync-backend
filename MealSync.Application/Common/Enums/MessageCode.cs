@@ -127,4 +127,8 @@ public enum MessageCode
 
     [Description("I-Shop-ChangeStatusToInActiveSuccess")]
     I_SHOP_CHANGE_STATUS_TO_INAC_SUCC,
+
+    // Customer
+    [Description("E-Customer-NotFound")]
+    E_CUSTOMER_NOT_FOUND,
 }
