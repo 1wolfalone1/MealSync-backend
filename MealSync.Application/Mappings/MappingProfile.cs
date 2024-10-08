@@ -90,5 +90,14 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Building.Name));
         CreateMap<Food, FoodCartSummaryResponse>();
         CreateMap<Account, CustomerInfoResponse>();
+        CreateMap<Food, FoodDetailOfShopResponse>()
+            .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.FoodOperatingSlots))
+            .ForMember(dest => dest.OptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups));
+        CreateMap<FoodOperatingSlot, FoodDetailOfShopResponse.OperatingSlotOfShopResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.OperatingSlot.Id))
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.OperatingSlot.Title))
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.OperatingSlot.StartTime))
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime));
+        CreateMap<FoodOptionGroup, FoodDetailOfShopResponse.OptionGroupOfShopResponse>();
     }
 }

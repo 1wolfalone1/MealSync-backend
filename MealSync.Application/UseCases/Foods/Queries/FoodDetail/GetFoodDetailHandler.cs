@@ -38,7 +38,7 @@ public class GetFoodDetailHandler : IQueryHandler<GetFoodDetailQuery, Result>
             var existed = await _foodRepository.CheckExistedAndActiveByIdAndShopId(request.FoodId, request.ShopId).ConfigureAwait(false);
             if (existed)
             {
-                return Result.Success(_mapper.Map<FoodDetailResponse>(_foodRepository.GetByIdIncludeAllInfo(request.FoodId)));
+                return Result.Success(_mapper.Map<FoodDetailResponse>(_foodRepository.GetByIdIncludeAllInfoForCustomer(request.FoodId)));
             }
             else
             {
