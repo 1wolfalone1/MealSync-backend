@@ -67,11 +67,24 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
     public async Task<bool> CheckExistedAndActiveByIdAndShopId(long id, long shopId)
     {
-        return await DbSet.AnyAsync(f => f.Id == id && f.ShopId == shopId && f.Status == FoodStatus.Active);
+        return await DbSet.AnyAsync(f => f.Id == id && f.ShopId == shopId && f.Status == FoodStatus.Active).ConfigureAwait(false);
     }
 
     public async Task<bool> CheckForUpdateByIdAndShopId(long id, long shopId)
     {
         return await DbSet.AnyAsync(f => f.Id == id && f.ShopId == shopId && f.Status != FoodStatus.Delete).ConfigureAwait(false);
+    }
+
+    public async Task<(int TotalCount, IEnumerable<Food> Foods)> GetAllActiveFoodByShopId(long shopId, int pageIndex, int pageSize)
+    {
+        var query = DbSet.Where(f => f.ShopId == shopId && f.Status == FoodStatus.Active);
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+        var foods = await query.OrderByDescending(f => f.TotalOrder)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        return (totalCount, foods);
     }
 }
