@@ -10,7 +10,7 @@ using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
 
-namespace MealSync.Application.UseCases.OptionGroups.Commands.Create;
+namespace MealSync.Application.UseCases.OptionGroups.Commands.CreateOptionGroup;
 
 public class CreateOptionGroupHandler : ICommandHandler<CreateOptionGroupCommand, Result>
 {

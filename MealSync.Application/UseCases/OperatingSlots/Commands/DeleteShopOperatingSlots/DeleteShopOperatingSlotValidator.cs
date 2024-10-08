@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace MealSync.Application.UseCases.ShopOwners.Commands.DeleteShopOperatingSlots;
+namespace MealSync.Application.UseCases.OperatingSlots.Commands.DeleteShopOperatingSlots;
 
 public class DeleteShopOperatingSlotValidator : AbstractValidator<DeleteShopOperatingSlotCommand>
 {

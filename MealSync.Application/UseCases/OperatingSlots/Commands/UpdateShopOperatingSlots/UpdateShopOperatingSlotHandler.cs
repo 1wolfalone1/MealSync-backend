@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using MealSync.Application.Common.Abstractions.Messaging;
-using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
@@ -10,9 +9,8 @@ using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
-namespace MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopOperatingSlots;
+namespace MealSync.Application.UseCases.OperatingSlots.Commands.UpdateShopOperatingSlots;
 
 public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatingSlotCommand, Result>
 {
