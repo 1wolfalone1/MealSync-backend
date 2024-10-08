@@ -15,4 +15,15 @@ public class CustomerBuildingRepository : BaseRepository<CustomerBuilding>, ICus
         return DbSet.Include(cb => cb.Building)
             .SingleOrDefault(cb => cb.CustomerId == id && cb.IsDefault);
     }
+
+    public CustomerBuilding? GetByBuildingIdAndCustomerId(long buildingId, long customerId)
+    {
+        return DbSet.FirstOrDefault(cb => cb.BuildingId == buildingId && cb.CustomerId == customerId);
+    }
+
+    public CustomerBuilding GetByBuildingIdAndCustomerIdIncludeBuilding(long buildingId, long customerId)
+    {
+        return DbSet.Include(cb => cb.Building)
+            .First(cb => cb.BuildingId == buildingId && cb.CustomerId == customerId);
+    }
 }

@@ -2,6 +2,7 @@
 using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Application.UseCases.Dormitories.Models;
 using MealSync.Application.UseCases.Buildings.Models;
+using MealSync.Application.UseCases.CustomerBuildings.Models;
 using MealSync.Application.UseCases.Favourites.Models;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.OptionGroups.Models;
@@ -75,5 +76,9 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.AddHours(-7).ToUnixTimeMilliseconds()))
             .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.AddHours(-7).ToUnixTimeMilliseconds()));
         CreateMap<PlatformCategory, PlatformCategoryResponse>();
+        CreateMap<CustomerBuilding, CustomerBuildingResponse>()
+            .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
+            .ForMember(dest => dest.BuildingId, opt => opt.MapFrom(src => src.BuildingId))
+            .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Building.Name));
     }
 }
