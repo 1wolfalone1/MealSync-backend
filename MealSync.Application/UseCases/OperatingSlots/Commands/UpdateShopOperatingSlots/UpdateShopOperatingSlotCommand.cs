@@ -1,7 +1,7 @@
 ﻿using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Shared;
 
-namespace MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopOperatingSlots;
+namespace MealSync.Application.UseCases.OperatingSlots.Commands.UpdateShopOperatingSlots;
 
 public class UpdateShopOperatingSlotCommand : ICommand<Result>
 {

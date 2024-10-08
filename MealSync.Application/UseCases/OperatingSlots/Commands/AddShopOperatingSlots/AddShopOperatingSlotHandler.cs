@@ -10,7 +10,7 @@ using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
 
-namespace MealSync.Application.UseCases.ShopOwners.Commands.AddShopOperatingSlots;
+namespace MealSync.Application.UseCases.OperatingSlots.Commands.AddShopOperatingSlots;
 
 public class AddShopOperatingSlotHandler : ICommandHandler<AddShopOperatingSlotCommand, Result>
 {

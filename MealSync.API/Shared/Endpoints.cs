@@ -10,6 +10,7 @@ public static class Endpoints
     public const string REGISTER_CUSTOMER = "auth/customer-register";
 
     // Shop Owner
+    public const string GET_FOOD = "shop-owner/food";
     public const string CREATE_FOOD = "shop-owner/food/create";
     public const string UPDATE_FOOD = "shop-owner/food/update";
     public const string GET_SHOP_PROFILE = "shop-owner/full-infor";

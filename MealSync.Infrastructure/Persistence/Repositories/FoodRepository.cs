@@ -125,4 +125,25 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
         // If the distinct list contains only one ShopId, return true (all ids belong to the same shop)
         return foods.Count == 1;
     }
+
+    public async Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopOwnerFood(long shopId)
+    {
+        var groupedFoods = await DbSet
+            .Where(f => f.ShopId == shopId && (f.Status == FoodStatus.Active || f.Status == FoodStatus.UnActive) && f.ShopCategoryId.HasValue)
+            .Include(f => f.ShopCategory)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        var result = groupedFoods
+            .GroupBy(f => new {f.ShopCategoryId, f.ShopCategory.DisplayOrder, f.ShopCategory.Name})
+            .Select(group => (
+                CategoryId: group.Key.ShopCategoryId.Value,        // Assuming ShopCategoryId is nullable, use .Value
+                CategoryName: group.Key.Name,                     // Use the category name
+                Foods: group.AsEnumerable()                       // The foods in the group
+            ))
+            .OrderBy(g => g.Foods.FirstOrDefault()?.ShopCategory.DisplayOrder) // Sort by DisplayOrder if needed
+            .ToList();
+
+        return result;
+    }
 }

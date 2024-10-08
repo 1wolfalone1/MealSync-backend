@@ -1,7 +1,7 @@
 using MealSync.API.Identites;
 using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
-using MealSync.Application.UseCases.OptionGroups.Commands.Create;
+using MealSync.Application.UseCases.OptionGroups.Commands.CreateOptionGroup;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MealSync.API.Controllers;
