@@ -34,9 +34,12 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Location,
                 opt => opt.MapFrom(
                     src => src.Location))
-            .ForMember(dest => dest.ShopDormitoryies,
+            .ForMember(dest => dest.ShopDormitories,
                 opt => opt.MapFrom(
-                    src => src.ShopDormitories));
+                    src => src.ShopDormitories))
+            .ForMember(dest => dest.ShopOwnerName,
+                opt => opt.MapFrom(
+                    src => src.Account != default ? src.Account.FullName : string.Empty));
         CreateMap<Food, FoodDetailResponse>()
             .ForMember(dest => dest.PlatformCategory, opt => opt.MapFrom(src => src.PlatformCategory))
             .ForMember(dest => dest.ShopCategory, opt => opt.MapFrom(src => src.ShopCategory))
@@ -47,6 +50,7 @@ public class MappingProfile : Profile
         CreateMap<OperatingSlot, FoodDetailResponse.OperatingSlotResponse>();
         CreateMap<FoodOperatingSlot, FoodDetailResponse.OperatingSlotResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.OperatingSlot.Id))
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.OperatingSlot.Title))
             .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.OperatingSlot.StartTime))
             .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime));
         CreateMap<FoodOptionGroup, FoodDetailResponse.FoodOptionGroupResponse>()
@@ -58,7 +62,10 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
         CreateMap<Option, OptionGroupResponse.OptionResponse>();
         CreateMap<ShopCategory, ShopCategoryResponse>();
-        CreateMap<Shop, ShopProfileResponse>();
+        CreateMap<Shop, ShopProfileResponse>()
+            .ForMember(dest => dest.ShopOwnerName,
+                opt => opt.MapFrom(
+                    src => src.Account != default ? src.Account.FullName : string.Empty));
         CreateMap<Shop, ShopSummaryResponse>()
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0));
         CreateMap<Order, OrderNotification>();
@@ -80,5 +87,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
             .ForMember(dest => dest.BuildingId, opt => opt.MapFrom(src => src.BuildingId))
             .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Building.Name));
+        CreateMap<Food, FoodCartSummaryResponse>();
     }
 }

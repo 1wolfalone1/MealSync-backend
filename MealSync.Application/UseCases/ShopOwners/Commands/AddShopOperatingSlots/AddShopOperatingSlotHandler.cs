@@ -41,6 +41,7 @@ public class AddShopOperatingSlotHandler : ICommandHandler<AddShopOperatingSlotC
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             var operatingSlot = new OperatingSlot()
             {
+                Title = request.Title,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,

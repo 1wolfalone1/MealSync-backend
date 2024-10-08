@@ -12,7 +12,7 @@ public static class Endpoints
     // Shop Owner
     public const string CREATE_FOOD = "shop-owner/food/create";
     public const string UPDATE_FOOD = "shop-owner/food/update";
-    public const string GET_SHOP_PROFILE = "shop-owner/profile";
+    public const string GET_SHOP_PROFILE = "shop-owner/full-infor";
     public const string UPDATE_SHOP_PROFILE = "shop-owner/profile";
     public const string UPDATE_SHOP_ACTIVE_INACTIVE = "shop-owner/shop-owner/active-inactive";
 
@@ -30,6 +30,7 @@ public static class Endpoints
     public const string GET_FAVOURITE_SHOP = "shop/favourite";
     public const string GET_SHOP_INFO = "shop/{id}/info";
     public const string GET_SHOP_FOOD = "shop/{id}/food";
+    public const string GET_ALL_SHOP_FOOD = "shop/{id}/food/all";
     public const string GET_SHOP_PROMOTION = "shop/{id}/promotion";
 
     // Dormitory
@@ -47,6 +48,7 @@ public static class Endpoints
     // Food
     public const string GET_TOP_FOOD = "food/top";
     public const string GET_FOOD_DETAIL = "shop/{shopId}/food/{foodId}";
+    public const string GET_FOOD_BY_IDS = "food";
 
     // Storage
     public const string UPLOAD_FILE = "storage/file/upload";

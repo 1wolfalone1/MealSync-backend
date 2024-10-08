@@ -5,7 +5,11 @@ namespace MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopProfile;
 
 public class UpdateShopProfileCommand : ICommand<Result>
 {
-    public string Name { get; set; }
+    public string ShopName { get; set; }
+
+    public string ShopOnwerName { get; set; }
+
+    public long[] DormitoryIds { get; set; }
 
     public string LogoUrl { get; set; }
 
@@ -15,9 +19,17 @@ public class UpdateShopProfileCommand : ICommand<Result>
 
     public string PhoneNumber { get; set; }
 
-    public bool IsAcceptingOrderNextDay { get; set; }
+    public LocationRequest Location { get; set; }
 
-    public int MinOrderHoursInAdvance { get; set; }
+    public class LocationRequest
+    {
+        public long Id { get; set; }
 
-    public int MaxOrderHoursInAdvance { get; set; }
+        public string Address { get; set; }
+
+        public double Latitude { get; set; }
+
+        public double Longtiude { get; set; }
+    }
 }
+

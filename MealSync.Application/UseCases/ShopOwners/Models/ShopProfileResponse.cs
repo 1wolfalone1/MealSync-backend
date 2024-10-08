@@ -6,6 +6,8 @@ public class ShopProfileResponse
 
     public string Name { get; set; }
 
+    public string ShopOwnerName { get; set; }
+
     public string LogoUrl { get; set; }
 
     public string BannerUrl { get; set; }
@@ -14,9 +16,7 @@ public class ShopProfileResponse
 
     public string PhoneNumber { get; set; }
 
-    public bool IsAcceptingOrderNextDay { get; set; }
+    public LocationResponse Location { get; set; }
 
-    public int MinOrderHoursInAdvance { get; set; }
-
-    public int MaxOrderHoursInAdvance { get; set; }
+    public List<ShopDormitoryResponse> ShopDormitories { get; set; }
 }

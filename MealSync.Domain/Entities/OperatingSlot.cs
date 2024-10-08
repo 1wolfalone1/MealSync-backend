@@ -12,6 +12,8 @@ public class OperatingSlot : BaseEntity
 
     public long ShopId { get; set; }
 
+    public string Title { get; set; }
+
     public int StartTime { get; set; }
 
     public int EndTime { get; set; }
