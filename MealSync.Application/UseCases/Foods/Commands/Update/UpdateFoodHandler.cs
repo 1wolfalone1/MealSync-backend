@@ -69,11 +69,10 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
             {
                 foodOptionGroups.Add(new FoodOptionGroup
                 {
-                    OptionGroupId = request.FoodOptionGroups[i].OptionGroupId,
+                    OptionGroupId = request.FoodOptionGroups[i],
                     DisplayOrder = i + 1,
                 });
             }
-            food.FoodOptionGroups = foodOptionGroups;
         }
 
         food.Name = request.Name;
@@ -83,6 +82,7 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
         food.PlatformCategoryId = request.PlatformCategoryId;
         food.ShopCategoryId = request.ShopCategoryId;
         food.FoodOperatingSlots = foodOperatingSlots;
+        food.FoodOptionGroups = foodOptionGroups;
 
         // Update product
         try
@@ -152,14 +152,14 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
         // Check existed option groups if present
         if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count > 0)
         {
-            request.FoodOptionGroups.ForEach(foodOptionGroup =>
+            request.FoodOptionGroups.ForEach(foodOptionGroupId =>
             {
-                var existedOptionGroup = _optionGroupRepository.CheckExistedByIdAndShopId(foodOptionGroup.OptionGroupId, accountId);
+                var existedOptionGroup = _optionGroupRepository.CheckExistedByIdAndShopId(foodOptionGroupId, accountId);
                 if (!existedOptionGroup)
                 {
                     throw new InvalidBusinessException(
                         MessageCode.E_OPTION_GROUP_NOT_FOUND.GetDescription(),
-                        new object[] { foodOptionGroup.OptionGroupId }
+                        new object[] { foodOptionGroupId }
                     );
                 }
             });

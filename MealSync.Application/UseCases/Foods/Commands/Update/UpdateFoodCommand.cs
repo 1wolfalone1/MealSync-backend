@@ -21,10 +21,5 @@ public class UpdateFoodCommand : ICommand<Result>
 
     public List<long> OperatingSlots { get; set; }
 
-    public List<UpdateFoodOptionGroupCommand>? FoodOptionGroups { get; set; }
-
-    public class UpdateFoodOptionGroupCommand
-    {
-        public long OptionGroupId { get; set; }
-    }
+    public List<long>? FoodOptionGroups { get; set; }
 }
