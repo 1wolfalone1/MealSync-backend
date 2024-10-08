@@ -47,6 +47,7 @@ public class MappingProfile : Profile
         CreateMap<OperatingSlot, FoodDetailResponse.OperatingSlotResponse>();
         CreateMap<FoodOperatingSlot, FoodDetailResponse.OperatingSlotResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.OperatingSlot.Id))
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.OperatingSlot.Title))
             .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.OperatingSlot.StartTime))
             .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime));
         CreateMap<FoodOptionGroup, FoodDetailResponse.FoodOptionGroupResponse>()
