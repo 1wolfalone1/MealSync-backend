@@ -1,4 +1,3 @@
-using System.Collections;
 using MealSync.Application.Common.Repositories;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
@@ -86,5 +85,31 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
             .ConfigureAwait(false);
 
         return (totalCount, foods);
+    }
+
+    public async Task<(List<long> IdsNotFound, IEnumerable<Food> Foods)> GetByIds(List<long> ids)
+    {
+        var foods = await DbSet
+            .Where(f => ids.Contains(f.Id) && f.Status != FoodStatus.Delete)
+            .ToListAsync()
+            .ConfigureAwait(false);
+        var foundIds = foods.Select(f => f.Id).ToList();
+        var idsNotFound = ids.Except(foundIds).ToList();
+
+        return (idsNotFound, foods);
+    }
+
+    public async Task<bool> CheckAllIdsInOneShop(List<long> ids)
+    {
+        // Retrieve the foods matching the provided ids
+        var foods = await DbSet
+            .Where(f => ids.Contains(f.Id))
+            .Select(f => f.ShopId) // Select only the ShopId to optimize query
+            .Distinct() // Ensure that only distinct ShopIds are retrieved
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        // If the distinct list contains only one ShopId, return true (all ids belong to the same shop)
+        return foods.Count == 1;
     }
 }
