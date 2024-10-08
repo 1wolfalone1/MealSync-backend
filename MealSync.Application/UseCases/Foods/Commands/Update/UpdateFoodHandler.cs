@@ -10,25 +10,25 @@ using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
 
-namespace MealSync.Application.UseCases.Foods.Commands.Create;
+namespace MealSync.Application.UseCases.Foods.Commands.Update;
 
-public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
+public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
 {
-    private readonly ILogger<CreateFoodHandler> _logger;
+    private readonly ILogger<UpdateFoodHandler> _logger;
     private readonly IPlatformCategoryRepository _platformCategoryRepository;
     private readonly IShopCategoryRepository _shopCategoryRepository;
     private readonly IOperatingSlotRepository _operatingSlotRepository;
     private readonly IOptionGroupRepository _optionGroupRepository;
     private readonly IFoodRepository _foodRepository;
-    private readonly IShopRepository _shopRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateFoodHandler(ILogger<CreateFoodHandler> logger, IPlatformCategoryRepository platformCategoryRepository,
+    public UpdateFoodHandler(
+        ILogger<UpdateFoodHandler> logger, IPlatformCategoryRepository platformCategoryRepository,
         IShopCategoryRepository shopCategoryRepository, IOperatingSlotRepository operatingSlotRepository,
         IOptionGroupRepository optionGroupRepository, IFoodRepository foodRepository,
-        IShopRepository shopRepository, ICurrentPrincipalService currentPrincipalService, IMapper mapper, IUnitOfWork unitOfWork
+        ICurrentPrincipalService currentPrincipalService, IMapper mapper, IUnitOfWork unitOfWork
     )
     {
         _logger = logger;
@@ -37,31 +37,32 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
         _operatingSlotRepository = operatingSlotRepository;
         _optionGroupRepository = optionGroupRepository;
         _foodRepository = foodRepository;
-        _shopRepository = shopRepository;
         _currentPrincipalService = currentPrincipalService;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<Result>> Handle(CreateFoodCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(UpdateFoodCommand request, CancellationToken cancellationToken)
     {
-        var accountId = _currentPrincipalService.CurrentPrincipalId!;
+        var accountId = _currentPrincipalService.CurrentPrincipalId!.Value;
 
-        await ValidateBusinessRequest(request, accountId.Value).ConfigureAwait(false);
+        // Validate request
+        await ValidateBusinessRequest(request, accountId).ConfigureAwait(false);
 
-        // Create new product
-        var shop = await _shopRepository.GetByAccountId(accountId.Value).ConfigureAwait(false);
+        var food = _foodRepository.GetByIdIncludeAllInfo(request.Id);
 
-        List<FoodOperatingSlot> operatingSlots = new List<FoodOperatingSlot>();
+        var foodOperatingSlots = new List<FoodOperatingSlot>();
         request.OperatingSlots.ForEach(operatingSlotId =>
         {
-            operatingSlots.Add(new FoodOperatingSlot
+            FoodOperatingSlot foodOperatingSlot = new FoodOperatingSlot
             {
                 OperatingSlotId = operatingSlotId,
-            });
+                FoodId = food.Id,
+            };
+            foodOperatingSlots.Add(foodOperatingSlot);
         });
 
-        List<FoodOptionGroup> foodOptionGroups = new List<FoodOptionGroup>();
+        var foodOptionGroups = new List<FoodOptionGroup>();
         if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count != 0)
         {
             for (var i = 0; i < request.FoodOptionGroups.Count; i++)
@@ -74,32 +75,21 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
             }
         }
 
-        var food = new Food
-        {
-            ShopId = shop.Id,
-            PlatformCategoryId = request.PlatformCategoryId,
-            ShopCategoryId = request.ShopCategoryId,
-            Name = request.Name,
-            Description = request.Description,
-            Price = request.Price,
-            ImageUrl = request.ImgUrl,
-            TotalOrder = 0,
-            IsSoldOut = false,
-            Status = FoodStatus.Active,
-            FoodOperatingSlots = operatingSlots,
-            FoodOptionGroups = foodOptionGroups,
-        };
+        food.Name = request.Name;
+        food.Description = request.Description;
+        food.Price = request.Price;
+        food.ImageUrl = request.ImgUrl;
+        food.PlatformCategoryId = request.PlatformCategoryId;
+        food.ShopCategoryId = request.ShopCategoryId;
+        food.FoodOperatingSlots = foodOperatingSlots;
+        food.FoodOptionGroups = foodOptionGroups;
 
-        // Save product
+        // Update product
         try
         {
             // Begin transaction
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-            await _foodRepository.AddAsync(food).ConfigureAwait(false);
-
-            // Update total food of shop
-            shop.TotalFood += 1;
-            _shopRepository.Update(shop);
+            _foodRepository.Update(food);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
             return Result.Create(_mapper.Map<FoodDetailResponse>(_foodRepository.GetByIdIncludeAllInfo(food.Id)));
         }
@@ -112,8 +102,17 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
         }
     }
 
-    private async Task ValidateBusinessRequest(CreateFoodCommand request, long accountId)
+    private async Task ValidateBusinessRequest(UpdateFoodCommand request, long accountId)
     {
+        // Check existed food
+        var existedFood = await _foodRepository.CheckForUpdateByIdAndShopId(request.Id, accountId).ConfigureAwait(false);
+        if (!existedFood)
+        {
+            throw new InvalidBusinessException(
+                MessageCode.E_FOOD_NOT_FOUND.GetDescription(),
+                new object[] { request.Id }
+            );
+        }
 
         // Check existed platform category
         var existedPlatformCategory = _platformCategoryRepository.CheckExistedById(request.PlatformCategoryId);
@@ -127,17 +126,14 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
         }
 
         // Check existed shop category
-        if (request.ShopCategoryId != null)
-        {
-            var existedShopCategory = _shopCategoryRepository.CheckExistedByIdAndShopId(request.ShopCategoryId.Value, accountId);
+        var existedShopCategory = _shopCategoryRepository.CheckExistedByIdAndShopId(request.ShopCategoryId, accountId);
 
-            if (!existedShopCategory)
-            {
-                throw new InvalidBusinessException(
-                    MessageCode.E_SHOP_CATEGORY_NOT_FOUND.GetDescription(),
-                    new object[] { request.ShopCategoryId }
-                );
-            }
+        if (!existedShopCategory)
+        {
+            throw new InvalidBusinessException(
+                MessageCode.E_SHOP_CATEGORY_NOT_FOUND.GetDescription(),
+                new object[] { request.ShopCategoryId }
+            );
         }
 
         // Check existed operating slots

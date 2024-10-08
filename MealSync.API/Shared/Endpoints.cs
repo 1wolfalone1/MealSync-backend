@@ -11,6 +11,7 @@ public static class Endpoints
 
     // Shop Owner
     public const string CREATE_FOOD = "shop-owner/food/create";
+    public const string UPDATE_FOOD = "shop-owner/food/update";
     public const string GET_SHOP_PROFILE = "shop-owner/profile";
     public const string UPDATE_SHOP_PROFILE = "shop-owner/profile";
     public const string UPDATE_SHOP_ACTIVE_INACTIVE = "shop-owner/shop-owner/active-inactive";
@@ -51,6 +52,9 @@ public static class Endpoints
     public const string UPLOAD_FILE = "storage/file/upload";
     public const string DELETE_FILE = "storage/file/delete";
 
-    //Platform category
+    // Platform category
     public const string GET_ALL_PLATFORM_CATEGORY = "platform-category";
+
+    // Customer Building
+    public const string UPDATE_CUSTOMER_BUILDING = "customer/building/update";
 }

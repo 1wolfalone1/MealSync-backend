@@ -69,4 +69,9 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
     {
         return await DbSet.AnyAsync(f => f.Id == id && f.ShopId == shopId && f.Status == FoodStatus.Active);
     }
+
+    public async Task<bool> CheckForUpdateByIdAndShopId(long id, long shopId)
+    {
+        return await DbSet.AnyAsync(f => f.Id == id && f.ShopId == shopId && f.Status != FoodStatus.Delete).ConfigureAwait(false);
+    }
 }
