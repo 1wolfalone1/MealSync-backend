@@ -26,4 +26,31 @@ public class CustomerBuildingRepository : BaseRepository<CustomerBuilding>, ICus
         return DbSet.Include(cb => cb.Building)
             .First(cb => cb.BuildingId == buildingId && cb.CustomerId == customerId);
     }
+
+    public async Task<List<CustomerBuilding>> GetByCustomerIdIncludeBuilding(long customerId)
+    {
+        // Find the default customer building for the given customer
+        var defaultCustomerBuilding = await DbSet
+            .Include(cb => cb.Building)
+            .FirstOrDefaultAsync(cb => cb.CustomerId == customerId && cb.IsDefault)
+            .ConfigureAwait(false);
+
+        if (defaultCustomerBuilding == null)
+        {
+            return new List<CustomerBuilding>();
+        }
+
+        var dormitoryId = defaultCustomerBuilding.Building.DormitoryId;
+
+        // Find all customer buildings in the same dormitory
+        var customerBuildingsInSameDormitory = await DbSet
+            .Include(cb => cb.Building)
+            .Where(cb => cb.CustomerId == customerId && cb.Building.DormitoryId == dormitoryId)
+            .OrderByDescending(cb => cb.IsDefault)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        return customerBuildingsInSameDormitory;
+    }
+
 }

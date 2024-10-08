@@ -35,7 +35,6 @@
 
     <ItemGroup>
         <Folder Include="UseCases\Buildings\Commands\"/>
-        <Folder Include="UseCases\CustomerBuildings\Queries\" />
         <Folder Include="UseCases\Dormitories\Commands\"/>
         <Folder Include="UseCases\OptionGroups\Queries\" />
         <Folder Include="UseCases\Promotions\Commands\" />
