@@ -20,6 +20,7 @@ public static class Endpoints
 
     // Option Group
     public const string CREATE_OPTION_GROUP = "shop-owner/option-group/create";
+    public const string LINK_FOOD_OPTION_GROUP = "shop-owner/option-group/link-food";
 
     // Shop Category
     public const string CREATE_SHOP_CATEGORY = "shop-owner/category/create";

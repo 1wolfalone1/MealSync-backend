@@ -128,6 +128,13 @@ public enum MessageCode
     [Description("I-Shop-ChangeStatusToInActiveSuccess")]
     I_SHOP_CHANGE_STATUS_TO_INAC_SUCC,
 
+    // Food option group
+    [Description("E-FoodOptionGroup-AlreadyLink")]
+    E_FOOD_OPTION_GROUP_ALREADY_LINK,
+
+    [Description("I-FoodOptionGroup-LinkSuccess")]
+    I_FOOD_OPTION_GROUP_LINK_SUCCESS,
+
     // Customer
     [Description("E-Customer-NotFound")]
     E_CUSTOMER_NOT_FOUND,
