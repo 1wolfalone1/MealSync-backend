@@ -87,4 +87,16 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
         return (totalCount, foods);
     }
+
+    public async Task<(List<long> IdsNotFound, IEnumerable<Food> Foods)> GetByIds(List<long> ids)
+    {
+        var foods = await DbSet
+            .Where(f => ids.Contains(f.Id) && f.Status != FoodStatus.Delete)
+            .ToListAsync()
+            .ConfigureAwait(false);
+        var foundIds = foods.Select(f => f.Id).ToList();
+        var idsNotFound = ids.Except(foundIds).ToList();
+
+        return (idsNotFound, foods);
+    }
 }

@@ -16,4 +16,6 @@ public interface IFoodRepository : IBaseRepository<Food>
     Task<bool> CheckForUpdateByIdAndShopId(long id, long shopId);
 
     Task<(int TotalCount, IEnumerable<Food> Foods)> GetAllActiveFoodByShopId(long shopId, int pageIndex, int pageSize);
+
+    Task<(List<long> IdsNotFound, IEnumerable<Food> Foods)> GetByIds(List<long> ids);
 }

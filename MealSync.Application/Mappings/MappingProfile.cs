@@ -87,5 +87,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
             .ForMember(dest => dest.BuildingId, opt => opt.MapFrom(src => src.BuildingId))
             .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Building.Name));
+        CreateMap<Food, FoodCartSummaryResponse>();
     }
 }

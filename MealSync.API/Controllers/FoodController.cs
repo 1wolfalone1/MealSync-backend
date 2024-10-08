@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.Foods.Commands.Create;
 using MealSync.Application.UseCases.Foods.Commands.Update;
 using MealSync.Application.UseCases.Foods.Queries.FoodDetail;
 using MealSync.Application.UseCases.Foods.Queries.GetAll;
+using MealSync.Application.UseCases.Foods.Queries.GetByIds;
 using MealSync.Application.UseCases.Foods.Queries.ShopFood;
 using MealSync.Application.UseCases.Foods.Queries.TopFood;
 using Microsoft.AspNetCore.Authorization;
@@ -70,5 +71,15 @@ public class FoodController : BaseApiController
     public async Task<IActionResult> UpdateFood(UpdateFoodCommand request)
     {
         return HandleResult(await Mediator.Send(request));
+    }
+
+    [HttpGet(Endpoints.GET_FOOD_BY_IDS)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> GetFoodInCart([FromQuery] List<long> ids)
+    {
+        return HandleResult(await Mediator.Send(new GetByIdsForCartQuery()
+        {
+            Ids = ids,
+        }).ConfigureAwait(false));
     }
 }
