@@ -59,4 +59,5 @@ public static class Endpoints
 
     // Customer Building
     public const string UPDATE_CUSTOMER_BUILDING = "customer/building/update";
+    public const string GET_ALL_CUSTOMER_BUILDING = "customer/building";
 }
