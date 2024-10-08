@@ -49,7 +49,7 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
         // Validate request
         await ValidateBusinessRequest(request, accountId).ConfigureAwait(false);
 
-        var food = _foodRepository.GetByIdIncludeAllInfo(request.Id);
+        var food = _foodRepository.GetByIdIncludeAllInfoForShop(request.Id);
 
         var foodOperatingSlots = new List<FoodOperatingSlot>();
         request.OperatingSlots.ForEach(operatingSlotId =>
@@ -91,7 +91,7 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             _foodRepository.Update(food);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-            return Result.Create(_mapper.Map<FoodDetailResponse>(_foodRepository.GetByIdIncludeAllInfo(food.Id)));
+            return Result.Create(_mapper.Map<FoodDetailResponse>(_foodRepository.GetByIdIncludeAllInfoForShop(food.Id)));
         }
         catch (Exception e)
         {
@@ -105,7 +105,7 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
     private async Task ValidateBusinessRequest(UpdateFoodCommand request, long accountId)
     {
         // Check existed food
-        var existedFood = await _foodRepository.CheckForUpdateByIdAndShopId(request.Id, accountId).ConfigureAwait(false);
+        var existedFood = await _foodRepository.CheckExistedByIdAndShopId(request.Id, accountId).ConfigureAwait(false);
         if (!existedFood)
         {
             throw new InvalidBusinessException(

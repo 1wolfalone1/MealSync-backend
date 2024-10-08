@@ -101,7 +101,7 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
             shop.TotalFood += 1;
             _shopRepository.Update(shop);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-            return Result.Create(_mapper.Map<FoodDetailResponse>(_foodRepository.GetByIdIncludeAllInfo(food.Id)));
+            return Result.Create(_mapper.Map<FoodDetailResponse>(_foodRepository.GetByIdIncludeAllInfoForShop(food.Id)));
         }
         catch (Exception e)
         {

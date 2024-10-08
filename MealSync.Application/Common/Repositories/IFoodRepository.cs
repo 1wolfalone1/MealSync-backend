@@ -4,7 +4,9 @@ namespace MealSync.Application.Common.Repositories;
 
 public interface IFoodRepository : IBaseRepository<Food>
 {
-    Food GetByIdIncludeAllInfo(long id);
+    Food GetByIdIncludeAllInfoForCustomer(long id);
+
+    Food GetByIdIncludeAllInfoForShop(long id);
 
     Task<(int TotalCount, IEnumerable<Food> Foods)> GetTopFood(long dormitoryId, int pageIndex, int pageSize);
 
@@ -12,7 +14,7 @@ public interface IFoodRepository : IBaseRepository<Food>
 
     Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopFood(long shopId);
 
-    Task<bool> CheckForUpdateByIdAndShopId(long id, long shopId);
+    Task<bool> CheckExistedByIdAndShopId(long id, long shopId);
 
     Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopOwnerFood(long shopId);
 

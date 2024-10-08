@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Foods.Commands.Create;
 using MealSync.Application.UseCases.Foods.Commands.Update;
 using MealSync.Application.UseCases.Foods.Queries.FoodDetail;
+using MealSync.Application.UseCases.Foods.Queries.FoodDetailOfShop;
 using MealSync.Application.UseCases.Foods.Queries.GetAll;
 using MealSync.Application.UseCases.Foods.Queries.GetByIds;
 using MealSync.Application.UseCases.Foods.Queries.ShopFood;
@@ -89,5 +90,15 @@ public class FoodController : BaseApiController
     public async Task<IActionResult> GetShopOwnerFood()
     {
         return HandleResult(await Mediator.Send(new GetShopOwnerFoodQuery()));
+    }
+
+    [HttpGet(Endpoints.GET_SHOP_FOOD_DETAIL)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetFoodInCart(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetFoodDetailOfShopQuery()
+        {
+            Id = id,
+        }).ConfigureAwait(false));
     }
 }
