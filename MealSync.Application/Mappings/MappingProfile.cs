@@ -73,8 +73,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Dormitories, opt => opt.MapFrom(src => src.ShopDormitories.Select(sd => sd.Dormitory)));
         CreateMap<Food, ShopFoodResponse.FoodResponse>();
         CreateMap<Promotion, PromotionSummaryResponse>()
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.ToUnixTimeMilliseconds()))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToUnixTimeMilliseconds()));
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.AddHours(-7).ToUnixTimeMilliseconds()));
         CreateMap<PlatformCategory, PlatformCategoryResponse>();
         CreateMap<CustomerBuilding, CustomerBuildingResponse>()
             .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
