@@ -18,6 +18,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             .Include(so => so.Location)
             .Include(so => so.ShopDormitories)
             .ThenInclude(sd => sd.Dormitory)
+            .Include(so => so.Account)
             .SingleOrDefault(so => so.Id == id);
     }
 

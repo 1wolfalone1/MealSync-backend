@@ -6,9 +6,13 @@ public class UpdateShopProfileValidator : AbstractValidator<UpdateShopProfileCom
 {
     public UpdateShopProfileValidator()
     {
-        RuleFor(x => x.Name)
+        RuleFor(x => x.ShopName)
             .NotEmpty()
             .WithMessage("Vui lòng cung cấp tên cửa hàng");
+
+        RuleFor(x => x.ShopOnwerName)
+            .NotEmpty()
+            .WithMessage("Vui lòng cung cấp tên chủ cửa hàng");
 
         RuleFor(x => x.PhoneNumber)
             .NotNull()
@@ -23,5 +27,21 @@ public class UpdateShopProfileValidator : AbstractValidator<UpdateShopProfileCom
         RuleFor(x => x.BannerUrl)
             .NotEmpty()
             .WithMessage("Vui lòng cung cấp ảnh bìa của cửa hàng");
+
+        RuleFor(x => x.DormitoryIds)
+            .Must(x => x.Length > 0)
+            .WithMessage("Vui lòng chọn ít nhất 1 khu vực bán hàng");
+
+        RuleFor(x => x.Location.Address)
+            .NotEmpty()
+            .WithMessage("Vui lòng cung cấp địa chỉ");
+
+        RuleFor(x => x.Location.Latitude)
+            .NotEmpty()
+            .WithMessage("Vui lòng cung cấp vĩ độ của vị trí");
+
+        RuleFor(x => x.Location.Longtiude)
+            .NotEmpty()
+            .WithMessage("Vui lòng cung cấp kinh độ của vị trí");
     }
 }
