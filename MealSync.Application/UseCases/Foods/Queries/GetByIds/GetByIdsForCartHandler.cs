@@ -5,6 +5,7 @@ using MealSync.Application.Common.Repositories;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Domain.Enums;
+using MealSync.Domain.Exceptions.Base;
 
 namespace MealSync.Application.UseCases.Foods.Queries.GetByIds;
 
@@ -23,18 +24,26 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
 
     public async Task<Result<Result>> Handle(GetByIdsForCartQuery request, CancellationToken cancellationToken)
     {
-        var data = await _foodRepository.GetByIds(request.Ids).ConfigureAwait(false);
-        var foods = _mapper.Map<List<FoodCartSummaryResponse>>(data.Foods);
-
-        return Result.Success(new
+        var isAllIdsInOneShop = await _foodRepository.CheckAllIdsInOneShop(request.Ids).ConfigureAwait(false);
+        if (isAllIdsInOneShop)
         {
-            Foods = foods,
-            IsHaveNotFound = data.IdsNotFound.Count > 0,
-            IdsNotFound = data.IdsNotFound.Count > 0 ? data.IdsNotFound : null,
-            Message = data.IdsNotFound.Count > 0
-                ? _systemResourceRepository.GetByResourceCode(
-                    MessageCode.E_FOOD_CART_NOT_FOUND.GetDescription(), data.IdsNotFound.Count)
-                : null,
-        });
+            var data = await _foodRepository.GetByIds(request.Ids).ConfigureAwait(false);
+            var foods = _mapper.Map<List<FoodCartSummaryResponse>>(data.Foods);
+
+            return Result.Success(new
+            {
+                Foods = foods,
+                IsHaveNotFound = data.IdsNotFound.Count > 0,
+                IdsNotFound = data.IdsNotFound.Count > 0 ? data.IdsNotFound : null,
+                Message = data.IdsNotFound.Count > 0
+                    ? _systemResourceRepository.GetByResourceCode(
+                        MessageCode.E_FOOD_CART_NOT_FOUND.GetDescription(), data.IdsNotFound.Count)
+                    : null,
+            });
+        }
+        else
+        {
+            throw new InvalidBusinessException(MessageCode.E_FOOD_IN_CART_NOT_IN_ONE_SHOP.GetDescription());
+        }
     }
 }

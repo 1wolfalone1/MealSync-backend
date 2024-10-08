@@ -1,5 +1,4 @@
 ﻿using MealSync.Domain.Entities;
-using MealSync.Domain.Enums;
 
 namespace MealSync.Application.Common.Repositories;
 
@@ -18,4 +17,6 @@ public interface IFoodRepository : IBaseRepository<Food>
     Task<(int TotalCount, IEnumerable<Food> Foods)> GetAllActiveFoodByShopId(long shopId, int pageIndex, int pageSize);
 
     Task<(List<long> IdsNotFound, IEnumerable<Food> Foods)> GetByIds(List<long> ids);
+
+    Task<bool> CheckAllIdsInOneShop(List<long> ids);
 }

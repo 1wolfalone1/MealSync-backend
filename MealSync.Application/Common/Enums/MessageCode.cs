@@ -106,6 +106,9 @@ public enum MessageCode
     [Description("E-Food-Cart-NotFound")]
     E_FOOD_CART_NOT_FOUND,
 
+    [Description("E-Food-In-Cart-Not-In-One-Shop")]
+    E_FOOD_IN_CART_NOT_IN_ONE_SHOP,
+
     // Shop
     [Description("E-Shop-NotAbleToInActive")]
     E_SHOP_NOT_ABLE_TO_IN_ACTIVE,
