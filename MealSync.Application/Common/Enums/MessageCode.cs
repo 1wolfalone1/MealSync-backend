@@ -75,6 +75,12 @@ public enum MessageCode
     [Description("E-OptionGroup-UpdateNotEnoughOption")]
     E_OPTION_GROUP_UPDATE_NOT_ENOUGH_OPTION,
 
+    [Description("W-OptionGroup-HaveFoodLinked")]
+    W_OPTION_GROUP_HAVE_FOOD_LINKED,
+
+    [Description("I-OptionGroup-DeleteSuccess")]
+    I_OPTION_GROUP_DELETE_SUCCESS,
+
     // Option
     [Description("E-Option-NotFound")]
     E_OPTION_NOT_FOUND,
