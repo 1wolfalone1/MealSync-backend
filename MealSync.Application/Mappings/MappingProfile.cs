@@ -99,5 +99,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.OperatingSlot.StartTime))
             .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime));
         CreateMap<FoodOptionGroup, FoodDetailOfShopResponse.OptionGroupOfShopResponse>();
+        CreateMap<OptionGroup, ShopOptionGroupResponse>()
+            .ForMember(dest => dest.NumOfItemLinked, opt => opt.MapFrom(src => src.FoodOptionGroups != default ? src.FoodOptionGroups.Count() : 0))
+            .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
     }
 }

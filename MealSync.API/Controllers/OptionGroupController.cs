@@ -3,6 +3,7 @@ using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.OptionGroups.Commands.CreateOptionGroup;
 using MealSync.Application.UseCases.OptionGroups.Commands.LinkOptionGroups;
+using MealSync.Application.UseCases.OptionGroups.Queries.GetAllOptionGroupOfShop;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MealSync.API.Controllers;
@@ -20,6 +21,13 @@ public class OptionGroupController : BaseApiController
     [HttpPost(Endpoints.LINK_FOOD_OPTION_GROUP)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> LinkFoodOptionGroup([FromBody] LinkOptionGroupCommand request)
+    {
+        return HandleResult(await Mediator.Send(request));
+    }
+
+    [HttpGet(Endpoints.GET_ALL_SHOP_OPTION_GROUP)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetAllShopOptionGroup([FromQuery] GetAllShopOptionGroupQuery request)
     {
         return HandleResult(await Mediator.Send(request));
     }

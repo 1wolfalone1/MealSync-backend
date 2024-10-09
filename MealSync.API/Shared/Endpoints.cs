@@ -19,6 +19,7 @@ public static class Endpoints
     public const string GET_SHOP_FOOD_DETAIL = "shop-owner/food/{id}/detail";
 
     // Option Group
+    public const string GET_ALL_SHOP_OPTION_GROUP = "shop-owner/option-group";
     public const string CREATE_OPTION_GROUP = "shop-owner/option-group/create";
     public const string LINK_FOOD_OPTION_GROUP = "shop-owner/option-group/link-food";
 

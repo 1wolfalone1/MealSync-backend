@@ -21,4 +21,21 @@ public class OptionGroupRepository : BaseRepository<OptionGroup>, IOptionGroupRe
         return DbSet.Include(og => og.Options.Where(o => o.Status != OptionStatus.Delete))
             .First(og => og.Id == id && og.Status != OptionGroupStatus.Delete);
     }
+
+    public (int TotalCount, List<OptionGroup> OptionGroups) GetAllShopOptonGroup(long? currentPrincipalId, int requestPageIndex, int requestPageSize)
+    {
+        var query = DbSet
+            .Include(op => op.FoodOptionGroups)
+            .Include(op => op.Options)
+            .Where(op => op.ShopId == currentPrincipalId.Value && op.Status != OptionGroupStatus.Delete);
+
+        var totalCount = query.Count();
+        var optionGroups = query
+            .OrderByDescending(op => op.CreatedDate)
+            .Skip((requestPageIndex - 1) * requestPageSize)
+            .Take(requestPageSize)
+            .ToList();
+
+        return (totalCount, optionGroups);
+    }
 }
