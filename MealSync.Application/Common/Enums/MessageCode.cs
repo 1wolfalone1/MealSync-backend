@@ -72,6 +72,13 @@ public enum MessageCode
     [Description("E-OptionGroup-RadioValidate")]
     E_OPTION_GROUP_RADIO_VALIDATE,
 
+    [Description("E-OptionGroup-UpdateNotEnoughOption")]
+    E_OPTION_GROUP_UPDATE_NOT_ENOUGH_OPTION,
+
+    // Option
+    [Description("E-Option-NotFound")]
+    E_OPTION_NOT_FOUND,
+
     // Shop
     [Description("E-Shop-NotFound")]
     E_SHOP_NOT_FOUND,
