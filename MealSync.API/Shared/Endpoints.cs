@@ -24,6 +24,9 @@ public static class Endpoints
     public const string UPDATE_OPTION_GROUP = "shop-owner/option-group/{id}";
     public const string LINK_FOOD_OPTION_GROUP = "shop-owner/option-group/link-food";
 
+    // Option
+    public const string CREATE_OPTION = "shop-owner/option";
+
     // Shop Category
     public const string CREATE_SHOP_CATEGORY = "shop-owner/category/create";
 
