@@ -9,4 +9,9 @@ public class FoodOptionGroupRepository : BaseRepository<FoodOptionGroup>, IFoodO
     public FoodOptionGroupRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
+
+    public int GetMaxCurrentDisplayOrder(long foodId)
+    {
+        return DbSet.Where(fog => fog.FoodId == foodId).Max(x => x.DisplayOrder);
+    }
 }
