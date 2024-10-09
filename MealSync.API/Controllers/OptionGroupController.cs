@@ -2,6 +2,7 @@ using MealSync.API.Identites;
 using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.OptionGroups.Commands.CreateOptionGroup;
+using MealSync.Application.UseCases.OptionGroups.Commands.DeleteOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.LinkOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.UpdateOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Queries.GetAllOptionGroupOfShop;
@@ -36,6 +37,14 @@ public class OptionGroupController : BaseApiController
     [HttpPut(Endpoints.UPDATE_OPTION_GROUP)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> UpdateShopOptionGroup([FromBody] UpdateOptionGroupCommand command, long id)
+    {
+        command.Id = id;
+        return HandleResult(await Mediator.Send(command));
+    }
+
+    [HttpDelete(Endpoints.DELETE_OPTION_GROUP)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> DeleteShopOptionGroup([FromBody] DeleteOptionGroupCommand command, long id)
     {
         command.Id = id;
         return HandleResult(await Mediator.Send(command));

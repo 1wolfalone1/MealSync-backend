@@ -19,9 +19,9 @@ public class LinkOptionGroupHandler : ICommandHandler<LinkOptionGroupCommand, Re
     private readonly IOptionGroupRepository _optionGroupRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISystemResourceRepository _systemResourceRepository;
-    private readonly ILogger<LinkOptionGroupCommand> _logger;
+    private readonly ILogger<LinkOptionGroupHandler> _logger;
 
-    public LinkOptionGroupHandler(ICurrentPrincipalService currentPrincipalService, IFoodOptionGroupRepository foodOptionGroupRepository, IFoodRepository foodRepository, ILogger<LinkOptionGroupCommand> logger, IOptionGroupRepository optionGroupRepository, IUnitOfWork unitOfWork, ISystemResourceRepository systemResourceRepository)
+    public LinkOptionGroupHandler(ICurrentPrincipalService currentPrincipalService, IFoodOptionGroupRepository foodOptionGroupRepository, IFoodRepository foodRepository, ILogger<LinkOptionGroupHandler> logger, IOptionGroupRepository optionGroupRepository, IUnitOfWork unitOfWork, ISystemResourceRepository systemResourceRepository)
     {
         _currentPrincipalService = currentPrincipalService;
         _foodOptionGroupRepository = foodOptionGroupRepository;
