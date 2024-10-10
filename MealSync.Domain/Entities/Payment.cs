@@ -16,6 +16,8 @@ public class Payment : BaseEntity
 
     public double Amount { get; set; }
 
+    public long VnPayTransactionNo { get; set; }
+
     public PaymentStatus Status { get; set; }
 
     public PaymentTypes Type { get; set; } = PaymentTypes.Payment;

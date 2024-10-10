@@ -104,7 +104,7 @@ public static class IdentityServiceExtensions
         // Register the JwtSettings instance as a singleton
         services.AddSingleton<JwtSetting>(jwtSetting);
 
-        //Set Redis Setting
+        // Set Redis Setting
         var redidSetting = new RedisSetting()
         {
             ConnectionString = config["REDIS_URL"]
@@ -119,6 +119,23 @@ public static class IdentityServiceExtensions
 
         services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redidSetting.ConnectionString));
         services.AddStackExchangeRedisCache(option => option.Configuration = redidSetting.ConnectionString);
+
+        // Set VnPay Setting
+        var vnPaySetting = new VnPaySetting
+        {
+            PaymentUrl = config["VN_PAY_PAYMENT_URL"] ?? string.Empty,
+            ReturnUrl = config["VN_PAY_RETURN_URL"] ?? string.Empty,
+            RefundUrl = config["VN_PAY_REFUND_URL"] ?? string.Empty,
+            TmpCode = config["VN_PAY_TMP_CODE"] ?? string.Empty,
+            HashSecret = config["VN_PAY_HASH_SECRET"] ?? string.Empty,
+        };
+
+        // Validate the VnPaySettings instance using DataAnnotations
+        var validationVnPayContext = new ValidationContext(vnPaySetting);
+        Validator.ValidateObject(vnPaySetting, validationVnPayContext, validateAllProperties: true);
+
+        // Register the RedisSettings instance as a singleton
+        services.AddSingleton<VnPaySetting>(vnPaySetting);
 
         //Config service
         var assembly = typeof(BaseService).Assembly;
