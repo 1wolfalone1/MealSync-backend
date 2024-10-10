@@ -20,8 +20,9 @@ public class OperatingSlotController : BaseApiController
 
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     [HttpPut(Endpoints.UPDATE_OPERATING_SLOT)]
-    public async Task<IActionResult> UpdateShopProfile([FromBody] UpdateShopOperatingSlotCommand command)
+    public async Task<IActionResult> UpdateShopProfile([FromBody] UpdateShopOperatingSlotCommand command, long id)
     {
+        command.Id = id;
         return HandleResult(await Mediator.Send(command));
     }
 
@@ -29,6 +30,7 @@ public class OperatingSlotController : BaseApiController
     [HttpDelete(Endpoints.DELETE_OPERATING_SLOT)]
     public async Task<IActionResult> DeleteShopProfile([FromBody] DeleteShopOperatingSlotCommand command, long id)
     {
+        command.Id = id;
         return HandleResult(await Mediator.Send(command));
     }
 }
