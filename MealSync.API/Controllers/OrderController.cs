@@ -31,9 +31,9 @@ public class OrderController : BaseApiController
 
         var payment = new Payment
         {
-            Id = 290,
+            Id = 2900,
             Amount = 30000,
-            OrderId = 300,
+            OrderId = 3000,
             CreatedDate = time,
         };
 
@@ -64,9 +64,9 @@ public class OrderController : BaseApiController
     {
         var payment = new Payment
         {
-            Id = 290,
+            Id = 2900,
             Amount = 30000,
-            OrderId = 300,
+            OrderId = 3000,
             Status = PaymentStatus.Pending,
         };
 
