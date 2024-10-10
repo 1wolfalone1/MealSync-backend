@@ -104,5 +104,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.NumOfItemLinked, opt => opt.MapFrom(src => src.FoodOptionGroups != default ? src.FoodOptionGroups.Count() : 0))
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
         CreateMap<Option, OptionResponse>();
+        CreateMap<Food, ShopOwnerFoodResponse.FoodResponse>();
     }
 }

@@ -113,6 +113,12 @@ public enum MessageCode
     E_DORMITORY_NOT_FOUND,
 
     // Food
+    [Description("I-Food-UpdateActiveSuccess")]
+    I_FOOD_UPDATE_ACTIVE_SUCCESS,
+
+    [Description("I-Food-UpdateInActiveSuccess")]
+    I_FOOD_UPDATE_INACTIVE_SUCCESS,
+
     [Description("E-Food-NotFound")]
     E_FOOD_NOT_FOUND,
 
@@ -121,6 +127,9 @@ public enum MessageCode
 
     [Description("E-Food-In-Cart-Not-In-One-Shop")]
     E_FOOD_IN_CART_NOT_IN_ONE_SHOP,
+
+    [Description("E-Food-InCorrectStatus")]
+    E_FOOD_INCORRECT_STATUS,
 
     // Shop
     [Description("E-Shop-NotAbleToInActive")]

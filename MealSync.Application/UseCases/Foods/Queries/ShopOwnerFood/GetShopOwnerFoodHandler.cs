@@ -23,11 +23,11 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
     public async Task<Result<Result>> Handle(GetShopOwnerFoodQuery request, CancellationToken cancellationToken)
     {
         var foods = await _foodRepository.GetShopOwnerFood(_currentPrincipalService.CurrentPrincipalId.Value).ConfigureAwait(false);
-        var response = foods.Select(g => new ShopFoodResponse()
+        var response = foods.Select(g => new ShopOwnerFoodResponse()
         {
             CategoryId = g.CategoryId,
             CategoryName = g.CategoryName,
-            Foods = _mapper.Map<List<ShopFoodResponse.FoodResponse>>(g.Foods),
+            Foods = _mapper.Map<List<ShopOwnerFoodResponse.FoodResponse>>(g.Foods),
         }).ToList();
         return Result.Success(response);
     }
