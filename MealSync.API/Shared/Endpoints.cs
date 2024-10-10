@@ -73,4 +73,9 @@ public static class Endpoints
     // Customer
     public const string GET_CUSTOMER_INFO = "customer/profile";
     public const string GET_ALL_CUSTOMER_BUILDING = "customer/building";
+
+    // Order
+    public const string CREATE_ORDER = "customer/order";
+    public const string CREATE_REFUND = "customer/order/refund";
+    public const string GET_IPN = "customer/order/IPN";
 }

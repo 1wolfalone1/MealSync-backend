@@ -2,7 +2,7 @@
 
 public enum PaymentMethods
 {
-    Vnpay = 1,
-    Zalopay = 2,
+    VnPay = 1,
+    ZaloPay = 2,
     Cash = 3,
 }

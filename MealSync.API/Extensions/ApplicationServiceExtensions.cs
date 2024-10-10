@@ -63,6 +63,8 @@ public static class ApplicationServiceExtensions
             options.JsonSerializerOptions.Converters.Add(new JsonNumericEnumConverter());
         });
 
+        services.AddHttpContextAccessor();
+
         return services;
     }
 
