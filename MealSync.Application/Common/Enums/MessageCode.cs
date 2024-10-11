@@ -72,6 +72,19 @@ public enum MessageCode
     [Description("E-OptionGroup-RadioValidate")]
     E_OPTION_GROUP_RADIO_VALIDATE,
 
+    [Description("E-OptionGroup-UpdateNotEnoughOption")]
+    E_OPTION_GROUP_UPDATE_NOT_ENOUGH_OPTION,
+
+    [Description("W-OptionGroup-HaveFoodLinked")]
+    W_OPTION_GROUP_HAVE_FOOD_LINKED,
+
+    [Description("I-OptionGroup-DeleteSuccess")]
+    I_OPTION_GROUP_DELETE_SUCCESS,
+
+    // Option
+    [Description("E-Option-NotFound")]
+    E_OPTION_NOT_FOUND,
+
     // Shop
     [Description("E-Shop-NotFound")]
     E_SHOP_NOT_FOUND,
@@ -100,6 +113,12 @@ public enum MessageCode
     E_DORMITORY_NOT_FOUND,
 
     // Food
+    [Description("I-Food-UpdateActiveSuccess")]
+    I_FOOD_UPDATE_ACTIVE_SUCCESS,
+
+    [Description("I-Food-UpdateInActiveSuccess")]
+    I_FOOD_UPDATE_INACTIVE_SUCCESS,
+
     [Description("E-Food-NotFound")]
     E_FOOD_NOT_FOUND,
 
@@ -108,6 +127,9 @@ public enum MessageCode
 
     [Description("E-Food-In-Cart-Not-In-One-Shop")]
     E_FOOD_IN_CART_NOT_IN_ONE_SHOP,
+
+    [Description("E-Food-InCorrectStatus")]
+    E_FOOD_INCORRECT_STATUS,
 
     // Shop
     [Description("E-Shop-NotAbleToInActive")]

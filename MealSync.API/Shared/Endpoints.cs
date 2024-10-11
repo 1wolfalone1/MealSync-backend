@@ -13,14 +13,21 @@ public static class Endpoints
     public const string GET_FOOD = "shop-owner/food";
     public const string CREATE_FOOD = "shop-owner/food/create";
     public const string UPDATE_FOOD = "shop-owner/food/update";
+    public const string UPDATE_FOOD_STATUS = "shop-owner/food/{id}/status";
     public const string GET_SHOP_PROFILE = "shop-owner/full-infor";
     public const string UPDATE_SHOP_PROFILE = "shop-owner/profile";
     public const string UPDATE_SHOP_ACTIVE_INACTIVE = "shop-owner/shop-owner/active-inactive";
     public const string GET_SHOP_FOOD_DETAIL = "shop-owner/food/{id}/detail";
 
     // Option Group
+    public const string GET_ALL_SHOP_OPTION_GROUP = "shop-owner/option-group";
     public const string CREATE_OPTION_GROUP = "shop-owner/option-group/create";
+    public const string UPDATE_OPTION_GROUP = "shop-owner/option-group/{id}";
+    public const string DELETE_OPTION_GROUP = "shop-owner/option-group/{id}";
     public const string LINK_FOOD_OPTION_GROUP = "shop-owner/option-group/link-food";
+
+    // Option
+    public const string CREATE_OPTION = "shop-owner/option";
 
     // Shop Category
     public const string CREATE_SHOP_CATEGORY = "shop-owner/category/create";
@@ -66,4 +73,9 @@ public static class Endpoints
     // Customer
     public const string GET_CUSTOMER_INFO = "customer/profile";
     public const string GET_ALL_CUSTOMER_BUILDING = "customer/building";
+
+    // Order
+    public const string CREATE_ORDER = "customer/order";
+    public const string CREATE_REFUND = "customer/order/refund";
+    public const string GET_IPN = "customer/order/IPN";
 }

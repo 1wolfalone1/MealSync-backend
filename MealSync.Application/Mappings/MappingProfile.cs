@@ -7,6 +7,7 @@ using MealSync.Application.UseCases.Customers.Models;
 using MealSync.Application.UseCases.Favourites.Models;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.OptionGroups.Models;
+using MealSync.Application.UseCases.Options.Models;
 using MealSync.Application.UseCases.Promotions.Models;
 using MealSync.Application.UseCases.PlatformCategory.Models;
 using MealSync.Application.UseCases.ShopCategories.Models;
@@ -99,5 +100,10 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.OperatingSlot.StartTime))
             .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime));
         CreateMap<FoodOptionGroup, FoodDetailOfShopResponse.OptionGroupOfShopResponse>();
+        CreateMap<OptionGroup, ShopOptionGroupResponse>()
+            .ForMember(dest => dest.NumOfItemLinked, opt => opt.MapFrom(src => src.FoodOptionGroups != default ? src.FoodOptionGroups.Count() : 0))
+            .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
+        CreateMap<Option, OptionResponse>();
+        CreateMap<Food, ShopOwnerFoodResponse.FoodResponse>();
     }
 }
