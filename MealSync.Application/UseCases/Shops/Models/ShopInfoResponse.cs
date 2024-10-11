@@ -22,6 +22,8 @@ public class ShopInfoResponse
 
     public bool IsReceivingOrderPaused { get; set; }
 
+    public bool IsAcceptingOrderNextDay { get; set; }
+
     public List<ShopOperatingSlotResponse> OperatingSlots { get; set; }
 
     public ShopLocationResponse Location { get; set; }
