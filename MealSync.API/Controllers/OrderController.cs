@@ -1,4 +1,5 @@
 using MealSync.API.Shared;
+using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services.Payments.VnPay;
 using MealSync.Application.Shared;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +13,15 @@ public class OrderController : BaseApiController
 {
     private readonly IVnPayPaymentService _paymentService;
     private readonly ILogger<OrderController> _logger;
+    private readonly IActivityLogRepository _activityLogRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public OrderController(IVnPayPaymentService paymentService, ILogger<OrderController> logger)
+    public OrderController(IVnPayPaymentService paymentService, ILogger<OrderController> logger, IActivityLogRepository activityLogRepository, IUnitOfWork unitOfWork)
     {
         _paymentService = paymentService;
         _logger = logger;
+        _activityLogRepository = activityLogRepository;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet(Endpoints.CREATE_ORDER)]
@@ -77,6 +82,29 @@ public class OrderController : BaseApiController
         _logger.LogInformation("RspCode: " + response.RspCode);
         _logger.LogInformation("Message: " + response.Message);
         _logger.LogInformation("------------------------END-----------------------");
-        return HandleResult(Result.Success(response));
+        ActivityLog activityLog = new ActivityLog
+        {
+            AccountId = 1,
+            ActionType = ModeratorActionTypes.Create,
+            TargetType = ModeratorTargetTypes.Order,
+            TargetId = 1,
+            ActionDetail = "RspCode: " + response.RspCode + " Message: " + response.Message,
+            IsSuccess = true
+        };
+        try
+        {
+            // Begin transaction
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+            await _activityLogRepository.AddAsync(activityLog).ConfigureAwait(false);
+            await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+            return HandleResult(Result.Success(response));
+        }
+        catch (Exception e)
+        {
+            // Rollback when exception
+            _unitOfWork.RollbackTransaction();
+            _logger.LogError(e, e.Message);
+            throw new("Internal Server Error");
+        }
     }
 }
