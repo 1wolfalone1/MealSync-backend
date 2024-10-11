@@ -2,6 +2,7 @@
 using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Foods.Commands.Create;
+using MealSync.Application.UseCases.Foods.Commands.Delete;
 using MealSync.Application.UseCases.Foods.Commands.ShopUpdateFoodStatus;
 using MealSync.Application.UseCases.Foods.Commands.Update;
 using MealSync.Application.UseCases.Foods.Queries.FoodDetail;
@@ -110,5 +111,15 @@ public class FoodController : BaseApiController
     {
         command.Id = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpDelete(Endpoints.DELETE_FOOD_STATUS)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> ShopOwnerUpdateFoodStatus(long id)
+    {
+        return HandleResult(await Mediator.Send(new DeleteFoodCommand()
+        {
+            Id = id,
+        }).ConfigureAwait(false));
     }
 }
