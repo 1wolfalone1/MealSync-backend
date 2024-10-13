@@ -47,24 +47,20 @@ public class UpdateCustomerBuildingHandler : ICommandHandler<UpdateCustomerBuild
         {
             var accountId = _currentPrincipalService.CurrentPrincipalId!.Value;
             var defaultCustomerBuilding = _customerBuildingRepository.GetDefaultByCustomerId(accountId);
+
+            // Create new not set default (no customer building)
+            if (defaultCustomerBuilding == default && !request.IsSetDefault)
+            {
+                throw new InvalidBusinessException(MessageCode.E_CUSTOMER_BUILDING_CREATE_NEW_NOT_SET_DEFAULT.GetDescription());
+            }
+
             try
             {
                 // Begin transaction
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
-                if (defaultCustomerBuilding != null)
-                {
-                    defaultCustomerBuilding.IsDefault = false;
-                    _customerBuildingRepository.Update(defaultCustomerBuilding);
-                }
-
-                var presentCustomerBuilding = _customerBuildingRepository.GetByBuildingIdAndCustomerId(request.BuildingId, accountId);
-                if (presentCustomerBuilding != default)
-                {
-                    presentCustomerBuilding.IsDefault = true;
-                    _customerBuildingRepository.Update(presentCustomerBuilding);
-                }
-                else
+                // Create new set default (no customer building)
+                if (defaultCustomerBuilding == default && request.IsSetDefault)
                 {
                     var customerBuilding = new CustomerBuilding
                     {
@@ -73,6 +69,50 @@ public class UpdateCustomerBuildingHandler : ICommandHandler<UpdateCustomerBuild
                         IsDefault = true,
                     };
                     await _customerBuildingRepository.AddAsync(customerBuilding).ConfigureAwait(false);
+                }
+
+                // Already have customer building
+                if (defaultCustomerBuilding != default)
+                {
+                    var presentCustomerBuilding = _customerBuildingRepository.GetByBuildingIdAndCustomerId(request.BuildingId, accountId);
+
+                    // Already exist with update building id, update set default
+                    if (presentCustomerBuilding != default && request.IsSetDefault)
+                    {
+                        defaultCustomerBuilding.IsDefault = false;
+                        _customerBuildingRepository.Update(defaultCustomerBuilding);
+                        presentCustomerBuilding.IsDefault = true;
+                        _customerBuildingRepository.Update(presentCustomerBuilding);
+                    }
+
+                    // Not exist with update building id, create new but not set default
+                    if (presentCustomerBuilding == default && !request.IsSetDefault)
+                    {
+                        var customerBuilding = new CustomerBuilding
+                        {
+                            CustomerId = accountId,
+                            BuildingId = request.BuildingId,
+                            IsDefault = false,
+                        };
+
+                        await _customerBuildingRepository.AddAsync(customerBuilding).ConfigureAwait(false);
+                    }
+
+                    // Not exist with update building id, create new but set default
+                    if (presentCustomerBuilding == default && request.IsSetDefault)
+                    {
+                        defaultCustomerBuilding.IsDefault = false;
+                        _customerBuildingRepository.Update(defaultCustomerBuilding);
+
+                        var customerBuilding = new CustomerBuilding
+                        {
+                            CustomerId = accountId,
+                            BuildingId = request.BuildingId,
+                            IsDefault = true,
+                        };
+
+                        await _customerBuildingRepository.AddAsync(customerBuilding).ConfigureAwait(false);
+                    }
                 }
 
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
