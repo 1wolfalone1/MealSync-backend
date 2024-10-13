@@ -119,6 +119,9 @@ public enum MessageCode
     [Description("I-Food-UpdateInActiveSuccess")]
     I_FOOD_UPDATE_INACTIVE_SUCCESS,
 
+    [Description("I-Food-DeleteSuccess")]
+    I_FOOD_DELETE_SUCCESS,
+
     [Description("E-Food-NotFound")]
     E_FOOD_NOT_FOUND,
 
