@@ -2,6 +2,7 @@ using MealSync.API.Shared;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services.Payments.VnPay;
 using MealSync.Application.Shared;
+using MealSync.Application.UseCases.Orders.Commands.Create;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
@@ -24,8 +25,8 @@ public class OrderController : BaseApiController
         _unitOfWork = unitOfWork;
     }
 
-    [HttpGet(Endpoints.CREATE_ORDER)]
-    public async Task<IActionResult> CreateOrder()
+    [HttpPost(Endpoints.CREATE_ORDER)]
+    public async Task<IActionResult> CreateOrder(CreateOrderCommand request)
     {
         // Get the current time with the correct offset
         var time = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
@@ -43,8 +44,8 @@ public class OrderController : BaseApiController
         };
 
         // Create the payment URL asynchronously
-        var paymentUrl = await _paymentService.CreatePaymentUrl(payment).ConfigureAwait(false);
-        return HandleResult(Result.Success(paymentUrl));
+        // var paymentUrl = await _paymentService.CreatePaymentUrl(payment).ConfigureAwait(false);
+        return HandleResult(await Mediator.Send(request));
     }
 
     [HttpGet(Endpoints.CREATE_REFUND)]

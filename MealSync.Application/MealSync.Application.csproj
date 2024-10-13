@@ -42,7 +42,6 @@
         <Folder Include="UseCases\OperatingSlots\Models\" />
         <Folder Include="UseCases\OperatingSlots\Queries\" />
         <Folder Include="UseCases\Options\Queries\" />
-        <Folder Include="UseCases\Orders\Commands\Create\" />
         <Folder Include="UseCases\Orders\Models\" />
         <Folder Include="UseCases\Orders\Queries\" />
         <Folder Include="UseCases\Promotions\Commands\" />

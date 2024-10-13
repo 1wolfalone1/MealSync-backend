@@ -15,8 +15,8 @@ public static class TimeUtils
 
     public static bool IsValidOperatingSlot(int time)
     {
-        int hours = time / 100;    // Extract hours (first two digits)
-        int minutes = time % 100;  // Extract minutes (last two digits)
+        int hours = time / 100; // Extract hours (first two digits)
+        int minutes = time % 100; // Extract minutes (last two digits)
 
         // Check if the time is in a valid range (hours: 00-23, minutes: 00 or 30)
         return hours >= 0 && hours <= 23 && (minutes == 0 || minutes == FrameConstant.TIME_FRAME_IN_MINUTES);
@@ -90,4 +90,13 @@ public static class TimeUtils
         return false;
     }
 
+    public static bool IsThirtyMinuteDifference(int startTime, int endTime)
+    {
+        // Convert both StartTime and EndTime to total minutes
+        int startMinutes = ConvertToMinutes(startTime);
+        int endMinutes = ConvertToMinutes(endTime);
+
+        // Check if the difference is exactly 30 minutes
+        return (endMinutes - startMinutes) == FrameConstant.TIME_FRAME_IN_MINUTES;
+    }
 }
