@@ -108,6 +108,10 @@ public enum MessageCode
     [Description("I-Building-NotFound")]
     E_BUILDING_NOT_FOUND,
 
+    // Customer Building
+    [Description("E-Customer-Building-CreateNewNotSetDefault")]
+    E_CUSTOMER_BUILDING_CREATE_NEW_NOT_SET_DEFAULT,
+
     // Dormitory
     [Description("E-Dormitory-NotFound")]
     E_DORMITORY_NOT_FOUND,
