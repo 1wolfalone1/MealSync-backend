@@ -51,7 +51,8 @@ public class Order : BaseEntity
 
     public DateTimeOffset OrderDate { get; set; }
 
-    public DateTimeOffset IntendedReceiveAt { get; set; }
+    [Column(TypeName = "date")]
+    public DateTime IntendedReceiveDate { get; set; }
 
     public DateTimeOffset? ReceiveAt { get; set; }
 
