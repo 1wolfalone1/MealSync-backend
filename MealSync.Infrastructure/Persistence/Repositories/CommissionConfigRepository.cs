@@ -11,6 +11,6 @@ public class CommissionConfigRepository : BaseRepository<CommissionConfig>, ICom
 
     public double GetCommissionConfig()
     {
-        return DbSet.OrderByDescending(cc => cc.CreatedDate).Select(cc => cc.Id).First();
+        return DbSet.OrderByDescending(cc => cc.CreatedDate).Select(cc => cc.CommissionRate).First();
     }
 }

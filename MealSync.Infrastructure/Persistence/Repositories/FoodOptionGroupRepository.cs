@@ -19,7 +19,7 @@ public class FoodOptionGroupRepository : BaseRepository<FoodOptionGroup>, IFoodO
 
     public Task<FoodOptionGroup?> GetActiveOptionGroupByFoodIdAndOptionGroupId(long foodId, long optionGroupId)
     {
-        return DbSet.Include(fog => fog.Food)
+        return DbSet.Include(fog => fog.OptionGroup)
             .FirstOrDefaultAsync(fog =>
                 fog.FoodId == foodId
                 && fog.OptionGroupId == optionGroupId

@@ -4,6 +4,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Payments.VnPay;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Orders.Models;
@@ -31,15 +32,14 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
     private readonly IOrderRepository _orderRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IVnPayPaymentService _paymentService;
 
-    public CreateOrderHandler(
-        IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository,
-        IBuildingRepository buildingRepository, IFoodRepository foodRepository, IFoodOperatingSlotRepository foodOperatingSlotRepository,
-        IOperatingSlotRepository operatingSlotRepository, IFoodOptionGroupRepository foodOptionGroupRepository,
-        IOptionRepository optionRepository, IPromotionRepository promotionRepository,
-        ICurrentPrincipalService currentPrincipalService, ICommissionConfigRepository commissionConfigRepository, IUnitOfWork unitOfWork,
-        IMapper mapper, ILogger<CreateOrderCommand> logger)
+    public CreateOrderHandler(ILogger<CreateOrderCommand> logger, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository, IBuildingRepository buildingRepository, IFoodRepository foodRepository,
+        IFoodOperatingSlotRepository foodOperatingSlotRepository, IOperatingSlotRepository operatingSlotRepository, IFoodOptionGroupRepository foodOptionGroupRepository, IOptionRepository optionRepository,
+        IPromotionRepository promotionRepository, ICurrentPrincipalService currentPrincipalService, ICommissionConfigRepository commissionConfigRepository, IOrderRepository orderRepository, IUnitOfWork unitOfWork,
+        IMapper mapper, IVnPayPaymentService paymentService)
     {
+        _logger = logger;
         _shopRepository = shopRepository;
         _shopDormitoryRepository = shopDormitoryRepository;
         _buildingRepository = buildingRepository;
@@ -51,9 +51,10 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         _promotionRepository = promotionRepository;
         _currentPrincipalService = currentPrincipalService;
         _commissionConfigRepository = commissionConfigRepository;
+        _orderRepository = orderRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
-        _logger = logger;
+        _paymentService = paymentService;
     }
 
     public async Task<Result<Result>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -131,7 +132,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             FullName = request.FullName,
             PhoneNumber = request.PhoneNumber,
             OrderDate = now,
-            IntendedReceiveAt = request.OrderTime.IsOrderNextDay ? now.AddDays(1) : now,
+            IntendedReceiveDate = request.OrderTime.IsOrderNextDay ? now.AddDays(1).Date : now.Date,
             ReceiveAt = null,
             CompletedAt = null,
             StartTime = request.OrderTime.StartTime,
@@ -143,6 +144,9 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             Reason = null,
             OrderDetails = validateFoodResult.OrderDetails,
             Payments = payments,
+            Address = "Delete",
+            Longitude = buildingOrder.Location.Longitude,
+            Latitude = buildingOrder.Location.Latitude,
         };
 
         if (shop.IsAutoOrderConfirmation)
@@ -177,7 +181,17 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             }
 
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-            return Result.Create("Success");
+
+            CreateOrderResponse response = new CreateOrderResponse()
+            {
+                PaymentMethod = request.PaymentMethod,
+                PaymentLink = request.PaymentMethod == PaymentMethods.VnPay ? await _paymentService.CreatePaymentUrl(payment).ConfigureAwait(false) : null,
+                Order = _mapper.Map<OrderResponse>(order),
+            };
+
+            // Todo: Notification for shop, wallet
+
+            return Result.Create(response);
         }
         catch (Exception e)
         {
@@ -370,8 +384,8 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                                 else if (option.IsCalculatePrice)
                                 {
                                     // Option affects the price, add it to the total price
-                                    totalFoodPrice += option.Price;
-                                    totalPriceOrderDetail += option.Price;
+                                    totalFoodPrice += option.Price * foodRequest.Quantity;
+                                    totalPriceOrderDetail += option.Price * foodRequest.Quantity;
                                 }
                                 else
                                 {
@@ -443,8 +457,8 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                                     else if (option.IsCalculatePrice)
                                     {
                                         // Option affects the price, add it to the total price
-                                        totalFoodPrice += option.Price;
-                                        totalPriceOrderDetail += option.Price;
+                                        totalFoodPrice += option.Price * foodRequest.Quantity;
+                                        totalPriceOrderDetail += option.Price * foodRequest.Quantity;
                                     }
                                     else
                                     {
@@ -500,13 +514,13 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                     orderDetails.Add(new OrderDetail
                     {
                         FoodId = food.Id,
+                        Quantity = foodRequest.Quantity,
                         BasicPrice = food.Price,
                         TotalPrice = totalPriceOrderDetail,
                         Description = description,
                         OrderDetailOptions = orderDetailOptions,
                     });
                 }
-
             }
         }
 
