@@ -189,7 +189,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 Order = _mapper.Map<OrderResponse>(order),
             };
 
-            // Todo: Notification for shop, wallet
+            // Todo: Notification for shop
 
             return Result.Create(response);
         }

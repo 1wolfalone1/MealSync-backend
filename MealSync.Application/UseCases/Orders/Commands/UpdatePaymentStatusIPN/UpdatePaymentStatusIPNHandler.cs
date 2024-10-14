@@ -54,6 +54,8 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
 
                     _paymentRepository.Update(payment);
 
+                    // Todo: Update wallet
+
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
                 }
                 catch (Exception e)
@@ -81,7 +83,7 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
 
         foreach (var key in query.Keys)
         {
-            var values = query[key];  // IQueryCollection may contain multiple values for a key.
+            var values = query[key]; // IQueryCollection may contain multiple values for a key.
             foreach (var value in values)
             {
                 stringBuilder.Append($"{key}={value}&");

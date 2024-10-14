@@ -64,38 +64,6 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
             .SetValidator(new ShipInfoValidator());
     }
 
-    //     private bool ValidateTotalFoodCost(CreateOrderCommand order, double totalFoodCost)
-    //     {
-    //         // Calculate the total expected food cost
-    //         double expectedTotalFoodCost = order.Foods.Sum(foodOrder =>
-    //         {
-    //             double totalFoodPrice = foodOrder.Price;
-    //
-    //             // Add option prices from OptionGroupRadio where IsCalculatePrice is true
-    //             if (foodOrder.OptionGroupRadio != null)
-    //             {
-    //                 totalFoodPrice += foodOrder.OptionGroupRadio
-    //                     .Where(opt => opt.Option.IsCalculatePrice)
-    //                     .Sum(opt => opt.Option.Price);
-    //             }
-    //
-    //             // Add option prices from OptionGroupCheckbox where IsCalculatePrice is true
-    //             if (foodOrder.OptionGroupCheckbox != null)
-    //             {
-    //                 totalFoodPrice += foodOrder.OptionGroupCheckbox
-    //                     .SelectMany(group => group.Options)
-    //                     .Where(opt => opt.IsCalculatePrice)
-    //                     .Sum(opt => opt.Price);
-    //             }
-    //
-    //             return totalFoodPrice * foodOrder.Quantity;
-    //         });
-    //
-    //         // Validate the total food cost
-    //         return Math.Abs(expectedTotalFoodCost - order.TotalFoodCost) == 0;
-    //     }
-    // }
-
     // Validator for FoodOrderCommand
     public class FoodOrderValidator : AbstractValidator<CreateOrderCommand.FoodOrderCommand>
     {
