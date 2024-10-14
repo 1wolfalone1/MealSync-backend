@@ -22,4 +22,9 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
                  && p.EndDate >= now)
             .ToListAsync().ConfigureAwait(false);
     }
+
+    public Task<Promotion?> GetByIdAndShopId(long id, long shopId)
+    {
+        return DbSet.FirstOrDefaultAsync(p => p.Id == id && p.ShopId == shopId);
+    }
 }

@@ -85,6 +85,9 @@ public enum MessageCode
     [Description("E-Option-NotFound")]
     E_OPTION_NOT_FOUND,
 
+    [Description("E-Option-Of-OptionGroup-NotFound")]
+    E_OPTION_OF_OPTION_GROUP_NOT_FOUND,
+
     // Shop
     [Description("E-Shop-NotFound")]
     E_SHOP_NOT_FOUND,
@@ -98,14 +101,26 @@ public enum MessageCode
     [Description("E-Shop-Banned")]
     E_SHOP_BANNED,
 
+    [Description("E-Shop-InActive")]
+    E_SHOP_INACTIVE,
+
+    [Description("E-Shop-ReceivingOrderPaused")]
+    E_SHOP_RECEIVING_ORDER_PAUSED,
+
+    [Description("E-Shop-NotAcceptingOrderNextDay")]
+    E_SHOP_NOT_ACCEPTING_ORDER_NEXT_DAY,
+
+    [Description("E-Shop-Dormitory_NotFound")]
+    E_SHOP_DORMITORY_NOT_FOUND,
+
     // Building
     [Description("E-Building-NotSelect")]
     E_BUILDING_NOT_SELECT,
 
     [Description("I-Building-Selected")]
-    E_BUILDING_SELECTED,
+    I_BUILDING_SELECTED,
 
-    [Description("I-Building-NotFound")]
+    [Description("E-Building-NotFound")]
     E_BUILDING_NOT_FOUND,
 
     // Dormitory
@@ -133,6 +148,12 @@ public enum MessageCode
 
     [Description("E-Food-InCorrectStatus")]
     E_FOOD_INCORRECT_STATUS,
+
+    [Description("E-Food-InActive")]
+    E_FOOD_INACTIVE,
+
+    [Description("E-Food-IsSoldOut")]
+    E_FOOD_IS_SOLD_OUT,
 
     // Shop
     [Description("E-Shop-NotAbleToInActive")]
@@ -163,4 +184,39 @@ public enum MessageCode
     // Customer
     [Description("E-Customer-NotFound")]
     E_CUSTOMER_NOT_FOUND,
+
+    // Order
+    [Description("E-Order-ShopNotSellInOrderTime")]
+    E_ORDER_SHOP_NOT_SELL_IN_ORDER_TIME,
+
+    [Description("E-Order-FoodNotSellInOrderTime")]
+    E_ORDER_FOOD_NOT_SELL_IN_ORDER_TIME,
+
+    [Description("E-Order-IncorrectDiscountAmount")]
+    E_ORDER_INCORRECT_DISCOUNT_AMOUNT,
+
+    [Description("E-Order-IncorrectTotalFoodCost")]
+    E_ORDER_INCORRECT_TOTAL_FOOD_COST,
+
+    [Description("E-Order-OptionGroupRequiredNotSelect")]
+    E_ORDER_OPTION_GROUP_REQUIRED_NOT_SELECT,
+
+    // Promotion
+    [Description("E-Promotion-NotFound")]
+    E_PROMOTION_NOT_FOUND,
+
+    [Description("E-Promotion-InActive")]
+    E_PROMOTION_INACTIVE,
+
+    [Description("E-Promotion-Out_Of_Available")]
+    E_PROMOTION_OUT_OF_AVAILABLE,
+
+    [Description("E-Promotion-Not-Apply-For-This-Time")]
+    E_PROMOTION_NOT_APPLY_FOR_THIS_TIME,
+
+    [Description("E-Promotion-Expired")]
+    E_PROMOTION_EXPIRED,
+
+    [Description("E-Promotion-Not-Enough-Condition")]
+    E_PROMOTION_NOT_ENOUGH_CONDITION,
 }

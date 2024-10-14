@@ -17,4 +17,9 @@ public class BuildingRepository : BaseRepository<Building>, IBuildingRepository
             .Include(b => b.Location)
             .Where(b => b.DormitoryId == dormitoryId && b.Name.Contains(name)).ToList();
     }
+
+    public Task<Building?> GetByIdIncludeLocation(long id)
+    {
+        return DbSet.Include(b => b.Location).FirstOrDefaultAsync(b => b.Id == id);
+    }
 }

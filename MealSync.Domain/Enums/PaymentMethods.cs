@@ -3,6 +3,5 @@
 public enum PaymentMethods
 {
     VnPay = 1,
-    ZaloPay = 2,
-    Cash = 3,
+    COD = 2,
 }

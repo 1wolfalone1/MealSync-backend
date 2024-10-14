@@ -2,95 +2,99 @@ using FluentValidation;
 using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Utils;
 
-namespace MealSync.Application.UseCases.Orders.Commands.Create
+namespace MealSync.Application.UseCases.Orders.Commands.Create;
+
+public class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
 {
-    public class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
+    public CreateOrderValidator()
     {
-        public CreateOrderValidator()
-        {
-            // Shop validation
-            RuleFor(x => x.ShopId)
-                .GreaterThan(0).WithMessage("Shop id phải lớn hơn 0.");
+        // Shop validation
+        RuleFor(x => x.ShopId)
+            .GreaterThan(0).WithMessage("Shop id phải lớn hơn 0.");
 
-            // Full name validation
-            RuleFor(x => x.FullName)
-                .NotEmpty().WithMessage("Tên người đặt hàng bắt buộc.");
+        // Full name validation
+        RuleFor(x => x.FullName)
+            .NotEmpty().WithMessage("Tên người đặt hàng bắt buộc.");
 
-            // Phone number validation
-            RuleFor(x => x.PhoneNumber)
-                .NotEmpty().WithMessage("Số điện thoại người đặt hàng bắt buộc.");
+        // Phone number validation
+        RuleFor(x => x.PhoneNumber)
+            .NotEmpty().WithMessage("Số điện thoại người đặt hàng bắt buộc.");
 
-            // Building validation
-            RuleFor(x => x.BuildingId)
-                .GreaterThan(0).WithMessage("Tòa nhà id phải lớn hơn 0.");
+        // Building validation
+        RuleFor(x => x.BuildingId)
+            .GreaterThan(0).WithMessage("Tòa nhà id phải lớn hơn 0.");
 
-            // Foods validation
-            RuleFor(x => x.Foods)
-                .NotEmpty().WithMessage("Phải có ít nhất một sản phẩm.")
-                .ForEach(product =>
-                {
-                    product.SetValidator(new FoodOrderValidator());
-                });
-
-            // Order TimeFrame validation
-            RuleFor(x => x.OrderTime)
-                .SetValidator(new OrderTimeFrameValidator());
-
-            // Voucher validation
-            RuleFor(x => x.VoucherId)
-                .GreaterThan(0).When(x => x.VoucherId.HasValue)
-                .WithMessage("Mã giảm giá id phải lớn hơn 0.");
-
-            // Total Discount validation
-            RuleFor(x => x.TotalDiscount)
-                .GreaterThanOrEqualTo(0).WithMessage("Tổng giảm giá không được nhỏ hơn 0.");
-
-            // Total Food Cost validation
-            RuleFor(x => x.TotalFoodCost)
-                .GreaterThan(0).WithMessage("Tổng tiền đồ ăn phải lớn hơn 0.");
-
-            // Total Food Cost validation (TotalFoodCost = sum of food prices + option prices if any)
-            RuleFor(x => x.TotalFoodCost)
-                .Must(ValidateTotalFoodCost)
-                .WithMessage("Tổng tiền đồ ăn phải bằng giá đồ ăn cộng với giá lựa chọn nếu có.");
-
-            // Total Order validation (Total order should be equal to or greater than food cost minus discounts)
-            RuleFor(x => x.TotalOrder)
-                .Equal(x => x.TotalFoodCost - x.TotalDiscount)
-                .WithMessage("Tổng đơn hàng phải bằng tổng tiền đồ ăn trừ đi giảm giá.");
-        }
-
-        private bool ValidateTotalFoodCost(CreateOrderCommand order, double totalFoodCost)
-        {
-            // Calculate the total expected food cost
-            double expectedTotalFoodCost = order.Foods.Sum(foodOrder =>
+        // Foods validation
+        RuleFor(x => x.Foods)
+            .NotEmpty().WithMessage("Phải có ít nhất một sản phẩm.")
+            .ForEach(product =>
             {
-                double totalFoodPrice = foodOrder.Price;
-
-                // Add option prices from OptionGroupRadio where IsCalculatePrice is true
-                if (foodOrder.OptionGroupRadio != null)
-                {
-                    totalFoodPrice += foodOrder.OptionGroupRadio
-                        .Where(opt => opt.Option.IsCalculatePrice)
-                        .Sum(opt => opt.Option.Price);
-                }
-
-                // Add option prices from OptionGroupCheckbox where IsCalculatePrice is true
-                if (foodOrder.OptionGroupCheckbox != null)
-                {
-                    totalFoodPrice += foodOrder.OptionGroupCheckbox
-                        .SelectMany(group => group.Options)
-                        .Where(opt => opt.IsCalculatePrice)
-                        .Sum(opt => opt.Price);
-                }
-
-                return totalFoodPrice * foodOrder.Quantity;
+                product.SetValidator(new FoodOrderValidator());
             });
 
-            // Validate the total food cost
-            return Math.Abs(expectedTotalFoodCost - order.TotalFoodCost) == 0;
-        }
+        // Order TimeFrame validation
+        RuleFor(x => x.OrderTime)
+            .SetValidator(new OrderTimeFrameValidator());
+
+        // Voucher validation
+        RuleFor(x => x.VoucherId)
+            .GreaterThan(0).When(x => x.VoucherId.HasValue)
+            .WithMessage("Mã giảm giá id phải lớn hơn 0.");
+
+        // Total Discount validation
+        RuleFor(x => x.TotalDiscount)
+            .GreaterThanOrEqualTo(0).WithMessage("Tổng giảm giá không được nhỏ hơn 0.");
+
+        // Total Food Cost validation
+        RuleFor(x => x.TotalFoodCost)
+            .GreaterThan(0).WithMessage("Tổng tiền đồ ăn phải lớn hơn 0.");
+
+        // Total Order validation (Total order should be equal to or greater than food cost minus discounts)
+        RuleFor(x => x.TotalOrder)
+            .Equal(x => x.TotalFoodCost - x.TotalDiscount)
+            .WithMessage("Tổng đơn hàng phải bằng tổng tiền đồ ăn trừ đi giảm giá.");
+
+        // Payment method validation
+        RuleFor(x => x.PaymentMethod)
+            .IsInEnum()
+            .WithMessage("Payment method phải là VnPay (1) hoặc COD (2).");
+
+        // Ship info validation
+        RuleFor(x => x.ShipInfo)
+            .SetValidator(new ShipInfoValidator());
     }
+
+    //     private bool ValidateTotalFoodCost(CreateOrderCommand order, double totalFoodCost)
+    //     {
+    //         // Calculate the total expected food cost
+    //         double expectedTotalFoodCost = order.Foods.Sum(foodOrder =>
+    //         {
+    //             double totalFoodPrice = foodOrder.Price;
+    //
+    //             // Add option prices from OptionGroupRadio where IsCalculatePrice is true
+    //             if (foodOrder.OptionGroupRadio != null)
+    //             {
+    //                 totalFoodPrice += foodOrder.OptionGroupRadio
+    //                     .Where(opt => opt.Option.IsCalculatePrice)
+    //                     .Sum(opt => opt.Option.Price);
+    //             }
+    //
+    //             // Add option prices from OptionGroupCheckbox where IsCalculatePrice is true
+    //             if (foodOrder.OptionGroupCheckbox != null)
+    //             {
+    //                 totalFoodPrice += foodOrder.OptionGroupCheckbox
+    //                     .SelectMany(group => group.Options)
+    //                     .Where(opt => opt.IsCalculatePrice)
+    //                     .Sum(opt => opt.Price);
+    //             }
+    //
+    //             return totalFoodPrice * foodOrder.Quantity;
+    //         });
+    //
+    //         // Validate the total food cost
+    //         return Math.Abs(expectedTotalFoodCost - order.TotalFoodCost) == 0;
+    //     }
+    // }
 
     // Validator for FoodOrderCommand
     public class FoodOrderValidator : AbstractValidator<CreateOrderCommand.FoodOrderCommand>
@@ -108,10 +112,6 @@ namespace MealSync.Application.UseCases.Orders.Commands.Create
             // Quantity validation
             RuleFor(x => x.Quantity)
                 .GreaterThan(0).WithMessage("Số lượng phải lớn hơn 0.");
-
-            // Price validation
-            RuleFor(x => x.Price)
-                .GreaterThan(0).WithMessage("Giá đồ ăn phải lớn hơn 0.");
 
             // OptionGroupRadio validation
             RuleForEach(x => x.OptionGroupRadio)
@@ -133,8 +133,8 @@ namespace MealSync.Application.UseCases.Orders.Commands.Create
                 .GreaterThan(0).WithMessage("Lựa chọn nhóm id phải lớn hơn 0.");
 
             // Option validation
-            RuleFor(x => x.Option)
-                .SetValidator(new OptionCommandValidator());
+            RuleFor(x => x.OptionId)
+                .GreaterThan(0).WithMessage("Lựa chọn id phải lớn hơn 0.");
         }
     }
 
@@ -148,28 +148,11 @@ namespace MealSync.Application.UseCases.Orders.Commands.Create
                 .GreaterThan(0).WithMessage("Lựa chọn nhóm id phải lớn hơn 0.");
 
             // Option validation
-            RuleFor(x => x.Options)
-                .NotEmpty().WithMessage("Phải có ít nhất một lựa chọn.")
-                .ForEach(option =>
-                {
-                    option.SetValidator(new OptionCommandValidator());
-                });
-        }
-    }
+            RuleFor(x => x.OptionIds)
+                .NotEmpty().WithMessage("Phải có ít nhất một lựa chọn.");
 
-    // Validator for OptionCommand
-    public class OptionCommandValidator : AbstractValidator<CreateOrderCommand.OptionCommand>
-    {
-        public OptionCommandValidator()
-        {
-            // Option ID validation
-            RuleFor(x => x.Id)
-                .GreaterThan(0).WithMessage("Lựa chọn id phải lớn hơn 0.");
-
-            // Option Price validation (If price should be calculated)
-            RuleFor(x => x.Price)
-                .GreaterThan(0).When(x => x.IsCalculatePrice)
-                .WithMessage("Giá lựa chọn phải lớn hơn 0 nếu nó được tính vào giá tổng.");
+            RuleForEach(x => x.OptionIds)
+                .GreaterThan(0).WithMessage("Mỗi lựa chọn id phải lớn hơn 0.");
         }
     }
 
@@ -181,15 +164,32 @@ namespace MealSync.Application.UseCases.Orders.Commands.Create
             // Validate start and end times (within 24 hours, 0-23 range)
             RuleFor(x => x.StartTime)
                 .Must(TimeUtils.IsValidOperatingSlot)
-                .WithMessage($"Vui lòng cung cấp thời gian bắt đầu đúng định dạng hhMM.");
+                .WithMessage("Vui lòng cung cấp thời gian bắt đầu đúng định dạng hhMM.");
 
             RuleFor(x => x)
                 .Must(x => x.EndTime > x.StartTime && TimeUtils.IsValidOperatingSlot(x.EndTime) && TimeUtils.IsThirtyMinuteDifference(x.StartTime, x.EndTime))
-                .WithMessage($"Thời gian kết thúc phải lớn hơn thời gian bắt đầu {FrameConstant.TIME_FRAME_IN_MINUTES} phút.");
+                .WithMessage($"Thời gian kết thúc bằng thời gian bắt đầu cộng {FrameConstant.TIME_FRAME_IN_MINUTES} phút.");
 
             // Future orders validation (if order is for the next day)
             RuleFor(x => x.IsOrderNextDay)
                 .NotNull().WithMessage("Phải xác định rõ có phải là đơn hàng cho ngày tiếp theo hay không.");
+        }
+    }
+
+    // Validator for ShipInfo
+    public class ShipInfoValidator : AbstractValidator<CreateOrderCommand.ShipInfoCommand>
+    {
+        public ShipInfoValidator()
+        {
+            // Validate duration
+            RuleFor(x => x.Duration)
+                .GreaterThan(0)
+                .WithMessage("Thời gian giao hàng phải lớn hơn 0.");
+
+            // Validate distance
+            RuleFor(x => x.Distance)
+                .GreaterThan(0)
+                .WithMessage("Khoảng cách giao hàng phải lớn hơn 0.");
         }
     }
 }

@@ -58,7 +58,7 @@ public class OrderController : BaseApiController
             Id = 290,
             Amount = 30000,
             OrderId = 300,
-            VnPayTransactionNo = 14609928,
+            PaymentThirdPartyId = "14609928",
             CreatedDate = dto,
         };
         var response = await _paymentService.CreateRefund(payment).ConfigureAwait(false);

@@ -8,4 +8,9 @@ public class CommissionConfigRepository : BaseRepository<CommissionConfig>, ICom
     public CommissionConfigRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
+
+    public double GetCommissionConfig()
+    {
+        return DbSet.OrderByDescending(cc => cc.CreatedDate).Select(cc => cc.Id).First();
+    }
 }

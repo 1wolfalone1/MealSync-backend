@@ -81,7 +81,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
         var vnpAmount = Convert.ToInt64(payment.Amount) * 100;
         var vnpTxnRef = payment.OrderId;
         var vnpOrderInfo = "Hoan tien giao dich don hang: " + payment.OrderId;
-        var vnPayTransactionNo = payment.VnPayTransactionNo;
+        var vnPayTransactionNo = Convert.ToInt64(payment.PaymentThirdPartyId);
         var vnpTransactionDate = payment.CreatedDate.ToString(DATE_FORMAT);
         var vnpCreateDate = DateTime.Now.ToString(DATE_FORMAT);
         var vnpCreateBy = "Admin";

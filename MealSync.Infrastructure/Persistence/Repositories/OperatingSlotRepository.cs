@@ -15,4 +15,12 @@ public class OperatingSlotRepository : BaseRepository<OperatingSlot>, IOperating
         return DbSet
             .FirstOrDefault(o => o.Id == id && o.ShopId == shopId);
     }
+
+    public Task<OperatingSlot?> GetAvailableForTimeRangeOrder(long shopId, long orderStartTimeReceiving, long orderEndTimeReceiving)
+    {
+        return DbSet.FirstOrDefaultAsync(slot =>
+            slot.ShopId == shopId &&
+            slot.StartTime <= orderStartTimeReceiving &&
+            slot.EndTime >= orderEndTimeReceiving);
+    }
 }
