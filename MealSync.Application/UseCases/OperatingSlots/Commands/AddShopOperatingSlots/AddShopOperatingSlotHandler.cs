@@ -1,10 +1,12 @@
 ﻿using System.Net;
+using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
+using MealSync.Application.UseCases.OperatingSlots.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
@@ -20,8 +22,9 @@ public class AddShopOperatingSlotHandler : ICommandHandler<AddShopOperatingSlotC
     private readonly IOperatingSlotRepository _operatingSlotRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly ILogger<AddShopOperatingSlotHandler> _logger;
+    private readonly IMapper _mapper;
 
-    public AddShopOperatingSlotHandler(IUnitOfWork unitOfWork, IShopRepository shopRepository, ICurrentPrincipalService currentPrincipalService, IOperatingSlotRepository operatingSlotRepository, ILogger<AddShopOperatingSlotHandler> logger, ISystemResourceRepository systemResourceRepository)
+    public AddShopOperatingSlotHandler(IUnitOfWork unitOfWork, IShopRepository shopRepository, ICurrentPrincipalService currentPrincipalService, IOperatingSlotRepository operatingSlotRepository, ILogger<AddShopOperatingSlotHandler> logger, ISystemResourceRepository systemResourceRepository, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _shopRepository = shopRepository;
@@ -29,6 +32,7 @@ public class AddShopOperatingSlotHandler : ICommandHandler<AddShopOperatingSlotC
         _operatingSlotRepository = operatingSlotRepository;
         _logger = logger;
         _systemResourceRepository = systemResourceRepository;
+        _mapper = mapper;
     }
 
     public async Task<Result<Result>> Handle(AddShopOperatingSlotCommand request, CancellationToken cancellationToken)
@@ -48,12 +52,8 @@ public class AddShopOperatingSlotHandler : ICommandHandler<AddShopOperatingSlotC
             };
             await _operatingSlotRepository.AddAsync(operatingSlot).ConfigureAwait(false);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-
-            return Result.Success(new
-            {
-                Code = MessageCode.I_OPERATING_SLOT_ADD_SUCCESS.GetDescription(),
-                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_OPERATING_SLOT_ADD_SUCCESS.GetDescription()),
-            });
+            var response = _mapper.Map<OperatingSlotResponse>(operatingSlot);
+            return Result.Success(response);
         }
         catch (Exception e)
         {

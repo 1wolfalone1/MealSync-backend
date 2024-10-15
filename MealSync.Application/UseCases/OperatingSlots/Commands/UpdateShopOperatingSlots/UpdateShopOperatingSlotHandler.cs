@@ -1,10 +1,12 @@
 ﻿using System.Net;
+using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
+using MealSync.Application.UseCases.OperatingSlots.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
@@ -23,10 +25,11 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
     private readonly ICacheService _cacheService;
     private readonly ICurrentAccountService _currentAccountService;
     private readonly ILogger<UpdateShopOperatingSlotHandler> _logger;
+    private readonly IMapper _mapper;
 
     public UpdateShopOperatingSlotHandler(IShopRepository shopRepository, IOperatingSlotRepository operatingSlotRepository, IUnitOfWork unitOfWork, ILogger<UpdateShopOperatingSlotHandler> logger,
         IFoodOperatingSlotRepository foodOperatingSlotRepository, ISystemResourceRepository systemResourceRepository, ICurrentPrincipalService currentPrincipalService, ICacheService cacheService,
-        ICurrentAccountService currentAccountService)
+        ICurrentAccountService currentAccountService, IMapper mapper)
     {
         _shopRepository = shopRepository;
         _operatingSlotRepository = operatingSlotRepository;
@@ -37,6 +40,7 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
         _currentPrincipalService = currentPrincipalService;
         _cacheService = cacheService;
         _currentAccountService = currentAccountService;
+        _mapper = mapper;
     }
 
     public async Task<Result<Result>> Handle(UpdateShopOperatingSlotCommand request, CancellationToken cancellationToken)
@@ -74,12 +78,8 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
             operatingSlot.EndTime = request.EndTime;
             _operatingSlotRepository.Update(operatingSlot);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-
-            return Result.Success(new
-            {
-                Code = MessageCode.I_OPERATING_SLOT_CHANGE_SUCCESS.GetDescription(),
-                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_OPERATING_SLOT_CHANGE_SUCCESS.GetDescription()),
-            });
+            var response = _mapper.Map<OperatingSlotResponse>(operatingSlot);
+            return Result.Success(response);
         }
         catch (Exception e)
         {
