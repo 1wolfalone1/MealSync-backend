@@ -17,4 +17,9 @@ public class FoodOperatingSlotRepository : BaseRepository<FoodOperatingSlot>, IF
             .Where(fos => fos.OperatingSlotId == operatingId)
             .Include(fos => fos.Food).ToList();
     }
+
+    public Task<bool> ExistedByFoodIdAndOperatingSlotId(long foodId, long operatingSlotId)
+    {
+        return DbSet.AnyAsync(fos => fos.FoodId == foodId && fos.OperatingSlotId == operatingSlotId);
+    }
 }

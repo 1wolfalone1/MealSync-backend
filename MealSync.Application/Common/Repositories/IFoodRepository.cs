@@ -23,4 +23,6 @@ public interface IFoodRepository : IBaseRepository<Food>
     Task<(List<long> IdsNotFound, IEnumerable<Food> Foods)> GetByIds(List<long> ids);
 
     Task<bool> CheckAllIdsInOneShop(List<long> ids);
+
+    Task<Food?> GetByIdAndShopId(long id, long shopId);
 }
