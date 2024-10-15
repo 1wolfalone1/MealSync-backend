@@ -3,6 +3,7 @@ using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.ShopCategories.Commands.Create;
 using MealSync.Application.UseCases.ShopCategories.Commands.Rearrange;
+using MealSync.Application.UseCases.ShopCategories.Queries;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MealSync.API.Controllers;
@@ -22,5 +23,12 @@ public class ShopCategoryController : BaseApiController
     public async Task<IActionResult> RearrangeShopCategory(RearrangeShopCategoryCommand request)
     {
         return HandleResult(await Mediator.Send(request));
+    }
+
+    [HttpGet(Endpoints.GET_APP_SHOP_CATEGORY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetAllShopCategory()
+    {
+        return HandleResult(await Mediator.Send(new GetAllShopCategoryQuery()));
     }
 }

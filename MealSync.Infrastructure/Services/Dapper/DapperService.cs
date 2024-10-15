@@ -1,5 +1,4 @@
-﻿
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Caching.Memory;
 using System.Data.Common;
 using System.Data;

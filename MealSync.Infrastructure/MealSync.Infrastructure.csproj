@@ -57,6 +57,8 @@
         <EmbeddedResource Include="Common\Queries\TestQuery.sql">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
+        <None Remove="Common\Queries\GetListCategoryWithFood.sql" />
+        <EmbeddedResource Include="Common\Queries\GetListCategoryWithFood.sql" />
     </ItemGroup>
 
 </Project>
