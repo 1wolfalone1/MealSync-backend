@@ -144,9 +144,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             Reason = null,
             OrderDetails = validateFoodResult.OrderDetails,
             Payments = payments,
-            Address = "Delete",
-            Longitude = buildingOrder.Location.Longitude,
-            Latitude = buildingOrder.Location.Latitude,
         };
 
         if (shop.IsAutoOrderConfirmation)
