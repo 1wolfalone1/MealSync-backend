@@ -135,15 +135,20 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
             .ConfigureAwait(false);
 
         var result = groupedFoods
-            .GroupBy(f => new {f.ShopCategoryId, f.ShopCategory.DisplayOrder, f.ShopCategory.Name})
+            .GroupBy(f => new { f.ShopCategoryId, f.ShopCategory.DisplayOrder, f.ShopCategory.Name })
             .Select(group => (
-                CategoryId: group.Key.ShopCategoryId.Value,        // Assuming ShopCategoryId is nullable, use .Value
-                CategoryName: group.Key.Name,                     // Use the category name
-                Foods: group.AsEnumerable()                       // The foods in the group
+                CategoryId: group.Key.ShopCategoryId.Value, // Assuming ShopCategoryId is nullable, use .Value
+                CategoryName: group.Key.Name, // Use the category name
+                Foods: group.AsEnumerable() // The foods in the group
             ))
             .OrderBy(g => g.Foods.FirstOrDefault()?.ShopCategory.DisplayOrder) // Sort by DisplayOrder if needed
             .ToList();
 
         return result;
+    }
+
+    public Task<Food?> GetByIdAndShopId(long id, long shopId)
+    {
+        return DbSet.FirstOrDefaultAsync(f => f.Id == id && f.ShopId == shopId);
     }
 }

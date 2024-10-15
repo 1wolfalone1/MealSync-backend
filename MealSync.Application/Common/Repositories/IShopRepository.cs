@@ -11,4 +11,6 @@ public interface IShopRepository : IBaseRepository<Shop>
     Task<Shop?> GetShopInfoById(long id);
 
     Task<(int TotalCount, IEnumerable<Shop> Shops)> GetTopShop(long dormitoryId, int pageIndex, int pageSize);
+
+    Task<Shop?> GetByIdIncludeLocation(long id);
 }

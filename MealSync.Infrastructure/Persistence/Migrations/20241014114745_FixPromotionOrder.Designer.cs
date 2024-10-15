@@ -4,6 +4,7 @@ using MealSync.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealSync.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MealSyncContext))]
-    partial class MealSyncContextModelSnapshot : ModelSnapshot
+    [Migration("20241014114745_FixPromotionOrder")]
+    partial class FixPromotionOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1075,6 +1078,11 @@ namespace MealSync.Infrastructure.Persistence.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("address");
+
                     b.Property<long>("BuildingId")
                         .HasColumnType("bigint")
                         .HasColumnName("building_id");
@@ -1136,6 +1144,14 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsReport")
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("is_report");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double")
+                        .HasColumnName("latitude");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double")
+                        .HasColumnName("longitude");
 
                     b.Property<string>("Note")
                         .HasColumnType("longtext")

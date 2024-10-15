@@ -50,6 +50,11 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
         return (totalCount, shops);
     }
 
+    public Task<Shop?> GetByIdIncludeLocation(long id)
+    {
+        return DbSet.Include(s => s.Location).FirstOrDefaultAsync(s => s.Id == id);
+    }
+
     public async Task<Shop?> GetShopInfoById(long id)
     {
         return await DbSet.Include(s => s.OperatingSlots)

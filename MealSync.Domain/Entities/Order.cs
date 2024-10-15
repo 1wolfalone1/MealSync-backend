@@ -43,15 +43,10 @@ public class Order : BaseEntity
 
     public string PhoneNumber { get; set; }
 
-    public string Address { get; set; }
-
-    public double Latitude { get; set; }
-
-    public double Longitude { get; set; }
-
     public DateTimeOffset OrderDate { get; set; }
 
-    public DateTimeOffset IntendedReceiveAt { get; set; }
+    [Column(TypeName = "date")]
+    public DateTime IntendedReceiveDate { get; set; }
 
     public DateTimeOffset? ReceiveAt { get; set; }
 

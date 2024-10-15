@@ -40,7 +40,7 @@ public class CheckBuildingSelectionHandler : IQueryHandler<CheckBuildingSelectio
         {
             return Result.Success(new
             {
-                Message = _systemResourceRepository.GetByResourceCode(MessageCode.E_BUILDING_SELECTED.GetDescription()),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_BUILDING_SELECTED.GetDescription()),
             });
         }
     }

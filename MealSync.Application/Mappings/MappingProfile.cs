@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Text.Json;
+using AutoMapper;
 using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Application.UseCases.Dormitories.Models;
 using MealSync.Application.UseCases.Buildings.Models;
@@ -8,6 +9,7 @@ using MealSync.Application.UseCases.Favourites.Models;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.OptionGroups.Models;
 using MealSync.Application.UseCases.Options.Models;
+using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Application.UseCases.Promotions.Models;
 using MealSync.Application.UseCases.PlatformCategory.Models;
 using MealSync.Application.UseCases.ShopCategories.Models;
@@ -105,5 +107,24 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
         CreateMap<Option, OptionResponse>();
         CreateMap<Food, ShopOwnerFoodResponse.FoodResponse>();
+
+        CreateMap<Order, OrderResponse>()
+            .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails));
+        CreateMap<OrderDetail, OrderResponse.OrderDetailResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Food.Id))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Food.Name))
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Food.ImageUrl))
+            .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
+            .ForMember(dest => dest.BasicPrice, opt => opt.MapFrom(src => src.BasicPrice))
+            .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice))
+            .ForMember(
+                dest => dest.OptionGroups,
+                opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Description)
+                    ? null
+                    : JsonSerializer.Deserialize<List<OrderDetailDescriptionDto>>(
+                        src.Description,
+                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                )
+            );
     }
 }
