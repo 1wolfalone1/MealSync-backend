@@ -25,6 +25,6 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
 
     public Task<Promotion?> GetByIdAndShopId(long id, long shopId)
     {
-        return DbSet.FirstOrDefaultAsync(p => p.Id == id && p.ShopId == shopId);
+        return DbSet.FirstOrDefaultAsync(p => p.Id == id && p.ShopId == shopId && p.Type == PromotionTypes.ShopPromotion);
     }
 }
