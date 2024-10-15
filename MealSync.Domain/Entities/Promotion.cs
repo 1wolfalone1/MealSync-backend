@@ -31,8 +31,6 @@ public class Promotion : BaseEntity
 
     public double MinOrdervalue { get; set; }
 
-    public double? MaxApplyValue { get; set; }
-
     public DateTimeOffset StartDate { get; set; }
 
     public DateTimeOffset EndDate { get; set; }
