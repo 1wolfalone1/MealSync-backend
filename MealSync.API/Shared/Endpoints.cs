@@ -34,6 +34,8 @@ public static class Endpoints
     public const string CREATE_SHOP_CATEGORY = "shop-owner/category/create";
     public const string REARRANGE_SHOP_CATEGORY = "shop-owner/category/re-arrange";
     public const string GET_APP_SHOP_CATEGORY = "shop-owner/category";
+    public const string UPDATE_APP_SHOP_CATEGORY = "shop-owner/category/{id}";
+    public const string DELETE_APP_SHOP_CATEGORY = "shop-owner/category/{id}";
 
     // Shop
     public const string GET_TOP_SHOP = "shop/top";
