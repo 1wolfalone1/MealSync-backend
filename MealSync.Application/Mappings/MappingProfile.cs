@@ -127,5 +127,8 @@ public class MappingProfile : Profile
                         new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
                 )
             );
+        CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
+        CreateMap<ShopCategory, ShopCategoryDetailResponse>()
+            .ForMember(dest => dest.Foods, src => src.MapFrom(opt => opt.Foods));
     }
 }
