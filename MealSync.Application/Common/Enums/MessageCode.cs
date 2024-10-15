@@ -34,11 +34,17 @@ public enum MessageCode
     E_PLATFORM_CATEGORY_NOT_FOUND,
 
     // Shop Category
+    [Description("I-ShopCategory-DeleteSuccess")]
+    I_SHOP_CATEGORY_DELETE_SUCCESS,
+
     [Description("E-ShopCategory-NotFound")]
     E_SHOP_CATEGORY_NOT_FOUND,
 
     [Description("E-ShopCategory-NotEnough")]
     E_SHOP_CATEGORY_NOT_ENOUGH,
+
+    [Description("E-ShopCategory-HaveFoodLinked")]
+    E_SHOP_CATEGORY_HAVE_FOOD_LINKED,
 
     // Operating Slot
     [Description("E-OperatingSlot-NotFound")]
