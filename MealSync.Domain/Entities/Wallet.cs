@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Domain.Entities;
 
@@ -17,6 +18,8 @@ public class Wallet : BaseEntity
     public double ReportingAmount { get; set; }
 
     public DateTimeOffset NextTransferDate { get; set; }
+
+    public WalletTypes Type { get; set; }
 
     public virtual Shop? Shop { get; set; }
 
