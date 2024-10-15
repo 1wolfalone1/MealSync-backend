@@ -5,7 +5,7 @@ using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.ShopCategories.Models;
 
-namespace MealSync.Application.UseCases.ShopCategories.Queries;
+namespace MealSync.Application.UseCases.ShopCategories.Queries.GetAll;
 
 public class GetAllShopCategoryHandler : IQueryHandler<GetAllShopCategoryQuery, Result>
 {
