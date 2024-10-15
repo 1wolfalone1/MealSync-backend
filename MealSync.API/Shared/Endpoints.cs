@@ -32,8 +32,8 @@ public static class Endpoints
 
     // Shop Category
     public const string CREATE_SHOP_CATEGORY = "shop-owner/category/create";
-
     public const string REARRANGE_SHOP_CATEGORY = "shop-owner/category/re-arrange";
+    public const string GET_APP_SHOP_CATEGORY = "shop-owner/category";
 
     // Shop
     public const string GET_TOP_SHOP = "shop/top";

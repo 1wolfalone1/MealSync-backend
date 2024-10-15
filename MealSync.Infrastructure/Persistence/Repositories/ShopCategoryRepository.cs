@@ -1,5 +1,6 @@
 ﻿using MealSync.Application.Common.Repositories;
 using MealSync.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
 
