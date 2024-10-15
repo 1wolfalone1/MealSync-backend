@@ -2,7 +2,9 @@ using MealSync.API.Identites;
 using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.ShopCategories.Commands.Create;
+using MealSync.Application.UseCases.ShopCategories.Commands.Delete;
 using MealSync.Application.UseCases.ShopCategories.Commands.Rearrange;
+using MealSync.Application.UseCases.ShopCategories.Commands.Update;
 using MealSync.Application.UseCases.ShopCategories.Queries;
 using Microsoft.AspNetCore.Authorization;
 
@@ -30,5 +32,23 @@ public class ShopCategoryController : BaseApiController
     public async Task<IActionResult> GetAllShopCategory()
     {
         return HandleResult(await Mediator.Send(new GetAllShopCategoryQuery()));
+    }
+
+    [HttpPut(Endpoints.UPDATE_APP_SHOP_CATEGORY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateShopCategory([FromBody] UpdateShopCategoryCommand command, long id)
+    {
+        command.Id = id;
+        return HandleResult(await Mediator.Send(command));
+    }
+
+    [HttpDelete(Endpoints.DELETE_APP_SHOP_CATEGORY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> DeletehopCategory(long id)
+    {
+        return HandleResult(await Mediator.Send(new DeleteShopCategoryCommand()
+        {
+            Id = id,
+        }));
     }
 }
