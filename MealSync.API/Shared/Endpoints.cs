@@ -81,4 +81,5 @@ public static class Endpoints
     public const string CREATE_ORDER = "customer/order";
     public const string CREATE_REFUND = "customer/order/refund";
     public const string GET_IPN = "customer/order/IPN";
+    public const string GET_ORDER_DETAIL = "customer/order/{id}";
 }
