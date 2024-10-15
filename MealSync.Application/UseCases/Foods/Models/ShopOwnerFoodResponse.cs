@@ -4,11 +4,15 @@ namespace MealSync.Application.UseCases.Foods.Models;
 
 public class ShopOwnerFoodResponse
 {
-    public long CategoryId { get; set; }
+    public long Id { get; set; }
 
-    public string CategoryName { get; set; } = null!;
+    public string Name { get; set; } = null!;
 
-    public List<FoodResponse> Foods { get; set; }
+    public string Description { get; set; }
+
+    public string? ImageUrl { get; set; }
+
+    public List<FoodResponse> Foods { get; set; } = new();
 
     public class FoodResponse
     {
@@ -22,6 +26,6 @@ public class ShopOwnerFoodResponse
 
         public bool IsSoldOut { get; set; }
 
-        public FoodStatus Status { get; set; }
+        public int Status { get; set; }
     }
 }

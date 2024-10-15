@@ -45,7 +45,6 @@
         <Folder Include="UseCases\Promotions\Commands\" />
         <Folder Include="UseCases\PlatformCategory\Commands\" />
         <Folder Include="UseCases\Roles\Queries\"/>
-        <Folder Include="UseCases\ShopCategories\Queries\" />
         <Folder Include="UseCases\Shops\Commands\" />
     </ItemGroup>
 

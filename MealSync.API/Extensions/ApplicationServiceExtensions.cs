@@ -2,11 +2,11 @@
 using FluentValidation;
 using MealSync.Application.Mappings;
 using System.Data;
-using MySql.Data.MySqlClient;
 using MediatR;
 using MealSync.Application.Behaviors;
 using System.Text.Json.Serialization;
 using MealSync.Domain.Enums;
+using MySqlConnector;
 
 namespace MealSync.API.Extensions;
 
