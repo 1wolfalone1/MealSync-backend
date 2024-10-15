@@ -7,6 +7,7 @@ using MealSync.Application.UseCases.CustomerBuildings.Models;
 using MealSync.Application.UseCases.Customers.Models;
 using MealSync.Application.UseCases.Favourites.Models;
 using MealSync.Application.UseCases.Foods.Models;
+using MealSync.Application.UseCases.OperatingSlots.Models;
 using MealSync.Application.UseCases.OptionGroups.Models;
 using MealSync.Application.UseCases.Options.Models;
 using MealSync.Application.UseCases.Orders.Models;
@@ -107,7 +108,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options));
         CreateMap<Option, OptionResponse>();
         CreateMap<Food, ShopOwnerFoodResponse.FoodResponse>();
-
+        CreateMap<OperatingSlot, OperatingSlotResponse>();
         CreateMap<Order, OrderResponse>()
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails));
         CreateMap<OrderDetail, OrderResponse.OrderDetailResponse>()
