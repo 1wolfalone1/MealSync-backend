@@ -109,7 +109,16 @@ public class MappingProfile : Profile
         CreateMap<Option, OptionResponse>();
         CreateMap<Food, ShopOwnerFoodResponse.FoodResponse>();
         CreateMap<OperatingSlot, OperatingSlotResponse>();
+
         CreateMap<Order, OrderResponse>()
+            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(
+                dest => dest.IntendedReceiveDate,
+                opt => opt.MapFrom(src =>
+                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+            )
+            .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
+            .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails));
         CreateMap<OrderDetail, OrderResponse.OrderDetailResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Food.Id))
@@ -127,5 +136,52 @@ public class MappingProfile : Profile
                         new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
                 )
             );
+
+        CreateMap<Order, DetailOrderCustomerResponse>()
+            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(
+                dest => dest.IntendedReceiveDate,
+                opt => opt.MapFrom(src =>
+                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+            )
+            .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
+            .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
+            .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.CustomerLocation.Longitude))
+            .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.CustomerLocation.Latitude))
+            .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails))
+            .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments))
+            .ForMember(dest => dest.ShopInfo, opt => opt.MapFrom(src => src));
+        CreateMap<OrderDetail, DetailOrderCustomerResponse.OrderDetailCustomerResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Food.Id))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Food.Name))
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Food.ImageUrl))
+            .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
+            .ForMember(dest => dest.BasicPrice, opt => opt.MapFrom(src => src.BasicPrice))
+            .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice))
+            .ForMember(
+                dest => dest.OptionGroups,
+                opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Description)
+                    ? null
+                    : JsonSerializer.Deserialize<List<OrderDetailDescriptionDto>>(
+                        src.Description,
+                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                )
+            );
+        CreateMap<Payment, DetailOrderCustomerResponse.PaymentOrderResponse>();
+        CreateMap<Order, DetailOrderCustomerResponse.ShopInfoResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Shop.Id))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Shop.Name))
+            .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.Shop.LogoUrl))
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.ShopLocation.Address))
+            .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.ShopLocation.Longitude))
+            .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.ShopLocation.Latitude));
+
+        CreateMap<Order, OrderSummaryResponse>()
+            .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
+            .ForMember(dest => dest.ShopLogoUrl, opt => opt.MapFrom(src => src.Shop.LogoUrl));
+
+        CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
+        CreateMap<ShopCategory, ShopCategoryDetailResponse>()
+            .ForMember(dest => dest.Foods, src => src.MapFrom(opt => opt.Foods));
     }
 }
