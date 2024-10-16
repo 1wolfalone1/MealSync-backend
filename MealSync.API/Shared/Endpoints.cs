@@ -58,6 +58,7 @@ public static class Endpoints
     public const string ADD_OPERATING_SLOT = "shop-owner/operating-slot";
     public const string UPDATE_OPERATING_SLOT = "shop-owner/operating-slot/{id}";
     public const string DELETE_OPERATING_SLOT = "shop-owner/operating-slot/{id}";
+    public const string GET_ALL_OPERATING_SLOT = "shop-owner/operating-slot";
 
     // Food
     public const string GET_TOP_FOOD = "food/top";

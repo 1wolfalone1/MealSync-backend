@@ -1,4 +1,6 @@
-﻿namespace MealSync.Application.UseCases.OperatingSlots.Models;
+﻿using MealSync.Application.Common.Utils;
+
+namespace MealSync.Application.UseCases.OperatingSlots.Models;
 
 public class OperatingSlotResponse
 {
@@ -9,4 +11,12 @@ public class OperatingSlotResponse
     public int StartTime { get; set; }
 
     public int EndTime { get; set; }
+
+    public string FrameFormat
+    {
+        get
+        {
+            return TimeFrameUtils.GetTimeFrameString(StartTime, EndTime);
+        }
+    }
 }
