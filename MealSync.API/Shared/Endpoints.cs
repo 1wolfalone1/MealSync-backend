@@ -45,7 +45,8 @@ public static class Endpoints
     public const string GET_SHOP_INFO = "shop/{id}/info";
     public const string GET_SHOP_FOOD = "shop/{id}/food";
     public const string GET_ALL_SHOP_FOOD = "shop/{id}/food/all";
-    public const string GET_SHOP_PROMOTION = "shop/{id}/promotion";
+    public const string GET_SHOP_PROMOTION = "shop/{id:long}/promotion";
+    public const string GET_SHOP_PROMOTION_BY_CONDITION = "shop/{id:long}/promotion/filter";
 
     // Dormitory
     public const string ALL_DORMITORY = "dormitory/all";
