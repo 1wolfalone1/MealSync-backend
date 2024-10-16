@@ -176,6 +176,10 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.ShopLocation.Longitude))
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.ShopLocation.Latitude));
 
+        CreateMap<Order, OrderSummaryResponse>()
+            .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
+            .ForMember(dest => dest.ShopLogoUrl, opt => opt.MapFrom(src => src.Shop.LogoUrl));
+
         CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
         CreateMap<ShopCategory, ShopCategoryDetailResponse>()
             .ForMember(dest => dest.Foods, src => src.MapFrom(opt => opt.Foods));

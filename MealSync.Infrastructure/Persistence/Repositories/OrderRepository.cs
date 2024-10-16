@@ -78,4 +78,33 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                 },
             }).FirstOrDefaultAsync();
     }
+
+    public async Task<(int TotalCount, IEnumerable<Order> Orders)> GetByCustomerId(long customerId, int pageIndex, int pageSize)
+    {
+        var query = DbSet.Where(o => o.CustomerId == customerId);
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+        var orders = await query
+            .OrderByDescending(o => o.CreatedDate)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .Select(o => new Order
+            {
+                Status = o.Status,
+                ShippingFee = o.ShippingFee,
+                TotalPrice = o.TotalPrice,
+                TotalPromotion = o.TotalPromotion,
+                OrderDate = o.OrderDate,
+                IntendedReceiveDate = o.IntendedReceiveDate,
+                StartTime = o.StartTime,
+                EndTime = o.EndTime,
+                Shop = new Shop
+                {
+                    Name = o.Shop.Name,
+                    LogoUrl = o.Shop.LogoUrl,
+                },
+            })
+            .ToListAsync().ConfigureAwait(false);
+
+        return (totalCount, orders);
+    }
 }
