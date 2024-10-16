@@ -16,15 +16,41 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
         var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
 
         return await DbSet.Where(
-            p => p.ShopId == id
-                 && p.Status == PromotionStatus.Active
-                 && p.NumberOfUsed < p.UsageLimit
-                 && p.EndDate >= now)
+                p => p.ShopId == id
+                     && p.Status == PromotionStatus.Active
+                     && p.Type == PromotionTypes.ShopPromotion
+                     && p.NumberOfUsed < p.UsageLimit
+                     && p.EndDate >= now
+                     && p.StartDate <= now)
             .ToListAsync().ConfigureAwait(false);
     }
 
     public Task<Promotion?> GetByIdAndShopId(long id, long shopId)
     {
         return DbSet.FirstOrDefaultAsync(p => p.Id == id && p.ShopId == shopId && p.Type == PromotionTypes.ShopPromotion);
+    }
+
+    public async Task<(IEnumerable<Promotion> EligibleList, IEnumerable<Promotion> IneligibleList)>
+        GetShopAvailablePromotionsByShopIdAndTotalPrice(long shopId, double totalPrice)
+    {
+        var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+
+        var promotions = await DbSet.Where(p =>
+            p.ShopId == shopId &&
+            p.Status == PromotionStatus.Active &&
+            p.Type == PromotionTypes.ShopPromotion &&
+            p.EndDate >= now &&
+            p.StartDate <= now
+        ).ToListAsync().ConfigureAwait(false);
+
+        // Split promotions into eligible and ineligible
+        var eligibleList = promotions.Where(p =>
+            p.NumberOfUsed < p.UsageLimit &&
+            p.MinOrdervalue <= totalPrice
+        ).ToList();
+
+        var ineligibleList = promotions.Except(eligibleList).ToList();
+
+        return (eligibleList, ineligibleList);
     }
 }
