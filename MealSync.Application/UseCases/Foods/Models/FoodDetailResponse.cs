@@ -14,6 +14,8 @@ public class FoodDetailResponse
 
     public string ImageUrl { get; set; } = null!;
 
+    public FoodStatus Status { get; set; }
+
     public bool IsSoldOut { get; set; }
 
     public PlatformCategoryResponse PlatformCategory { get; set; }

@@ -1,5 +1,6 @@
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Shared;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Foods.Commands.Update;
 
@@ -14,6 +15,8 @@ public class UpdateFoodCommand : ICommand<Result>
     public double Price { get; set; }
 
     public string ImgUrl { get; set; } = null!;
+
+    public FoodStatus Status { get; set; }
 
     public long PlatformCategoryId { get; set; }
 

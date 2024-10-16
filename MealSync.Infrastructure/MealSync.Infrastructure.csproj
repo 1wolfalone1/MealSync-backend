@@ -59,6 +59,8 @@
         </EmbeddedResource>
         <None Remove="Common\Queries\GetListCategoryWithFood.sql" />
         <EmbeddedResource Include="Common\Queries\GetListCategoryWithFood.sql" />
+        <None Remove="Common\Queries\GetListOrderForShopByStatus.sql" />
+        <EmbeddedResource Include="Common\Queries\GetListOrderForShopByStatus.sql" />
     </ItemGroup>
 
 </Project>

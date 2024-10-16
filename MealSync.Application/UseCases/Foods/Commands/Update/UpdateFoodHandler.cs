@@ -82,6 +82,7 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
         food.Description = request.Description;
         food.Price = request.Price;
         food.ImageUrl = request.ImgUrl;
+        food.Status = request.Status;
         food.PlatformCategoryId = request.PlatformCategoryId;
         food.ShopCategoryId = request.ShopCategoryId;
         food.FoodOperatingSlots = foodOperatingSlots;
