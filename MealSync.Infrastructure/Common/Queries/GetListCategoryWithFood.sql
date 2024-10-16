@@ -53,6 +53,7 @@ SELECT
     f.id AS Id,
     f.platform_category_id AS PlatformCategory,
     f.description AS Description,
+    f.name AS Name,
     f.price AS Price,
     f.image_url AS ImageUrl,
     f.total_order AS TotalOrder,
