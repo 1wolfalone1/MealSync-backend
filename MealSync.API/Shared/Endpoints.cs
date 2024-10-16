@@ -36,6 +36,7 @@ public static class Endpoints
     public const string GET_APP_SHOP_CATEGORY = "shop-owner/category";
     public const string UPDATE_APP_SHOP_CATEGORY = "shop-owner/category/{id}";
     public const string DELETE_APP_SHOP_CATEGORY = "shop-owner/category/{id}";
+    public const string GET_APP_SHOP_CATEGORY_DETAIL = "shop-owner/category/{id}";
 
     // Shop
     public const string GET_TOP_SHOP = "shop/top";
@@ -81,6 +82,6 @@ public static class Endpoints
     public const string CREATE_ORDER = "customer/order";
     public const string CREATE_REFUND = "customer/order/refund";
     public const string GET_IPN = "customer/order/IPN";
-    public const string GET_ORDER_DETAIL = "customer/order/{id}";
+    public const string GET_ORDER_DETAIL = "customer/order/{id:long}";
     public const string GET_ORDER_HISTORY = "customer/order/history";
 }

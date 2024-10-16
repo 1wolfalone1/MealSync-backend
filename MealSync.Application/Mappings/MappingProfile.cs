@@ -111,6 +111,14 @@ public class MappingProfile : Profile
         CreateMap<OperatingSlot, OperatingSlotResponse>();
 
         CreateMap<Order, OrderResponse>()
+            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(
+                dest => dest.IntendedReceiveDate,
+                opt => opt.MapFrom(src =>
+                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+            )
+            .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
+            .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails));
         CreateMap<OrderDetail, OrderResponse.OrderDetailResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Food.Id))
@@ -130,6 +138,14 @@ public class MappingProfile : Profile
             );
 
         CreateMap<Order, DetailOrderCustomerResponse>()
+            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(
+                dest => dest.IntendedReceiveDate,
+                opt => opt.MapFrom(src =>
+                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+            )
+            .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
+            .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.CustomerLocation.Longitude))
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.CustomerLocation.Latitude))
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails))
@@ -163,5 +179,9 @@ public class MappingProfile : Profile
         CreateMap<Order, OrderSummaryResponse>()
             .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
             .ForMember(dest => dest.ShopLogoUrl, opt => opt.MapFrom(src => src.Shop.LogoUrl));
+
+        CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
+        CreateMap<ShopCategory, ShopCategoryDetailResponse>()
+            .ForMember(dest => dest.Foods, src => src.MapFrom(opt => opt.Foods));
     }
 }

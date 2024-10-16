@@ -33,11 +33,12 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IVnPayPaymentService _paymentService;
+    private readonly ISystemResourceRepository _systemResourceRepository;
 
     public CreateOrderHandler(ILogger<CreateOrderCommand> logger, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository, IBuildingRepository buildingRepository, IFoodRepository foodRepository,
         IFoodOperatingSlotRepository foodOperatingSlotRepository, IOperatingSlotRepository operatingSlotRepository, IFoodOptionGroupRepository foodOptionGroupRepository, IOptionRepository optionRepository,
         IPromotionRepository promotionRepository, ICurrentPrincipalService currentPrincipalService, ICommissionConfigRepository commissionConfigRepository, IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-        IMapper mapper, IVnPayPaymentService paymentService)
+        IMapper mapper, IVnPayPaymentService paymentService, ISystemResourceRepository systemResourceRepository)
     {
         _logger = logger;
         _shopRepository = shopRepository;
@@ -55,6 +56,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _paymentService = paymentService;
+        _systemResourceRepository = systemResourceRepository;
     }
 
     public async Task<Result<Result>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -78,7 +80,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         var validateFoodResult = await ValidateFoodRequest(request, shopOperatingSlot).ConfigureAwait(false);
 
         // Validate business rules for the voucher.
-        await ValidatePromotionRequest(request, validateFoodResult.TotalFoodPrice).ConfigureAwait(false);
+        var promotion = await ValidatePromotionRequest(request, validateFoodResult.TotalFoodPrice).ConfigureAwait(false);
 
         var commissionConfig = _commissionConfigRepository.GetCommissionConfig();
 
@@ -148,14 +150,31 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
 
         if (shop.IsAutoOrderConfirmation)
         {
-            var startFrame = TimeUtils.ConvertToMinutes(request.OrderTime.StartTime);
-            var minOrderHoursMinutes = shop.MinOrderHoursInAdvance * 60;
-            var maxOrderHoursMinutes = shop.MaxOrderHoursInAdvance * 60;
-            var orderTime = (now.Hour * 100) + now.Minute;
+            var startFrameMinutes = TimeUtils.ConvertToMinutes(request.OrderTime.StartTime); // Total minutes for start time
+            var minOrderMinutes = shop.MinOrderHoursInAdvance * 60; // Min constraint in minutes
+            var maxOrderMinutes = shop.MaxOrderHoursInAdvance * 60; // Max constraint in minutes
 
-            if (startFrame - maxOrderHoursMinutes <= orderTime && orderTime <= startFrame - minOrderHoursMinutes)
+            var currentTimeMinutes = (now.Hour * 60) + now.Minute; // Convert current time to total minutes
+
+            // Handle time comparison, accounting for cases crossing midnight
+            var minAllowedTime = (startFrameMinutes - maxOrderMinutes + 1440) % 1440;
+            var maxAllowedTime = (startFrameMinutes - minOrderMinutes + 1440) % 1440;
+
+            if (minAllowedTime <= maxAllowedTime)
             {
-                order.Status = OrderStatus.Confirmed;
+                // Normal case: Range within the same day
+                if (currentTimeMinutes >= minAllowedTime && currentTimeMinutes <= maxAllowedTime)
+                {
+                    order.Status = OrderStatus.Confirmed;
+                }
+            }
+            else
+            {
+                // Cross-midnight case: Two segments (e.g., 23:00 - 01:00)
+                if (currentTimeMinutes >= minAllowedTime || currentTimeMinutes <= maxAllowedTime)
+                {
+                    order.Status = OrderStatus.Confirmed;
+                }
             }
         }
 
@@ -165,6 +184,13 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
             await _orderRepository.AddAsync(order).ConfigureAwait(false);
+
+            // Update promotion usage if present
+            if (promotion != default)
+            {
+                promotion.NumberOfUsed += 1;
+                _promotionRepository.Update(promotion);
+            }
 
             // Update total order of shop
             shop.TotalOrder += 1;
@@ -184,6 +210,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 PaymentMethod = request.PaymentMethod,
                 PaymentLink = request.PaymentMethod == PaymentMethods.VnPay ? await _paymentService.CreatePaymentUrl(payment).ConfigureAwait(false) : null,
                 Order = _mapper.Map<OrderResponse>(order),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_SUCCESS.GetDescription()) ?? string.Empty,
             };
 
             // Todo: Notification for shop
@@ -199,7 +226,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         }
     }
 
-    private async Task ValidatePromotionRequest(CreateOrderCommand request, double totalFoodPrice)
+    private async Task<Promotion?> ValidatePromotionRequest(CreateOrderCommand request, double totalFoodPrice)
     {
         // Check if a voucher is provided in the request
         if (request.VoucherId != default)
@@ -262,6 +289,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                         else
                         {
                             // Do nothing
+                            return promotion;
                         }
                     }
                     else if (promotion.Type == PromotionTypes.ShopPromotion && promotion.ApplyType == PromotionApplyTypes.Absolute)
@@ -277,11 +305,13 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                         else
                         {
                             // Do nothing
+                            return promotion;
                         }
                     }
                     else
                     {
                         // Do nothing
+                        return promotion;
                     }
                 }
             }
@@ -290,6 +320,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         {
             // Do nothing
         }
+        return default;
     }
 
     private async Task<(double TotalFoodPrice, List<OrderDetail> OrderDetails, List<Food> foods)> ValidateFoodRequest(
