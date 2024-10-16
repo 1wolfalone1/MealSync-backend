@@ -31,9 +31,5 @@ public class UpdateFoodValidate : AbstractValidator<UpdateFoodCommand>
         RuleFor(p => p.ShopCategoryId)
             .GreaterThan(0)
             .WithMessage("Sản phẩm phải có ít nhất một thể loại của shop.");
-
-        RuleFor(p => p.OperatingSlots)
-            .NotEmpty()
-            .WithMessage("Sản phẩm phải có ít nhất một thời gian hoạt động.");
     }
 }

@@ -53,13 +53,16 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
         var shop = await _shopRepository.GetByAccountId(accountId.Value).ConfigureAwait(false);
 
         List<FoodOperatingSlot> operatingSlots = new List<FoodOperatingSlot>();
-        request.OperatingSlots.ForEach(operatingSlotId =>
+        if (request.OperatingSlots != null && request.OperatingSlots.Count != 0)
         {
-            operatingSlots.Add(new FoodOperatingSlot
+            request.OperatingSlots.ForEach(operatingSlotId =>
             {
-                OperatingSlotId = operatingSlotId,
+                operatingSlots.Add(new FoodOperatingSlot
+                {
+                    OperatingSlotId = operatingSlotId,
+                });
             });
-        });
+        }
 
         List<FoodOptionGroup> foodOptionGroups = new List<FoodOptionGroup>();
         if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count != 0)
@@ -141,17 +144,20 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
         }
 
         // Check existed operating slots
-        request.OperatingSlots.ForEach(id =>
+        if (request.OperatingSlots != null && request.OperatingSlots.Count > 0)
         {
-            var operatingSlot = _operatingSlotRepository.GetByIdAndShopId(id, accountId);
-            if (operatingSlot == null)
+            request.OperatingSlots.ForEach(id =>
             {
-                throw new InvalidBusinessException(
-                    MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(),
-                    new object[] { id }
-                );
-            }
-        });
+                var operatingSlot = _operatingSlotRepository.GetByIdAndShopId(id, accountId);
+                if (operatingSlot == null)
+                {
+                    throw new InvalidBusinessException(
+                        MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(),
+                        new object[] { id }
+                    );
+                }
+            });
+        }
 
         // Check existed option groups if present
         if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count > 0)
