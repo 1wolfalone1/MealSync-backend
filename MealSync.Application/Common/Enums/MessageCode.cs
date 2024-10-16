@@ -165,6 +165,9 @@ public enum MessageCode
     [Description("E-Food-IsSoldOut")]
     E_FOOD_IS_SOLD_OUT,
 
+    [Description("E-Food-NotSelectSlot")]
+    E_FOOD_NOT_SELECT_SLOT,
+
     // Shop
     [Description("E-Shop-NotAbleToInActive")]
     E_SHOP_NOT_ABLE_TO_IN_ACTIVE,
