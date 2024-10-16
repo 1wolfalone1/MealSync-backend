@@ -85,7 +85,7 @@ public class CreateFoodHandler : ICommandHandler<CreateFoodCommand, Result>
             ImageUrl = request.ImgUrl,
             TotalOrder = 0,
             IsSoldOut = false,
-            Status = FoodStatus.Active,
+            Status = request.Status,
             FoodOperatingSlots = operatingSlots,
             FoodOptionGroups = foodOptionGroups,
         };
