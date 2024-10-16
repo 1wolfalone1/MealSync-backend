@@ -20,7 +20,7 @@ public class CreateFoodCommand : ICommand<Result>
 
     public long? ShopCategoryId { get; set; }
 
-    public List<long> OperatingSlots { get; set; }
+    public List<long>? OperatingSlots { get; set; }
 
     public List<long>? FoodOptionGroups { get; set; }
 }

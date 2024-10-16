@@ -50,17 +50,20 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
         await ValidateBusinessRequest(request, accountId).ConfigureAwait(false);
 
         var food = _foodRepository.GetByIdIncludeAllInfoForShop(request.Id);
-
         var foodOperatingSlots = new List<FoodOperatingSlot>();
-        request.OperatingSlots.ForEach(operatingSlotId =>
+
+        if (request.OperatingSlots != null && request.OperatingSlots.Count != 0)
         {
-            FoodOperatingSlot foodOperatingSlot = new FoodOperatingSlot
+            request.OperatingSlots.ForEach(operatingSlotId =>
             {
-                OperatingSlotId = operatingSlotId,
-                FoodId = food.Id,
-            };
-            foodOperatingSlots.Add(foodOperatingSlot);
-        });
+                FoodOperatingSlot foodOperatingSlot = new FoodOperatingSlot
+                {
+                    OperatingSlotId = operatingSlotId,
+                    FoodId = food.Id,
+                };
+                foodOperatingSlots.Add(foodOperatingSlot);
+            });
+        }
 
         var foodOptionGroups = new List<FoodOptionGroup>();
         if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count != 0)
@@ -137,17 +140,20 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
         }
 
         // Check existed operating slots
-        request.OperatingSlots.ForEach(id =>
+        if (request.OperatingSlots != null && request.OperatingSlots.Count > 0)
         {
-            var operatingSlot = _operatingSlotRepository.GetByIdAndShopId(id, accountId);
-            if (operatingSlot == null)
+            request.OperatingSlots.ForEach(id =>
             {
-                throw new InvalidBusinessException(
-                    MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(),
-                    new object[] { id }
-                );
-            }
-        });
+                var operatingSlot = _operatingSlotRepository.GetByIdAndShopId(id, accountId);
+                if (operatingSlot == null)
+                {
+                    throw new InvalidBusinessException(
+                        MessageCode.E_OPERATING_SLOT_NOT_FOUND.GetDescription(),
+                        new object[] { id }
+                    );
+                }
+            });
+        }
 
         // Check existed option groups if present
         if (request.FoodOptionGroups != null && request.FoodOptionGroups.Count > 0)
