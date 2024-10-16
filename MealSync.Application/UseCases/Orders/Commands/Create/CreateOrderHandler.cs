@@ -33,11 +33,12 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IVnPayPaymentService _paymentService;
+    private readonly ISystemResourceRepository _systemResourceRepository;
 
     public CreateOrderHandler(ILogger<CreateOrderCommand> logger, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository, IBuildingRepository buildingRepository, IFoodRepository foodRepository,
         IFoodOperatingSlotRepository foodOperatingSlotRepository, IOperatingSlotRepository operatingSlotRepository, IFoodOptionGroupRepository foodOptionGroupRepository, IOptionRepository optionRepository,
         IPromotionRepository promotionRepository, ICurrentPrincipalService currentPrincipalService, ICommissionConfigRepository commissionConfigRepository, IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-        IMapper mapper, IVnPayPaymentService paymentService)
+        IMapper mapper, IVnPayPaymentService paymentService, ISystemResourceRepository systemResourceRepository)
     {
         _logger = logger;
         _shopRepository = shopRepository;
@@ -55,6 +56,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _paymentService = paymentService;
+        _systemResourceRepository = systemResourceRepository;
     }
 
     public async Task<Result<Result>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -208,6 +210,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 PaymentMethod = request.PaymentMethod,
                 PaymentLink = request.PaymentMethod == PaymentMethods.VnPay ? await _paymentService.CreatePaymentUrl(payment).ConfigureAwait(false) : null,
                 Order = _mapper.Map<OrderResponse>(order),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_SUCCESS.GetDescription()) ?? string.Empty,
             };
 
             // Todo: Notification for shop

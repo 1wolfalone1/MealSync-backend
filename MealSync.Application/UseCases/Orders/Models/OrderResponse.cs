@@ -22,13 +22,13 @@ public class OrderResponse
 
     public string PhoneNumber { get; set; }
 
-    public DateTimeOffset OrderDate { get; set; }
+    public long OrderDate { get; set; }
 
-    public DateTime IntendedReceiveDate { get; set; }
+    public long IntendedReceiveDate { get; set; }
 
-    public DateTimeOffset? ReceiveAt { get; set; }
+    public long? ReceiveAt { get; set; }
 
-    public DateTimeOffset? CompletedAt { get; set; }
+    public long? CompletedAt { get; set; }
 
     public int StartTime { get; set; }
 
