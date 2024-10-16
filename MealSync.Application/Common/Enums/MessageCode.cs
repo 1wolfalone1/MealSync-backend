@@ -211,6 +211,12 @@ public enum MessageCode
     [Description("E-Order-OptionGroupRequiredNotSelect")]
     E_ORDER_OPTION_GROUP_REQUIRED_NOT_SELECT,
 
+    [Description("E-Order-NotFound")]
+    E_ORDER_NOT_FOUND,
+
+    [Description("I-Order-OrderSuccess")]
+    I_ORDER_SUCCESS,
+
     // Promotion
     [Description("E-Promotion-NotFound")]
     E_PROMOTION_NOT_FOUND,
