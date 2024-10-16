@@ -140,6 +140,14 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
             );
         }
 
+        // Check status active must choose operating slot
+        if (request.Status == FoodStatus.Active && (request.OperatingSlots == null || request.OperatingSlots.Count == 0))
+        {
+            throw new InvalidBusinessException(
+                MessageCode.E_FOOD_NOT_SELECT_SLOT.GetDescription()
+            );
+        }
+
         // Check existed operating slots
         if (request.OperatingSlots != null && request.OperatingSlots.Count > 0)
         {
