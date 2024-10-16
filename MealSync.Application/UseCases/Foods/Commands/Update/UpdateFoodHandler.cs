@@ -82,6 +82,7 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
         food.Description = request.Description;
         food.Price = request.Price;
         food.ImageUrl = request.ImgUrl;
+        food.Status = request.Status;
         food.PlatformCategoryId = request.PlatformCategoryId;
         food.ShopCategoryId = request.ShopCategoryId;
         food.FoodOperatingSlots = foodOperatingSlots;
@@ -136,6 +137,14 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
             throw new InvalidBusinessException(
                 MessageCode.E_SHOP_CATEGORY_NOT_FOUND.GetDescription(),
                 new object[] { request.ShopCategoryId }
+            );
+        }
+
+        // Check status active must choose operating slot
+        if (request.Status == FoodStatus.Active && (request.OperatingSlots == null || request.OperatingSlots.Count == 0))
+        {
+            throw new InvalidBusinessException(
+                MessageCode.E_FOOD_NOT_SELECT_SLOT.GetDescription()
             );
         }
 
