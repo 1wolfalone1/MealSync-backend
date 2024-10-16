@@ -1,4 +1,5 @@
 using FluentValidation;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Foods.Commands.Create;
 
@@ -19,6 +20,10 @@ public class CreateFoodValidate : AbstractValidator<CreateFoodCommand>
         RuleFor(p => p.ImgUrl)
             .NotEmpty()
             .WithMessage("Ảnh sản phẩm bắt buộc");
+
+        RuleFor(p => p.Status)
+            .Must(status => status == FoodStatus.Active || status == FoodStatus.UnActive)
+            .WithMessage("Trạng thái của đồ ăn chỉ được là 'Active' hoặc 'Inactive'.");
 
         RuleFor(p => p.PlatformCategoryId)
             .GreaterThan(0)
