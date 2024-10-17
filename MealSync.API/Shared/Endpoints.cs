@@ -27,6 +27,7 @@ public static class Endpoints
     public const string DELETE_OPTION_GROUP = "shop-owner/option-group/{id:long}";
     public const string GET_DETAIL_OPTION_GROUP = "shop-owner/option-group/{id:long}";
     public const string LINK_FOOD_OPTION_GROUP = "shop-owner/option-group/link-food";
+    public const string UNLINK_FOOD_OPTION_GROUP = "shop-owner/option-group/unlink-food";
 
     // Option
     public const string CREATE_OPTION = "shop-owner/option";
