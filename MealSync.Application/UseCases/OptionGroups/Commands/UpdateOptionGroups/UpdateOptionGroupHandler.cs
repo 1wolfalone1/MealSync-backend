@@ -102,7 +102,7 @@ public class UpdateOptionGroupHandler : ICommandHandler<UpdateOptionGroupCommand
             if (totalDefault != 1)
             {
                 throw new InvalidBusinessException(
-                    MessageCode.E_OPTION_GROUP_RADIO_VALIDATE.GetDescription()
+                    MessageCode.E_OPTION_GROUP_RADIO_REQUIRED_VALIDATE.GetDescription()
                 );
             }
         }

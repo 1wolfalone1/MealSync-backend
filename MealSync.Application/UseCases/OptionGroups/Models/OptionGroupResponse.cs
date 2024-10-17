@@ -14,6 +14,10 @@ public class OptionGroupResponse
 
     public OptionGroupStatus Status { get; set; }
 
+    public int MinChoices { get; set; }
+
+    public int MaxChoices { get; set; }
+
     public List<OptionResponse> Options { get; set; }
 
     public class OptionResponse

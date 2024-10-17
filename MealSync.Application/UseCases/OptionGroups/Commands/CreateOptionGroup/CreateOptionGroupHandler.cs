@@ -35,14 +35,39 @@ public class CreateOptionGroupHandler : ICommandHandler<CreateOptionGroupCommand
     public async Task<Result<Result>> Handle(CreateOptionGroupCommand request, CancellationToken cancellationToken)
     {
         // Validate request
-        if (request.Type == OptionGroupTypes.Radio)
+        if (request.Type == OptionGroupTypes.Radio && request.IsRequire)
         {
             // Must have only 1 option default
             var totalDefault = request.Options.Count(o => o.IsDefault);
             if (totalDefault != 1)
             {
                 throw new InvalidBusinessException(
-                    MessageCode.E_OPTION_GROUP_RADIO_VALIDATE.GetDescription()
+                    MessageCode.E_OPTION_GROUP_RADIO_REQUIRED_VALIDATE.GetDescription()
+                );
+            }
+        }
+
+        if (request.Type == OptionGroupTypes.CheckBox && request.IsRequire)
+        {
+            // Must have only 1 option default
+            var totalDefault = request.Options.Count(o => o.IsDefault);
+            if (totalDefault < request.MinChoices || totalDefault > request.MaxChoices)
+            {
+                throw new InvalidBusinessException(
+                    MessageCode.E_OPTION_GROUP_CHECKBOX_REQUIRED_VALIDATE.GetDescription(),
+                    new object[] { request.MinChoices, request.MaxChoices }
+                );
+            }
+        }
+
+        if (!request.IsRequire)
+        {
+            // Must have only 0 option default
+            var totalDefault = request.Options.Count(o => o.IsDefault);
+            if (totalDefault != 0)
+            {
+                throw new InvalidBusinessException(
+                    MessageCode.E_OPTION_GROUP_NOT_REQUIRED_VALIDATE.GetDescription()
                 );
             }
         }
@@ -54,12 +79,12 @@ public class CreateOptionGroupHandler : ICommandHandler<CreateOptionGroupCommand
         {
             options.Add(new Option
             {
-                IsDefault = request.Type == OptionGroupTypes.CheckBox ? false : option.IsDefault,
+                IsDefault = option.IsDefault,
                 Title = option.Title,
                 IsCalculatePrice = option.IsCalculatePrice,
                 Price = option.Price,
                 ImageUrl = option.ImageUrl,
-                Status = OptionStatus.Active,
+                Status = option.Status,
             });
         });
 
@@ -69,7 +94,9 @@ public class CreateOptionGroupHandler : ICommandHandler<CreateOptionGroupCommand
             Title = request.Title,
             IsRequire = request.IsRequire,
             Type = request.Type,
-            Status = OptionGroupStatus.Active,
+            Status = request.Status,
+            MinChoices = request.MinChoices,
+            MaxChoices = request.MaxChoices,
             Options = options,
         };
 
