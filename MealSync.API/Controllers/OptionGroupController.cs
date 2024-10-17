@@ -6,6 +6,7 @@ using MealSync.Application.UseCases.OptionGroups.Commands.DeleteOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.LinkOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.UnLinkOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.UpdateOptionGroups;
+using MealSync.Application.UseCases.OptionGroups.Commands.UpdateOptionGroupStatus;
 using MealSync.Application.UseCases.OptionGroups.Queries.GetAllOptionGroupOfShop;
 using MealSync.Application.UseCases.OptionGroups.Queries.GetOptionGroupDetail;
 using Microsoft.AspNetCore.Authorization;
@@ -54,7 +55,7 @@ public class OptionGroupController : BaseApiController
 
     [HttpGet(Endpoints.GET_DETAIL_OPTION_GROUP)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> GetDetailShopOptionGroup(int id)
+    public async Task<IActionResult> GetDetailShopOptionGroup(long id)
     {
         return HandleResult(await Mediator.Send(new GetOptionGroupDetailQuery()
         {
@@ -66,6 +67,14 @@ public class OptionGroupController : BaseApiController
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> UnLinkShopOptionGroup([FromBody] UnLinkOptionGroupCommand command)
     {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_OPTION_GROUP_STATUS)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateptionGroupStatus([FromBody] UpdateOptionGroupStatusCommand command, long id)
+    {
+        command.Id = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }
