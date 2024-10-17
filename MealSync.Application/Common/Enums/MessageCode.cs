@@ -220,6 +220,9 @@ public enum MessageCode
     [Description("E-Order-OptionGroupRequiredNotSelect")]
     E_ORDER_OPTION_GROUP_REQUIRED_NOT_SELECT,
 
+    [Description("E-Order-OptionSelectedOverRangeMinMax")]
+    E_ORDER_OPTION_SELECTED_OVER_RANGE_MIN_MAX,
+
     [Description("E-Order-NotFound")]
     E_ORDER_NOT_FOUND,
 
