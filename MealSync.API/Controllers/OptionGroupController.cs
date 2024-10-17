@@ -6,6 +6,7 @@ using MealSync.Application.UseCases.OptionGroups.Commands.DeleteOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.LinkOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.UpdateOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Queries.GetAllOptionGroupOfShop;
+using MealSync.Application.UseCases.OptionGroups.Queries.GetOptionGroupDetail;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MealSync.API.Controllers;
@@ -48,5 +49,15 @@ public class OptionGroupController : BaseApiController
     {
         command.Id = id;
         return HandleResult(await Mediator.Send(command));
+    }
+
+    [HttpGet(Endpoints.GET_DETAIL_OPTION_GROUP)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetDetailShopOptionGroup(int id)
+    {
+        return HandleResult(await Mediator.Send(new GetOptionGroupDetailQuery()
+        {
+            Id = id
+        }));
     }
 }
