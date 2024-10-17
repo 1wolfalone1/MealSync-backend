@@ -22,6 +22,10 @@ public class OptionGroup : BaseEntity
 
     public OptionGroupStatus Status { get; set; }
 
+    public int MinChoices { get; set; }
+
+    public int MaxChoices { get; set; }
+
     public virtual Shop Shop { get; set; }
 
     public virtual ICollection<Option> Options { get; set; } = new List<Option>();
