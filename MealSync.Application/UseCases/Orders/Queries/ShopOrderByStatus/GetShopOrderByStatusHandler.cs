@@ -1,4 +1,6 @@
 ﻿using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Constants;
+using MealSync.Application.Common.Models.Responses;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Dapper;
 using MealSync.Application.Shared;
@@ -45,16 +47,19 @@ public class GetShopOrderByStatusHandler : IQueryHandler<GetShopOrderByStatusQue
             {
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
                 Status = request.Status,
-                IntendedRecieveDate = request.IntendedRecieveDate.ToString("yyyy-M-d"),
+                IntendedRecieveDate = request.IntendedRecieveDate != null ? request.IntendedRecieveDate.Value.ToString("yyyy-M-d") : null,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
                 PhoneNumber = request.PhoneNumber,
-                OrderId = request.Id,
+                OrderId = request.Id != null ? request.Id.Replace(IdPatternConstant.PREFIX_ID, "") : null,
                 Offset = (request.PageIndex - 1) * request.PageSize,
                 PageSize = request.PageSize,
             },
             "CustomerSection, FoodSection").ConfigureAwait(false);
 
-        return Result.Success(orderUniq.Values.ToList());
+        var result = new PaginationResponse<OrderForShopByStatusResponse>(
+            orderUniq.Values.ToList(), orderUniq.Values.ToList().Count > 0 ? orderUniq.Values.ToList().First().TotalPages : 0, request.PageIndex, request.PageSize
+        );
+        return Result.Success(result);
     }
 }

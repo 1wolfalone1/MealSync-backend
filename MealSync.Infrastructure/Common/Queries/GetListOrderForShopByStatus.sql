@@ -55,10 +55,8 @@ WITH OrdersOfShop AS (
         AND o.status IN @Status
         AND (
             @OrderId IS NULL
-            OR o.id LIKE CONCAT('%', CONCAT(@OrderId, '%'))
-        )
-        AND(
-            @PhoneNumber IS NULL
+            OR o.id LIKE CONCAT('%',CONCAT(@OrderId, '%'))
+            OR @PhoneNumber IS NULL
             OR o.phone_number LIKE CONCAT('%', CONCAT(@PhoneNumber, '%'))
         )
         AND (
@@ -85,6 +83,12 @@ SELECT
     o.start_time AS StartTime,
     o.end_time AS EndTime,
     o.intended_receive_date AS IntendedReceiveDate,
+    (
+        SELECT
+            Count(*)
+        FROM
+            OrdersOfShop
+    ) AS TotalPages,
     -- Customer
     o.customer_id AS CustomerSection,
     o.customer_id AS Id,
@@ -100,4 +104,5 @@ FROM
     OrdersOfShop o
     INNER JOIN order_detail od ON o.id = od.order_id
     INNER JOIN food f ON od.food_id = f.id
-LIMIT @PageSize OFFSET @OffSet;
+LIMIT
+    @PageSize OFFSET @OffSet;

@@ -12,6 +12,12 @@ public class CreateOptionGroupCommand : ICommand<Result>
 
     public OptionGroupTypes Type { get; set; }
 
+    public int MinChoices { get; set; }
+
+    public int MaxChoices { get; set; }
+
+    public OptionGroupStatus Status { get; set; }
+
     public List<CreateOptionCommand> Options { get; set; }
 
     public class CreateOptionCommand
@@ -25,5 +31,7 @@ public class CreateOptionGroupCommand : ICommand<Result>
         public double Price { get; set; }
 
         public string? ImageUrl { get; set; }
+
+        public OptionStatus Status { get; set; }
     }
 }
