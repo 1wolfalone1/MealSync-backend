@@ -46,6 +46,9 @@ public class UpdateOptionGroupHandler : ICommandHandler<UpdateOptionGroupCommand
             optionGroup.Title = request.Title;
             optionGroup.IsRequire = request.IsRequire;
             optionGroup.Type = request.Type;
+            optionGroup.Status = request.Status;
+            optionGroup.MinChoices = request.MinChoices;
+            optionGroup.MaxChoices = request.MaxChoices;
 
             var options = new List<Option>();
             foreach (var option in request.Options)
@@ -58,6 +61,7 @@ public class UpdateOptionGroupHandler : ICommandHandler<UpdateOptionGroupCommand
                     IsCalculatePrice = option.IsCalculatePrice,
                     Price = option.Price,
                     ImageUrl = option.ImageUrl,
+                    Status = option.Status,
                 });
             }
 
@@ -95,7 +99,8 @@ public class UpdateOptionGroupHandler : ICommandHandler<UpdateOptionGroupCommand
         if (optionGroup.Options.Count != request.Options.Count)
             throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_UPDATE_NOT_ENOUGH_OPTION.GetDescription());
 
-        if (request.IsRequire)
+        // Validate request
+        if (request.Type == OptionGroupTypes.Radio && request.IsRequire)
         {
             // Must have only 1 option default
             var totalDefault = request.Options.Count(o => o.IsDefault);
@@ -103,6 +108,31 @@ public class UpdateOptionGroupHandler : ICommandHandler<UpdateOptionGroupCommand
             {
                 throw new InvalidBusinessException(
                     MessageCode.E_OPTION_GROUP_RADIO_REQUIRED_VALIDATE.GetDescription()
+                );
+            }
+        }
+
+        if (request.Type == OptionGroupTypes.CheckBox && request.IsRequire)
+        {
+            // Must have only 1 option default
+            var totalDefault = request.Options.Count(o => o.IsDefault);
+            if (totalDefault < request.MinChoices || totalDefault > request.MaxChoices)
+            {
+                throw new InvalidBusinessException(
+                    MessageCode.E_OPTION_GROUP_CHECKBOX_REQUIRED_VALIDATE.GetDescription(),
+                    new object[] { request.MinChoices, request.MaxChoices }
+                );
+            }
+        }
+
+        if (!request.IsRequire)
+        {
+            // Must have only 0 option default
+            var totalDefault = request.Options.Count(o => o.IsDefault);
+            if (totalDefault != 0)
+            {
+                throw new InvalidBusinessException(
+                    MessageCode.E_OPTION_GROUP_NOT_REQUIRED_VALIDATE.GetDescription()
                 );
             }
         }
