@@ -11,12 +11,12 @@ public class SystemResourceRepository : BaseRepository<SystemResource>, ISystemR
 
     public string? GetByResourceCode(string code)
     {
-        return DbSet.SingleOrDefault(sr => sr.ResourceCode == code)?.ResourceContent;
+        return DbSet.FirstOrDefault(sr => sr.ResourceCode == code)?.ResourceContent;
     }
 
     public string? GetByResourceCode(string code, params object[] args)
     {
-        var systemResource = DbSet.SingleOrDefault(sr => sr.ResourceCode == code);
-        return systemResource == default? null : string.Format(systemResource.ResourceContent, args);
+        var systemResource = DbSet.FirstOrDefault(sr => sr.ResourceCode == code);
+        return systemResource == default ? null : string.Format(systemResource.ResourceContent, args);
     }
 }

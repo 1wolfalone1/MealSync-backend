@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.OptionGroups.Commands.CreateOptionGroup;
 using MealSync.Application.UseCases.OptionGroups.Commands.DeleteOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.LinkOptionGroups;
+using MealSync.Application.UseCases.OptionGroups.Commands.UnLinkOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.UpdateOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Queries.GetAllOptionGroupOfShop;
 using MealSync.Application.UseCases.OptionGroups.Queries.GetOptionGroupDetail;
@@ -59,5 +60,12 @@ public class OptionGroupController : BaseApiController
         {
             Id = id
         }));
+    }
+
+    [HttpDelete(Endpoints.UNLINK_FOOD_OPTION_GROUP)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UnLinkShopOptionGroup([FromBody] UnLinkOptionGroupCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }
