@@ -75,8 +75,14 @@ public enum MessageCode
     [Description("E-OptionGroup-NotFound")]
     E_OPTION_GROUP_NOT_FOUND,
 
-    [Description("E-OptionGroup-RadioValidate")]
-    E_OPTION_GROUP_RADIO_VALIDATE,
+    [Description("E-OptionGroup-RadioRequiredValidate")]
+    E_OPTION_GROUP_RADIO_REQUIRED_VALIDATE,
+
+    [Description("E-OptionGroup-CheckBoxRequiredValidate")]
+    E_OPTION_GROUP_CHECKBOX_REQUIRED_VALIDATE,
+
+    [Description("E-OptionGroup-NotRequiredValidate")]
+    E_OPTION_GROUP_NOT_REQUIRED_VALIDATE,
 
     [Description("E-OptionGroup-UpdateNotEnoughOption")]
     E_OPTION_GROUP_UPDATE_NOT_ENOUGH_OPTION,
