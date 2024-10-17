@@ -93,6 +93,9 @@ public enum MessageCode
     [Description("I-OptionGroup-DeleteSuccess")]
     I_OPTION_GROUP_DELETE_SUCCESS,
 
+    [Description("I-OptionGroup-UpdateStatusSuccess")]
+    I_OPTION_GROUP_UPDATE_STATUS_SUCCESS,
+
     // Option
     [Description("E-Option-NotFound")]
     E_OPTION_NOT_FOUND,
