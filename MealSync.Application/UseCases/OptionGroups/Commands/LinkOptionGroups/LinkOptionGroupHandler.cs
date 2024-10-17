@@ -21,7 +21,8 @@ public class LinkOptionGroupHandler : ICommandHandler<LinkOptionGroupCommand, Re
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly ILogger<LinkOptionGroupHandler> _logger;
 
-    public LinkOptionGroupHandler(ICurrentPrincipalService currentPrincipalService, IFoodOptionGroupRepository foodOptionGroupRepository, IFoodRepository foodRepository, ILogger<LinkOptionGroupHandler> logger, IOptionGroupRepository optionGroupRepository, IUnitOfWork unitOfWork, ISystemResourceRepository systemResourceRepository)
+    public LinkOptionGroupHandler(ICurrentPrincipalService currentPrincipalService, IFoodOptionGroupRepository foodOptionGroupRepository, IFoodRepository foodRepository, ILogger<LinkOptionGroupHandler> logger,
+        IOptionGroupRepository optionGroupRepository, IUnitOfWork unitOfWork, ISystemResourceRepository systemResourceRepository)
     {
         _currentPrincipalService = currentPrincipalService;
         _foodOptionGroupRepository = foodOptionGroupRepository;
@@ -36,6 +37,15 @@ public class LinkOptionGroupHandler : ICommandHandler<LinkOptionGroupCommand, Re
     {
         // Validate
         Validate(request);
+
+        // Case not found link still return 200
+        var foodOptionGroupTemp = _foodOptionGroupRepository.Get(og => og.FoodId == request.FoodId && og.OptionGroupId == request.OptionGroupId).SingleOrDefault();
+        if (foodOptionGroupTemp != default)
+            return Result.Success(new
+            {
+                Code = MessageCode.E_FOOD_OPTION_GROUP_ALREADY_LINK.GetDescription(),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.E_FOOD_OPTION_GROUP_ALREADY_LINK.GetDescription(), request.FoodId),
+            });
 
         try
         {
@@ -69,14 +79,10 @@ public class LinkOptionGroupHandler : ICommandHandler<LinkOptionGroupCommand, Re
     {
         var optionGroup = _optionGroupRepository.Get(og => og.Id == request.OptionGroupId && og.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
         if (optionGroup == default)
-            throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_NOT_FOUND.GetDescription(), new object[]{request.OptionGroupId}, HttpStatusCode.NotFound);
+            throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_NOT_FOUND.GetDescription(), new object[] { request.OptionGroupId }, HttpStatusCode.NotFound);
 
         var food = _foodRepository.Get(og => og.Id == request.FoodId && og.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
         if (food == default)
-            throw new InvalidBusinessException(MessageCode.E_FOOD_NOT_FOUND.GetDescription(), new object[]{request.FoodId}, HttpStatusCode.NotFound);
-
-        var foodOptionGroup = _foodOptionGroupRepository.Get(og => og.FoodId == request.FoodId && og.OptionGroupId == request.OptionGroupId).SingleOrDefault();
-        if (foodOptionGroup != default)
-            throw new InvalidBusinessException(MessageCode.E_FOOD_OPTION_GROUP_ALREADY_LINK.GetDescription(), new object[]{request.FoodId}, HttpStatusCode.NotFound);
+            throw new InvalidBusinessException(MessageCode.E_FOOD_NOT_FOUND.GetDescription(), new object[] { request.FoodId }, HttpStatusCode.NotFound);
     }
 }

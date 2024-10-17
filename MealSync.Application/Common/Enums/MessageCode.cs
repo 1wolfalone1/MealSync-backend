@@ -197,8 +197,14 @@ public enum MessageCode
     [Description("E-FoodOptionGroup-AlreadyLink")]
     E_FOOD_OPTION_GROUP_ALREADY_LINK,
 
+    [Description("E-FoodOptionGroup-AlreadyUnLink")]
+    E_FOOD_OPTION_GROUP_ALREADY_UNLINK,
+
     [Description("I-FoodOptionGroup-LinkSuccess")]
     I_FOOD_OPTION_GROUP_LINK_SUCCESS,
+
+    [Description("I-FoodOptionGroup-UnLinkSuccess")]
+    I_FOOD_OPTION_GROUP_UNLINK_SUCCESS,
 
     // Customer
     [Description("E-Customer-NotFound")]
