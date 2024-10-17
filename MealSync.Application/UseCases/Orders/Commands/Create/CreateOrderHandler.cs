@@ -376,8 +376,8 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                     else
                     {
                         // Add the food price to the total price
-                        totalFoodPrice += food.Price;
-                        totalPriceOrderDetail += food.Price;
+                        totalFoodPrice += food.Price * foodRequest.Quantity;
+                        totalPriceOrderDetail += food.Price * foodRequest.Quantity;
                         foods.Add(food);
                     }
 
@@ -469,6 +469,16 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                             else
                             {
                                 var optionList = new List<OrderDetailDescriptionDto.OptionDto>();
+
+                                if (foodOptionGroup.OptionGroup.IsRequire && (
+                                        foodOptionGroup.OptionGroup.MinChoices > optionGroupCheckboxRequest.OptionIds.Count
+                                        || foodOptionGroup.OptionGroup.MaxChoices < optionGroupCheckboxRequest.OptionIds.Count))
+                                {
+                                    throw new InvalidBusinessException(
+                                        MessageCode.E_ORDER_OPTION_SELECTED_OVER_RANGE_MIN_MAX.GetDescription(),
+                                        new object[] { foodOptionGroup.OptionGroup.Title!, foodOptionGroup.OptionGroup.MinChoices, foodOptionGroup.OptionGroup.MaxChoices }
+                                    );
+                                }
 
                                 // Validate each selected option in the checkbox group
                                 foreach (var optionId in optionGroupCheckboxRequest.OptionIds)
