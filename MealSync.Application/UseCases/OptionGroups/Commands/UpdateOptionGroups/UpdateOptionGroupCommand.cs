@@ -15,6 +15,12 @@ public class UpdateOptionGroupCommand : ICommand<Result>
 
     public OptionGroupTypes Type { get; set; }
 
+    public int MinChoices { get; set; }
+
+    public int MaxChoices { get; set; }
+
+    public OptionGroupStatus Status { get; set; }
+
     public List<UpdateOptionRequest> Options { get; set; }
 }
 
@@ -25,6 +31,8 @@ public class UpdateOptionRequest
     public bool IsDefault { get; set; }
 
     public string Title { get; set; } = null!;
+
+    public OptionStatus Status { get; set; }
 
     public bool IsCalculatePrice { get; set; }
 

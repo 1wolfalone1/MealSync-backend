@@ -14,6 +14,10 @@ public class ShopOptionGroupResponse
 
     public OptionGroupStatus Status { get; set; }
 
+    public int MinChoices { get; set; }
+
+    public int MaxChoices { get; set; }
+
     public int NumOfItemLinked { get; set; }
 
     public List<OptionGroupResponse.OptionResponse> Options { get; set; }

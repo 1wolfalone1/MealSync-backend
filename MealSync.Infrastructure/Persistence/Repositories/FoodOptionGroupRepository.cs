@@ -14,7 +14,12 @@ public class FoodOptionGroupRepository : BaseRepository<FoodOptionGroup>, IFoodO
 
     public int GetMaxCurrentDisplayOrder(long foodId)
     {
-        return DbSet.Where(fog => fog.FoodId == foodId).Max(x => x.DisplayOrder);
+        var list = DbSet.Where(fog => fog.FoodId == foodId).ToList();
+
+        if (list != null && list.Count > 0)
+            return list.Max(fog => fog.DisplayOrder);
+
+        return 0;
     }
 
     public Task<FoodOptionGroup?> GetActiveOptionGroupByFoodIdAndOptionGroupId(long foodId, long optionGroupId)
