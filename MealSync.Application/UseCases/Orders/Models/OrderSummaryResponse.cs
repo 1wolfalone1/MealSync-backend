@@ -16,9 +16,9 @@ public class OrderSummaryResponse
 
     public double TotalPromotion { get; set; }
 
-    public DateTimeOffset OrderDate { get; set; }
+    public long OrderDate { get; set; }
 
-    public DateTime IntendedReceiveDate { get; set; }
+    public long IntendedReceiveDate { get; set; }
 
     public int StartTime { get; set; }
 
