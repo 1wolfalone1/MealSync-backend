@@ -150,7 +150,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.CustomerLocation.Latitude))
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails))
             .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments))
-            .ForMember(dest => dest.ShopInfo, opt => opt.MapFrom(src => src));
+            .ForMember(dest => dest.ShopInfo, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.Promotion, opt => opt.MapFrom(src => src.Promotion));
         CreateMap<OrderDetail, DetailOrderCustomerResponse.OrderDetailCustomerResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Food.Id))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Food.Name))
@@ -175,6 +176,10 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.ShopLocation.Address))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.ShopLocation.Longitude))
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.ShopLocation.Latitude));
+
+        CreateMap<Promotion, DetailOrderCustomerResponse.PromotionOrderResponse>()
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.AddHours(-7).ToUnixTimeMilliseconds()));
 
         CreateMap<Order, OrderSummaryResponse>()
             .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))

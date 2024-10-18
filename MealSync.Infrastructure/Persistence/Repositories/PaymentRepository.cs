@@ -18,4 +18,12 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository
             && p.Type == PaymentTypes.Payment
             && p.PaymentMethods == PaymentMethods.VnPay);
     }
+
+    public Task<Payment?> GetPaymentVnPayByOrderId(long orderId)
+    {
+        return DbSet.FirstOrDefaultAsync(p =>
+            p.OrderId == orderId
+            && p.Type == PaymentTypes.Payment
+            && p.PaymentMethods == PaymentMethods.VnPay);
+    }
 }

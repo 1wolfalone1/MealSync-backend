@@ -92,4 +92,5 @@ public static class Endpoints
     public const string GET_ORDER_HISTORY = "customer/order/history";
     public const string GET_ORDER_FOR_SHOP_BY_STATUS = "shop-owner/order";
     public const string GET_ORDER_DETAIL_FOR_SHOP_BY_STATUS = "shop-owner/order/{id:long}";
+    public const string GET_PAYMENT_STATUS_BY_ORDER_ID = "customer/order/{id:long}/payment/status";
 }

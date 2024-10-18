@@ -120,12 +120,12 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                     refundPayment.Status = PaymentStatus.PaidSuccess;
                     refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
                     refundPayment.PaymentThirdPartyContent = content;
-                    refundMessage = _systemResourceRepository.GetByResourceCode(MessageCode.E_PAYMENT_REFUND_SUCCESS.GetDescription());
+                    refundMessage = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_REFUND_SUCCESS.GetDescription());
                 }
                 else
                 {
                     refundPayment.Status = PaymentStatus.PaidFail;
-                    refundMessage = _systemResourceRepository.GetByResourceCode(MessageCode.E_PAYMENT_REFUND_FAIL.GetDescription());
+                    refundMessage = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_REFUND_FAIL.GetDescription());
                 }
 
                 await _paymentRepository.AddAsync(refundPayment).ConfigureAwait(false);
