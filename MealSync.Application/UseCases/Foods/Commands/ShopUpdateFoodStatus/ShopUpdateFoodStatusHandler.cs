@@ -41,6 +41,7 @@ public class ShopUpdateFoodStatusHandler : ICommandHandler<ShopUpdateFoodStatusC
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             var food = _foodRepository.GetById(request.Id);
             food.Status = request.Status;
+            food.IsSoldOut = request.IsSoldOut.Value;
             _foodRepository.Update(food);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
             var messageCode = request.Status == FoodStatus.Active ? MessageCode.I_FOOD_UPDATE_ACTIVE_SUCCESS.GetDescription() : MessageCode.I_FOOD_UPDATE_INACTIVE_SUCCESS.GetDescription();
