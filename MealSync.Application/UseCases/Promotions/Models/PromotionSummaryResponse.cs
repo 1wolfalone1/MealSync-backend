@@ -16,6 +16,8 @@ public class PromotionSummaryResponse
 
     public double? AmountRate { get; set; }
 
+    public double? MaximumApplyValue { get; set; }
+
     public double? AmountValue { get; set; }
 
     public double MinOrdervalue { get; set; }
@@ -25,4 +27,8 @@ public class PromotionSummaryResponse
     public long EndDate { get; set; }
 
     public PromotionApplyTypes ApplyType { get; set; }
+
+    public int UsageLimit { get; set; }
+
+    public int NumberOfUsed { get; set; }
 }
