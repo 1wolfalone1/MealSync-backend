@@ -1,10 +1,14 @@
+using System.Net;
 using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.ShopCategories.Models;
 using MealSync.Domain.Entities;
+using MealSync.Domain.Enums;
+using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
 
 namespace MealSync.Application.UseCases.ShopCategories.Commands.Create;
@@ -31,6 +35,9 @@ public class CreateShopCategoryHandler : ICommandHandler<CreateShopCategoryComma
 
     public async Task<Result<Result>> Handle(CreateShopCategoryCommand request, CancellationToken cancellationToken)
     {
+        // Validate
+        Validate(request);
+
         var accountId = _currentPrincipalService.CurrentPrincipalId!;
         var lastedShopCategory = _shopCategoryRepository.GetLastedByShopId(accountId.Value);
         ShopCategory shopCategory = new ShopCategory
@@ -65,5 +72,11 @@ public class CreateShopCategoryHandler : ICommandHandler<CreateShopCategoryComma
             _logger.LogError(e, e.Message);
             throw new("Internal Server Error");
         }
+    }
+
+    private void Validate(CreateShopCategoryCommand request)
+    {
+        if (_shopCategoryRepository.CheckExistName(request.Name))
+            throw new InvalidBusinessException(MessageCode.E_SHOP_CATEGORY_DOUBLE_NAME.GetDescription(), new object[]{request.Name}, HttpStatusCode.Conflict);
     }
 }

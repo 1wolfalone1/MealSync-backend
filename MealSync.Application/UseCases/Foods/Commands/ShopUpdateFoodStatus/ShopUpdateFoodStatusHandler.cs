@@ -63,11 +63,5 @@ public class ShopUpdateFoodStatusHandler : ICommandHandler<ShopUpdateFoodStatusC
         var food = _foodRepository.Get(f => f.Id == request.Id && f.ShopId == _currentPrincipalService.CurrentPrincipalId && f.Status != FoodStatus.Delete).SingleOrDefault();
         if (food == default)
             throw new InvalidBusinessException(MessageCode.E_FOOD_NOT_FOUND.GetDescription(), new object[] { request.Id }, HttpStatusCode.NotFound);
-
-        if (request.Status == FoodStatus.Active && food.Status != FoodStatus.UnActive)
-            throw new InvalidBusinessException(MessageCode.E_FOOD_INCORRECT_STATUS.GetDescription());
-
-        if (request.Status == FoodStatus.UnActive && food.Status != FoodStatus.Active)
-            throw new InvalidBusinessException(MessageCode.E_FOOD_INCORRECT_STATUS.GetDescription());
     }
 }

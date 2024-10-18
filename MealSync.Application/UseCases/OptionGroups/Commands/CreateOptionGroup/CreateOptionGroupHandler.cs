@@ -1,3 +1,4 @@
+using System.Net;
 using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
@@ -35,6 +36,10 @@ public class CreateOptionGroupHandler : ICommandHandler<CreateOptionGroupCommand
     public async Task<Result<Result>> Handle(CreateOptionGroupCommand request, CancellationToken cancellationToken)
     {
         // Validate request
+        var optionGroupCheck = _optionGroupRepository.CheckExistTitleOptionGroup(request.Title);
+        if (optionGroupCheck)
+            throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_DOUBLE_TITLE.GetDescription(), new object[]{request.Title}, HttpStatusCode.Conflict);
+
         if (request.Type == OptionGroupTypes.Radio && request.IsRequire)
         {
             // Must have only 1 option default
