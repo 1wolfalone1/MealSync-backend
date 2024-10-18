@@ -46,6 +46,9 @@ public enum MessageCode
     [Description("E-ShopCategory-HaveFoodLinked")]
     E_SHOP_CATEGORY_HAVE_FOOD_LINKED,
 
+    [Description("E-ShopCategory-DoubleName")]
+    E_SHOP_CATEGORY_DOUBLE_NAME,
+
     // Operating Slot
     [Description("E-OperatingSlot-NotFound")]
     E_OPERATING_SLOT_NOT_FOUND,
@@ -95,6 +98,9 @@ public enum MessageCode
 
     [Description("I-OptionGroup-UpdateStatusSuccess")]
     I_OPTION_GROUP_UPDATE_STATUS_SUCCESS,
+
+    [Description("E-OptionGroup-DoubleTitle")]
+    E_OPTION_GROUP_DOUBLE_TITLE,
 
     // Option
     [Description("E-Option-NotFound")]
