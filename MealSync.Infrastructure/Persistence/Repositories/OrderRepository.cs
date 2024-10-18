@@ -77,16 +77,34 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                     Latitude = o.ShopLocation.Latitude,
                     Longitude = o.ShopLocation.Longitude,
                 },
+                Promotion = o.Promotion == default
+                    ? null
+                    : new Promotion
+                    {
+                        Id = o.Promotion.Id,
+                        Title = o.Promotion.Title,
+                        BannerUrl = o.Promotion.BannerUrl,
+                        Decription = o.Promotion.Decription,
+                        Type = o.Promotion.Type,
+                        AmountRate = o.Promotion.AmountRate,
+                        MaximumApplyValue = o.Promotion.MaximumApplyValue,
+                        AmountValue = o.Promotion.AmountValue,
+                        MinOrdervalue = o.Promotion.MinOrdervalue,
+                        StartDate = o.Promotion.StartDate,
+                        EndDate = o.Promotion.EndDate,
+                        ApplyType = o.Promotion.ApplyType,
+                    },
             }).FirstOrDefaultAsync();
     }
 
-    public async Task<(int TotalCount, IEnumerable<Order> Orders)> GetByCustomerIdAndStatus(long customerId, OrderStatus? status, int pageIndex, int pageSize)
+    public async Task<(int TotalCount, IEnumerable<Order> Orders)> GetByCustomerIdAndStatus(
+        long customerId, List<OrderStatus>? statusList, int pageIndex, int pageSize)
     {
         var query = DbSet.Where(o => o.CustomerId == customerId);
 
-        if (status != default)
+        if (statusList != default && statusList.Count > 0)
         {
-            query = query.Where(o => o.Status == status);
+            query = query.Where(o => statusList.Contains(o.Status));
         }
 
         var totalCount = await query.CountAsync().ConfigureAwait(false);
@@ -119,5 +137,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     public Task<Order?> GetByIdAndCustomerIdIncludePayment(long id, long customerId)
     {
         return DbSet.Include(o => o.Payments).FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == customerId);
+    }
+
+    public Task<bool> CheckExistedByIdAndCustomerId(long id, long customerId)
+    {
+        return DbSet.AnyAsync(o => o.Id == id && o.CustomerId == customerId);
     }
 }

@@ -273,12 +273,24 @@ public enum MessageCode
     E_PROMOTION_NOT_ENOUGH_CONDITION,
 
     // Payment
-    [Description("I-Payment-NotFound")]
+    [Description("E-Payment-NotFound")]
     E_PAYMENT_NOT_FOUND,
 
     [Description("I-Payment-RefundSuccess")]
-    E_PAYMENT_REFUND_SUCCESS,
+    I_PAYMENT_REFUND_SUCCESS,
 
     [Description("I-Payment-RefundFail")]
-    E_PAYMENT_REFUND_FAIL,
+    I_PAYMENT_REFUND_FAIL,
+
+    [Description("I-Payment-Success")]
+    I_PAYMENT_SUCCESS,
+
+    [Description("I-Payment-Fail")]
+    I_PAYMENT_FAIL,
+
+    [Description("I-Payment-Pending")]
+    I_PAYMENT_PENDING,
+
+    [Description("I-Payment-Cancel")]
+    I_PAYMENT_CANCEL,
 }
