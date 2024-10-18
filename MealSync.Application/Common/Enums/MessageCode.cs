@@ -238,6 +238,15 @@ public enum MessageCode
     [Description("I-Order-OrderSuccess")]
     I_ORDER_SUCCESS,
 
+    [Description("E-Order-CustomerFailCancelOrder")]
+    E_ORDER_CUSTOMER_FAIL_TO_CANCEL_ORDER,
+
+    [Description("E-Order-CustomerOverdueCancelOrder")]
+    E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER,
+
+    [Description("I-Order-CancelSuccess")]
+    I_ORDER_CANCEL_SUCCESS,
+
     // Promotion
     [Description("E-Promotion-NotFound")]
     E_PROMOTION_NOT_FOUND,
@@ -256,4 +265,14 @@ public enum MessageCode
 
     [Description("E-Promotion-Not-Enough-Condition")]
     E_PROMOTION_NOT_ENOUGH_CONDITION,
+
+    // Payment
+    [Description("I-Payment-NotFound")]
+    E_PAYMENT_NOT_FOUND,
+
+    [Description("I-Payment-RefundSuccess")]
+    E_PAYMENT_REFUND_SUCCESS,
+
+    [Description("I-Payment-RefundFail")]
+    E_PAYMENT_REFUND_FAIL,
 }

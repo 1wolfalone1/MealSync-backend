@@ -4,6 +4,8 @@ namespace MealSync.Application.UseCases.Orders.Models;
 
 public class OrderSummaryResponse
 {
+    public long Id { get; set; }
+
     public string ShopName { get; set; }
 
     public string? ShopLogoUrl { get; set; }
