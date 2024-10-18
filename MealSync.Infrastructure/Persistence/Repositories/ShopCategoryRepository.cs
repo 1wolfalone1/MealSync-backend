@@ -29,4 +29,11 @@ public class ShopCategoryRepository : BaseRepository<ShopCategory>, IShopCategor
     {
         return DbSet.Where(sc => sc.ShopId == shopId).OrderBy(sc => sc.DisplayOrder).ToList();
     }
+
+    public bool CheckExistName(string name, long? id)
+    {
+        return id == null
+            ? DbSet.Any(sc => sc.Name == name)
+            : DbSet.Any(sc => sc.Name == name && sc.Id != id);
+    }
 }

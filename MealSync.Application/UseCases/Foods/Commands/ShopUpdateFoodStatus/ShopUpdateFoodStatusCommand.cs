@@ -9,4 +9,6 @@ public class ShopUpdateFoodStatusCommand : ICommand<Result>
     public long Id { get; set; }
 
     public FoodStatus Status { get; set; }
+
+    public bool? IsSoldOut { get; set; }
 }

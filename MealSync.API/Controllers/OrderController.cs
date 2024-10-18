@@ -6,6 +6,7 @@ using MealSync.Application.UseCases.Orders.Commands.CancelOrderCustomer;
 using MealSync.Application.UseCases.Orders.Commands.Create;
 using MealSync.Application.UseCases.Orders.Commands.UpdatePaymentStatusIPN;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailCustomer;
+using MealSync.Application.UseCases.Orders.Queries.OrderDetailForShop;
 using MealSync.Application.UseCases.Orders.Queries.OrderHistory;
 using MealSync.Application.UseCases.Orders.Queries.ShopOrderByStatus;
 using MealSync.Domain.Enums;
@@ -60,5 +61,15 @@ public class OrderController : BaseApiController
     public async Task<IActionResult> GetOrderForShopByStatus([FromQuery] GetShopOrderByStatusQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_ORDER_DETAIL_FOR_SHOP_BY_STATUS)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetOrderDetailForShopByStatus(long id)
+    {
+        return HandleResult(await Mediator.Send(new OrderDetailForShopQuery()
+        {
+            Id = id,
+        }).ConfigureAwait(false));
     }
 }

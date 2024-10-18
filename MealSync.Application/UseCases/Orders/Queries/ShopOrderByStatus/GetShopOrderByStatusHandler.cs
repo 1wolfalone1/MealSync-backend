@@ -26,7 +26,7 @@ public class GetShopOrderByStatusHandler : IQueryHandler<GetShopOrderByStatusQue
         {
             if (!orderUniq.TryGetValue(parent.Id, out var order))
             {
-                parent.CustomerInfor = child1;
+                parent.Customer = child1;
                 parent.Foods.Add(child2);
                 orderUniq.Add(parent.Id, parent);
             }
