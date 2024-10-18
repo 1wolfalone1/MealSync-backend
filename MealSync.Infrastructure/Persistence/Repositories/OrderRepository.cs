@@ -84,7 +84,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                         Id = o.Promotion.Id,
                         Title = o.Promotion.Title,
                         BannerUrl = o.Promotion.BannerUrl,
-                        Decription = o.Promotion.Decription,
+                        Description = o.Promotion.Description,
                         Type = o.Promotion.Type,
                         AmountRate = o.Promotion.AmountRate,
                         MaximumApplyValue = o.Promotion.MaximumApplyValue,
@@ -128,6 +128,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                     Name = o.Shop.Name,
                     LogoUrl = o.Shop.LogoUrl,
                 },
+                OrderDetails = o.OrderDetails.Select(od => new OrderDetail
+                {
+                    Id = od.Id,
+                }).ToList(),
             })
             .ToListAsync().ConfigureAwait(false);
 

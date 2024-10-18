@@ -188,6 +188,7 @@ public class MappingProfile : Profile
                 opt => opt.MapFrom(src =>
                     new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
             )
+            .ForMember(dest => dest.TotalOrderDetail, opt => opt.MapFrom(src => src.OrderDetails.Count))
             .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
             .ForMember(dest => dest.ShopLogoUrl, opt => opt.MapFrom(src => src.Shop.LogoUrl));
 

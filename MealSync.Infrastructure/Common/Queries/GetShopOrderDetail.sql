@@ -83,7 +83,7 @@ SELECT
     p.id AS PromotionSection,
     p.id AS Id,
     p.title AS Title,
-    p.decription AS Description,
+    p.description AS Description,
     p.banner_url AS BannerUrl,
     p.amount_rate AS AmountRate,
     p.amount_value AS AmountValue,
