@@ -1,5 +1,6 @@
 using MealSync.Application.Common.Repositories;
 using MealSync.Domain.Entities;
+using MealSync.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
@@ -79,9 +80,15 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             }).FirstOrDefaultAsync();
     }
 
-    public async Task<(int TotalCount, IEnumerable<Order> Orders)> GetByCustomerId(long customerId, int pageIndex, int pageSize)
+    public async Task<(int TotalCount, IEnumerable<Order> Orders)> GetByCustomerIdAndStatus(long customerId, OrderStatus? status, int pageIndex, int pageSize)
     {
         var query = DbSet.Where(o => o.CustomerId == customerId);
+
+        if (status != default)
+        {
+            query = query.Where(o => o.Status == status);
+        }
+
         var totalCount = await query.CountAsync().ConfigureAwait(false);
         var orders = await query
             .OrderByDescending(o => o.CreatedDate)
@@ -89,6 +96,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             .Take(pageSize)
             .Select(o => new Order
             {
+                Id = o.Id,
                 Status = o.Status,
                 ShippingFee = o.ShippingFee,
                 TotalPrice = o.TotalPrice,
@@ -106,5 +114,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             .ToListAsync().ConfigureAwait(false);
 
         return (totalCount, orders);
+    }
+
+    public Task<Order?> GetByIdAndCustomerIdIncludePayment(long id, long customerId)
+    {
+        return DbSet.Include(o => o.Payments).FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == customerId);
     }
 }
