@@ -24,7 +24,8 @@ public class GetOrderHistoryHandler : IQueryHandler<GetOrderHistoryQuery, Result
     public async Task<Result<Result>> Handle(GetOrderHistoryQuery request, CancellationToken cancellationToken)
     {
         var customerId = _currentPrincipalService.CurrentPrincipalId!.Value;
-        var data = await _orderRepository.GetByCustomerId(customerId, request.PageIndex, request.PageSize).ConfigureAwait(false);
+        var data = await _orderRepository.GetByCustomerIdAndStatus(customerId, request.Status, request.PageIndex, request.PageSize)
+            .ConfigureAwait(false);
         var result = new PaginationResponse<OrderSummaryResponse>(
             _mapper.Map<List<OrderSummaryResponse>>(data.Orders), data.TotalCount, request.PageIndex, request.PageSize);
 
