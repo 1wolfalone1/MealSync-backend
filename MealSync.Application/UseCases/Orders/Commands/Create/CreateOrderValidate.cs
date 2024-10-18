@@ -36,11 +36,6 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
         RuleFor(x => x.OrderTime)
             .SetValidator(new OrderTimeFrameValidator());
 
-        // Voucher validation
-        RuleFor(x => x.VoucherId)
-            .GreaterThan(0).When(x => x.VoucherId.HasValue)
-            .WithMessage("Mã giảm giá id phải lớn hơn 0.");
-
         // Total Discount validation
         RuleFor(x => x.TotalDiscount)
             .GreaterThanOrEqualTo(0).WithMessage("Tổng giảm giá không được nhỏ hơn 0.");
