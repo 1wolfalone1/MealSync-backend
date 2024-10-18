@@ -18,6 +18,8 @@ public class OrderSummaryResponse
 
     public double TotalPromotion { get; set; }
 
+    public int TotalOrderDetail { get; set; }
+
     public long OrderDate { get; set; }
 
     public long IntendedReceiveDate { get; set; }

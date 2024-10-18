@@ -128,6 +128,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                     Name = o.Shop.Name,
                     LogoUrl = o.Shop.LogoUrl,
                 },
+                OrderDetails = o.OrderDetails.Select(od => new OrderDetail
+                {
+                    Id = od.Id,
+                }).ToList(),
             })
             .ToListAsync().ConfigureAwait(false);
 
