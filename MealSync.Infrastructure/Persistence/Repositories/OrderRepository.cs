@@ -84,7 +84,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                         Id = o.Promotion.Id,
                         Title = o.Promotion.Title,
                         BannerUrl = o.Promotion.BannerUrl,
-                        Decription = o.Promotion.Decription,
+                        Description = o.Promotion.Description,
                         Type = o.Promotion.Type,
                         AmountRate = o.Promotion.AmountRate,
                         MaximumApplyValue = o.Promotion.MaximumApplyValue,
