@@ -1,7 +1,5 @@
 using MealSync.API.Identites;
 using MealSync.API.Shared;
-using MealSync.Application.Common.Repositories;
-using MealSync.Application.Common.Services.Payments.VnPay;
 using MealSync.Application.UseCases.Orders.Commands.CancelOrderCustomer;
 using MealSync.Application.UseCases.Orders.Commands.Create;
 using MealSync.Application.UseCases.Orders.Commands.UpdatePaymentStatusIPN;
@@ -49,11 +47,11 @@ public class OrderController : BaseApiController
 
     [HttpGet(Endpoints.GET_ORDER_HISTORY)]
     [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
-    public async Task<IActionResult> GetOrderHistory(OrderStatus? status, int pageIndex, int pageSize)
+    public async Task<IActionResult> GetOrderHistory([FromQuery] List<OrderStatus>? status, int pageIndex, int pageSize)
     {
         return HandleResult(
             await Mediator.Send(
-                new GetOrderHistoryQuery { Status = status, PageIndex = pageIndex, PageSize = pageSize }).ConfigureAwait(false));
+                new GetOrderHistoryQuery { StatusList = status, PageIndex = pageIndex, PageSize = pageSize }).ConfigureAwait(false));
     }
 
     [HttpGet(Endpoints.GET_ORDER_FOR_SHOP_BY_STATUS)]

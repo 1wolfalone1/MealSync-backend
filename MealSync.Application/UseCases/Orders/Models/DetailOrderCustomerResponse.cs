@@ -44,6 +44,8 @@ public class DetailOrderCustomerResponse
 
     public ShopInfoResponse ShopInfo { get; set; }
 
+    public PromotionOrderResponse? Promotion { get; set; }
+
     public class OrderDetailCustomerResponse
     {
         public long Id { get; set; }
@@ -87,5 +89,32 @@ public class DetailOrderCustomerResponse
         public double Latitude { get; set; }
 
         public double Longitude { get; set; }
+    }
+
+    public class PromotionOrderResponse
+    {
+        public int Id { get; set; }
+
+        public string Title { get; set; } = null!;
+
+        public string? BannerUrl { get; set; }
+
+        public string? Description { get; set; }
+
+        public PromotionTypes Type { get; set; }
+
+        public double? AmountRate { get; set; }
+
+        public double? MaximumApplyValue { get; set; }
+
+        public double? AmountValue { get; set; }
+
+        public double MinOrdervalue { get; set; }
+
+        public long StartDate { get; set; }
+
+        public long EndDate { get; set; }
+
+        public PromotionApplyTypes ApplyType { get; set; }
     }
 }
