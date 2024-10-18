@@ -28,7 +28,7 @@ public class OrderForShopByStatusResponse
 
     public int TotalPages { get; set; }
 
-    public CustomerInforInOrderForShop CustomerInfor { get; set; }
+    public CustomerInforInOrderForShop Customer { get; set; }
 
     public List<FoodInOrderForShop> Foods { get; set; } = new();
 

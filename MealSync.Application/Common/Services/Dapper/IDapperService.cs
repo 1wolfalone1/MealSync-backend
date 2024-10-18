@@ -28,4 +28,5 @@ public enum QueryName
     TestQuery,
     GetListCategoryWithFood,
     GetListOrderForShopByStatus,
+    GetShopOrderDetail,
 }
