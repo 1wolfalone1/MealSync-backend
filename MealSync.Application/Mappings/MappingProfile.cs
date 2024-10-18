@@ -177,6 +177,12 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.ShopLocation.Latitude));
 
         CreateMap<Order, OrderSummaryResponse>()
+            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(
+                dest => dest.IntendedReceiveDate,
+                opt => opt.MapFrom(src =>
+                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+            )
             .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
             .ForMember(dest => dest.ShopLogoUrl, opt => opt.MapFrom(src => src.Shop.LogoUrl));
 
