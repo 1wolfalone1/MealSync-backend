@@ -1,4 +1,5 @@
-﻿using MealSync.Domain.Enums;
+﻿using MealSync.Application.Common.Utils;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Foods.Models;
 
@@ -27,5 +28,28 @@ public class ShopOwnerFoodResponse
         public bool IsSoldOut { get; set; }
 
         public int Status { get; set; }
+
+        public int TotalOrderInNextTwoHours { get; set; }
+
+        public List<OperatingSlotInFood> OperatingSlots { get; set; } = new();
+
+        public class OperatingSlotInFood
+        {
+            public long Id { get; set; }
+
+            public string Title { get; set; }
+
+            public int StartTime { get; set; }
+
+            public int EndTime { get; set; }
+
+            public string TimeFrameFormat
+            {
+                get
+                {
+                    return TimeFrameUtils.GetTimeFrameString(StartTime, EndTime);
+                }
+            }
+        }
     }
 }
