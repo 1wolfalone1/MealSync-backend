@@ -2,6 +2,7 @@ using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Orders.Commands.CancelOrderCustomer;
 using MealSync.Application.UseCases.Orders.Commands.Create;
+using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRejectOrder;
 using MealSync.Application.UseCases.Orders.Commands.UpdatePaymentStatusIPN;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailCustomer;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailForShop;
@@ -61,13 +62,21 @@ public class OrderController : BaseApiController
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 
-    [HttpGet(Endpoints.GET_ORDER_DETAIL_FOR_SHOP_BY_STATUS)]
+    [HttpGet(Endpoints.GET_ORDER_DETAIL_FOR_SHOP)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> GetOrderDetailForShopByStatus(long id)
+    public async Task<IActionResult> GetOrderDetailForShop(long id)
     {
         return HandleResult(await Mediator.Send(new OrderDetailForShopQuery()
         {
             Id = id,
         }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.SHOP_REJECT_ORDER)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetOrderDetailForShopByStatus([FromBody] ShopRejectOrderCommand command, long id)
+    {
+        command.Id = id;
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }
