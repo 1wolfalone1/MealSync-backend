@@ -90,9 +90,9 @@ public class FoodController : BaseApiController
 
     [HttpGet(Endpoints.GET_FOOD)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> GetShopOwnerFood()
+    public async Task<IActionResult> GetShopOwnerFood([FromQuery] GetShopOwnerFoodQuery query)
     {
-        return HandleResult(await Mediator.Send(new GetShopOwnerFoodQuery()));
+        return HandleResult(await Mediator.Send(query));
     }
 
     [HttpGet(Endpoints.GET_SHOP_FOOD_DETAIL)]

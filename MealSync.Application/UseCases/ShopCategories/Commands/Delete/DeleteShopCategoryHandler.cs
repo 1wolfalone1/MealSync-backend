@@ -60,11 +60,11 @@ public class DeleteShopCategoryHandler : ICommandHandler<DeleteShopCategoryComma
     private void Validate(DeleteShopCategoryCommand request)
     {
         var shopCategory = _shopCategoryRepository.Get(sc => sc.ShopId == _currentPrincipalService.CurrentPrincipalId.Value && sc.Id == request.Id)
-            .Include(sc => sc.Foods).SingleOrDefault();
+            .Include(sc => sc.Foods.Where(f => f.Status != FoodStatus.Delete)).SingleOrDefault();
         if (shopCategory == default)
             throw new InvalidBusinessException(MessageCode.E_SHOP_CATEGORY_NOT_FOUND.GetDescription(), new object[] { request.Id }, HttpStatusCode.NotFound);
 
         if (shopCategory.Foods.Count > 0)
-            throw new InvalidBusinessException(MessageCode.E_SHOP_CATEGORY_HAVE_FOOD_LINKED.GetDescription(), new object[] { shopCategory.Foods.Count }, HttpStatusCode.NotFound);
+            throw new InvalidBusinessException(MessageCode.E_SHOP_CATEGORY_HAVE_FOOD_LINKED.GetDescription(), new object[] { shopCategory.Foods.Count });
     }
 }

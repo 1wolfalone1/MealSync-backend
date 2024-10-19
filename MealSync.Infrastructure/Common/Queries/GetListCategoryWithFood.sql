@@ -3,13 +3,12 @@
  Date: 15/10/2024
  
  @ShopId:=5 int
- @Offset int
- @PageSize int
+ @FilterMode int
  */
-
--- SET @ShopId:=5;
--- SET @PageSize:=12;
--- SET @OffSet:=0;
+-- SET @ShopId:=2;
+-- SET @CurrentHours:=2300;
+-- SET @StartLastTwoHour:=1000;
+-- SET @FilterMode:=0;
 WITH ShopCategoryTable AS (
     SELECT
         id,
@@ -27,8 +26,8 @@ WITH ShopCategoryTable AS (
 ),
 WithFoodCondition AS (
     SELECT
-        id,
-        shop_id,
+        f.id,
+        f.shop_id,
         platform_category_id,
         shop_category_id,
         name,
@@ -37,11 +36,53 @@ WithFoodCondition AS (
         image_url,
         total_order,
         status,
-        is_sold_out
+        is_sold_out,
+        os.id AS os_id,
+        os.title,
+        os.start_time,
+        os.end_time
     FROM
         food f
+        LEFT JOIN food_operating_slot fos ON f.id = fos.food_id
+        LEFT JOIN operating_slot os ON fos.operating_slot_id = os.id
     WHERE
-        f.status IN (1, 2) -- Active AND InActive
+        f.shop_id = @ShopId
+        AND (
+            @FilterMode = 0
+            AND f.status IN (1, 2)
+            OR @FilterMode = 1 -- IN time frame
+            AND(
+                os.start_time >= @CurrentHours
+                AND os.end_time <= @CurrentHours
+            )
+            OR @FilterMode = 2 -- OUT CURRENT time frame
+            AND(
+                os.start_time > @CurrentHours
+                OR os.end_time < @CurrentHours
+            )
+            OR @FilterMode = 3 -- Food selling
+            AND f.status = 1
+            AND f.is_sold_out = 0
+            OR @FilterMode = 4 -- Food Sold OUT
+            AND f.status = 1
+            AND f.is_sold_out = 1
+            OR @FilterMode = 5 -- Food Inactive
+            AND f.status = 2
+        )
+),
+WitNumberOrderIn2HoursAdvance AS (
+    SELECT
+        f.id,
+        o.id AS asdasdasd
+    FROM
+        WithFoodCondition f
+        INNER JOIN order_detail od ON f.id = od.food_id
+        INNER JOIN `order` o ON od.order_id = o.id
+    WHERE
+        o.start_time >= @StartLastTwoHour
+    GROUP BY
+        o.id,
+        f.id
 )
 SELECT
     sc.id AS Id,
@@ -58,9 +99,20 @@ SELECT
     f.image_url AS ImageUrl,
     f.total_order AS TotalOrder,
     f.status AS Status,
-    f.is_sold_out AS IsSoldOut
+    f.is_sold_out AS IsSoldOut,
+    (
+        SELECT
+            Count(*)
+        FROM
+            WitNumberOrderIn2HoursAdvance fn
+        WHERE
+            fn.id = f.id
+    ) AS TotalOrderInNext2Hours,
+    f.os_id AS OperatingSection,
+    f.os_id AS Id,
+    f.title AS Title,
+    f.start_time AS StartTime,
+    f.end_time AS EndTime
 FROM
     ShopCategoryTable AS sc
-    LEFT JOIN WithFoodCondition f ON sc.id = f.shop_category_id
--- LIMIT
---     @PageSize OFFSET @OffSet;
+    LEFT JOIN WithFoodCondition f ON sc.id = f.shop_category_id;
