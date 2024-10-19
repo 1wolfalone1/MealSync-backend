@@ -63,6 +63,6 @@ public class NotifierSerivce : INotifierSerivce
         }
 
         _logger.LogInformation("[PUSH NOTIFICATION]: {0}", JsonConvert.SerializeObject(notification));
-        await _notificationProvider.NotifyAsync(notification);
+        await _notificationProvider.NotifyAsync(notification).ConfigureAwait(false);
     }
 }

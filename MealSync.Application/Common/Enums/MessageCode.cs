@@ -253,6 +253,12 @@ public enum MessageCode
     [Description("I-Order-CancelSuccess")]
     I_ORDER_CANCEL_SUCCESS,
 
+    [Description("I-Order-RejectSuccess")]
+    I_ORDER_REJECT_SUCCESS,
+
+    [Description("E-Order-NotInCorrectStatus")]
+    E_ORDER_NOT_IN_CORRECT_STATUS,
+
     // Promotion
     [Description("E-Promotion-NotFound")]
     E_PROMOTION_NOT_FOUND,
