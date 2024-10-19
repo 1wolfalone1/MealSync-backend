@@ -30,7 +30,7 @@ public static class ApplicationServiceExtensions
         {
             opt.AddPolicy("CorsPolicy", poli =>
             {
-                poli.AllowAnyMethod().AllowAnyHeader().WithOrigins(config["ALLOW_ORIGIN"]);
+                poli.WithOrigins(config["ALLOW_ORIGIN"].Split(",")).AllowAnyMethod().AllowAnyHeader();
 
             });
         });
