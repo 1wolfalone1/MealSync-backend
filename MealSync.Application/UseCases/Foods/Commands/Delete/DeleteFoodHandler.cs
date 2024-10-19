@@ -41,6 +41,7 @@ public class DeleteFoodHandler : ICommandHandler<DeleteFoodCommand, Result>
             food.Status = FoodStatus.Delete;
             food.FoodOperatingSlots = null;
             food.FoodOptionGroups = null;
+            food.ShopCategoryId = null;
             _foodRepository.Update(food);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
             return Result.Success(new

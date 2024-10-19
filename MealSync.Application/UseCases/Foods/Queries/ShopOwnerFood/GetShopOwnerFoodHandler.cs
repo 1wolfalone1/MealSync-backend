@@ -3,6 +3,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Dapper;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Foods.Models;
 using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
@@ -27,19 +28,46 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
     public async Task<Result<Result>> Handle(GetShopOwnerFoodQuery request, CancellationToken cancellationToken)
     {
         Dictionary<long, ShopOwnerFoodResponse> listCategoryDic = new Dictionary<long, ShopOwnerFoodResponse>();
-        Func<ShopOwnerFoodResponse, ShopOwnerFoodResponse.FoodResponse, ShopOwnerFoodResponse> map = (parent, child) =>
+        Dictionary<long, ShopOwnerFoodResponse.FoodResponse> listOperatingDic = new Dictionary<long, ShopOwnerFoodResponse.FoodResponse>();
+        Func<ShopOwnerFoodResponse, ShopOwnerFoodResponse.FoodResponse, ShopOwnerFoodResponse.FoodResponse.OperatingSlotInFood, ShopOwnerFoodResponse> map = (parent, child1, child2) =>
         {
             if (!listCategoryDic.TryGetValue(parent.Id, out var category))
             {
-                if (child.Id != 0)
-                    parent.Foods.Add(child);
+                if (child1.Id != 0)
+                {
+                    if (child2.Id != 0)
+                    {
+                        child1.OperatingSlots.Add(child2);
+                        listOperatingDic.Add(child1.Id, child1);
+                    }
+
+                    parent.Foods.Add(child1);
+                }
+
                 listCategoryDic.Add(parent.Id, parent);
             }
             else
             {
-                if (child.Id != 0)
+                if (child1.Id != 0)
                 {
-                    category.Foods.Add(child);
+                    if (listOperatingDic.TryGetValue(child1.Id, out var food))
+                    {
+                        child1 = food;
+                        if (child2.Id != 0)
+                        {
+                            child1.OperatingSlots.Add(child2);
+                            listOperatingDic.Remove(child1.Id);
+                            listOperatingDic.Add(child1.Id, child1);
+                            var foodInCategory = category.Foods.Where(f => f.Id == child1.Id).Single();
+                            category.Foods.Remove(foodInCategory);
+                            category.Foods.Add(child1);
+                        }
+                    }
+                    else
+                    {
+                        category.Foods.Add(child1);
+                    }
+
                     listCategoryDic.Remove(category.Id);
                     listCategoryDic.Add(category.Id, category);
                 }
@@ -48,14 +76,25 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
             return parent;
         };
 
-        await _dapperService.SelectAsync<ShopOwnerFoodResponse, ShopOwnerFoodResponse.FoodResponse, ShopOwnerFoodResponse>(
+        DateTimeOffset currentDateTime = DateTimeOffset.Now;
+        await _dapperService.SelectAsync<ShopOwnerFoodResponse, ShopOwnerFoodResponse.FoodResponse, ShopOwnerFoodResponse.FoodResponse.OperatingSlotInFood, ShopOwnerFoodResponse>(
             QueryName.GetListCategoryWithFood,
             map,
             new
             {
-                ShopId = _currentPrincipalService.CurrentPrincipalId
+                ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
+                CurrentHours = int.Parse(currentDateTime.ToString("HHmm")),
+                StartLastTwoHour = TimeFrameUtils.GetTimeHoursInRound(),
+                FilterMode = request.FilterMode,
             },
-            "FoodId");
-        return Result.Success(listCategoryDic.Values.ToList());
+            "FoodId, OperatingSection");
+
+        if (request.FilterMode == 0)
+            return Result.Success(listCategoryDic.Values.ToList());
+        else
+        {
+            var list = listCategoryDic.Values.ToList().Where(c => c.Foods.Count > 0);
+            return Result.Success(list);
+        }
     }
 }
