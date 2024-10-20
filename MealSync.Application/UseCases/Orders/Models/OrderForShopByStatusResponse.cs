@@ -1,4 +1,6 @@
-﻿namespace MealSync.Application.UseCases.Orders.Models;
+﻿using MealSync.Application.Common.Utils;
+
+namespace MealSync.Application.UseCases.Orders.Models;
 
 public class OrderForShopByStatusResponse
 {
@@ -24,7 +26,21 @@ public class OrderForShopByStatusResponse
 
     public int StartTime { get; set; }
 
-    public int EndTime { get; set; }
+    private int _endTime; // Backing field
+
+    public int EndTime
+    {
+        get
+        {
+            return TimeFrameUtils.ConvertEndTime(_endTime); // Use the backing field
+        }
+
+        set
+        {
+            _endTime = value; // Set the backing field
+        }
+    }
+
 
     public int TotalPages { get; set; }
 

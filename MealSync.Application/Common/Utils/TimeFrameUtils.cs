@@ -16,12 +16,14 @@ public class TimeFrameUtils
         return string.Format("{0}:{1}", hour.ToString().PadLeft(2,'0'), minute.ToString().PadRight(2, '0'));
     }
 
-    public static int GetTimeHoursInRound(){
-        DateTimeOffset currentDateTime = DateTimeOffset.Now;
+    public static int GetTimeHoursInRound()
+    {
+        DateTimeOffset utcTime = DateTimeOffset.UtcNow;
+        DateTimeOffset timeInUtcPlus7 = utcTime.ToOffset(TimeSpan.FromHours(7));
 
         // Get the current hour and minute
-        int hour = currentDateTime.Hour;
-        int minute = currentDateTime.Minute;
+        int hour = timeInUtcPlus7.Hour;
+        int minute = timeInUtcPlus7.Minute;
 
         // Logic to round up to the next section (either xx:30 or next hour)
         if (minute > 0 && minute <= 30)
@@ -37,5 +39,21 @@ public class TimeFrameUtils
         // Return the result as a number in hhmm format
         int roundedTime = hour * 100 + minute;
         return roundedTime;
+    }
+
+    public static DateTimeOffset GetCurrentTime()
+    {
+        DateTimeOffset utcTime = DateTimeOffset.UtcNow;
+        return utcTime.ToOffset(TimeSpan.FromHours(7));
+    }
+
+    public static int ConvertEndTime(int endTime)
+    {
+        if (endTime == 2400)
+        {
+            return 0;
+        }
+
+        return endTime;
     }
 }

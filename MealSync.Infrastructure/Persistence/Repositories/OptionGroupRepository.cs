@@ -39,10 +39,10 @@ public class OptionGroupRepository : BaseRepository<OptionGroup>, IOptionGroupRe
         return (totalCount, optionGroups);
     }
 
-    public bool CheckExistTitleOptionGroup(string title, long? id = null)
+    public bool CheckExistTitleOptionGroup(string title, long shopId, long? id = null)
     {
         return id == null
-            ? DbSet.Any(og => og.Title == title)
-            : DbSet.Any(og => og.Title == title && og.Id != id);
+            ? DbSet.Any(og => og.Title == title && og.ShopId == shopId)
+            : DbSet.Any(og => og.Title == title && og.ShopId == shopId && og.Id != id);
     }
 }

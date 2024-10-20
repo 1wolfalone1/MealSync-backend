@@ -51,7 +51,7 @@ public class GetShopOrderByStatusHandler : IQueryHandler<GetShopOrderByStatusQue
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
                 PhoneNumber = request.PhoneNumber,
-                OrderId = request.Id != null ? request.Id.Replace(IdPatternConstant.PREFIX_ID, "") : null,
+                OrderId = request.Id != null ? request.Id.ToUpper().Replace(IdPatternConstant.PREFIX_ID, "") : null,
                 Offset = (request.PageIndex - 1) * request.PageSize,
                 PageSize = request.PageSize,
             },
