@@ -16,7 +16,8 @@ public class TimeFrameUtils
         return string.Format("{0}:{1}", hour.ToString().PadLeft(2,'0'), minute.ToString().PadRight(2, '0'));
     }
 
-    public static int GetTimeHoursInRound(){
+    public static int GetTimeHoursInRound()
+    {
         DateTimeOffset utcTime = DateTimeOffset.UtcNow;
         DateTimeOffset timeInUtcPlus7 = utcTime.ToOffset(TimeSpan.FromHours(7));
 

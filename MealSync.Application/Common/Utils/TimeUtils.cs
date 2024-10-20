@@ -10,7 +10,7 @@ public static class TimeUtils
         int minutes = time % 100; // Extract minutes (last two digits)
 
         // Check if the time is in a valid range (hours: 00-23, minutes: 00-59)
-        return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+        return hours >= 0 && hours <= 24 && minutes >= 0 && minutes <= 59;
     }
 
     public static bool IsValidOperatingSlot(int time)
@@ -19,11 +19,16 @@ public static class TimeUtils
         int minutes = time % 100; // Extract minutes (last two digits)
 
         // Check if the time is in a valid range (hours: 00-23, minutes: 00 or 30)
-        return hours >= 0 && hours <= 23 && (minutes == 0 || minutes == FrameConstant.TIME_FRAME_IN_MINUTES);
+        return hours >= 0 && hours <= 24 && (minutes == 0 || minutes == FrameConstant.TIME_FRAME_IN_MINUTES);
     }
 
     public static int ConvertToMinutes(int time)
     {
+        if (time == 2400)
+        {
+            time = 0;
+        }
+
         int hours = time / 100; // Extract hours
         int minutes = time % 100; // Extract minutes
 
