@@ -54,10 +54,12 @@ WITH OrdersOfShop AS (
         )
         AND o.status IN @Status
         AND (
-            @OrderId IS NULL
-            OR o.id LIKE CONCAT('%',CONCAT(@OrderId, '%'))
-            OR @PhoneNumber IS NULL
-            OR o.phone_number LIKE CONCAT('%', CONCAT(@PhoneNumber, '%'))
+            @OrderId IS NOT NULL
+            AND o.id LIKE CONCAT('%', CONCAT(@OrderId, '%'))
+            OR @PhoneNumber IS NOT NULL
+            AND o.phone_number LIKE CONCAT('%', CONCAT(@PhoneNumber, '%'))
+            OR @OrderId IS NULL
+            AND @PhoneNumber IS NULL
         )
         AND (
             o.start_time >= @StartTime

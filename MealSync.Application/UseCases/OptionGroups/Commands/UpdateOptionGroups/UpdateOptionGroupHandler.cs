@@ -88,7 +88,7 @@ public class UpdateOptionGroupHandler : ICommandHandler<UpdateOptionGroupCommand
         if (optionGroup == default)
             throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_NOT_FOUND.GetDescription(), new object[]{request.Id}, HttpStatusCode.NotFound);
 
-        if (_optionGroupRepository.CheckExistTitleOptionGroup(request.Title, request.Id))
+        if (_optionGroupRepository.CheckExistTitleOptionGroup(request.Title, _currentPrincipalService.CurrentPrincipalId.Value, request.Id))
             throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_DOUBLE_TITLE.GetDescription(), new object[]{request.Title}, HttpStatusCode.Conflict);
 
         foreach (var option in request.Options)
