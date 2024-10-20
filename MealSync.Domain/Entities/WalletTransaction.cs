@@ -11,7 +11,7 @@ public class WalletTransaction : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long WalletFromId { get; set; }
+    public long? WalletFromId { get; set; }
 
     public long? WalletToId { get; set; }
 

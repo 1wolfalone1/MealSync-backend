@@ -69,6 +69,9 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         // Validate business rules for the shop.
         await ValidateShopRequest(request, shop, buildingOrder).ConfigureAwait(false);
 
+        // Validate order time
+        ValidateOrderTime(request, now);
+
         var shopOperatingSlot = await _operatingSlotRepository.GetAvailableForTimeRangeOrder(
                 request.ShopId, request.OrderTime.StartTime, request.OrderTime.EndTime)
             .ConfigureAwait(false);
@@ -80,7 +83,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         var validateFoodResult = await ValidateFoodRequest(request, shopOperatingSlot).ConfigureAwait(false);
 
         // Validate business rules for the voucher.
-        var promotion = await ValidatePromotionRequest(request, validateFoodResult.TotalFoodPrice).ConfigureAwait(false);
+        var promotion = await ValidatePromotionRequest(request, validateFoodResult.TotalFoodPrice, now).ConfigureAwait(false);
 
         var commissionConfig = _commissionConfigRepository.GetCommissionConfig();
 
@@ -117,7 +120,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         // Create new order
         Order order = new Order
         {
-            PromotionId = request.VoucherId.HasValue ? request.VoucherId.Value : null,
+            PromotionId = request.VoucherId.HasValue && request.VoucherId != 0 ? request.VoucherId.Value : null,
             ShopId = request.ShopId,
             CustomerId = customerId.Value,
             DeliveryPackageId = null,
@@ -148,33 +151,22 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             Payments = payments,
         };
 
-        if (shop.IsAutoOrderConfirmation)
+        if (shop.IsAutoOrderConfirmation && !request.OrderTime.IsOrderNextDay)
         {
             var startFrameMinutes = TimeUtils.ConvertToMinutes(request.OrderTime.StartTime); // Total minutes for start time
             var minOrderMinutes = shop.MinOrderHoursInAdvance * 60; // Min constraint in minutes
             var maxOrderMinutes = shop.MaxOrderHoursInAdvance * 60; // Max constraint in minutes
-
             var currentTimeMinutes = (now.Hour * 60) + now.Minute; // Convert current time to total minutes
+            var minAllowedTime = startFrameMinutes - maxOrderMinutes < 0 ? 0 : startFrameMinutes - maxOrderMinutes;
+            var maxAllowedTime = startFrameMinutes - minOrderMinutes;
 
-            // Handle time comparison, accounting for cases crossing midnight
-            var minAllowedTime = (startFrameMinutes - maxOrderMinutes + 1440) % 1440;
-            var maxAllowedTime = (startFrameMinutes - minOrderMinutes + 1440) % 1440;
-
-            if (minAllowedTime <= maxAllowedTime)
+            if (maxAllowedTime >= 0 && currentTimeMinutes >= minAllowedTime && currentTimeMinutes <= maxAllowedTime)
             {
-                // Normal case: Range within the same day
-                if (currentTimeMinutes >= minAllowedTime && currentTimeMinutes <= maxAllowedTime)
-                {
-                    order.Status = OrderStatus.Confirmed;
-                }
+                order.Status = OrderStatus.Confirmed;
             }
             else
             {
-                // Cross-midnight case: Two segments (e.g., 23:00 - 01:00)
-                if (currentTimeMinutes >= minAllowedTime || currentTimeMinutes <= maxAllowedTime)
-                {
-                    order.Status = OrderStatus.Confirmed;
-                }
+                order.Status = OrderStatus.Pending;
             }
         }
 
@@ -226,10 +218,24 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         }
     }
 
-    private async Task<Promotion?> ValidatePromotionRequest(CreateOrderCommand request, double totalFoodPrice)
+    private static void ValidateOrderTime(CreateOrderCommand request, DateTimeOffset now)
+    {
+        var startTimeInMinutes = TimeUtils.ConvertToMinutes(request.OrderTime.StartTime);
+        var currentTimeMinutes = (now.Hour * 60) + now.Minute;
+        if (!request.OrderTime.IsOrderNextDay && startTimeInMinutes < currentTimeMinutes)
+        {
+            throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERY_START_TIME_EXCEEDED.GetDescription());
+        }
+        else
+        {
+            // Do nothing
+        }
+    }
+
+    private async Task<Promotion?> ValidatePromotionRequest(CreateOrderCommand request, double totalFoodPrice, DateTimeOffset now)
     {
         // Check if a voucher is provided in the request
-        if (request.VoucherId != default)
+        if (request.VoucherId != default && request.VoucherId != 0)
         {
             // Retrieve the promotion by ID and ShopId
             var promotion = await _promotionRepository.GetByIdAndShopId(request.VoucherId.Value, request.ShopId).ConfigureAwait(false);
@@ -253,8 +259,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 }
                 else
                 {
-                    var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
-
                     if (promotion.NumberOfUsed == promotion.UsageLimit)
                     {
                         // Throw an exception if the promotion usage limit has been reached

@@ -25,6 +25,20 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
     private readonly ILogger<CancelOrderCustomerHandler> _logger;
     private const int TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS = 2;
 
+    public CancelOrderCustomerHandler(
+        IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService,
+        IVnPayPaymentService paymentService, IPaymentRepository paymentRepository, IUnitOfWork unitOfWork,
+        ISystemResourceRepository systemResourceRepository, ILogger<CancelOrderCustomerHandler> logger)
+    {
+        _orderRepository = orderRepository;
+        _currentPrincipalService = currentPrincipalService;
+        _paymentService = paymentService;
+        _paymentRepository = paymentRepository;
+        _unitOfWork = unitOfWork;
+        _systemResourceRepository = systemResourceRepository;
+        _logger = logger;
+    }
+
     public async Task<Result<Result>> Handle(CancelOrderCustomerCommand request, CancellationToken cancellationToken)
     {
         var customerId = _currentPrincipalService.CurrentPrincipalId!.Value;
@@ -51,19 +65,44 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                 else if (order.Status == OrderStatus.Confirmed)
                 {
                     var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
-                    var currentTimeHHmm = (now.Hour * 100) + now.Minute; // Convert current time to HHmm format
-                    var deadlineHHmm = TimeUtils.ConvertToMinutes(order.StartTime) - (TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS * 60);
+                    var currentTimeInMinutes = (now.Hour * 60) + now.Minute;
+                    var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
+                    var deadlineInMinutes = startTimeInMinutes - (TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS * 60);
 
-                    // Handle crossing midnight by adjusting the deadline within [0, 1440) minutes range
-                    deadlineHHmm = (deadlineHHmm + 1440) % 1440;
-
-                    if (currentTimeHHmm <= TimeUtils.ConvertFromMinutes(deadlineHHmm))
+                    if (order.OrderDate.Day == order.IntendedReceiveDate.Day || now.Day == order.IntendedReceiveDate.Day)
                     {
-                        return await CancelOrderAsync(order, payment).ConfigureAwait(false);
+                        if (deadlineInMinutes < 0)
+                        {
+                            deadlineInMinutes = 0;
+                        }
+
+                        if (currentTimeInMinutes < deadlineInMinutes)
+                        {
+                            return await CancelOrderAsync(order, payment).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
+                        }
                     }
                     else
                     {
-                        throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
+                        if (deadlineInMinutes < 0)
+                        {
+                            deadlineInMinutes = 1440 + deadlineInMinutes;
+                            if (currentTimeInMinutes < deadlineInMinutes)
+                            {
+                                return await CancelOrderAsync(order, payment).ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
+                            }
+                        }
+                        else
+                        {
+                            throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
+                        }
                     }
                 }
                 else
@@ -85,15 +124,10 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             // Refund + update status order to cancel
             isRefund = true;
         }
-        else if (payment.PaymentMethods == PaymentMethods.COD && payment.Status == PaymentStatus.Pending)
+        else
         {
             // Update status order to cancel
             isRefund = false;
-        }
-        else
-        {
-            // Throw exception not found payment
-            throw new InvalidBusinessException(MessageCode.E_PAYMENT_NOT_FOUND.GetDescription());
         }
 
         try
