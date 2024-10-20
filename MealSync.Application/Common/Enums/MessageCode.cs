@@ -226,6 +226,9 @@ public enum MessageCode
     [Description("E-Order-FoodNotSellInOrderTime")]
     E_ORDER_FOOD_NOT_SELL_IN_ORDER_TIME,
 
+    [Description("E-Order-DeliveryStartTimeExceeded")]
+    E_ORDER_DELIVERY_START_TIME_EXCEEDED,
+
     [Description("E-Order-IncorrectDiscountAmount")]
     E_ORDER_INCORRECT_DISCOUNT_AMOUNT,
 

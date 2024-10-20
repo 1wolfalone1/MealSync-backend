@@ -2,6 +2,7 @@
 
 public enum WalletTypes
 {
-    System = 1,
-    Shop = 2,
+    SystemTotal = 1,
+    SystemCommission = 2,
+    Shop = 3,
 }
