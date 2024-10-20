@@ -11,12 +11,15 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository
     {
     }
 
-    public Task<Payment> GetOldestByOrderId(long orderId)
+    public Task<Payment> GetOrderPaymentVnPayByOrderId(long orderId)
     {
-        return DbSet.OrderBy(p => p.CreatedDate).FirstAsync(p =>
-            p.OrderId == orderId
-            && p.Type == PaymentTypes.Payment
-            && p.PaymentMethods == PaymentMethods.VnPay);
+        return DbSet.Include(p => p.Order)
+            .ThenInclude(o => o.Shop)
+            .OrderBy(p => p.CreatedDate)
+            .FirstAsync(p =>
+                p.OrderId == orderId
+                && p.Type == PaymentTypes.Payment
+                && p.PaymentMethods == PaymentMethods.VnPay);
     }
 
     public Task<Payment?> GetPaymentVnPayByOrderId(long orderId)
