@@ -94,10 +94,6 @@ public class UpdateOptionValidator : AbstractValidator<UpdateOptionRequest>
 {
     public UpdateOptionValidator()
     {
-        RuleFor(o => o.Id)
-            .NotEmpty()
-            .WithMessage("Vui lòng cung cấp id của lựa chọn");
-
         RuleFor(o => o.IsDefault)
             .NotNull()
             .WithMessage("Lựa chọn có phải mặc định không.");

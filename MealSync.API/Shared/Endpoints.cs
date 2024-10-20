@@ -40,6 +40,7 @@ public static class Endpoints
     public const string UPDATE_APP_SHOP_CATEGORY = "shop-owner/category/{id}";
     public const string DELETE_APP_SHOP_CATEGORY = "shop-owner/category/{id}";
     public const string GET_APP_SHOP_CATEGORY_DETAIL = "shop-owner/category/{id}";
+    public const string GET_WEB_SHOP_CATEGORY_DETAIL = "web/shop-owner/category";
 
     // Shop
     public const string GET_TOP_SHOP = "shop/top";
