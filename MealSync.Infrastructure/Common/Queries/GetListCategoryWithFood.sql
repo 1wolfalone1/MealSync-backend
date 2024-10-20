@@ -6,9 +6,9 @@
  @FilterMode int
  */
 -- SET @ShopId:=2;
--- SET @CurrentHours:=2300;
+-- SET @CurrentHours:=2128;
 -- SET @StartLastTwoHour:=1000;
--- SET @FilterMode:=0;
+-- SET @FilterMode:=1;
 WITH ShopCategoryTable AS (
     SELECT
         id,
@@ -26,21 +26,7 @@ WITH ShopCategoryTable AS (
 ),
 WithFoodCondition AS (
     SELECT
-        f.id,
-        f.shop_id,
-        platform_category_id,
-        shop_category_id,
-        name,
-        description,
-        price,
-        image_url,
-        total_order,
-        status,
-        is_sold_out,
-        os.id AS os_id,
-        os.title,
-        os.start_time,
-        os.end_time
+        f.id
     FROM
         food f
         LEFT JOIN food_operating_slot fos ON f.id = fos.food_id
@@ -52,8 +38,8 @@ WithFoodCondition AS (
             AND f.status IN (1, 2)
             OR @FilterMode = 1 -- IN time frame
             AND(
-                os.start_time >= @CurrentHours
-                AND os.end_time <= @CurrentHours
+                os.start_time <= @CurrentHours
+                AND os.end_time >= @CurrentHours
             )
             OR @FilterMode = 2 -- OUT CURRENT time frame
             AND(
@@ -69,6 +55,31 @@ WithFoodCondition AS (
             OR @FilterMode = 5 -- Food Inactive
             AND f.status = 2
         )
+    GROUP BY
+        f.id
+),
+WithFoodAndOperatingSlot AS (
+    SELECT
+        f.id,
+        fo.shop_id,
+        fo.platform_category_id,
+        fo.shop_category_id,
+        fo.name,
+        fo.description,
+        fo.price,
+        fo.image_url,
+        fo.total_order,
+        fo.status,
+        fo.is_sold_out,
+        os.id AS os_id,
+        os.title,
+        os.start_time,
+        os.end_time
+    FROM
+        WithFoodCondition f
+        INNER JOIN food fo ON f.id = fo.id
+        LEFT JOIN food_operating_slot fos ON f.id = fos.food_id
+        LEFT JOIN operating_slot os ON fos.operating_slot_id = os.id
 ),
 WitNumberOrderIn2HoursAdvance AS (
     SELECT
@@ -115,4 +126,6 @@ SELECT
     f.end_time AS EndTime
 FROM
     ShopCategoryTable AS sc
-    LEFT JOIN WithFoodCondition f ON sc.id = f.shop_category_id;
+    LEFT JOIN WithFoodAndOperatingSlot f ON sc.id = f.shop_category_id
+ORDER BY
+    sc.display_order;

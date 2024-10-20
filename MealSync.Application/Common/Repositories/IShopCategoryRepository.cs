@@ -12,5 +12,5 @@ public interface IShopCategoryRepository : IBaseRepository<ShopCategory>
 
     List<ShopCategory> GetAllByShopId(long shopId);
 
-    bool CheckExistName(string name, long? id = 0);
+    bool CheckExistName(string name, long shopId, long? id = 0);
 }

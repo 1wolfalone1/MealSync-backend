@@ -76,14 +76,13 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
             return parent;
         };
 
-        DateTimeOffset currentDateTime = DateTimeOffset.Now;
         await _dapperService.SelectAsync<ShopOwnerFoodResponse, ShopOwnerFoodResponse.FoodResponse, ShopOwnerFoodResponse.FoodResponse.OperatingSlotInFood, ShopOwnerFoodResponse>(
             QueryName.GetListCategoryWithFood,
             map,
             new
             {
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
-                CurrentHours = int.Parse(currentDateTime.ToString("HHmm")),
+                CurrentHours = int.Parse(TimeFrameUtils.GetCurrentTime().ToString("HHmm")),
                 StartLastTwoHour = TimeFrameUtils.GetTimeHoursInRound(),
                 FilterMode = request.FilterMode,
             },

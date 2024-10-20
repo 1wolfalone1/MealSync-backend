@@ -76,7 +76,7 @@ public class CreateShopCategoryHandler : ICommandHandler<CreateShopCategoryComma
 
     private void Validate(CreateShopCategoryCommand request)
     {
-        if (_shopCategoryRepository.CheckExistName(request.Name))
+        if (_shopCategoryRepository.CheckExistName(request.Name, _currentPrincipalService.CurrentPrincipalId.Value))
             throw new InvalidBusinessException(MessageCode.E_SHOP_CATEGORY_DOUBLE_NAME.GetDescription(), new object[]{request.Name}, HttpStatusCode.Conflict);
     }
 }

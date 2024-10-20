@@ -59,7 +59,7 @@ public class UpdateShopCategoryHandler : ICommandHandler<UpdateShopCategoryComma
         if (_shopCategoryRepository.GetByIdAndShopId(request.Id, _currentPrincipalService.CurrentPrincipalId.Value) == default)
             throw new InvalidBusinessException(MessageCode.E_SHOP_CATEGORY_NOT_FOUND.GetDescription(), new object[] { request.Id }, HttpStatusCode.NotFound);
 
-        if (_shopCategoryRepository.CheckExistName(request.Name, request.Id))
+        if (_shopCategoryRepository.CheckExistName(request.Name, _currentPrincipalService.CurrentPrincipalId.Value, request.Id))
             throw new InvalidBusinessException(MessageCode.E_SHOP_CATEGORY_DOUBLE_NAME.GetDescription(), new object[]{ request.Name }, HttpStatusCode.Conflict);
     }
 }
