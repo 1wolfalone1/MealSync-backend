@@ -1,3 +1,4 @@
+using MealSync.Application.Common.Utils;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Foods.Models;
@@ -56,7 +57,20 @@ public class FoodDetailResponse
 
         public int StartTime { get; set; }
 
-        public int EndTime { get; set; }
+        private int _endTime; // Backing field
+
+        public int EndTime
+        {
+            get
+            {
+                return TimeFrameUtils.ConvertEndTime(_endTime); // Use the backing field
+            }
+
+            set
+            {
+                _endTime = value; // Set the backing field
+            }
+        }
     }
 
     public class FoodOptionGroupResponse

@@ -151,4 +151,45 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
     {
         return DbSet.FirstOrDefaultAsync(f => f.Id == id && f.ShopId == shopId);
     }
+
+    public async Task<(int TotalCount, IEnumerable<Food> Foods)> GetAllShopFoodForWeb(long shopId, int pageIndex, int pageSize, int statusMode, long? operatingSlotId, string? name)
+    {
+        var query = DbSet.Where(f => f.ShopId == shopId && f.Status != FoodStatus.Delete)
+            .Include(f => f.ShopCategory)
+            .Include(f => f.FoodOperatingSlots)
+            .ThenInclude(fog => fog.OperatingSlot)
+            .AsQueryable();
+
+        if (statusMode == 1)
+        {
+            query = query.Where(f => f.Status == FoodStatus.Active && !f.IsSoldOut);
+        }
+        else if (statusMode == 2)
+        {
+            query = query.Where(f => f.Status == FoodStatus.Active && f.IsSoldOut);
+        }
+        else if (statusMode == 3)
+        {
+            query = query.Where(f => f.Status == FoodStatus.UnActive);
+        }
+
+        if (operatingSlotId != null)
+        {
+            query = query.Where(f => f.FoodOperatingSlots.Select(fog => fog.OperatingSlot).Any(op => op.Id == operatingSlotId));
+        }
+
+        if (name != null)
+        {
+            query = query.Where(f => f.Name.Contains(name));
+        }
+
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+        var foods = await query.OrderByDescending(f => f.UpdatedDate)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        return (totalCount, foods);
+    }
 }
