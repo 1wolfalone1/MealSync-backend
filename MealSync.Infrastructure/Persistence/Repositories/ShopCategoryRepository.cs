@@ -36,4 +36,23 @@ public class ShopCategoryRepository : BaseRepository<ShopCategory>, IShopCategor
             ? DbSet.Any(sc => sc.Name == name && sc.ShopId == shopId)
             : DbSet.Any(sc => sc.Name == name && sc.ShopId == shopId && sc.Id != id);
     }
+
+    public async Task<(int TotalCount, IEnumerable<ShopCategory> ShopCategories)> GetAllShopCategoriesAsync(int pageIndex, int pageSize, string? name)
+    {
+        var query = DbSet.Include(sc => sc.Foods)
+            .OrderByDescending(sc => sc.DisplayOrder).AsQueryable();
+        if (name != null)
+        {
+            query = query.Where(sc => sc.Name.Contains(name));
+        }
+
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+        var shopCategories = await query.OrderByDescending(f => f.UpdatedDate)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        return (totalCount, shopCategories);
+    }
 }

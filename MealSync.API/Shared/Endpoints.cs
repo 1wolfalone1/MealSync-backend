@@ -20,6 +20,9 @@ public static class Endpoints
     public const string UPDATE_SHOP_ACTIVE_INACTIVE = "shop-owner/shop-owner/active-inactive";
     public const string GET_SHOP_FOOD_DETAIL = "shop-owner/food/{id}/detail";
 
+    // Shop Owner For Web
+    public const string GET_FOOD_FOR_WEB = "web/shop-owner/food";
+
     // Option Group
     public const string GET_ALL_SHOP_OPTION_GROUP = "shop-owner/option-group";
     public const string CREATE_OPTION_GROUP = "shop-owner/option-group/create";
@@ -40,6 +43,7 @@ public static class Endpoints
     public const string UPDATE_APP_SHOP_CATEGORY = "shop-owner/category/{id}";
     public const string DELETE_APP_SHOP_CATEGORY = "shop-owner/category/{id}";
     public const string GET_APP_SHOP_CATEGORY_DETAIL = "shop-owner/category/{id}";
+    public const string GET_WEB_SHOP_CATEGORY_DETAIL = "web/shop-owner/category";
 
     // Shop
     public const string GET_TOP_SHOP = "shop/top";
