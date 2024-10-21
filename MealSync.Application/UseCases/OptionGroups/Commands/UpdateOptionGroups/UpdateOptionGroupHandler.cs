@@ -43,6 +43,49 @@ public class UpdateOptionGroupHandler : ICommandHandler<UpdateOptionGroupCommand
         try
         {
             var optionGroup = _optionGroupRepository.GetByIdIncludeOption(request.Id);
+            var listOptionIds = request.Options.Select(o => o.Id).ToList();
+            var listOptionOrigin = optionGroup.Options.Select(o => o.Id).ToList();
+            // List for update (IDs that are the same in both lists)
+            var listUpdateIds = listOptionIds.Intersect(listOptionOrigin).ToList();
+
+            // List for delete (IDs in original list but missing from new list)
+            var listDeleteIds = listOptionOrigin.Except(listOptionIds).ToList();
+
+            foreach (var option in optionGroup.Options)
+            {
+                // Update
+                if (listUpdateIds.Contains(option.Id))
+                {
+                    var optionUpdate = request.Options.Single(o => o.Id == option.Id);
+                    option.IsDefault = request.IsRequire ? optionUpdate.IsDefault : false;
+                    option.Title = optionUpdate.Title;
+                    option.Status = optionUpdate.Status;
+                    option.IsCalculatePrice = optionUpdate.IsCalculatePrice;
+                    option.Price = optionUpdate.Price;
+                    option.ImageUrl = optionUpdate.ImageUrl;
+                }
+
+                // Delete
+                if (listDeleteIds.Contains(option.Id))
+                {
+                    option.Status = OptionStatus.Delete;
+                }
+            }
+
+            // Add
+            foreach (var optionAdd in request.Options.Where(o => o.Id == 0).ToList())
+            {
+                optionGroup.Options.Add(new Option()
+                {
+                    IsDefault = optionAdd.IsDefault,
+                    Title = optionAdd.Title,
+                    ImageUrl = optionAdd.ImageUrl,
+                    IsCalculatePrice = optionAdd.IsCalculatePrice,
+                    Price = optionAdd.Price,
+                    Status = optionAdd.Status,
+                });
+            }
+
             optionGroup.Title = request.Title;
             optionGroup.IsRequire = request.IsRequire;
             optionGroup.Type = request.Type;
@@ -50,25 +93,11 @@ public class UpdateOptionGroupHandler : ICommandHandler<UpdateOptionGroupCommand
             optionGroup.MinChoices = request.MinChoices;
             optionGroup.MaxChoices = request.MaxChoices;
 
-            var options = new List<Option>();
-            foreach (var option in request.Options)
-            {
-                options.Add(new Option()
-                {
-                    Id = option.Id,
-                    IsDefault = request.IsRequire ? option.IsDefault : false,
-                    Title = option.Title,
-                    IsCalculatePrice = option.IsCalculatePrice,
-                    Price = option.Price,
-                    ImageUrl = option.ImageUrl,
-                    Status = option.Status,
-                });
-            }
-
-            optionGroup.Options = options;
             _optionGroupRepository.Update(optionGroup);
-            var response = _mapper.Map<OptionGroupResponse>(optionGroup);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+            var optionGroupRe = _optionGroupRepository.GetByIdIncludeOption(request.Id);
+            optionGroup.Options = optionGroupRe.Options.Where(o => o.Status != OptionStatus.Delete).ToList();
+            var response = _mapper.Map<OptionGroupResponse>(optionGroupRe);
             return Result.Success(response);
         }
         catch (Exception e)
@@ -91,16 +120,13 @@ public class UpdateOptionGroupHandler : ICommandHandler<UpdateOptionGroupCommand
         if (_optionGroupRepository.CheckExistTitleOptionGroup(request.Title, _currentPrincipalService.CurrentPrincipalId.Value, request.Id))
             throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_DOUBLE_TITLE.GetDescription(), new object[]{request.Title}, HttpStatusCode.Conflict);
 
-        foreach (var option in request.Options)
+        foreach (var option in request.Options.Where(o => o.Id != 0))
         {
             if (_optionRepository.Get(o => o.Id == option.Id
                                            && o.OptionGroupId == request.Id
                                            && o.Status != OptionStatus.Delete).SingleOrDefault() == default)
                 throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_NOT_FOUND.GetDescription(), new object[]{request.Id}, HttpStatusCode.NotFound);
         }
-
-        if (optionGroup.Options.Count != request.Options.Count)
-            throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_UPDATE_NOT_ENOUGH_OPTION.GetDescription());
 
         // Validate request
         if (request.Type == OptionGroupTypes.Radio && request.IsRequire)
