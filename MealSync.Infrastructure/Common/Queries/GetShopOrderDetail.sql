@@ -65,10 +65,13 @@ SELECT
     o.total_price AS TotalPrice,
     o.order_date AS OrderDate,
     o.receive_at AS ReceiveAt,
+    o.note AS Note,
     o.completed_at AS CompletedAt,
     o.intended_receive_date AS IntendedReceiveDate,
     o.start_time AS StartTime,
     o.end_time AS EndTime,
+    d.id AS DormitoryId,
+    d.name AS DormitoryName,
     -- Customer
     a.id AS CustomerSection,
     a.id AS Id,
@@ -110,6 +113,8 @@ SELECT
     od.description AS OrderDescription
 FROM
     OrderInfor o
+    INNER JOIN building b ON o.building_id = b.id
+    INNER JOIN dormitory d ON b.dormitory_id = d.id
     INNER JOIN OrderDetailWithFood od ON o.id = od.order_id
     INNER JOIN location l ON o.customer_location_id = l.id
     LEFT JOIN promotion p ON o.promotion_id = p.id
