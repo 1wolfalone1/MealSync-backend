@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
@@ -9,32 +10,34 @@ using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
 
-namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRejectOrder;
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopConfirmOrder;
 
-public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Result>
+public class ShopConfirmOrderHandler : ICommandHandler<ShopConfirmOrderCommand, Result>
 {
-    private readonly INotifierSerivce _notifierSerivce;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IOrderRepository _orderRepository;
-    private readonly ILogger<ShopRejectOrderHandler> _logger;
+    private readonly ILogger<ShopConfirmOrderHandler> _logger;
+    private readonly IMapper _mapper;
     private readonly ICurrentPrincipalService _currentPrincipalService;
-    private readonly INotificationFactory _notificationFactory;
     private readonly IShopRepository _shopRepository;
+    private readonly INotificationFactory _notificationFactory;
+    private readonly INotifierSerivce _notifierSerivce;
     private readonly ISystemResourceRepository _systemResourceRepository;
 
-    public ShopRejectOrderHandler(INotifierSerivce notifierSerivce, IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopRejectOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository)
+    public ShopConfirmOrderHandler(IUnitOfWork unitOfWork, ILogger<ShopConfirmOrderHandler> logger, IOrderRepository orderRepository, IMapper mapper, ICurrentPrincipalService currentPrincipalService, IShopRepository shopRepository, INotificationFactory notificationFactory, INotifierSerivce notifierSerivce, ISystemResourceRepository systemResourceRepository)
     {
-        _notifierSerivce = notifierSerivce;
         _unitOfWork = unitOfWork;
-        _orderRepository = orderRepository;
         _logger = logger;
+        _orderRepository = orderRepository;
+        _mapper = mapper;
         _currentPrincipalService = currentPrincipalService;
-        _notificationFactory = notificationFactory;
         _shopRepository = shopRepository;
+        _notificationFactory = notificationFactory;
+        _notifierSerivce = notifierSerivce;
         _systemResourceRepository = systemResourceRepository;
     }
 
-    public async Task<Result<Result>> Handle(ShopRejectOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(ShopConfirmOrderCommand request, CancellationToken cancellationToken)
     {
         // Validate
         Validate(request);
@@ -43,20 +46,19 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             var order = _orderRepository.GetById(request.Id);
-            order.Status = OrderStatus.Rejected;
-            order.Reason = request.Reason;
+            order.Status = OrderStatus.Confirmed;
             _orderRepository.Update(order);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
             // Send notification to customer
             var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
-            var noti = _notificationFactory.CreateOrderRejectedNotification(order, shop);
+            var noti = _notificationFactory.CreateOrderConfirmNotification(order, shop);
             _notifierSerivce.NotifyAsync(noti);
             return Result.Success(new
             {
                 OrderId = order.Id,
-                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_REJECT_SUCCESS.GetDescription(), order.Id),
-                Code = MessageCode.I_ORDER_REJECT_SUCCESS.GetDescription(),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_CONFIRM_SUCCESS.GetDescription(), order.Id),
+                Code = MessageCode.I_ORDER_CONFIRM_SUCCESS.GetDescription(),
             });
         }
         catch (Exception e)
@@ -67,7 +69,7 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
         }
     }
 
-    private void Validate(ShopRejectOrderCommand request)
+    private void Validate(ShopConfirmOrderCommand request)
     {
         var order = _orderRepository.Get(o => o.Id == request.Id && o.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault();
         if (order == default)

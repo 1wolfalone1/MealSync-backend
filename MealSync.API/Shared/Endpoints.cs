@@ -98,4 +98,5 @@ public static class Endpoints
     public const string GET_ORDER_DETAIL_FOR_SHOP = "shop-owner/order/{id:long}";
     public const string GET_PAYMENT_STATUS_BY_ORDER_ID = "customer/order/{id:long}/payment/status";
     public const string SHOP_REJECT_ORDER = "shop-owner/order/{id:long}/reject";
+    public const string SHOP_CONFIRM_ORDER = "shop-owner/order/{id:long}/confirm";
 }

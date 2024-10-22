@@ -259,6 +259,9 @@ public enum MessageCode
     [Description("I-Order-RejectSuccess")]
     I_ORDER_REJECT_SUCCESS,
 
+    [Description("I-Order-ConfirmSuccess")]
+    I_ORDER_CONFIRM_SUCCESS,
+
     [Description("E-Order-NotInCorrectStatus")]
     E_ORDER_NOT_IN_CORRECT_STATUS,
 

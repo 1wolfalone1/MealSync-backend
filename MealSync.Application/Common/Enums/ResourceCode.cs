@@ -46,4 +46,7 @@ public enum ResourceCode
 
     [Description("Notification-Order-Cancel")]
     NOTIFICATION_ORDER_CANCEL,
+
+    [Description("Notification-Order-Confirm")]
+    NOTIFICATION_ORDER_CONFIRM,
 }
