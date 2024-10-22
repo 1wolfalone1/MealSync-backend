@@ -43,6 +43,12 @@ public class OrderDetailForShopResponse
         }
     }
 
+    public string Note { get; set; }
+
+    public long DormitoryId { get; set; }
+
+    public string DormitoryName { get; set; }
+
     public CustomerInforInShoprderDetailForShop Customer { get; set; }
 
     public PromotionInShopOrderDetail Promotion { get; set; }
