@@ -7,4 +7,6 @@ public interface INotificationFactory
     Notification CreateOrderRejectedNotification(Order order, Shop shop);
 
     Notification CreateOrderCancelNotification(Order order, Shop shop);
+
+    Notification CreateOrderConfirmNotification(Order order, Shop shop);
 }
