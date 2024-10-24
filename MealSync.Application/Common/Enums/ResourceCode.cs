@@ -41,6 +41,12 @@ public enum ResourceCode
     SHOP_BANNER,
 
     // Notification
+    [Description("Notification-Order-Pending")]
+    NOTIFICATION_ORDER_PENDING,
+
+    [Description("Notification-Order-Confirmed")]
+    NOTIFICATION_ORDER_CONFIRMED,
+
     [Description("Notification-Order-Reject")]
     NOTIFICATION_ORDER_REJECT,
 

@@ -8,14 +8,14 @@ using Newtonsoft.Json;
 
 namespace MealSync.Infrastructure.Services.Notifications;
 
-public class NotifierSerivce : INotifierSerivce
+public class NotifierService : INotifierService
 {
     private readonly INotificationProvider _notificationProvider;
-    private readonly ILogger<NotifierSerivce> _logger;
+    private readonly ILogger<NotifierService> _logger;
     private readonly IMobileNotificationService _mobileNotificationService;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public NotifierSerivce(INotificationProvider notificationProvider, ILogger<NotifierSerivce> logger, IMobileNotificationService mobileNotificationService, IServiceScopeFactory serviceScopeFactory)
+    public NotifierService(INotificationProvider notificationProvider, ILogger<NotifierService> logger, IMobileNotificationService mobileNotificationService, IServiceScopeFactory serviceScopeFactory)
     {
         _notificationProvider = notificationProvider;
         _logger = logger;

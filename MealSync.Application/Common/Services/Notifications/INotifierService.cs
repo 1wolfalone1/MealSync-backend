@@ -2,7 +2,7 @@
 
 namespace MealSync.Application.Common.Services.Notifications;
 
-public interface INotifierSerivce
+public interface INotifierService
 {
     Task NotifyAsync(Notification notification);
 }

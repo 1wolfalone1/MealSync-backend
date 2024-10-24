@@ -23,7 +23,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly ILogger<CancelOrderCustomerHandler> _logger;
-    private const int TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS = 2;
+    private const int TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS = 1;
 
     public CancelOrderCustomerHandler(
         IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService,
@@ -101,7 +101,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                         }
                         else
                         {
-                            throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
+                            return await CancelOrderAsync(order, payment).ConfigureAwait(false);
                         }
                     }
                 }

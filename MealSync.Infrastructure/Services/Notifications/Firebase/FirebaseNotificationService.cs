@@ -56,7 +56,7 @@ public class FirebaseNotificationService : BaseService, IMobileNotificationServi
                 var response = await fcmSender.SendAsync(message).ConfigureAwait(false);
                 _logger.LogInformation("Successfully sent message: " + response);
             }
-            catch (FirebaseMessagingException ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending message: " + ex.Message);
             }
