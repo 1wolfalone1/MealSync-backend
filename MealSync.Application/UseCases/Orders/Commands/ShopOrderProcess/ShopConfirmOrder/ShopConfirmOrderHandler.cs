@@ -21,10 +21,10 @@ public class ShopConfirmOrderHandler : ICommandHandler<ShopConfirmOrderCommand, 
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IShopRepository _shopRepository;
     private readonly INotificationFactory _notificationFactory;
-    private readonly INotifierSerivce _notifierSerivce;
+    private readonly INotifierService _notifierService;
     private readonly ISystemResourceRepository _systemResourceRepository;
 
-    public ShopConfirmOrderHandler(IUnitOfWork unitOfWork, ILogger<ShopConfirmOrderHandler> logger, IOrderRepository orderRepository, IMapper mapper, ICurrentPrincipalService currentPrincipalService, IShopRepository shopRepository, INotificationFactory notificationFactory, INotifierSerivce notifierSerivce, ISystemResourceRepository systemResourceRepository)
+    public ShopConfirmOrderHandler(IUnitOfWork unitOfWork, ILogger<ShopConfirmOrderHandler> logger, IOrderRepository orderRepository, IMapper mapper, ICurrentPrincipalService currentPrincipalService, IShopRepository shopRepository, INotificationFactory notificationFactory, INotifierService notifierService, ISystemResourceRepository systemResourceRepository)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -33,7 +33,7 @@ public class ShopConfirmOrderHandler : ICommandHandler<ShopConfirmOrderCommand, 
         _currentPrincipalService = currentPrincipalService;
         _shopRepository = shopRepository;
         _notificationFactory = notificationFactory;
-        _notifierSerivce = notifierSerivce;
+        _notifierService = notifierService;
         _systemResourceRepository = systemResourceRepository;
     }
 
@@ -53,7 +53,7 @@ public class ShopConfirmOrderHandler : ICommandHandler<ShopConfirmOrderCommand, 
             // Send notification to customer
             var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
             var noti = _notificationFactory.CreateOrderConfirmNotification(order, shop);
-            _notifierSerivce.NotifyAsync(noti);
+            _notifierService.NotifyAsync(noti);
             return Result.Success(new
             {
                 OrderId = order.Id,
