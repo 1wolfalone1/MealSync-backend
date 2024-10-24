@@ -24,7 +24,7 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
     private readonly IOrderRepository _orderRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
-    private readonly INotifierSerivce _notifierSerivce;
+    private readonly INotifierService _notifierService;
     private readonly INotificationFactory _notificationFactory;
     private readonly IAccountFlagRepository _accountFlagRepository;
     private readonly IAccountRepository _accountRepository;
@@ -32,7 +32,7 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
     private readonly IEmailService _emailService;
 
     public UpdateShopStatusInactiveActiveHandler(ILogger<UpdateShopStatusInactiveActiveHandler> logger, IUnitOfWork unitOfWork, IShopRepository shopRepository, ICurrentPrincipalService currentPrincipalService, IOrderRepository orderRepository,
-        ISystemResourceRepository systemResourceRepository, INotifierSerivce notifierSerivce, INotificationFactory notificationFactory, IEmailService emailService, IAccountFlagRepository accountFlagRepository, ICurrentAccountService currentAccountService, IAccountRepository accountRepository)
+        ISystemResourceRepository systemResourceRepository, INotifierService notifierService, INotificationFactory notificationFactory, IEmailService emailService, IAccountFlagRepository accountFlagRepository, ICurrentAccountService currentAccountService, IAccountRepository accountRepository)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
@@ -40,7 +40,7 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
         _currentPrincipalService = currentPrincipalService;
         _orderRepository = orderRepository;
         _systemResourceRepository = systemResourceRepository;
-        _notifierSerivce = notifierSerivce;
+        _notifierService = notifierService;
         _notificationFactory = notificationFactory;
         _emailService = emailService;
         _accountFlagRepository = accountFlagRepository;
@@ -179,7 +179,7 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
         // Notification for customer order rejected
         var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
         var noti = _notificationFactory.CreateOrderRejectedNotification(order, shop);
-        await _notifierSerivce.NotifyAsync(noti).ConfigureAwait(false);
+        await _notifierService.NotifyAsync(noti).ConfigureAwait(false);
     }
 
     private async Task CancelOrderConfirmedAsync(Order order)
@@ -190,7 +190,7 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
         // Notification for customer order cancelled
         var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
         var noti = _notificationFactory.CreateOrderCancelNotification(order, shop);
-        await _notifierSerivce.NotifyAsync(noti).ConfigureAwait(false);
+        await _notifierService.NotifyAsync(noti).ConfigureAwait(false);
     }
 
     private async Task ValidateAsync(UpdateShopStatusInactiveActiveCommand request)
