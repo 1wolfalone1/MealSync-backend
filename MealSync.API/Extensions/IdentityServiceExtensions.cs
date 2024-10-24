@@ -162,7 +162,7 @@ public static class IdentityServiceExtensions
         // Add notification service
         services.AddSingleton<IMobileNotificationService, FirebaseNotificationService>();
         services.AddSingleton<INotificationProvider, NotificationProvider>();
-        services.AddSingleton<INotifierSerivce, NotifierSerivce>();
+        services.AddSingleton<INotifierService, NotifierService>();
         services.AddSingleton<INotificationFactory, NotificationFactory>();
 
         // Add Error Config

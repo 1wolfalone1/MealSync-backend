@@ -4,6 +4,10 @@ namespace MealSync.Application.Common.Services.Notifications;
 
 public interface INotificationFactory
 {
+    Notification CreateOrderPendingNotification(Order order, Shop shop);
+
+    Notification CreateOrderConfirmedNotification(Order order, Shop shop);
+
     Notification CreateOrderRejectedNotification(Order order, Shop shop);
 
     Notification CreateOrderCancelNotification(Order order, Shop shop);

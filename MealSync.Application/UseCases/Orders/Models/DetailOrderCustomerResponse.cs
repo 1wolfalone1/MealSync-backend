@@ -40,7 +40,7 @@ public class DetailOrderCustomerResponse
 
     public List<OrderDetailCustomerResponse> OrderDetails { get; set; }
 
-    public List<PaymentOrderResponse> Payments { get; set; }
+    public PaymentOrderResponse Payments { get; set; }
 
     public ShopInfoResponse ShopInfo { get; set; }
 

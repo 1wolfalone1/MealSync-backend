@@ -13,7 +13,7 @@ namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRej
 
 public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Result>
 {
-    private readonly INotifierSerivce _notifierSerivce;
+    private readonly INotifierService _notifierService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IOrderRepository _orderRepository;
     private readonly ILogger<ShopRejectOrderHandler> _logger;
@@ -22,9 +22,9 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
     private readonly IShopRepository _shopRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
 
-    public ShopRejectOrderHandler(INotifierSerivce notifierSerivce, IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopRejectOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository)
+    public ShopRejectOrderHandler(INotifierService notifierService, IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopRejectOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository)
     {
-        _notifierSerivce = notifierSerivce;
+        _notifierService = notifierService;
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
         _logger = logger;
@@ -51,7 +51,7 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
             // Send notification to customer
             var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
             var noti = _notificationFactory.CreateOrderRejectedNotification(order, shop);
-            _notifierSerivce.NotifyAsync(noti);
+            _notifierService.NotifyAsync(noti);
             return Result.Success(new
             {
                 OrderId = order.Id,

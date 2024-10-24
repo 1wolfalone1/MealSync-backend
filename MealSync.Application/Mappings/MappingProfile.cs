@@ -17,6 +17,7 @@ using MealSync.Application.UseCases.ShopCategories.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Application.UseCases.Shops.Models;
 using MealSync.Domain.Entities;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.Mappings;
 
@@ -149,7 +150,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.CustomerLocation.Longitude))
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.CustomerLocation.Latitude))
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails))
-            .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments))
+            .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments.FirstOrDefault(p => p.Type == PaymentTypes.Payment)))
             .ForMember(dest => dest.ShopInfo, opt => opt.MapFrom(src => src))
             .ForMember(dest => dest.Promotion, opt => opt.MapFrom(src => src.Promotion));
         CreateMap<OrderDetail, DetailOrderCustomerResponse.OrderDetailCustomerResponse>()

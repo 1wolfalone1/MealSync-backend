@@ -4,6 +4,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Services.Payments.VnPay;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
@@ -34,11 +35,16 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
     private readonly IMapper _mapper;
     private readonly IVnPayPaymentService _paymentService;
     private readonly ISystemResourceRepository _systemResourceRepository;
+    private readonly INotificationFactory _notificationFactory;
+    private readonly INotifierService _notifierService;
 
-    public CreateOrderHandler(ILogger<CreateOrderCommand> logger, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository, IBuildingRepository buildingRepository, IFoodRepository foodRepository,
-        IFoodOperatingSlotRepository foodOperatingSlotRepository, IOperatingSlotRepository operatingSlotRepository, IFoodOptionGroupRepository foodOptionGroupRepository, IOptionRepository optionRepository,
-        IPromotionRepository promotionRepository, ICurrentPrincipalService currentPrincipalService, ICommissionConfigRepository commissionConfigRepository, IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-        IMapper mapper, IVnPayPaymentService paymentService, ISystemResourceRepository systemResourceRepository)
+    public CreateOrderHandler(
+        ILogger<CreateOrderCommand> logger, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository,
+        IBuildingRepository buildingRepository, IFoodRepository foodRepository, IFoodOperatingSlotRepository foodOperatingSlotRepository,
+        IOperatingSlotRepository operatingSlotRepository, IFoodOptionGroupRepository foodOptionGroupRepository, IOptionRepository optionRepository,
+        IPromotionRepository promotionRepository, ICurrentPrincipalService currentPrincipalService, ICommissionConfigRepository commissionConfigRepository,
+        IOrderRepository orderRepository, IUnitOfWork unitOfWork, IMapper mapper, IVnPayPaymentService paymentService,
+        ISystemResourceRepository systemResourceRepository, INotificationFactory notificationFactory, INotifierService notifierService)
     {
         _logger = logger;
         _shopRepository = shopRepository;
@@ -57,6 +63,8 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         _mapper = mapper;
         _paymentService = paymentService;
         _systemResourceRepository = systemResourceRepository;
+        _notificationFactory = notificationFactory;
+        _notifierService = notifierService;
     }
 
     public async Task<Result<Result>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -77,7 +85,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             .ConfigureAwait(false);
 
         // Validate business rules for the operating slot of shop.
-        ValidateOrderTimeRequest(request, shopOperatingSlot);
+        ValidateOrderTimeSlotRequest(request, shopOperatingSlot);
 
         // Validate business rules for the food.
         var validateFoodResult = await ValidateFoodRequest(request, shopOperatingSlot).ConfigureAwait(false);
@@ -133,7 +141,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             ShippingFee = 0,
             TotalPrice = request.TotalFoodCost,
             TotalPromotion = request.TotalDiscount,
-            ChargeFee = commissionConfig / 100 * request.TotalOrder,
+            ChargeFee = MoneyUtils.RoundToNearestInt(commissionConfig / 100 * request.TotalOrder),
             FullName = request.FullName,
             PhoneNumber = request.PhoneNumber,
             OrderDate = now,
@@ -151,16 +159,16 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             Payments = payments,
         };
 
-        if (shop.IsAutoOrderConfirmation && !request.OrderTime.IsOrderNextDay)
+        if (shop.IsAutoOrderConfirmation && !request.OrderTime.IsOrderNextDay && request.PaymentMethod == PaymentMethods.COD)
         {
             var startFrameMinutes = TimeUtils.ConvertToMinutes(request.OrderTime.StartTime); // Total minutes for start time
             var minOrderMinutes = shop.MinOrderHoursInAdvance * 60; // Min constraint in minutes
             var maxOrderMinutes = shop.MaxOrderHoursInAdvance * 60; // Max constraint in minutes
             var currentTimeMinutes = (now.Hour * 60) + now.Minute; // Convert current time to total minutes
             var minAllowedTime = startFrameMinutes - maxOrderMinutes < 0 ? 0 : startFrameMinutes - maxOrderMinutes;
-            var maxAllowedTime = startFrameMinutes - minOrderMinutes;
+            var maxAllowedTime = startFrameMinutes - minOrderMinutes < 0 ? 0 : startFrameMinutes - minOrderMinutes;
 
-            if (maxAllowedTime >= 0 && currentTimeMinutes >= minAllowedTime && currentTimeMinutes <= maxAllowedTime)
+            if (currentTimeMinutes >= minAllowedTime && currentTimeMinutes <= maxAllowedTime)
             {
                 order.Status = OrderStatus.Confirmed;
             }
@@ -205,7 +213,24 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_SUCCESS.GetDescription()) ?? string.Empty,
             };
 
-            // Todo: Notification for shop
+            // Notify
+            if (request.PaymentMethod == PaymentMethods.COD)
+            {
+                if (order.Status == OrderStatus.Pending)
+                {
+                    var notification = _notificationFactory.CreateOrderPendingNotification(order, shop);
+                    await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
+                }
+                else if (order.Status == OrderStatus.Confirmed)
+                {
+                    var notification = _notificationFactory.CreateOrderConfirmedNotification(order, shop);
+                    await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
+                }
+                else
+                {
+                    // Do nothing
+                }
+            }
 
             return Result.Create(response);
         }
@@ -276,17 +301,20 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                     }
                     else if (promotion.Type == PromotionTypes.ShopPromotion && promotion.ApplyType == PromotionApplyTypes.Percent)
                     {
+                        var totalDiscount = MoneyUtils.RoundToNearestInt(promotion.AmountRate!.Value / 100 * totalFoodPrice);
+
                         // Ensure the order meets the minimum value condition
                         if (promotion.MinOrdervalue > totalFoodPrice)
                         {
                             throw new InvalidBusinessException(MessageCode.E_PROMOTION_NOT_ENOUGH_CONDITION.GetDescription());
                         }
-                        else if (promotion.AmountRate / 100 * totalFoodPrice > promotion.MaximumApplyValue && request.TotalDiscount - promotion.MaximumApplyValue != 0.0)
+                        else if (totalDiscount > MoneyUtils.RoundToNearestInt(promotion.MaximumApplyValue!.Value)
+                                 && MoneyUtils.RoundToNearestInt(request.TotalDiscount) - MoneyUtils.RoundToNearestInt(promotion.MaximumApplyValue.Value) != 0)
                         {
                             // Throw an exception exceeds the maximum allowed value
                             throw new InvalidBusinessException(MessageCode.E_ORDER_INCORRECT_DISCOUNT_AMOUNT.GetDescription());
                         }
-                        else if (promotion.AmountRate / 100 * totalFoodPrice <= promotion.MaximumApplyValue && request.TotalDiscount - (promotion.AmountRate / 100 * totalFoodPrice) != 0.0)
+                        else if (totalDiscount <= MoneyUtils.RoundToNearestInt(promotion.MaximumApplyValue.Value) && MoneyUtils.RoundToNearestInt(request.TotalDiscount - totalDiscount) != 0)
                         {
                             throw new InvalidBusinessException(MessageCode.E_ORDER_INCORRECT_DISCOUNT_AMOUNT.GetDescription());
                         }
@@ -302,7 +330,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                         {
                             throw new InvalidBusinessException(MessageCode.E_PROMOTION_NOT_ENOUGH_CONDITION.GetDescription());
                         }
-                        else if (request.TotalDiscount - promotion.AmountValue != 0.0)
+                        else if (MoneyUtils.RoundToNearestInt(request.TotalDiscount) - MoneyUtils.RoundToNearestInt(promotion.AmountValue!.Value) != 0)
                         {
                             throw new InvalidBusinessException(MessageCode.E_ORDER_INCORRECT_DISCOUNT_AMOUNT.GetDescription());
                         }
@@ -324,6 +352,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         {
             // Do nothing
         }
+
         return default;
     }
 
@@ -576,7 +605,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         }
     }
 
-    private static void ValidateOrderTimeRequest(CreateOrderCommand request, OperatingSlot? shopOperatingSlot)
+    private static void ValidateOrderTimeSlotRequest(CreateOrderCommand request, OperatingSlot? shopOperatingSlot)
     {
         if (shopOperatingSlot == default)
         {
