@@ -13,4 +13,6 @@ public class SystemConfig : BaseEntity
     public int TimeFrameDuration { get; set; }
 
     public int MaxFlagsBeforeBan { get; set; }
+
+    public int MaxWarningBeforeInscreaseFlag { get; set; }
 }

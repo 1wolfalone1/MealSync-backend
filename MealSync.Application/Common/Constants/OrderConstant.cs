@@ -11,4 +11,6 @@ public static class OrderConstant
         OrderStatus.Preparing,
         OrderStatus.Delivering,
     };
+
+    public static readonly int TIME_SHOP_CANCEL_ORDER_CONFIRMED_IN_MINUTES = 60;
 }
