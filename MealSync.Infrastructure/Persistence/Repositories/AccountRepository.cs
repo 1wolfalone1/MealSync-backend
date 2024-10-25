@@ -31,4 +31,12 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
         return DbSet.Include(a => a.Customer)
             .FirstOrDefault(a => a.Id == id && a.RoleId == (int)Roles.Customer && a.Status == AccountStatus.Verify);
     }
+
+    public List<Account>? GetAccountsOfModeratorByDormitoryId(long dormitoryId)
+    {
+        return DbSet.Include(a => a.Moderator)
+            .ThenInclude(m => m.ModeratorDormitories)
+            .Where(a => a.RoleId == (int)Roles.Moderator &&
+                        a.Moderator.ModeratorDormitories.Any(md => md.DormitoryId == dormitoryId)).ToList();
+    }
 }
