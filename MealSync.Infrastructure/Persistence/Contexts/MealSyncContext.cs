@@ -442,14 +442,14 @@ public class MealSyncContext : DbContext
         modelBuilder.Entity<Review>()
             .HasOne(r => r.Order)
             .WithMany(o => o.Reviews)
-            .HasForeignKey(r => r.ShopId)
-            .HasConstraintName("FK_Review_Shop");
+            .HasForeignKey(r => r.OrderId)
+            .HasConstraintName("FK_Review_Order");
 
         modelBuilder.Entity<Review>()
             .HasOne(r => r.Shop)
             .WithMany(o => o.ReviewReplys)
-            .HasForeignKey(r => r.OrderId)
-            .HasConstraintName("FK_Review_Order");
+            .HasForeignKey(r => r.ShopId)
+            .HasConstraintName("FK_Review_Shop");
 
         modelBuilder.Entity<Report>()
             .HasOne(r => r.Shop)

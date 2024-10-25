@@ -8,7 +8,7 @@ public class ReviewDetailResponse
 
     public RatingRanges Rating { get; set; }
 
-    public string Comment { get; set; } = null!;
+    public string Comment { get; set; }
 
     public List<string> ImageUrls { get; set; }
 }

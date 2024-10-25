@@ -24,7 +24,7 @@ public class Review : BaseEntity
 
     public string? ImageUrl { get; set; }
 
-    public ReviewEntites Entity { get; set; }
+    public ReviewEntities Entity { get; set; }
 
     public virtual Customer? Customer { get; set; }
 

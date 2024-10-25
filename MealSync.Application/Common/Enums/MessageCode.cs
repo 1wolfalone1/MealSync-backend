@@ -308,8 +308,11 @@ public enum MessageCode
 
     // Review
     [Description("E-Review-Time-Limit")]
-    REVIEW_TIME_LIMIT,
+    E_REVIEW_TIME_LIMIT,
 
     [Description("E-Review-Unavailabe")]
-    REVIEW_UNAVAILABLE,
+    E_REVIEW_UNAVAILABLE,
+
+    [Description("E-Review-Customer_Already_Review")]
+    E_REVIEW_CUSTOMER_ALREADY_REVIEW,
 }

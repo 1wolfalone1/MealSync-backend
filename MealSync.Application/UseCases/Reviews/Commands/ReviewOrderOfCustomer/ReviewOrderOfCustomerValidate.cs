@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace MealSync.Application.UseCases.Reviews.Commands.ReviewOrderOfCustomer;
 
-public class ReviewOrderValidate : AbstractValidator<ReviewOrderOfCustomerCommand>
+public class ReviewOrderOfCustomerValidate : AbstractValidator<ReviewOrderOfCustomerCommand>
 {
-    public ReviewOrderValidate()
+    public ReviewOrderOfCustomerValidate()
     {
         RuleFor(x => x.OrderId)
             .GreaterThan(0).WithMessage("Id phải lớn hơn 0");

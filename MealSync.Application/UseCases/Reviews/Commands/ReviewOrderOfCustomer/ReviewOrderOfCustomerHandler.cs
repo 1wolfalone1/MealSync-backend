@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MealSync.Application.UseCases.Reviews.Commands.ReviewOrderOfCustomer;
 
-public class ReviewOrderHandler : ICommandHandler<ReviewOrderOfCustomerCommand, Result>
+public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustomerCommand, Result>
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IReviewRepository _reviewRepository;
@@ -21,13 +21,13 @@ public class ReviewOrderHandler : ICommandHandler<ReviewOrderOfCustomerCommand, 
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IStorageService _storageService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<ReviewOrderHandler> _logger;
+    private readonly ILogger<ReviewOrderOfCustomerHandler> _logger;
     private readonly IMapper _mapper;
 
-    public ReviewOrderHandler(
+    public ReviewOrderOfCustomerHandler(
         IOrderRepository orderRepository, IReviewRepository reviewRepository, IShopRepository shopRepository,
         ICurrentPrincipalService currentPrincipalService, IStorageService storageService,
-        IUnitOfWork unitOfWork, ILogger<ReviewOrderHandler> logger, IMapper mapper)
+        IUnitOfWork unitOfWork, ILogger<ReviewOrderOfCustomerHandler> logger, IMapper mapper)
     {
         _orderRepository = orderRepository;
         _reviewRepository = reviewRepository;
@@ -47,6 +47,10 @@ public class ReviewOrderHandler : ICommandHandler<ReviewOrderOfCustomerCommand, 
         if (order == default)
         {
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.OrderId });
+        }
+        else if (await _reviewRepository.CheckExistedReviewOfCustomerByOrderId(request.OrderId).ConfigureAwait(false))
+        {
+            throw new InvalidBusinessException(MessageCode.E_REVIEW_CUSTOMER_ALREADY_REVIEW.GetDescription(), new object[] { request.OrderId });
         }
         else
         {
@@ -78,10 +82,12 @@ public class ReviewOrderHandler : ICommandHandler<ReviewOrderOfCustomerCommand, 
                     Review review = new Review
                     {
                         CustomerId = customerId,
+                        ShopId = order.ShopId,
                         OrderId = request.OrderId,
                         Rating = request.Rating,
                         Comment = request.Comment,
                         ImageUrl = string.Join(",", imageUrls),
+                        Entity = ReviewEntities.Customer,
                     };
 
                     var shop = await _shopRepository.GetByAccountId(order.ShopId).ConfigureAwait(false);
@@ -107,12 +113,12 @@ public class ReviewOrderHandler : ICommandHandler<ReviewOrderOfCustomerCommand, 
                 }
                 else
                 {
-                    throw new InvalidBusinessException(MessageCode.REVIEW_TIME_LIMIT.GetDescription());
+                    throw new InvalidBusinessException(MessageCode.E_REVIEW_TIME_LIMIT.GetDescription());
                 }
             }
             else
             {
-                throw new InvalidBusinessException(MessageCode.REVIEW_UNAVAILABLE.GetDescription());
+                throw new InvalidBusinessException(MessageCode.E_REVIEW_UNAVAILABLE.GetDescription());
             }
         }
     }
