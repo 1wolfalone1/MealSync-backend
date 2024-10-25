@@ -29,6 +29,18 @@ public enum ResourceCode
     [Description("Email-Body-AnnouceApplyFlagForShop")]
     EMAIL_BODY_ANNOUCE_APPLY_FLAG_FOR_SHOP,
 
+    [Description("Email-Subject-AnnouceRefundOrderFail")]
+    EMAIL_SUBJECT_ANNOUCE_REFUND_ORDER_FAIL,
+
+    [Description("Email-Body-AnnouceRefundOrderFail")]
+    EMAIL_BODY_ANNOUCE_REFUND_ORDER_FAIL,
+
+    [Description("Email-Subject-AccountEnoughFlagForBan")]
+    EMAIL_SUBJECT_ACCOUNT_ENOUGH_FLAG_FOR_BAN,
+
+    [Description("Email-Body-Account-EnoughFlagForBan")]
+    EMAIL_BODY_ACCOUNT_ENOUGH_FLAG_FOR_BAN,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,
@@ -55,4 +67,7 @@ public enum ResourceCode
 
     [Description("Notification-Order-Confirm")]
     NOTIFICATION_ORDER_CONFIRM,
+
+    [Description("Notification-Order-RefundFail")]
+    NOTIFICATION_ORDER_REFUND_FAIL,
 }
