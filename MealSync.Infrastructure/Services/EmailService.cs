@@ -50,6 +50,20 @@ public class EmailService : IEmailService, IBaseService
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ANNOUCE_APPLY_FLAG_FOR_SHOP.GetDescription(), flag));
     }
 
+    public bool SendEmailToAnnounceModeratorRefundFail(string email, long orderId)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_ANNOUCE_REFUND_ORDER_FAIL.GetDescription(), orderId),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ANNOUCE_REFUND_ORDER_FAIL.GetDescription(), orderId));
+    }
+
+    public bool SendEmailToAnnounceAccountGotBanned(string email, string fullName)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_ACCOUNT_ENOUGH_FLAG_FOR_BAN.GetDescription(), fullName),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ACCOUNT_ENOUGH_FLAG_FOR_BAN.GetDescription(), fullName));
+    }
+
     private bool SendEmail(string toEmail, string subject, string body)
     {
         try

@@ -119,4 +119,24 @@ public class NotificationFactory : INotificationFactory
             IsSave = true,
         };
     }
+
+    public Notification CreateRefundFaillNotification(Order order, Account accMode)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = accMode.Id,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_REFUND_FAIL.GetDescription(), order.Id),
+            ImageUrl = accMode.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToModerator,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
 }
