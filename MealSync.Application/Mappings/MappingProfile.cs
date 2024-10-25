@@ -13,6 +13,7 @@ using MealSync.Application.UseCases.Options.Models;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Application.UseCases.Promotions.Models;
 using MealSync.Application.UseCases.PlatformCategory.Models;
+using MealSync.Application.UseCases.Reviews.Models;
 using MealSync.Application.UseCases.ShopCategories.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Application.UseCases.Shops.Models;
@@ -145,6 +146,7 @@ public class MappingProfile : Profile
                 opt => opt.MapFrom(src =>
                     new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
             )
+            .ForMember(dest => dest.IsOrderNextDay, opt => opt.MapFrom(src => src.OrderDate.Day != src.IntendedReceiveDate.Day))
             .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.CustomerLocation.Longitude))
@@ -196,5 +198,13 @@ public class MappingProfile : Profile
         CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
         CreateMap<ShopCategory, ShopCategoryDetailResponse>()
             .ForMember(dest => dest.Foods, src => src.MapFrom(opt => opt.Foods));
+
+        CreateMap<Review, ReviewDetailResponse>()
+            .ForMember(
+                dest => dest.ImageUrls,
+                src => src.MapFrom(opt =>
+                    string.IsNullOrEmpty(opt.ImageUrl)
+                        ? new List<string>()
+                        : opt.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList()));
     }
 }

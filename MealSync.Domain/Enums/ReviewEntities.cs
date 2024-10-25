@@ -1,6 +1,6 @@
 ﻿namespace MealSync.Domain.Enums;
 
-public enum ReviewEntites
+public enum ReviewEntities
 {
     Customer = 1,
     Shop = 2,

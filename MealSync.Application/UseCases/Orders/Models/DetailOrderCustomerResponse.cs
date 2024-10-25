@@ -28,6 +28,8 @@ public class DetailOrderCustomerResponse
 
     public long OrderDate { get; set; }
 
+    public bool IsOrderNextDay { get; set; }
+
     public long IntendedReceiveDate { get; set; }
 
     public int StartTime { get; set; }
