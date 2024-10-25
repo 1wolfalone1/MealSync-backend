@@ -13,6 +13,7 @@ using MealSync.Application.UseCases.Options.Models;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Application.UseCases.Promotions.Models;
 using MealSync.Application.UseCases.PlatformCategory.Models;
+using MealSync.Application.UseCases.Reviews.Models;
 using MealSync.Application.UseCases.ShopCategories.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Application.UseCases.Shops.Models;
@@ -196,5 +197,13 @@ public class MappingProfile : Profile
         CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
         CreateMap<ShopCategory, ShopCategoryDetailResponse>()
             .ForMember(dest => dest.Foods, src => src.MapFrom(opt => opt.Foods));
+
+        CreateMap<Review, ReviewDetailResponse>()
+            .ForMember(
+                dest => dest.ImageUrls,
+                src => src.MapFrom(opt =>
+                    string.IsNullOrEmpty(opt.ImageUrl)
+                        ? new List<string>()
+                        : opt.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList()));
     }
 }

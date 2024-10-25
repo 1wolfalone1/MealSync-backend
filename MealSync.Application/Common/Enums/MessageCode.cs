@@ -305,4 +305,11 @@ public enum MessageCode
 
     [Description("I-Payment-Cancel")]
     I_PAYMENT_CANCEL,
+
+    // Review
+    [Description("E-Review-Time-Limit")]
+    REVIEW_TIME_LIMIT,
+
+    [Description("E-Review-Unavailabe")]
+    REVIEW_UNAVAILABLE,
 }

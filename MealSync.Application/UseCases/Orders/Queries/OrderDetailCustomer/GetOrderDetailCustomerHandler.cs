@@ -26,7 +26,7 @@ public class GetOrderDetailCustomerHandler : IQueryHandler<GetOrderDetailCustome
     public async Task<Result<Result>> Handle(GetOrderDetailCustomerQuery request, CancellationToken cancellationToken)
     {
         var customerId = _currentPrincipalService.CurrentPrincipalId!.Value;
-        var order = await _orderRepository.GetByIdAndCustomerId(request.Id, customerId).ConfigureAwait(false);
+        var order = await _orderRepository.GetByIdAndCustomerIdForDetail(request.Id, customerId).ConfigureAwait(false);
 
         if (order == default)
         {

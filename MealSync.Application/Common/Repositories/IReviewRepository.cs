@@ -4,4 +4,5 @@ namespace MealSync.Application.Common.Repositories;
 
 public interface IReviewRepository : IBaseRepository<Review>
 {
+    Task<bool> CheckExistedReviewOfCustomerByOrderId(long orderId);
 }
