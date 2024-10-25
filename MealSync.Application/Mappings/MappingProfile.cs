@@ -146,6 +146,7 @@ public class MappingProfile : Profile
                 opt => opt.MapFrom(src =>
                     new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
             )
+            .ForMember(dest => dest.IsOrderNextDay, opt => opt.MapFrom(src => src.OrderDate.Day != src.IntendedReceiveDate.Day))
             .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.CustomerLocation.Longitude))

@@ -103,4 +103,5 @@ public static class Endpoints
 
     // Review
     public const string REVIEW_ORDER = "customer/order/review";
+    public const string REVIEW_OF_SHOP = "shop/{shopId:long}/review";
 }
