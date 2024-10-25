@@ -11,7 +11,9 @@ public class Review : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long CustomerId { get; set; }
+    public long? CustomerId { get; set; }
+
+    public long? ShopId { get; set; }
 
     public long OrderId { get; set; }
 
@@ -20,9 +22,13 @@ public class Review : BaseEntity
     [Column(TypeName = "text")]
     public string? Comment { get; set; }
 
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
 
-    public virtual Customer Customer { get; set; }
+    public ReviewEntites Entity { get; set; }
+
+    public virtual Customer? Customer { get; set; }
+
+    public virtual Shop? Shop { get; set; }
 
     public virtual Order Order { get; set; }
 }
