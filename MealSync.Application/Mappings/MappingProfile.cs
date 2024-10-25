@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using AutoMapper;
 using MealSync.Application.Common.Services.Notifications.Models;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.UseCases.Dormitories.Models;
 using MealSync.Application.UseCases.Buildings.Models;
 using MealSync.Application.UseCases.CustomerBuildings.Models;
@@ -82,6 +83,7 @@ public class MappingProfile : Profile
         CreateMap<OperatingSlot, ShopInfoResponse.ShopOperatingSlotResponse>();
         CreateMap<Dormitory, ShopInfoResponse.ShopDormitoryResponse>();
         CreateMap<Shop, ShopInfoResponse>()
+            .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0))
             .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location))
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.OperatingSlots))
             .ForMember(dest => dest.Dormitories, opt => opt.MapFrom(src => src.ShopDormitories.Select(sd => sd.Dormitory)));
@@ -140,6 +142,8 @@ public class MappingProfile : Profile
             );
 
         CreateMap<Order, DetailOrderCustomerResponse>()
+            .ForMember(dest => dest.IsReviewAllowed, opt => opt.MapFrom(src => IsReviewAllowed(src)))
+            .ForMember(dest => dest.IsCancelAllowed, opt => opt.MapFrom(src => IsCancelAllowed(src)))
             .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
             .ForMember(
                 dest => dest.IntendedReceiveDate,
@@ -185,6 +189,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.AddHours(-7).ToUnixTimeMilliseconds()));
 
         CreateMap<Order, OrderSummaryResponse>()
+            .ForMember(dest => dest.IsReviewAllowed, opt => opt.MapFrom(src => IsReviewAllowed(src)))
             .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
             .ForMember(
                 dest => dest.IntendedReceiveDate,
@@ -206,5 +211,39 @@ public class MappingProfile : Profile
                     string.IsNullOrEmpty(opt.ImageUrl)
                         ? new List<string>()
                         : opt.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList()));
+    }
+
+    private bool IsReviewAllowed(Order order)
+    {
+        var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7));
+
+        var receiveDate = new DateTime(
+            order.IntendedReceiveDate.Year,
+            order.IntendedReceiveDate.Month,
+            order.IntendedReceiveDate.Day,
+            order.EndTime / 100,
+            order.EndTime % 100,
+            0
+        );
+
+        var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
+
+        return (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.IssueReported || order.Status == OrderStatus.UnderReview
+                || order.Status == OrderStatus.Resolved || order.Status == OrderStatus.Completed) && order.Reviews.Count == 0 && now >= endTime && now <= endTime.AddHours(24);
+    }
+
+    private bool IsCancelAllowed(Order order)
+    {
+        var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+        var intendedReceiveDateTime = new DateTime(
+            order.IntendedReceiveDate.Year,
+            order.IntendedReceiveDate.Month,
+            order.IntendedReceiveDate.Day,
+            order.StartTime / 100,
+            order.StartTime % 100,
+            0);
+        var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-TimeUtils.TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS);
+
+        return order.Status == OrderStatus.Pending || (order.Status == OrderStatus.Confirmed && now < endTime);
     }
 }

@@ -161,14 +161,18 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
 
         if (shop.IsAutoOrderConfirmation && !request.OrderTime.IsOrderNextDay && request.PaymentMethod == PaymentMethods.COD)
         {
-            var startFrameMinutes = TimeUtils.ConvertToMinutes(request.OrderTime.StartTime); // Total minutes for start time
-            var minOrderMinutes = shop.MinOrderHoursInAdvance * 60; // Min constraint in minutes
-            var maxOrderMinutes = shop.MaxOrderHoursInAdvance * 60; // Max constraint in minutes
-            var currentTimeMinutes = (now.Hour * 60) + now.Minute; // Convert current time to total minutes
-            var minAllowedTime = startFrameMinutes - maxOrderMinutes < 0 ? 0 : startFrameMinutes - maxOrderMinutes;
-            var maxAllowedTime = startFrameMinutes - minOrderMinutes < 0 ? 0 : startFrameMinutes - minOrderMinutes;
+            var intendedReceiveDateTime = new DateTime(
+                order.IntendedReceiveDate.Year,
+                order.IntendedReceiveDate.Month,
+                order.IntendedReceiveDate.Day,
+                order.StartTime / 100,
+                order.StartTime % 100,
+                0);
 
-            if (currentTimeMinutes >= minAllowedTime && currentTimeMinutes <= maxAllowedTime)
+            var minAllowed = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MaxOrderHoursInAdvance);
+            var maxAllowed = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MinOrderHoursInAdvance);
+
+            if (now >= minAllowed && now <= maxAllowed)
             {
                 order.Status = OrderStatus.Confirmed;
             }

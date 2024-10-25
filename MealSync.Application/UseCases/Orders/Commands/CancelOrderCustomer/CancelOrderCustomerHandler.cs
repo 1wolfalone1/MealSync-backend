@@ -23,7 +23,6 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly ILogger<CancelOrderCustomerHandler> _logger;
-    private const int TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS = 1;
 
     public CancelOrderCustomerHandler(
         IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService,
@@ -65,44 +64,22 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                 else if (order.Status == OrderStatus.Confirmed)
                 {
                     var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
-                    var currentTimeInMinutes = (now.Hour * 60) + now.Minute;
-                    var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
-                    var deadlineInMinutes = startTimeInMinutes - (TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS * 60);
+                    var intendedReceiveDateTime = new DateTime(
+                        order.IntendedReceiveDate.Year,
+                        order.IntendedReceiveDate.Month,
+                        order.IntendedReceiveDate.Day,
+                        order.StartTime / 100,
+                        order.StartTime % 100,
+                        0);
+                    var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-TimeUtils.TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS);
 
-                    if (order.OrderDate.Day == order.IntendedReceiveDate.Day || now.Day == order.IntendedReceiveDate.Day)
+                    if (now < endTime)
                     {
-                        if (deadlineInMinutes < 0)
-                        {
-                            deadlineInMinutes = 0;
-                        }
-
-                        if (currentTimeInMinutes < deadlineInMinutes)
-                        {
-                            return await CancelOrderAsync(order, payment).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
-                        }
+                        return await CancelOrderAsync(order, payment).ConfigureAwait(false);
                     }
                     else
                     {
-                        if (deadlineInMinutes < 0)
-                        {
-                            deadlineInMinutes = 1440 + deadlineInMinutes;
-                            if (currentTimeInMinutes < deadlineInMinutes)
-                            {
-                                return await CancelOrderAsync(order, payment).ConfigureAwait(false);
-                            }
-                            else
-                            {
-                                throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
-                            }
-                        }
-                        else
-                        {
-                            return await CancelOrderAsync(order, payment).ConfigureAwait(false);
-                        }
+                        throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TimeUtils.TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
                     }
                 }
                 else
