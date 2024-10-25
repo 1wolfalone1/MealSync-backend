@@ -11,7 +11,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
     }
 
-    public Task<Order?> GetByIdAndCustomerId(long id, long customerId)
+    public Task<Order?> GetByIdAndCustomerIdForDetail(long id, long customerId)
     {
         // return DbSet.Include(o => o.OrderDetails)
         //     .ThenInclude(od => od.Food)
@@ -146,5 +146,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     public Task<bool> CheckExistedByIdAndCustomerId(long id, long customerId)
     {
         return DbSet.AnyAsync(o => o.Id == id && o.CustomerId == customerId);
+    }
+
+    public Task<Order?> GetByIdAndCustomerId(long id, long customerId)
+    {
+        return DbSet.FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == customerId);
     }
 }

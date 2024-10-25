@@ -440,6 +440,7 @@ public class MealSyncContext : DbContext
             .HasConstraintName("FK_Review_Customer");
 
         modelBuilder.Entity<Review>()
+
             .HasOne(r => r.Shop)
             .WithMany(o => o.ReviewReplys)
             .HasForeignKey(r => r.ShopId)

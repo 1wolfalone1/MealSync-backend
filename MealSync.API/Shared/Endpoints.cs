@@ -100,4 +100,7 @@ public static class Endpoints
     public const string SHOP_REJECT_ORDER = "shop-owner/order/{id:long}/reject";
     public const string SHOP_CONFIRM_ORDER = "shop-owner/order/{id:long}/confirm";
     public const string SHOP_CANCEL_ORDER = "shop-owner/order/{id:long}/cancel";
+
+    // Review
+    public const string REVIEW_ORDER = "customer/order/review";
 }
