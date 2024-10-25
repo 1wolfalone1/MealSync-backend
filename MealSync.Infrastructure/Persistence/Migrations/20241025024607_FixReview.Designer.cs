@@ -4,6 +4,7 @@ using MealSync.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealSync.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MealSyncContext))]
-    partial class MealSyncContextModelSnapshot : ModelSnapshot
+    [Migration("20241025024607_FixReview")]
+    partial class FixReview
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2135,10 +2138,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasColumnName("max_flags_before_ban");
 
-                    b.Property<int>("MaxWarningBeforeInscreaseFlag")
-                        .HasColumnType("int")
-                        .HasColumnName("max_warning_before_inscrease_flag");
-
                     b.Property<int>("TimeFrameDuration")
                         .HasColumnType("int")
                         .HasColumnName("time_frame_duration");
@@ -2889,15 +2888,15 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasForeignKey("CustomerId")
                         .HasConstraintName("FK_Review_Customer");
 
-                    b.HasOne("MealSync.Domain.Entities.Order", "Order")
-                        .WithMany("Reviews")
+                    b.HasOne("MealSync.Domain.Entities.Shop", "Shop")
+                        .WithMany("ReviewReplys")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Review_Order");
 
-                    b.HasOne("MealSync.Domain.Entities.Shop", "Shop")
-                        .WithMany("ReviewReplys")
+                    b.HasOne("MealSync.Domain.Entities.Order", "Order")
+                        .WithMany("Reviews")
                         .HasForeignKey("ShopId")
                         .HasConstraintName("FK_Review_Shop");
 

@@ -4,6 +4,7 @@ using MealSync.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealSync.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MealSyncContext))]
-    partial class MealSyncContextModelSnapshot : ModelSnapshot
+    [Migration("20241025071441_AddNewColumnToSystemConfig")]
+    partial class AddNewColumnToSystemConfig
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2889,15 +2892,15 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasForeignKey("CustomerId")
                         .HasConstraintName("FK_Review_Customer");
 
-                    b.HasOne("MealSync.Domain.Entities.Order", "Order")
-                        .WithMany("Reviews")
+                    b.HasOne("MealSync.Domain.Entities.Shop", "Shop")
+                        .WithMany("ReviewReplys")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Review_Order");
 
-                    b.HasOne("MealSync.Domain.Entities.Shop", "Shop")
-                        .WithMany("ReviewReplys")
+                    b.HasOne("MealSync.Domain.Entities.Order", "Order")
+                        .WithMany("Reviews")
                         .HasForeignKey("ShopId")
                         .HasConstraintName("FK_Review_Shop");
 

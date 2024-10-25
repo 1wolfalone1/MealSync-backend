@@ -85,4 +85,6 @@ public class Shop : BaseEntity
     public virtual ICollection<ShopCategory> ShopCategories { get; set; } = new List<ShopCategory>();
 
     public virtual ICollection<OptionGroup> OptionGroups { get; set; } = new List<OptionGroup>();
+
+    public virtual ICollection<Review> ReviewReplys { get; set; } = new List<Review>();
 }
