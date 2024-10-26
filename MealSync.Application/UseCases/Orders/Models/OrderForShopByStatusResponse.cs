@@ -24,6 +24,8 @@ public class OrderForShopByStatusResponse
 
     public DateTime IntendedReceiveDate { get; set; }
 
+    public DateTime CreatedDate { get; set; }
+
     public long DormitoryId { get; set; }
 
     public string DormitoryName { get; set; }
