@@ -72,7 +72,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             {
                 if (order.Status == OrderStatus.Pending)
                 {
-                    return await CancelOrderAsync(order, payment).ConfigureAwait(false);
+                    return await CancelOrderAsync(order, payment, request.Note).ConfigureAwait(false);
                 }
                 else if (order.Status == OrderStatus.Confirmed)
                 {
@@ -88,7 +88,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
 
                     if (now < endTime)
                     {
-                        return await CancelOrderAsync(order, payment).ConfigureAwait(false);
+                        return await CancelOrderAsync(order, payment, request.Note).ConfigureAwait(false);
                     }
                     else
                     {
@@ -104,7 +104,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
         }
     }
 
-    private async Task<Result<Result>> CancelOrderAsync(Order order, Payment payment)
+    private async Task<Result<Result>> CancelOrderAsync(Order order, Payment payment, string note)
     {
         string? refundMessage = string.Empty;
         bool isRefund;
@@ -164,6 +164,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             // Update order status to Cancelled
             order.Status = OrderStatus.Cancelled;
             order.IsRefund = isRefund;
+            order.Note = note;
             _orderRepository.Update(order);
 
             // Commit transaction
