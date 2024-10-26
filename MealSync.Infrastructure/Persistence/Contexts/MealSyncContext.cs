@@ -49,7 +49,7 @@ public class MealSyncContext : DbContext
 
     public virtual DbSet<OperatingSlot> OperatingSlots { get; set; }
 
-    public virtual DbSet<StaffDelivery> StaffDeliveries { get; set; }
+    public virtual DbSet<ShopDeliveryStaff> ShopDeliveryStaffs { get; set; }
 
     public virtual DbSet<Food> Foods { get; set; }
 
@@ -260,17 +260,17 @@ public class MealSyncContext : DbContext
             .HasForeignKey(sd => sd.DormitoryId)
             .HasConstraintName("FK_ShopDormitory_Dormitory");
 
-        modelBuilder.Entity<StaffDelivery>()
+        modelBuilder.Entity<ShopDeliveryStaff>()
             .HasOne(sd => sd.Shop)
-            .WithMany(so => so.StaffDeliveries)
+            .WithMany(so => so.ShopDeliveryStaffs)
             .HasForeignKey(sd => sd.ShopId)
-            .HasConstraintName("FK_StaffDelivery_Shop");
+            .HasConstraintName("FK_ShopDeliveryStaff_Shop");
 
-        modelBuilder.Entity<StaffDelivery>()
+        modelBuilder.Entity<ShopDeliveryStaff>()
             .HasOne(sd => sd.Account)
-            .WithOne(a => a.StaffDelivery)
-            .HasForeignKey<StaffDelivery>(sd => sd.Id)
-            .HasConstraintName("FK_StaffDelivery_Account");
+            .WithOne(a => a.ShopDeliveryStaff)
+            .HasForeignKey<ShopDeliveryStaff>(sd => sd.Id)
+            .HasConstraintName("FK_ShopDeliveryStaff_Account");
 
         modelBuilder.Entity<Food>()
             .HasOne(p => p.PlatformCategory)
@@ -428,10 +428,10 @@ public class MealSyncContext : DbContext
             .HasConstraintName("FK_Payment_Order");
 
         modelBuilder.Entity<DeliveryPackage>()
-            .HasOne(doc => doc.StaffDelivery)
+            .HasOne(doc => doc.ShopDeliveryStaff)
             .WithMany(sd => sd.DeliveryPackages)
-            .HasForeignKey(doc => doc.StaffDeliveryId)
-            .HasConstraintName("FK_DeliveryPackage_StaffDelivery");
+            .HasForeignKey(doc => doc.ShopDeliveryStaffId)
+            .HasConstraintName("FK_DeliveryPackage_ShopDeliveryStaff");
 
         modelBuilder.Entity<Review>()
             .HasOne(r => r.Customer)
@@ -464,10 +464,10 @@ public class MealSyncContext : DbContext
             .HasConstraintName("FK_Report_Customer");
 
         modelBuilder.Entity<Report>()
-            .HasOne(r => r.StaffDelivery)
+            .HasOne(r => r.ShopDeliveryStaff)
             .WithMany(sd => sd.Reports)
-            .HasForeignKey(r => r.StaffDeliveryId)
-            .HasConstraintName("FK_Report_StaffDelivery");
+            .HasForeignKey(r => r.ShopDeliveryStaffId)
+            .HasConstraintName("FK_Report_ShopDeliveryStaff");
 
         modelBuilder.Entity<Report>()
             .HasOne(r => r.Order)
