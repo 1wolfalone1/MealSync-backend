@@ -23,6 +23,8 @@ public class OrderDetail : BaseEntity
     [Column(TypeName = "text")]
     public string? Description { get; set; }
 
+    public string? Note { get; set; }
+
     public virtual Food Food { get; set; }
 
     public virtual Order Order { get; set; }
