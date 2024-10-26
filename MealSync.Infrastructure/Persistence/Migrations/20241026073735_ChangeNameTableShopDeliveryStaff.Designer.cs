@@ -4,6 +4,7 @@ using MealSync.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealSync.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MealSyncContext))]
-    partial class MealSyncContextModelSnapshot : ModelSnapshot
+    [Migration("20241026073735_ChangeNameTableShopDeliveryStaff")]
+    partial class ChangeNameTableShopDeliveryStaff
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -452,10 +455,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_date");
 
-                    b.Property<DateTime>("DeliveryDate")
-                        .HasColumnType("date")
-                        .HasColumnName("delivery_date");
-
                     b.Property<int>("EndTime")
                         .HasColumnType("int")
                         .HasColumnName("end_time");
@@ -471,10 +470,6 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.Property<int>("StartTime")
                         .HasColumnType("int")
                         .HasColumnName("start_time");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("status");
 
                     b.Property<long?>("UpdatedBy")
                         .HasColumnType("bigint")

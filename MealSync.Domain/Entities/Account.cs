@@ -52,7 +52,7 @@ public class Account : BaseEntity
 
     public virtual Moderator? Moderator { get; set; }
 
-    public virtual StaffDelivery? StaffDelivery { get; set; }
+    public virtual ShopDeliveryStaff? ShopDeliveryStaff { get; set; }
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 

@@ -1,6 +1,6 @@
 ﻿namespace MealSync.Domain.Enums;
 
-public enum StaffDeliveryStatus
+public enum ShopDeliveryStaffStatus
 {
     Free = 1,
     Busy = 2,
