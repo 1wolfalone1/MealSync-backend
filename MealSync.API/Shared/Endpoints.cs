@@ -55,6 +55,9 @@ public static class Endpoints
     public const string GET_SHOP_PROMOTION = "shop/{id:long}/promotion";
     public const string GET_SHOP_PROMOTION_BY_CONDITION = "shop/{id:long}/promotion/filter";
 
+    // Shop delivery staff
+    public const string GET_SHOP_DELIVER_STAFF_AVAILABLE = "shop/shop-delivery-staff/available";
+
     // Dormitory
     public const string ALL_DORMITORY = "dormitory/all";
 

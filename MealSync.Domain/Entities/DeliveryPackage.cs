@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Domain.Entities;
 
@@ -10,15 +11,20 @@ public class DeliveryPackage : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    public long? StaffDeliveryId { get; set; }
+    public long? ShopDeliveryStaffId { get; set; }
 
     public long? ShopId { get; set; }
+
+    [Column(TypeName = "date")]
+    public DateTime DeliveryDate { get; set; }
 
     public int StartTime { get; set; }
 
     public int EndTime { get; set; }
 
-    public virtual StaffDelivery? StaffDelivery { get; set; }
+    public DeliveryPackageStatus Status { get; set; }
+
+    public virtual ShopDeliveryStaff? ShopDeliveryStaff { get; set; }
 
     public virtual Shop? Shop { get; set; }
 

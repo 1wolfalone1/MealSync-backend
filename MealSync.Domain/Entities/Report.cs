@@ -15,7 +15,7 @@ public class Report : BaseEntity
 
     public long? CustomerId { get; set; }
 
-    public long? StaffDeliveryId { get; set; }
+    public long? ShopDeliveryStaffId { get; set; }
 
     public long OrderId { get; set; }
 
@@ -33,7 +33,7 @@ public class Report : BaseEntity
 
     public virtual Customer? Customer { get; set; }
 
-    public virtual StaffDelivery? StaffDelivery { get; set; }
+    public virtual ShopDeliveryStaff? ShopDeliveryStaff { get; set; }
 
     public virtual Order Order { get; set; }
 }

@@ -16,6 +16,15 @@ public class TimeFrameUtils
         return string.Format("{0}:{1}", hour.ToString().PadLeft(2,'0'), minute.ToString().PadRight(2, '0'));
     }
 
+    public static int GetCurrentHours()
+    {
+        var currentDate = GetCurrentDate();
+        var hour = currentDate.Hour * 100;
+        var minute = currentDate.Minute % 100;
+        return hour + minute;
+    }
+
+
     public static int GetTimeHoursInRound()
     {
         DateTimeOffset utcTime = DateTimeOffset.UtcNow;
