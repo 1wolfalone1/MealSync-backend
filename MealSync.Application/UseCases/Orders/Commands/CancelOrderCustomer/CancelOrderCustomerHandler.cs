@@ -72,7 +72,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             {
                 if (order.Status == OrderStatus.Pending)
                 {
-                    return await CancelOrderAsync(order, payment, request.Note).ConfigureAwait(false);
+                    return await CancelOrderAsync(order, payment, request.Reason).ConfigureAwait(false);
                 }
                 else if (order.Status == OrderStatus.Confirmed)
                 {
@@ -88,7 +88,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
 
                     if (now < endTime)
                     {
-                        return await CancelOrderAsync(order, payment, request.Note).ConfigureAwait(false);
+                        return await CancelOrderAsync(order, payment, request.Reason).ConfigureAwait(false);
                     }
                     else
                     {
