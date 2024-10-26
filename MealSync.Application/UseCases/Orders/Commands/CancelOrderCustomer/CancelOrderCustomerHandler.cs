@@ -104,7 +104,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
         }
     }
 
-    private async Task<Result<Result>> CancelOrderAsync(Order order, Payment payment, string note)
+    private async Task<Result<Result>> CancelOrderAsync(Order order, Payment payment, string reason)
     {
         string? refundMessage = string.Empty;
         bool isRefund;
@@ -164,7 +164,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             // Update order status to Cancelled
             order.Status = OrderStatus.Cancelled;
             order.IsRefund = isRefund;
-            order.Note = note;
+            order.Reason = reason;
             _orderRepository.Update(order);
 
             // Commit transaction
