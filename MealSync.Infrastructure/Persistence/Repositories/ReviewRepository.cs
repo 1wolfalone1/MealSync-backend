@@ -68,4 +68,41 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
 
         return (totalCount, reviews);
     }
+
+    public async Task<ReviewOverviewDto> GetReviewOverviewByShopId(long shopId)
+    {
+        var query = DbSet.Where(r => r.ShopId == shopId);
+
+        var overview = await query
+            .GroupBy(r => 1)
+            .Select(g => new
+            {
+                TotalReview = g.Count(),
+                TotalRating = g.Sum(r => (int)r.Rating),
+                TotalOneStar = g.Count(r => r.Rating == RatingRanges.OneStar),
+                TotalTwoStar = g.Count(r => r.Rating == RatingRanges.TwoStar),
+                TotalThreeStar = g.Count(r => r.Rating == RatingRanges.ThreeStar),
+                TotalFourStar = g.Count(r => r.Rating == RatingRanges.FourStar),
+                TotalFiveStar = g.Count(r => r.Rating == RatingRanges.FiveStar),
+            })
+            .FirstOrDefaultAsync().ConfigureAwait(false);
+
+        if (overview == null || overview.TotalReview == 0)
+        {
+            return new ReviewOverviewDto();
+        }
+
+        var ratingAverage = Math.Round((double)overview.TotalRating / overview.TotalReview, 1);
+
+        return new ReviewOverviewDto
+        {
+            TotalReview = overview.TotalReview,
+            RatingAverage = ratingAverage,
+            TotalOneStar = overview.TotalOneStar,
+            TotalTwoStar = overview.TotalTwoStar,
+            TotalThreeStar = overview.TotalThreeStar,
+            TotalFourStar = overview.TotalFourStar,
+            TotalFiveStar = overview.TotalFiveStar,
+        };
+    }
 }

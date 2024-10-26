@@ -27,10 +27,10 @@ public class OrderController : BaseApiController
     }
 
     [HttpPut(Endpoints.CANCEL_ORDER)]
-    // [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
-    public async Task<IActionResult> CancelOrder(long id)
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> CancelOrder(long id, string note)
     {
-        return HandleResult(await Mediator.Send(new CancelOrderCustomerCommand { Id = id }).ConfigureAwait(false));
+        return HandleResult(await Mediator.Send(new CancelOrderCustomerCommand { Id = id, Note = note}).ConfigureAwait(false));
     }
 
     [HttpGet(Endpoints.GET_IPN)]

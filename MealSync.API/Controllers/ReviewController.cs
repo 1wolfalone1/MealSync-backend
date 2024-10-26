@@ -1,6 +1,7 @@
 using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Reviews.Commands.ReviewOrderOfCustomer;
+using MealSync.Application.UseCases.Reviews.Queries.GetOverviewOfShop;
 using MealSync.Application.UseCases.Reviews.Queries.GetReviewOfShop;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +28,16 @@ public class ReviewController : BaseApiController
             Filter = filter,
             PageIndex = pageIndex,
             PageSize = pageSize,
+        }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.REVIEW_SUMMARY_OF_SHOP)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> GetReviewSummaryOfShop(int shopId)
+    {
+        return this.HandleResult(await Mediator.Send(new GetOverviewOfShopQuery
+        {
+            ShopId = shopId,
         }).ConfigureAwait(false));
     }
 }
