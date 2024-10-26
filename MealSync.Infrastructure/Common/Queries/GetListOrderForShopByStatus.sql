@@ -85,6 +85,8 @@ SELECT
     o.start_time AS StartTime,
     o.end_time AS EndTime,
     o.intended_receive_date AS IntendedReceiveDate,
+    d.id AS DormitoryId,
+    d.name AS DormitoryName,
     (
         SELECT
             Count(*)
@@ -104,7 +106,12 @@ SELECT
     od.quantity AS Quantity
 FROM
     OrdersOfShop o
+    INNER JOIN building b ON o.building_id = b.id
+    INNER JOIN dormitory d ON b.dormitory_id = d.id
     INNER JOIN order_detail od ON o.id = od.order_id
     INNER JOIN food f ON od.food_id = f.id
+ORDER BY
+    o.start_time ASC,
+    o.order_date ASC
 LIMIT
     @PageSize OFFSET @OffSet;

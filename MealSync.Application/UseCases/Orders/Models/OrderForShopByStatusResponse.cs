@@ -24,6 +24,10 @@ public class OrderForShopByStatusResponse
 
     public DateTime IntendedReceiveDate { get; set; }
 
+    public long DormitoryId { get; set; }
+
+    public string DormitoryName { get; set; }
+
     public int StartTime { get; set; }
 
     private int _endTime; // Backing field
