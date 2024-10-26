@@ -32,7 +32,7 @@ public class GetOverviewOfShopHandler : IQueryHandler<GetOverviewOfShopQuery, Re
         }
         else
         {
-            return Result.Success(_reviewRepository.GetReviewOverviewByShopId(request.ShopId));
+            return Result.Success(await _reviewRepository.GetReviewOverviewByShopId(request.ShopId).ConfigureAwait(false));
         }
     }
 }
