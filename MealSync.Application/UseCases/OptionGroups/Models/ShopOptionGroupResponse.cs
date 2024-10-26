@@ -18,6 +18,8 @@ public class ShopOptionGroupResponse
 
     public int MaxChoices { get; set; }
 
+    public DateTimeOffset CreatedDate { get; set; }
+
     public int NumOfItemLinked { get; set; }
 
     public List<OptionGroupResponse.OptionResponse> Options { get; set; }

@@ -14,5 +14,5 @@ public interface IShopCategoryRepository : IBaseRepository<ShopCategory>
 
     bool CheckExistName(string name, long shopId, long? id = 0);
 
-    Task<(int TotalCount, IEnumerable<ShopCategory> ShopCategories)> GetAllShopCategoriesAsync(int pageIndex, int pageSize, string? name);
+    Task<(int TotalCount, IEnumerable<ShopCategory> ShopCategories)> GetAllShopCategoriesAsync(int pageIndex, int pageSize, string? name, long shopId);
 }
