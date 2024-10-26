@@ -21,6 +21,15 @@ public class TestController : BaseApiController
         _cacheService = cacheService;
     }
 
+    [HttpGet("/")]
+    public async Task<IActionResult> DefaultUrl()
+    {
+        return Ok(new
+        {
+            Version = "0.0.1",
+        });
+    }
+
     [HttpGet("hehe")]
     public async Task<IActionResult> GetAccount()
     {
