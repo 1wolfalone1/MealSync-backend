@@ -67,7 +67,7 @@ public class Shop : BaseEntity
 
     public virtual ICollection<ShopDormitory> ShopDormitories { get; set; } = new List<ShopDormitory>();
 
-    public virtual ICollection<StaffDelivery> StaffDeliveries { get; set; } = new List<StaffDelivery>();
+    public virtual ICollection<ShopDeliveryStaff> ShopDeliveryStaffs { get; set; } = new List<ShopDeliveryStaff>();
 
     public virtual ICollection<Food> Foods { get; set; } = new List<Food>();
 

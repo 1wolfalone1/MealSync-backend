@@ -4,15 +4,15 @@ using MealSync.Domain.Enums;
 
 namespace MealSync.Domain.Entities;
 
-[Table("staff_delivery")]
-public class StaffDelivery : BaseEntity
+[Table("shop_delivery_staff")]
+public class ShopDeliveryStaff : BaseEntity
 {
     [Key]
     public long Id { get; set; }
 
     public long ShopId { get; set; }
 
-    public StaffDeliveryStatus Status { get; set; }
+    public ShopDeliveryStaffStatus Status { get; set; }
 
     public virtual Account Account { get; set; }
 
