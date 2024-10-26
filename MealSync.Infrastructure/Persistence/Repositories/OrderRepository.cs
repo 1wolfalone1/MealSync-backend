@@ -94,6 +94,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                         EndDate = o.Promotion.EndDate,
                         ApplyType = o.Promotion.ApplyType,
                     },
+                Reviews = o.Reviews.Select(od => new Review
+                {
+                    Id = od.Id,
+                }).ToList(),
             }).FirstOrDefaultAsync();
     }
 
@@ -129,6 +133,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                     LogoUrl = o.Shop.LogoUrl,
                 },
                 OrderDetails = o.OrderDetails.Select(od => new OrderDetail
+                {
+                    Id = od.Id,
+                }).ToList(),
+                Reviews = o.Reviews.Select(od => new Review
                 {
                     Id = od.Id,
                 }).ToList(),

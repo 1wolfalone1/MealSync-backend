@@ -4,6 +4,8 @@ namespace MealSync.Application.Common.Utils;
 
 public static class TimeUtils
 {
+    public const int TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS = 1;
+
     public static bool IsValidTime(int time)
     {
         int hours = time / 100; // Extract hours (first two digits)

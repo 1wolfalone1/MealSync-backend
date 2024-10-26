@@ -68,14 +68,18 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
 
                         if (shop.IsAutoOrderConfirmation && shop.Status == ShopStatus.Active)
                         {
-                            var startFrameMinutes = TimeUtils.ConvertToMinutes(payment.Order.StartTime); // Total minutes for start time
-                            var minOrderMinutes = shop.MinOrderHoursInAdvance * 60; // Min constraint in minutes
-                            var maxOrderMinutes = shop.MaxOrderHoursInAdvance * 60; // Max constraint in minutes
-                            var orderTimeMinutes = (payment.Order.CreatedDate.Hour * 60) + payment.Order.CreatedDate.Minute; // Convert order time to total minutes
-                            var minAllowedTime = startFrameMinutes - maxOrderMinutes < 0 ? 0 : startFrameMinutes - maxOrderMinutes;
-                            var maxAllowedTime = startFrameMinutes - minOrderMinutes < 0 ? 0 : startFrameMinutes - minOrderMinutes;
+                            var intendedReceiveDateTime = new DateTime(
+                                payment.Order.IntendedReceiveDate.Year,
+                                payment.Order.IntendedReceiveDate.Month,
+                                payment.Order.IntendedReceiveDate.Day,
+                                payment.Order.StartTime / 100,
+                                payment.Order.StartTime % 100,
+                                0);
 
-                            if (orderTimeMinutes >= minAllowedTime && orderTimeMinutes <= maxAllowedTime)
+                            var minAllowed = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MaxOrderHoursInAdvance);
+                            var maxAllowed = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MinOrderHoursInAdvance);
+
+                            if (payment.Order.CreatedDate >= minAllowed && payment.Order.CreatedDate <= maxAllowed)
                             {
                                 payment.Order.Status = OrderStatus.Confirmed;
                             }
