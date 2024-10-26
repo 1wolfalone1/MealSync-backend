@@ -41,7 +41,7 @@ public class TimeFrameUtils
         return roundedTime;
     }
 
-    public static DateTimeOffset GetCurrentTime()
+    public static DateTimeOffset GetCurrentDate()
     {
         DateTimeOffset utcTime = DateTimeOffset.UtcNow;
         return utcTime.ToOffset(TimeSpan.FromHours(7));
@@ -56,4 +56,14 @@ public class TimeFrameUtils
 
         return endTime;
     }
+
+    public static int ConvertMinutesToHour(int minutes)
+    {
+        int hours = minutes / 60;
+        int remainingMinutes = minutes % 60;
+
+        // Combine hours and remaining minutes in the format hhMM
+        return (hours * 100) + remainingMinutes;
+    }
+
 }

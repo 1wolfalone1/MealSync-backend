@@ -12,5 +12,7 @@ public class ShopCategoryForShopWebResponse
 
     public int DisplayOrder { get; set; }
 
+    public DateTimeOffset CreatedDate { get; set; }
+
     public int NumberFoodLinked { get; set; }
 }

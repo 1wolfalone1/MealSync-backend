@@ -82,7 +82,7 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
             new
             {
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
-                CurrentHours = int.Parse(TimeFrameUtils.GetCurrentTime().ToString("HHmm")),
+                CurrentHours = int.Parse(TimeFrameUtils.GetCurrentDate().ToString("HHmm")),
                 StartLastTwoHour = TimeFrameUtils.GetTimeHoursInRound(),
                 FilterMode = request.FilterMode,
             },

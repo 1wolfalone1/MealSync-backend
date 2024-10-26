@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace MealSync.Infrastructure.Settings;
 
@@ -21,9 +22,11 @@ public class FirebaseConfigLoader
             Environment.SetEnvironmentVariable("FIREBASE_AUTH_PROVIDER_CERT_URL", jsonObject["auth_provider_x509_cert_url"]?.ToString());
             Environment.SetEnvironmentVariable("FIREBASE_CLIENT_CERT_URL", jsonObject["client_x509_cert_url"]?.ToString());
         }
-        catch (Exception e)
+        catch
         {
-            Console.WriteLine(e);
+            using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+            ILogger logger = factory.CreateLogger<FirebaseConfigLoader>();
+            logger.LogError($"Vui lòng cung cấp file firebase_credentials.json");
         }
     }
 }
