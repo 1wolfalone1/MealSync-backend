@@ -95,7 +95,7 @@ SELECT
     p.maximum_apply_value AS MaximumApplyValue,
     -- Delivery Package
     dp.id AS DeliveryPackageSection,
-    dp.staff_delivery_id AS Id,
+    dp.shop_delivery_staff_id AS Id,
     a2.full_name AS FullName,
     a2.phone_number AS PhoneNumber,
     a2.email AS Email,
@@ -120,4 +120,4 @@ FROM
     LEFT JOIN promotion p ON o.promotion_id = p.id
     INNER JOIN account a ON a.id = o.customer_id
     LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
-    LEFT JOIN account a2 ON dp.staff_delivery_id = a2.id;
+    LEFT JOIN account a2 ON dp.shop_delivery_staff_id = a2.id;
