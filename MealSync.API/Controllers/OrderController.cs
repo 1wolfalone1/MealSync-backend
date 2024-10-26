@@ -4,6 +4,7 @@ using MealSync.Application.UseCases.Orders.Commands.CancelOrderCustomer;
 using MealSync.Application.UseCases.Orders.Commands.Create;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCancelOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopConfirmOrder;
+using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopPreparingOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRejectOrder;
 using MealSync.Application.UseCases.Orders.Commands.UpdatePaymentStatusIPN;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailCustomer;
@@ -95,6 +96,14 @@ public class OrderController : BaseApiController
     [HttpPut(Endpoints.SHOP_CANCEL_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> ShopCancelOrder([FromBody]ShopCancelOrderCommand command, long id)
+    {
+        command.Id = id;
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.SHOP_PREPARING_ORDER)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> ShopChangeToPreparingOrder([FromBody]ShopPreparingOrderCommand command, long id)
     {
         command.Id = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));

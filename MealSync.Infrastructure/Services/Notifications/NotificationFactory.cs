@@ -139,4 +139,24 @@ public class NotificationFactory : INotificationFactory
             IsSave = true,
         };
     }
+
+    public Notification CreateOrderPreparingNotification(Order order, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_PREPARING.GetDescription(), order.Id),
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
 }

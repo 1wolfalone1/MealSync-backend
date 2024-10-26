@@ -1,0 +1,113 @@
+﻿using System.Net;
+using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Constants;
+using MealSync.Application.Common.Enums;
+using MealSync.Application.Common.Repositories;
+using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Notifications;
+using MealSync.Application.Common.Utils;
+using MealSync.Application.Shared;
+using MealSync.Domain.Enums;
+using MealSync.Domain.Exceptions.Base;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopPreparingOrder;
+
+public class ShopPreparingOrderHandler : ICommandHandler<ShopPreparingOrderCommand, Result>
+{
+    private readonly IOrderRepository _orderRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<Result> _logger;
+    private readonly ICurrentPrincipalService _currentPrincipalService;
+    private readonly INotifierService _notifierService;
+    private readonly INotificationFactory _notificationFactory;
+    private readonly IShopRepository _shopRepository;
+    private readonly ISystemResourceRepository _systemResourceRepository;
+
+    public ShopPreparingOrderHandler(IOrderRepository orderRepository, IUnitOfWork unitOfWork, ILogger<Result> logger, ICurrentPrincipalService currentPrincipalService, INotifierService notifierService,
+        INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository)
+    {
+        _orderRepository = orderRepository;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+        _currentPrincipalService = currentPrincipalService;
+        _notifierService = notifierService;
+        _notificationFactory = notificationFactory;
+        _shopRepository = shopRepository;
+        _systemResourceRepository = systemResourceRepository;
+    }
+
+    public async Task<Result<Result>> Handle(ShopPreparingOrderCommand request, CancellationToken cancellationToken)
+    {
+        // Validate
+        Validate(request);
+
+        var order = _orderRepository.Get(o => o.Id == request.Id)
+            .Include(o => o.Customer).Single();
+
+        if (!request.IsConfirm.Value)
+        {
+            if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDate().Date)
+            {
+                return Result.Warning(new
+                {
+                    Code = MessageCode.W_ORDER_NOT_IN_DATE_PREPARING.GetDescription(),
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_NOT_IN_DATE_PREPARING.GetDescription(), order.Id),
+                });
+            }
+            else
+            {
+                var currentTime = TimeFrameUtils.GetCurrentDate();
+                var currentTimeInMinutes = currentTime.Hour * 60 + currentTime.Minute;
+                var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
+                if (startTimeInMinutes - currentTimeInMinutes > OrderConstant.TIME_SHOP_CANCEL_ORDER_CONFIRMED_IN_MINUTES)
+                {
+                    var timeEarlyInHours = TimeFrameUtils.ConvertMinutesToHour(startTimeInMinutes - currentTimeInMinutes);
+                    return Result.Warning(new
+                    {
+                        Code = MessageCode.W_ORDER_PREPARING_EARLY.GetDescription(),
+                        Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_PREPARING_EARLY.GetDescription(),
+                            new string[] { order.Id.ToString(), TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), TimeFrameUtils.GetTimeHoursFormat(timeEarlyInHours) }),
+                    });
+                }
+            }
+        }
+
+        try
+        {
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+            order.Status = OrderStatus.Preparing;
+            _orderRepository.Update(order);
+            await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+
+            // Noti for customer
+            var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
+            var noti = _notificationFactory.CreateOrderPreparingNotification(order, shop);
+            _notifierService.NotifyAsync(noti);
+
+            return Result.Success(new
+            {
+                Code = MessageCode.I_ORDER_SHOP_CHANGE_PREPARING_SUCCESS.GetDescription(),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_SHOP_CHANGE_PREPARING_SUCCESS.GetDescription(), order.Id),
+            });
+        }
+        catch (Exception e)
+        {
+            _unitOfWork.RollbackTransaction();
+            _logger.LogError(e, e.Message);
+            throw;
+        }
+    }
+
+    private void Validate(ShopPreparingOrderCommand request)
+    {
+        var order = _orderRepository.Get(o => o.Id == request.Id && o.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault();
+        if (order == default)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.Id }, HttpStatusCode.NotFound);
+
+        if (order.Status != OrderStatus.Confirmed)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.Id });
+    }
+
+}
