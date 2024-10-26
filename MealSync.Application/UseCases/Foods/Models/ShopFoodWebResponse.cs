@@ -25,6 +25,8 @@ public class ShopFoodWebResponse
 
     public bool IsSoldOut { get; set; }
 
+    public DateTimeOffset CreatedDate { get; set; }
+
     public ShopCategoryForShopFoodWeb ShopCategory { get; set; }
 
     public List<OperatingSlotForShopFoodWeb> OperatingSlots { get; set; }

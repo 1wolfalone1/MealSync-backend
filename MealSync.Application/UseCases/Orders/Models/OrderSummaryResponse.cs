@@ -20,6 +20,8 @@ public class OrderSummaryResponse
 
     public int TotalOrderDetail { get; set; }
 
+    public bool IsReviewAllowed { get; set; }
+
     public long OrderDate { get; set; }
 
     public long IntendedReceiveDate { get; set; }

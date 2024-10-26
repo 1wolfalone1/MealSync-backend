@@ -265,11 +265,20 @@ public enum MessageCode
     [Description("I-Order-ShopCancelOrderSuccess")]
     I_ORDER_SHOP_CACEL_ORDER_SUCCESS,
 
+    [Description("I-Order-ChangePreparingSuccess")]
+    I_ORDER_SHOP_CHANGE_PREPARING_SUCCESS,
+
     [Description("E-Order-NotInCorrectStatus")]
     E_ORDER_NOT_IN_CORRECT_STATUS,
 
     [Description("W-Order-CancelOrderLessThanAHours")]
     W_ORDER_CANCEL_ORDER_LESS_THAN_A_HOUR,
+
+    [Description("W-Order-NotInDatePreparing")]
+    W_ORDER_NOT_IN_DATE_PREPARING,
+
+    [Description("W-Order-PreparingEarly")]
+    W_ORDER_PREPARING_EARLY,
 
     // Promotion
     [Description("E-Promotion-NotFound")]

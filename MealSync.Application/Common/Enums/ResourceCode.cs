@@ -70,4 +70,7 @@ public enum ResourceCode
 
     [Description("Notification-Order-RefundFail")]
     NOTIFICATION_ORDER_REFUND_FAIL,
+
+    [Description("Notification-Order-Preparing")]
+    NOTIFICATION_ORDER_PREPARING,
 }

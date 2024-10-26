@@ -32,6 +32,10 @@ public class DetailOrderCustomerResponse
 
     public long IntendedReceiveDate { get; set; }
 
+    public bool IsReviewAllowed { get; set; }
+
+    public bool IsCancelAllowed { get; set; }
+
     public int StartTime { get; set; }
 
     public int EndTime { get; set; }

@@ -3,6 +3,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Services.Payments.VnPay;
 using MealSync.Application.Common.Services.Payments.VnPay.Models;
 using MealSync.Application.Common.Utils;
@@ -23,12 +24,18 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly ILogger<CancelOrderCustomerHandler> _logger;
-    private const int TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS = 1;
+    private readonly IAccountRepository _accountRepository;
+    private readonly INotificationFactory _notificationFactory;
+    private readonly INotifierService _notifierService;
+    private readonly IBuildingRepository _buildingRepository;
+    private readonly IEmailService _emailService;
 
     public CancelOrderCustomerHandler(
         IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService,
         IVnPayPaymentService paymentService, IPaymentRepository paymentRepository, IUnitOfWork unitOfWork,
-        ISystemResourceRepository systemResourceRepository, ILogger<CancelOrderCustomerHandler> logger)
+        ISystemResourceRepository systemResourceRepository, ILogger<CancelOrderCustomerHandler> logger,
+        IAccountRepository accountRepository, INotificationFactory notificationFactory, INotifierService notifierService,
+        IBuildingRepository buildingRepository, IEmailService emailService)
     {
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
@@ -37,6 +44,11 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
         _unitOfWork = unitOfWork;
         _systemResourceRepository = systemResourceRepository;
         _logger = logger;
+        _accountRepository = accountRepository;
+        _notificationFactory = notificationFactory;
+        _notifierService = notifierService;
+        _buildingRepository = buildingRepository;
+        _emailService = emailService;
     }
 
     public async Task<Result<Result>> Handle(CancelOrderCustomerCommand request, CancellationToken cancellationToken)
@@ -65,44 +77,22 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                 else if (order.Status == OrderStatus.Confirmed)
                 {
                     var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
-                    var currentTimeInMinutes = (now.Hour * 60) + now.Minute;
-                    var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
-                    var deadlineInMinutes = startTimeInMinutes - (TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS * 60);
+                    var intendedReceiveDateTime = new DateTime(
+                        order.IntendedReceiveDate.Year,
+                        order.IntendedReceiveDate.Month,
+                        order.IntendedReceiveDate.Day,
+                        order.StartTime / 100,
+                        order.StartTime % 100,
+                        0);
+                    var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-TimeUtils.TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS);
 
-                    if (order.OrderDate.Day == order.IntendedReceiveDate.Day || now.Day == order.IntendedReceiveDate.Day)
+                    if (now < endTime)
                     {
-                        if (deadlineInMinutes < 0)
-                        {
-                            deadlineInMinutes = 0;
-                        }
-
-                        if (currentTimeInMinutes < deadlineInMinutes)
-                        {
-                            return await CancelOrderAsync(order, payment).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
-                        }
+                        return await CancelOrderAsync(order, payment).ConfigureAwait(false);
                     }
                     else
                     {
-                        if (deadlineInMinutes < 0)
-                        {
-                            deadlineInMinutes = 1440 + deadlineInMinutes;
-                            if (currentTimeInMinutes < deadlineInMinutes)
-                            {
-                                return await CancelOrderAsync(order, payment).ConfigureAwait(false);
-                            }
-                            else
-                            {
-                                throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
-                            }
-                        }
-                        else
-                        {
-                            return await CancelOrderAsync(order, payment).ConfigureAwait(false);
-                        }
+                        throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_OVERDUE_CANCEL_ORDER.GetDescription(), new object[] { TimeUtils.TIME_CANCEL_ORDER_CONFIRMED_IN_HOURS });
                     }
                 }
                 else
@@ -160,6 +150,12 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                 {
                     refundPayment.Status = PaymentStatus.PaidFail;
                     refundMessage = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_REFUND_FAIL.GetDescription());
+
+                    // Get moderator account to send mail
+                    await SendEmailAnnounceModeratorAsync(order).ConfigureAwait(false);
+
+                    // Send notification for moderator
+                    await NotifyAnnounceRefundFailAsync(order).ConfigureAwait(false);
                 }
 
                 await _paymentRepository.AddAsync(refundPayment).ConfigureAwait(false);
@@ -186,6 +182,33 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             _unitOfWork.RollbackTransaction();
             _logger.LogError(e, e.Message);
             throw new("Internal Server Error");
+        }
+    }
+
+    private async Task SendEmailAnnounceModeratorAsync(Order order)
+    {
+        var building = _buildingRepository.GetById(order.BuildingId);
+        var moderators = _accountRepository.GetAccountsOfModeratorByDormitoryId(building!.DormitoryId);
+        if (moderators != default && moderators.Count > 0)
+        {
+            foreach (var moderator in moderators)
+            {
+                _emailService.SendEmailToAnnounceModeratorRefundFail(moderator.Email, order.Id);
+            }
+        }
+    }
+
+    private async Task NotifyAnnounceRefundFailAsync(Order order)
+    {
+        var building = _buildingRepository.GetById(order.BuildingId);
+        var moderators = _accountRepository.GetAccountsOfModeratorByDormitoryId(building!.DormitoryId);
+        if (moderators != default && moderators.Count > 0)
+        {
+            foreach (var moderator in moderators)
+            {
+                var notification = _notificationFactory.CreateRefundFaillNotification(order, moderator);
+                await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
+            }
         }
     }
 }

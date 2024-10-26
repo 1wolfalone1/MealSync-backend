@@ -15,4 +15,6 @@ public interface INotificationFactory
     Notification CreateOrderConfirmNotification(Order order, Shop shop);
 
     Notification CreateRefundFaillNotification(Order order, Account accMod);
+
+    Notification CreateOrderPreparingNotification(Order order, Shop shop);
 }
