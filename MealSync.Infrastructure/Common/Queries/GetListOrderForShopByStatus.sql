@@ -44,7 +44,12 @@ WITH OrdersOfShop AS (
         start_time,
         end_time,
         intended_receive_date,
-        created_date
+        created_date,
+        ROW_NUMBER() OVER (
+            ORDER BY
+                o.id
+        ) AS RowNum,
+            COUNT(id) OVER () AS TotalPages
     FROM
         `order` o
     WHERE
@@ -69,7 +74,6 @@ WITH OrdersOfShop AS (
     ORDER BY
         o.start_time ASC,
         o.order_date ASC
-    LIMIT @PageSize OFFSET @OffSet
 )
 SELECT
     -- Order
@@ -111,6 +115,8 @@ FROM
     INNER JOIN dormitory d ON b.dormitory_id = d.id
     INNER JOIN order_detail od ON o.id = od.order_id
     INNER JOIN food f ON od.food_id = f.id
+WHERE
+    RowNum BETWEEN (@PageIndex - 1) * @PageSize + 1 AND @PageIndex * @PageSize
 ORDER BY
     o.start_time ASC,
     o.order_date ASC;
