@@ -192,7 +192,7 @@ public class NotificationFactory : INotificationFactory
             AccountId = order.ShopId,
             ReferenceId = order.Id,
             Title = NotificationConstant.ORDER_TITLE,
-            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_SHOP_DELIVERED.GetDescription(), new string[] { order.Id.ToString(), nameOfDeliver}),
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_SHOP_DELIVERED.GetDescription(), new string[] { order.Id.ToString(), nameOfDeliver }),
             ImageUrl = accShip.AvatarUrl,
             Data = JsonConvert.SerializeObject(orderNotification),
             Type = NotificationTypes.SendToShop,
@@ -236,6 +236,67 @@ public class NotificationFactory : INotificationFactory
             ImageUrl = shop.LogoUrl,
             Data = JsonConvert.SerializeObject(orderNotification),
             Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateOrderDeliveryFailedToCustomerNotification(Order order, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_DELIVERY_FAIL_TO_CUSTOMER.GetDescription(), order.Id),
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateOrderDeliveryFailedToShopNotification(Order order, Account accShip, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        var nameOfDeliver = accShip.Id == order.ShopId ? "bạn" : accShip.FullName;
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_DELIVERY_FAIL_TO_SHOP.GetDescription(), new object[] { order.Id, nameOfDeliver }),
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateOrderDeliveryFailedToModeratorNotification(Order order, Account accMod, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = accMod.Id,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_DELIVERY_FAIL_TO_MODERATOR.GetDescription(), new object[] { order.Id, shop.Id }),
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToModerator,
             EntityType = NotificationEntityTypes.Order,
             IsSave = true,
         };
