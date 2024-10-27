@@ -56,6 +56,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
                     ImageUrls = string.IsNullOrEmpty(r.ImageUrl)
                         ? new List<string>()
                         : r.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList(),
+                    CreatedDate = r.CreatedDate.AddHours(-7).ToUnixTimeMilliseconds(),
                 }).ToList(),
             });
 

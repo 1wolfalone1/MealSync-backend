@@ -1,3 +1,5 @@
+using MealSync.Application.UseCases.Customers.Commands.UpdateAvatar;
+
 namespace MealSync.API.Controllers;
 
 using MealSync.API.Identites;
@@ -14,5 +16,15 @@ public class CustomerController : BaseApiController
     public async Task<IActionResult> GetCustomerInfo()
     {
         return HandleResult(await Mediator.Send(new GetCustomerInfoQuery()).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_AVATAR)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> UpdateCustomerAvatar(IFormFile file)
+    {
+        return this.HandleResult(await this.Mediator.Send(new UpdateAvatarCommand
+        {
+            File = file,
+        }).ConfigureAwait(false));
     }
 }

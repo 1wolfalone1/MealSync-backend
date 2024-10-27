@@ -15,4 +15,13 @@ public class CustomerInfoResponse
     public string? FullName { get; set; }
 
     public Genders Genders { get; set; }
+
+    public BuildingResponse Building { get; set; }
+
+    public class BuildingResponse
+    {
+        public long Id { get; set; }
+
+        public string Name { get; set; }
+    }
 }

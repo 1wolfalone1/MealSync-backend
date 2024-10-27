@@ -11,7 +11,7 @@ public class ReviewOrderOfCustomerCommand : ICommand<Result>
 
     public RatingRanges Rating { get; set; }
 
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
 
-    public IFormFile[] Images { get; set; }
+    public IFormFile[]? Images { get; set; }
 }
