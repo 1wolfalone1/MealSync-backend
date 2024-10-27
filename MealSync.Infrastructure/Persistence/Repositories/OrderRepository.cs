@@ -46,6 +46,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                     BasicPrice = od.BasicPrice,
                     TotalPrice = od.TotalPrice,
                     Description = od.Description,
+                    Note = od.Note,
                     Food = new Food
                     {
                         Name = od.Food.Name,

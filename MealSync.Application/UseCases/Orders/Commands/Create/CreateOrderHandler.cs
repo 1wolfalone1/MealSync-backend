@@ -196,17 +196,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 _promotionRepository.Update(promotion);
             }
 
-            // Update total order of shop
-            shop.TotalOrder += 1;
-            _shopRepository.Update(shop);
-
-            // Update total order of food
-            foreach (var food in validateFoodResult.foods)
-            {
-                food.TotalOrder += 1;
-                _foodRepository.Update(food);
-            }
-
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
             CreateOrderResponse response = new CreateOrderResponse()
@@ -360,11 +349,10 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         return default;
     }
 
-    private async Task<(double TotalFoodPrice, List<OrderDetail> OrderDetails, List<Food> foods)> ValidateFoodRequest(
+    private async Task<(double TotalFoodPrice, List<OrderDetail> OrderDetails)> ValidateFoodRequest(
         CreateOrderCommand request, OperatingSlot? shopOperatingSlot)
     {
         var orderDetails = new List<OrderDetail>();
-        var foods = new List<Food>();
         double totalFoodPrice = 0;
 
         foreach (var foodRequest in request.Foods)
@@ -415,7 +403,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                         // Add the food price to the total price
                         totalFoodPrice += food.Price * foodRequest.Quantity;
                         totalPriceOrderDetail += food.Price * foodRequest.Quantity;
-                        foods.Add(food);
                     }
 
                     var optionGroupSelectedIds = new List<long>();
@@ -593,6 +580,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                         BasicPrice = food.Price,
                         TotalPrice = totalPriceOrderDetail,
                         Description = description,
+                        Note = foodRequest.Note,
                         OrderDetailOptions = orderDetailOptions,
                     });
                 }
@@ -605,7 +593,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         }
         else
         {
-            return (totalFoodPrice, orderDetails, foods);
+            return (totalFoodPrice, orderDetails);
         }
     }
 
