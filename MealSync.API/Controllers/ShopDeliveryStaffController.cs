@@ -1,6 +1,6 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
-using MealSync.Application.UseCases.Orders.Queries.GetListShopStaffForShop;
+using MealSync.Application.UseCases.ShopDeliveryStaffs.Queries.GetListShopStaffForShop;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

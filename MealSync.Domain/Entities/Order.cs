@@ -67,6 +67,8 @@ public class Order : BaseEntity
 
     public string? Reason { get; set; }
 
+    public string? ReasonIdentity { get; set; }
+
     public virtual Promotion? Promotion { get; set; }
 
     public virtual Shop Shop { get; set; }
