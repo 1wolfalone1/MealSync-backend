@@ -43,7 +43,8 @@ WITH OrdersOfShop AS (
         completed_at,
         start_time,
         end_time,
-        intended_receive_date
+        intended_receive_date,
+        created_date
     FROM
         `order` o
     WHERE
@@ -55,7 +56,7 @@ WITH OrdersOfShop AS (
         AND o.status IN @Status
         AND (
             @OrderId IS NOT NULL
-            AND o.id LIKE CONCAT('%', CONCAT(@OrderId, '%'))
+            AND CONCAT('MS-', o.id) LIKE CONCAT('%', @OrderId, '%')
             OR @PhoneNumber IS NOT NULL
             AND o.phone_number LIKE CONCAT('%', CONCAT(@PhoneNumber, '%'))
             OR @OrderId IS NULL
@@ -63,8 +64,6 @@ WITH OrdersOfShop AS (
         )
         AND (
             o.start_time >= @StartTime
-            AND o.start_time <= @EndTime
-            OR o.end_time >= @StartTime
             AND o.end_time <= @EndTime
         )
     ORDER BY
@@ -85,6 +84,7 @@ SELECT
     o.start_time AS StartTime,
     o.end_time AS EndTime,
     o.intended_receive_date AS IntendedReceiveDate,
+    o.created_date AS CreatedDate,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
     (
