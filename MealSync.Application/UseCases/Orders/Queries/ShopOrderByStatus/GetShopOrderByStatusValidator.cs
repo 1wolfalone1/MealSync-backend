@@ -7,6 +7,6 @@ public class GetShopOrderByStatusValidator : AbstractValidator<GetShopOrderBySta
     public GetShopOrderByStatusValidator()
     {
         RuleFor(x => x.Status)
-            .ForEach(x => x.IsInEnum().WithMessage("Vui lòng cung cấp danh sách status từ 1 đến 11"));
+            .ForEach(x => x.IsInEnum().WithMessage("Vui lòng cung cấp danh sách status từ 1 đến 12"));
     }
 }

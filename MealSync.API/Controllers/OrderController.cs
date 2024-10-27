@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.Orders.Commands.Create;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCancelOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopConfirmOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
+using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveryFailOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliverySuccess;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopPreparingOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRejectOrder;
@@ -13,6 +14,7 @@ using MealSync.Application.UseCases.Orders.Queries.OrderDetailCustomer;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailForShop;
 using MealSync.Application.UseCases.Orders.Queries.OrderHistory;
 using MealSync.Application.UseCases.Orders.Queries.ShopOrderByStatus;
+using MealSync.Application.UseCases.Orders.Queries.ShopWebOrderByStatus;
 using MealSync.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -63,6 +65,13 @@ public class OrderController : BaseApiController
     [HttpGet(Endpoints.GET_ORDER_FOR_SHOP_BY_STATUS)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> GetOrderForShopByStatus([FromQuery] GetShopOrderByStatusQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_ORDER_FOR_SHOP_WEB_BY_STATUS)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetOrderForShopWebByStatus([FromQuery] GetShopWebOrderByStatusQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
@@ -122,6 +131,14 @@ public class OrderController : BaseApiController
     [HttpPut(Endpoints.SHOP_DELIVERED_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody]ShopDeliverySuccessCommand command, long id)
+    {
+        command.OrderId = id;
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.SHOP_DELIVERED_FAIl_ORDER)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody]ShopDeliveryFailOrderCommand command, long id)
     {
         command.OrderId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
