@@ -96,9 +96,10 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
 
             // Refund process
             var paymentOrder = order.Payments.FirstOrDefault(p => p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess);
+            bool isRefund = false;
             if (paymentOrder != default)
             {
-                await RefundOrderAsync(order, paymentOrder).ConfigureAwait(false);
+                isRefund = await RefundOrderAsync(order, paymentOrder).ConfigureAwait(false);
             }
 
             // Check time to mark an warning
@@ -106,6 +107,8 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
 
             order.Reason = request.Reason;
             order.Status = OrderStatus.Cancelled;
+            order.IsRefund = isRefund;
+            order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIndentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription());
             _orderRepository.Update(order);
             _shopRepository.Update(shop);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
@@ -137,7 +140,7 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.Id });
     }
 
-    private async Task RefundOrderAsync(Order order, Payment payment)
+    private async Task<bool> RefundOrderAsync(Order order, Payment payment)
     {
         if (payment.PaymentMethods == PaymentMethods.VnPay && payment.Status == PaymentStatus.PaidSuccess)
         {
@@ -172,7 +175,10 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
             }
 
             await _paymentRepository.AddAsync(refundPayment).ConfigureAwait(false);
+            return true;
         }
+
+        return false;
     }
 
     private async Task MarkWarningProcessAsync(Shop shop, Order order)

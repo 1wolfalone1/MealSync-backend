@@ -208,10 +208,10 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
     private async Task ValidateAsync(UpdateShopStatusInactiveActiveCommand request)
     {
         var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
-        if (shop.Status != ShopStatus.Active && request.Status == (int)ShopStatus.InActive)
+        if (shop.Status != ShopStatus.Active && (request.Status == (int)ShopStatus.InActive || request.Status == (int)ShopStatus.Active))
             throw new InvalidBusinessException(MessageCode.E_SHOP_NOT_ABLE_TO_IN_ACTIVE.GetDescription());
 
-        if (shop.Status != ShopStatus.InActive && request.Status == (int)ShopStatus.Active)
+        if (shop.Status != ShopStatus.InActive && (request.Status == (int)ShopStatus.InActive || request.Status == (int)ShopStatus.Active))
             throw new InvalidBusinessException(MessageCode.E_SHOP_NOT_ABLE_TO_ACTIVE.GetDescription());
     }
 }
