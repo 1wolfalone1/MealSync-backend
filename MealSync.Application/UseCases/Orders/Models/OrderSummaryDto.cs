@@ -2,8 +2,10 @@ using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Orders.Models;
 
-public class OrderSummaryResponse
+public class OrderSummaryDto
 {
+    public int TotalCount { get; set; }
+
     public long Id { get; set; }
 
     public string ShopName { get; set; }
@@ -18,13 +20,9 @@ public class OrderSummaryResponse
 
     public double TotalPromotion { get; set; }
 
-    // public int TotalOrderDetail { get; set; }
+    public DateTime OrderDate { get; set; }
 
-    // public bool IsReviewAllowed { get; set; }
-
-    public long OrderDate { get; set; }
-
-    public long IntendedReceiveDate { get; set; }
+    public DateTime IntendedReceiveDate { get; set; }
 
     public int StartTime { get; set; }
 

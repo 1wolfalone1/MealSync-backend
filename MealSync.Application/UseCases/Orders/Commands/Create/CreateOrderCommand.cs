@@ -47,6 +47,8 @@ public class CreateOrderCommand : ICommand<Result>
 
         public int Quantity { get; set; }
 
+        public string? Note { get; set; }
+
         public List<OptionGroupRadioCommand>? OptionGroupRadio { get; set; }
 
         public List<OptionGroupCheckboxCommand>? OptionGroupCheckbox { get; set; }

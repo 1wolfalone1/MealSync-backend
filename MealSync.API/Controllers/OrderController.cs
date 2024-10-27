@@ -51,11 +51,11 @@ public class OrderController : BaseApiController
 
     [HttpGet(Endpoints.GET_ORDER_HISTORY)]
     [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
-    public async Task<IActionResult> GetOrderHistory([FromQuery] List<OrderStatus>? status, int pageIndex, int pageSize)
+    public async Task<IActionResult> GetOrderHistory([FromQuery] OrderStatus[]? status, bool reviewMode, int pageIndex, int pageSize)
     {
         return HandleResult(
             await Mediator.Send(
-                new GetOrderHistoryQuery { StatusList = status, PageIndex = pageIndex, PageSize = pageSize }).ConfigureAwait(false));
+                new GetOrderHistoryQuery { StatusList = status, ReviewMode = reviewMode, PageIndex = pageIndex, PageSize = pageSize }).ConfigureAwait(false));
     }
 
     [HttpGet(Endpoints.GET_ORDER_FOR_SHOP_BY_STATUS)]
