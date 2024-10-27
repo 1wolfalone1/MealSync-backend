@@ -5,7 +5,7 @@ using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Orders.Models;
 
-namespace MealSync.Application.UseCases.Orders.Queries.GetListShopStaffForShop;
+namespace MealSync.Application.UseCases.ShopDeliveryStaffs.Queries.GetListShopStaffForShop;
 
 public class GetListShopStaffForShopHandler : ICommandHandler<GetListShopStaffForShopQuery, Result>
 {

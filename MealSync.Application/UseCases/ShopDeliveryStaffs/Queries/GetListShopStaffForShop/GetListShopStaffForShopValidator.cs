@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace MealSync.Application.UseCases.Orders.Queries.GetListShopStaffForShop;
+namespace MealSync.Application.UseCases.ShopDeliveryStaffs.Queries.GetListShopStaffForShop;
 
 public class GetListShopStaffForShopValidator : AbstractValidator<GetListShopStaffForShopQuery>
 {
