@@ -58,6 +58,8 @@ public class DetailOrderCustomerResponse
 
         public string Name { get; set; } = null!;
 
+        public string? Note { get; set; }
+
         public string ImageUrl { get; set; } = null!;
 
         public int Quantity { get; set; }

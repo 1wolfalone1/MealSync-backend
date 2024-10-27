@@ -7,7 +7,7 @@ public interface IOrderRepository : IBaseRepository<Order>
 {
     Task<Order?> GetByIdAndCustomerIdForDetail(long id, long customerId);
 
-    Task<(int TotalCount, IEnumerable<Order> Orders)> GetByCustomerIdAndStatus(long customerId, List<OrderStatus>? statusList, int pageIndex, int pageSize);
+    Task<(int TotalCount, IEnumerable<Order> Orders)> GetByCustomerIdAndStatus(long customerId, OrderStatus[]? statusList, bool reviewMode, int pageIndex, int pageSize);
 
     Task<Order?> GetByIdAndCustomerIdIncludePayment(long id, long customerId);
 

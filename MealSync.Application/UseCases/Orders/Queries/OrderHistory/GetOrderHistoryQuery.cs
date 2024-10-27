@@ -7,5 +7,7 @@ namespace MealSync.Application.UseCases.Orders.Queries.OrderHistory;
 
 public class GetOrderHistoryQuery : PaginationRequest, IQuery<Result>
 {
-    public List<OrderStatus>? StatusList { get; set; }
+    public OrderStatus[]? StatusList { get; set; }
+
+    public bool ReviewMode { get; set; }
 }

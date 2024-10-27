@@ -189,16 +189,27 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.AddHours(-7).ToUnixTimeMilliseconds()));
 
         CreateMap<Order, OrderSummaryResponse>()
-            .ForMember(dest => dest.IsReviewAllowed, opt => opt.MapFrom(src => IsReviewAllowed(src)))
             .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
             .ForMember(
                 dest => dest.IntendedReceiveDate,
                 opt => opt.MapFrom(src =>
                     new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
             )
-            .ForMember(dest => dest.TotalOrderDetail, opt => opt.MapFrom(src => src.OrderDetails.Count))
+            // .ForMember(dest => dest.TotalOrderDetail, opt => opt.MapFrom(src => src.OrderDetails.Count))
             .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
             .ForMember(dest => dest.ShopLogoUrl, opt => opt.MapFrom(src => src.Shop.LogoUrl));
+
+        CreateMap<OrderSummaryDto, OrderSummaryResponse>()
+            .ForMember(
+                dest => dest.OrderDate,
+                opt => opt.MapFrom(src =>
+                    new DateTimeOffset(src.OrderDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+            )
+            .ForMember(
+                dest => dest.IntendedReceiveDate,
+                opt => opt.MapFrom(src =>
+                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+            );
 
         CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
         CreateMap<ShopCategory, ShopCategoryDetailResponse>()
@@ -228,8 +239,9 @@ public class MappingProfile : Profile
 
         var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
 
-        return (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.IssueReported || order.Status == OrderStatus.UnderReview
-                || order.Status == OrderStatus.Resolved || order.Status == OrderStatus.Completed) && order.Reviews.Count == 0 && now >= endTime && now <= endTime.AddHours(24);
+        return (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.IssueReported ||
+                order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved)
+               && order.Reviews.Count == 0 && now >= endTime && now <= endTime.AddHours(24);
     }
 
     private bool IsCancelAllowed(Order order)

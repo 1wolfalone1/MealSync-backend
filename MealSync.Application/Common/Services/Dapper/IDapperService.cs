@@ -29,4 +29,5 @@ public enum QueryName
     GetListCategoryWithFood,
     GetListOrderForShopByStatus,
     GetShopOrderDetail,
+    GetOrderHistoryOfCustomer,
 }
