@@ -52,7 +52,7 @@ public class GetShopOrderByStatusHandler : IQueryHandler<GetShopOrderByStatusQue
                 EndTime = request.EndTime,
                 PhoneNumber = request.PhoneNumber,
                 OrderId = request.Id != null ? request.Id.ToUpper() : null,
-                Offset = (request.PageIndex - 1) * request.PageSize,
+                PageIndex = request.PageIndex,
                 PageSize = request.PageSize,
             },
             "CustomerSection, FoodSection").ConfigureAwait(false);
