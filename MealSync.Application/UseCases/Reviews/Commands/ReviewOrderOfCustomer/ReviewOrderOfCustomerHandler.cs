@@ -56,7 +56,7 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
         {
             if (
                 order.Status == OrderStatus.Delivered || order.Status == OrderStatus.IssueReported ||
-                order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved || order.Status == OrderStatus.Completed)
+                order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved)
             {
                 var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
                 var receiveDate = new DateTime(

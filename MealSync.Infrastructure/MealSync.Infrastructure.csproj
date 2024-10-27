@@ -54,6 +54,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="Common\Queries\GetOrderHistoryOfCustomer.sql" />
         <EmbeddedResource Include="Common\Queries\TestQuery.sql">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>

@@ -102,21 +102,16 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     }
 
     public async Task<(int TotalCount, IEnumerable<Order> Orders)> GetByCustomerIdAndStatus(
-        long customerId, List<OrderStatus>? statusList, int pageIndex, int pageSize)
+        long customerId, OrderStatus[]? statusList, bool reviewMode, int pageIndex, int pageSize)
     {
+        var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7));
         var query = DbSet.Where(o => o.CustomerId == customerId);
 
-        if (statusList != default && statusList.Count > 0)
+        if (statusList != default && statusList.Length > 0)
         {
             query = query.Where(o => statusList.Contains(o.Status));
         }
-
-        var totalCount = await query.CountAsync().ConfigureAwait(false);
-        var orders = await query
-            .OrderByDescending(o => o.CreatedDate)
-            .Skip((pageIndex - 1) * pageSize)
-            .Take(pageSize)
-            .Select(o => new Order
+        var projectedQuery = query.Select(o => new Order
             {
                 Id = o.Id,
                 Status = o.Status,
@@ -141,7 +136,42 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                     Id = od.Id,
                 }).ToList(),
             })
-            .ToListAsync().ConfigureAwait(false);
+            .ToList();
+
+        var result = projectedQuery.AsEnumerable(); // This brings the data into memory
+
+        if (reviewMode)
+        {
+            result = result.Where(o =>
+                (o.Status == OrderStatus.Delivered ||
+                 o.Status == OrderStatus.IssueReported ||
+                 o.Status == OrderStatus.UnderReview ||
+                 o.Status == OrderStatus.Resolved) &&
+                o.Reviews.Count == 0 &&
+                now >= new DateTimeOffset(
+                    o.IntendedReceiveDate.Year,
+                    o.IntendedReceiveDate.Month,
+                    o.IntendedReceiveDate.Day,
+                    o.EndTime / 100,
+                    o.EndTime % 100,
+                    0,
+                    TimeSpan.FromHours(7)) &&
+                now <= new DateTimeOffset(
+                    o.IntendedReceiveDate.Year,
+                    o.IntendedReceiveDate.Month,
+                    o.IntendedReceiveDate.Day,
+                    o.EndTime / 100,
+                    o.EndTime % 100,
+                    0,
+                    TimeSpan.FromHours(7)).AddHours(24));
+        }
+
+        var totalCount = result.Count();
+        var orders = result
+            .OrderByDescending(o => o.CreatedDate)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
 
         return (totalCount, orders);
     }

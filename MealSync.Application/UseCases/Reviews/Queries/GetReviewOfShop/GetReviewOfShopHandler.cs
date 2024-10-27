@@ -13,11 +13,13 @@ public class GetReviewOfShopHandler : IQueryHandler<GetReviewOfShopQuery, Result
 {
     private readonly IReviewRepository _reviewRepository;
     private readonly IShopRepository _shopRepository;
+    private readonly IOrderDetailRepository _orderDetailRepository;
 
-    public GetReviewOfShopHandler(IReviewRepository reviewRepository, IShopRepository shopRepository)
+    public GetReviewOfShopHandler(IReviewRepository reviewRepository, IShopRepository shopRepository, IOrderDetailRepository orderDetailRepository)
     {
         _reviewRepository = reviewRepository;
         _shopRepository = shopRepository;
+        _orderDetailRepository = orderDetailRepository;
     }
 
     public async Task<Result<Result>> Handle(GetReviewOfShopQuery request, CancellationToken cancellationToken)
@@ -35,6 +37,11 @@ public class GetReviewOfShopHandler : IQueryHandler<GetReviewOfShopQuery, Result
         else
         {
             var data = await _reviewRepository.GetByShopId(request.ShopId, request.Filter, request.PageIndex, request.PageSize).ConfigureAwait(false);
+            foreach (var review in data.Reviews)
+            {
+                review.Description = await _orderDetailRepository.GetOrderDescriptionByOrderId(review.OrderId).ConfigureAwait(false);
+            }
+
             var result = new PaginationResponse<ReviewShopDto>(data.Reviews, data.TotalCount, request.PageIndex, request.PageSize);
 
             return Result.Success(result);

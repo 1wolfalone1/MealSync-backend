@@ -6,6 +6,8 @@ public class ReviewShopDto
 {
     public long OrderId { get; set; }
 
+    public string Description { get; set; }
+
     public List<ReviewDto> Reviews { get; set; }
 
     public class ReviewDto
