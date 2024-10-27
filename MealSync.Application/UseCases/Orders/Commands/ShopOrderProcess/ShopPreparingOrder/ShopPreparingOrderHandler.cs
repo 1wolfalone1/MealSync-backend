@@ -61,7 +61,7 @@ public class ShopPreparingOrderHandler : ICommandHandler<ShopPreparingOrderComma
                 var currentTime = TimeFrameUtils.GetCurrentDate();
                 var currentTimeInMinutes = currentTime.Hour * 60 + currentTime.Minute;
                 var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
-                if (startTimeInMinutes - currentTimeInMinutes > OrderConstant.TIME_SHOP_CANCEL_ORDER_CONFIRMED_IN_MINUTES)
+                if (startTimeInMinutes - currentTimeInMinutes > OrderConstant.TIME_WARNING_SHOP_PREPARE_ORDER_EARLY_IN_MINUTES)
                 {
                     var timeEarlyInHours = TimeFrameUtils.ConvertMinutesToHour(startTimeInMinutes - currentTimeInMinutes);
                     return Result.Warning(new

@@ -73,4 +73,25 @@ public enum ResourceCode
 
     [Description("Notification-Order-Preparing")]
     NOTIFICATION_ORDER_PREPARING,
+
+    [Description("Notification-Order-CustomerDelivered")]
+    NOTIFICATION_ORDER_CUSTOMER_DELIVERED,
+
+    [Description("Notification-Order-ShopDelivered")]
+    NOTIFICATION_ORDER_SHOP_DELIVERED,
+
+    [Description("Notification-Order-CustomerDelivering")]
+    NOTIFICATION_ORDER_CUSTOMER_DELIVERING,
+
+    [Description("Notification-Order-AssignedToShopStaff")]
+    NOTIFICATION_ORDER_ASSIGNED_TO_SHOP_STAFF,
+
+    [Description("Notification-Order-DeliveryFailToCustomer")]
+    NOTIFICATION_ORDER_DELIVERY_FAIL_TO_CUSTOMER,
+
+    [Description("Notification-Order-DeliveryFailToShop")]
+    NOTIFICATION_ORDER_DELIVERY_FAIL_TO_SHOP,
+
+    [Description("Notification-Order-DeliveryFailToModerator")]
+    NOTIFICATION_ORDER_DELIVERY_FAIL_TO_MODERATOR,
 }

@@ -17,4 +17,18 @@ public interface INotificationFactory
     Notification CreateRefundFaillNotification(Order order, Account accMod);
 
     Notification CreateOrderPreparingNotification(Order order, Shop shop);
+
+    Notification CreateOrderCustomerDeliveredNotification(Order order, Shop shop);
+
+    Notification CreateOrderShopDeliveredNotification(Order order, Account accShip);
+
+    Notification CreateOrderCustomerDeliveringNotification(Order order, Shop shop);
+
+    Notification CreateOrderAssignedToStaffdNotification(Order order, Account accShip, Shop shop);
+
+    Notification CreateOrderDeliveryFailedToCustomerNotification(Order order, Shop shop);
+
+    Notification CreateOrderDeliveryFailedToShopNotification(Order order, Account accShip, Shop shop);
+
+    Notification CreateOrderDeliveryFailedToModeratorNotification(Order order, Account accMod, Shop shop);
 }

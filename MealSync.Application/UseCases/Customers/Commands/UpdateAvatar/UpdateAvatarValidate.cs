@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace MealSync.Application.UseCases.Storages.Commands.UploadFile;
+namespace MealSync.Application.UseCases.Customers.Commands.UpdateAvatar;
 
-public class UploadFileValidate : AbstractValidator<UploadFileCommand>
+public class UpdateAvatarValidate : AbstractValidator<UpdateAvatarCommand>
 {
-    public UploadFileValidate()
+    public UpdateAvatarValidate()
     {
         RuleFor(x => x.File)
             .Must(file => file != default && file.Length <= 5 * 1024 * 1024)
