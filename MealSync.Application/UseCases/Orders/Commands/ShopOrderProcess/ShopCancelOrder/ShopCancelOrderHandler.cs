@@ -73,7 +73,7 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
         // Warning
         if (!request.IsConfirm.Value)
         {
-            var currentTime = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+            var currentTime = TimeFrameUtils.GetCurrentDate();
             var currentTimeInMinutes = (currentTime.Hour * 60) + currentTime.Minute;
             var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
             var deadlineInMinutes = startTimeInMinutes - currentTimeInMinutes;
@@ -185,7 +185,7 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
     {
         // Check see is shop cancel order late than 1 hour near time frame
         var systemConfig = _systemConfigRepository.Get().FirstOrDefault();
-        var currentTime = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+        var currentTime = TimeFrameUtils.GetCurrentDate();
         var currentTimeInMinutes = (currentTime.Hour * 60) + currentTime.Minute;
         var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
         var deadlineInMinutes = startTimeInMinutes - currentTimeInMinutes;

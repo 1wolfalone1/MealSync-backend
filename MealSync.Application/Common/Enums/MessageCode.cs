@@ -274,6 +274,9 @@ public enum MessageCode
     [Description("I-Order-Delivering")]
     I_ORDER_DELIVERING,
 
+    [Description("I-Order-DeliveryFail")]
+    I_ORDER_DELIVERY_FAIL,
+
     [Description("E-Order-NotInCorrectStatus")]
     E_ORDER_NOT_IN_CORRECT_STATUS,
 

@@ -30,4 +30,5 @@ public enum QueryName
     GetListOrderForShopByStatus,
     GetShopOrderDetail,
     GetOrderHistoryOfCustomer,
+    GetListOrderForShopWebByStatus,
 }
