@@ -65,6 +65,8 @@
         <EmbeddedResource Include="Common\Queries\GetListOrderForShopByStatus.sql" />
         <None Remove="Common\Queries\GetShopOrderDetail.sql" />
         <EmbeddedResource Include="Common\Queries\GetShopOrderDetail.sql" />
+        <None Remove="Common\Queries\GetListOrderByPackageId.sql" />
+        <EmbeddedResource Include="Common\Queries\GetListOrderByPackageId.sql" />
     </ItemGroup>
 
 </Project>

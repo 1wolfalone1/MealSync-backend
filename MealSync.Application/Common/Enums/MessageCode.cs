@@ -295,6 +295,12 @@ public enum MessageCode
     [Description("E-Order-DeliveringInWrongDate")]
     E_ORDER_NOT_DELIVERING_IN_WRONG_DATE,
 
+    [Description("E-Order-InOtherPackage")]
+    E_ORDER_IN_OTHER_PACKAGE,
+
+    [Description("E-Order-InDifferentFrame")]
+    E_ORDER_IN_DIFFERENT_FRAME,
+
     // Promotion
     [Description("E-Promotion-NotFound")]
     E_PROMOTION_NOT_FOUND,

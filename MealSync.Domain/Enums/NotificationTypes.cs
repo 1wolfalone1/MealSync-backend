@@ -4,6 +4,7 @@ public enum NotificationTypes
 {
     SendToCustomer = 1,
     SendToShop = 2,
-    SendToModerator = 3,
-    SendToAdmin = 4,
+    SendToShopDeliveryStaff = 3,
+    SendToModerator = 4,
+    SendToAdmin = 5,
 }

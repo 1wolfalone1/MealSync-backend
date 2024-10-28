@@ -48,7 +48,7 @@ public class ShopPreparingOrderHandler : ICommandHandler<ShopPreparingOrderComma
 
         if (!request.IsConfirm.Value)
         {
-            if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDate().Date)
+            if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
             {
                 return Result.Warning(new
                 {
@@ -58,17 +58,23 @@ public class ShopPreparingOrderHandler : ICommandHandler<ShopPreparingOrderComma
             }
             else
             {
-                var currentTime = TimeFrameUtils.GetCurrentDate();
-                var currentTimeInMinutes = currentTime.Hour * 60 + currentTime.Minute;
-                var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
-                if (startTimeInMinutes - currentTimeInMinutes > OrderConstant.TIME_WARNING_SHOP_PREPARE_ORDER_EARLY_IN_MINUTES)
+                var now = TimeFrameUtils.GetCurrentDateInUTC7();
+                var intendedReceiveDateTime = new DateTime(
+                    order.IntendedReceiveDate.Year,
+                    order.IntendedReceiveDate.Month,
+                    order.IntendedReceiveDate.Day,
+                    order.StartTime / 100,
+                    order.StartTime % 100,
+                    0);
+                var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-OrderConstant.TIME_WARNING_SHOP_PREPARE_ORDER_EARLY_IN_HOURS);
+                if (now < endTime)
                 {
-                    var timeEarlyInHours = TimeFrameUtils.ConvertMinutesToHour(startTimeInMinutes - currentTimeInMinutes);
-                    return Result.Warning(new
+                    var diffDate = endTime.AddHours(OrderConstant.TIME_WARNING_SHOP_PREPARE_ORDER_EARLY_IN_HOURS) - now;
+                    return Result.Success(new
                     {
                         Code = MessageCode.W_ORDER_PREPARING_EARLY.GetDescription(),
                         Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_PREPARING_EARLY.GetDescription(),
-                            new string[] { order.Id.ToString(), TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), TimeFrameUtils.GetTimeHoursFormat(timeEarlyInHours) }),
+                            new string[] { order.Id.ToString(), TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), $"{diffDate.Hours}:{diffDate.Minutes}" }),
                     });
                 }
             }

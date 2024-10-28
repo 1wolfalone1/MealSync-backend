@@ -221,22 +221,22 @@ public class NotificationFactory : INotificationFactory
         };
     }
 
-    public Notification CreateOrderAssignedToStaffdNotification(Order order, Account accShip, Shop shop)
+    public Notification CreateOrderAssignedToStaffNotification(DeliveryPackage deliveryPackage, Account accShip, Shop shop)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
         var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-        var orderNotification = mapper.Map<OrderNotification>(order);
+        var deliveryPackageMapper = mapper.Map<DeliveryPackageNotification>(deliveryPackage);
         return new Notification
         {
             AccountId = accShip.Id,
-            ReferenceId = order.Id,
+            ReferenceId = deliveryPackageMapper.Id,
             Title = NotificationConstant.ORDER_TITLE,
-            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_ASSIGNED_TO_SHOP_STAFF.GetDescription(), order.Id),
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_ASSIGNED_TO_SHOP_STAFF.GetDescription(), deliveryPackage.Id),
             ImageUrl = shop.LogoUrl,
-            Data = JsonConvert.SerializeObject(orderNotification),
-            Type = NotificationTypes.SendToShop,
-            EntityType = NotificationEntityTypes.Order,
+            Data = JsonConvert.SerializeObject(deliveryPackageMapper),
+            Type = NotificationTypes.SendToShopDeliveryStaff,
+            EntityType = NotificationEntityTypes.DeliveryPackage,
             IsSave = true,
         };
     }

@@ -7,7 +7,7 @@ public class ShopDeliveringOrderCommand : ICommand<Result>
 {
     public long OrderId { get; set; }
 
-    public long? ShipperId { get; set; }
+    public long? ShopDeliveryStaffId { get; set; }
 
     public bool? IsConfirm { get; set; }
 }

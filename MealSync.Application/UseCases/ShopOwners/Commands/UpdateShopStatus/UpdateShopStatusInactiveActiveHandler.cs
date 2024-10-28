@@ -91,11 +91,11 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                         await CancelOrderConfirmedAsync(order).ConfigureAwait(false);
 
                         // Check see is shop cancel order late than 1 hour near time frame
-                        var currentTime = TimeFrameUtils.GetCurrentDate();
+                        var currentTime = TimeFrameUtils.GetCurrentDateInUTC7();
                         var currentTimeInMinutes = (currentTime.Hour * 60) + currentTime.Minute;
                         var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
                         var deadlineInMinutes = startTimeInMinutes - currentTimeInMinutes;
-                        if (order.IntendedReceiveDate.Date == currentTime.Date)
+                        if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
                         {
                             if (deadlineInMinutes < OrderConstant.TIME_SHOP_CANCEL_ORDER_CONFIRMED_IN_MINUTES)
                                 numberConfirmOrderOverAHour++;

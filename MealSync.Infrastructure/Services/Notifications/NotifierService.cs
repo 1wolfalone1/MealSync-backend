@@ -65,4 +65,31 @@ public class NotifierService : INotifierService
         _logger.LogInformation("[PUSH NOTIFICATION]: {0}", JsonConvert.SerializeObject(notification));
         await _notificationProvider.NotifyAsync(notification).ConfigureAwait(false);
     }
+
+    public async Task NotifyRangeAsync(List<Notification> notifications)
+    {
+        var listNotificationSave = notifications.Where(noti => noti.IsSave).ToList();
+
+        // persist notification into database
+        try
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var notificationRepository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+            await unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+            await notificationRepository.AddRangeAsync(listNotificationSave).ConfigureAwait(false);
+            await unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            throw;
+        }
+
+        foreach (var notification in notifications)
+        {
+            _logger.LogInformation("[PUSH NOTIFICATION]: {0}", JsonConvert.SerializeObject(notifications));
+            await _notificationProvider.NotifyAsync(notification).ConfigureAwait(false);
+        }
+    }
 }
