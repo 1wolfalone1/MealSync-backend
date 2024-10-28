@@ -2,6 +2,7 @@
 using MealSync.Application.Common.Models.Responses;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Dapper;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Application.UseCases.Orders.Queries.ShopOrderByStatus;

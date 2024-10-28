@@ -43,7 +43,7 @@ public class CustomSaveChangesInterceptor : SaveChangesInterceptor
 
                     // Adjust to UTC+7
                     if (currentValue != null)
-                        entry.CurrentValues[property] = currentValue.AddHours(7);
+                        entry.CurrentValues[property] = currentValue;
                 }
             }
         }
