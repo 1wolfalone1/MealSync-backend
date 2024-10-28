@@ -89,6 +89,8 @@ public static class Endpoints
     // Customer
     public const string GET_CUSTOMER_INFO = "customer/profile";
     public const string GET_ALL_CUSTOMER_BUILDING = "customer/building";
+    public const string UPDATE_AVATAR = "customer/avatar";
+    public const string UPDATE_CUSTOMER_PROFILE = "customer/profile";
 
     // Order
     public const string CREATE_ORDER = "customer/order";
@@ -106,6 +108,10 @@ public static class Endpoints
     public const string SHOP_PREPARING_ORDER = "shop-owner/order/{id:long}/preparing";
     public const string SHOP_DELIVERING_ORDER = "shop-owner/order/{id:long}/delivering";
     public const string SHOP_DELIVERED_ORDER = "shop-owner/order/{id:long}/delivered";
+    public const string SHOP_DELIVERED_FAIl_ORDER = "shop-owner/order/{id:long}/delivery-fail";
+
+    // Shop order for web
+    public const string GET_ORDER_FOR_SHOP_WEB_BY_STATUS = "web/shop-owner/order";
 
     // Delivery package
 

@@ -102,6 +102,7 @@ public class SignupCustomerHandler : ICommandHandler<SignupCustomerCommand, Resu
                 RoleId = (int)Domain.Enums.Roles.Customer,
                 Type = AccountTypes.Local,
                 Status = AccountStatus.UnVerify,
+                Genders = Genders.UnKnown,
             };
 
             var refreshToken = _jwtTokenService.GenerateJwtToken(newAccount);

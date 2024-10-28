@@ -25,5 +25,7 @@ public class ReviewShopDto
         public string Comment { get; set; }
 
         public List<string> ImageUrls { get; set; }
+
+        public long CreatedDate { get; set; }
     }
 }

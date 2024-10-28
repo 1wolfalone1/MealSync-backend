@@ -20,6 +20,7 @@ public class ReviewOrderOfCustomerValidate : AbstractValidator<ReviewOrderOfCust
         RuleFor(x => x.Images)
             .Must(images => images == null || images.Length <= 5)
             .WithMessage("Tối đa 5 ảnh")
+            .When(images => images != default && images.Images != default && images.Images.Length > 0)
             .ForEach(image =>
                 image.Must(file => file.Length <= 5 * 1024 * 1024)
                     .WithMessage("Ảnh không được vượt quá 5 MB.")

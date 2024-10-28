@@ -73,10 +73,13 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
                 if (now >= endTime && now <= endTime.AddHours(24))
                 {
                     var imageUrls = new List<string>();
-                    foreach (var file in request.Images)
+                    if (request.Images != default)
                     {
-                        var url = await _storageService.UploadFileAsync(file).ConfigureAwait(false);
-                        imageUrls.Add(url);
+                        foreach (var file in request.Images)
+                        {
+                            var url = await _storageService.UploadFileAsync(file).ConfigureAwait(false);
+                            imageUrls.Add(url);
+                        }
                     }
 
                     Review review = new Review

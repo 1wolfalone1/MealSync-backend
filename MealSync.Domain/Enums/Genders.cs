@@ -4,6 +4,6 @@ public enum Genders
 {
     Male = 1,
     Female = 2,
-    Unknow = 3,
+    UnKnown = 3,
 }
 

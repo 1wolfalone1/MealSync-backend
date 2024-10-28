@@ -28,7 +28,7 @@ public class TimeFrameUtils
     public static int GetTimeHoursInRound()
     {
         DateTimeOffset utcTime = DateTimeOffset.UtcNow;
-        DateTimeOffset timeInUtcPlus7 = utcTime.ToOffset(TimeSpan.FromHours(7));
+        DateTimeOffset timeInUtcPlus7 = utcTime;
 
         // Get the current hour and minute
         int hour = timeInUtcPlus7.Hour;
@@ -53,7 +53,7 @@ public class TimeFrameUtils
     public static DateTimeOffset GetCurrentDate()
     {
         DateTimeOffset utcTime = DateTimeOffset.UtcNow;
-        return utcTime.ToOffset(TimeSpan.FromHours(7));
+        return utcTime;
     }
 
     public static int ConvertEndTime(int endTime)
