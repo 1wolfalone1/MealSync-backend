@@ -73,22 +73,6 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
         // Warning
         if (!request.IsConfirm.Value)
         {
-            // var currentTime = TimeFrameUtils.GetCurrentDateInUTC7();
-            // var currentTimeInMinutes = (currentTime.Hour * 60) + currentTime.Minute;
-            // var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
-            // var deadlineInMinutes = startTimeInMinutes - currentTimeInMinutes;
-            // if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
-            // {
-            //     if (deadlineInMinutes <= OrderConstant.TIME_SHOP_CANCEL_ORDER_CONFIRMED_IN_MINUTES)
-            //     {
-            //         return Result.Warning(new
-            //         {
-            //             Code = MessageCode.W_ORDER_CANCEL_ORDER_LESS_THAN_A_HOUR.GetDescription(),
-            //             Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_CANCEL_ORDER_LESS_THAN_A_HOUR.GetDescription(), order.Id),
-            //         });
-            //     }
-            // }
-
             var now = TimeFrameUtils.GetCurrentDateInUTC7();
             var intendedReceiveDateTime = new DateTime(
                 order.IntendedReceiveDate.Year,

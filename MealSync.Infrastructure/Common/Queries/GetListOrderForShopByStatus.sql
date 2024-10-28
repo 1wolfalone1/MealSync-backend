@@ -2,7 +2,6 @@
  CreatedBy: ThongNV
  Date: 16/10/2024
  
- @PageSize
  @OffSet
  @ShopId
  @Status int[]

@@ -15,12 +15,12 @@ using Microsoft.Extensions.Logging;
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
 
-public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCommand, Result>
+public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Result>
 {
     private readonly IOrderRepository _orderRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<ShopDeliveringOrderCommand> _logger;
+    private readonly ILogger<ShopAssignOrderCommand> _logger;
     private readonly IDeliveryPackageRepository _deliveryPackageRepository;
     private readonly INotificationFactory _notificationFactory;
     private readonly INotifierService _notifierService;
@@ -29,7 +29,7 @@ public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCom
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
 
-    public ShopDeliveringOrderHandler(IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IUnitOfWork unitOfWork, ILogger<ShopDeliveringOrderCommand> logger,
+    public ShopAssignOrderHandler(IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IUnitOfWork unitOfWork, ILogger<ShopAssignOrderCommand> logger,
         IDeliveryPackageRepository deliveryPackageRepository, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository, IAccountRepository accountRepository,
         ISystemResourceRepository systemResourceRepository, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
     {
@@ -46,7 +46,7 @@ public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCom
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
     }
 
-    public async Task<Result<Result>> Handle(ShopDeliveringOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(ShopAssignOrderCommand request, CancellationToken cancellationToken)
     {
         // Validate
         Validate(request);
@@ -55,20 +55,6 @@ public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCom
         var order = _orderRepository.GetById(request.OrderId);
         if (!request.IsConfirm.Value)
         {
-            // var currentTime = TimeFrameUtils.GetCurrentDateInUTC7();
-            // var currentTimeInMinutes = currentTime.Hour * 60 + currentTime.Minute;
-            // var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
-            // if (startTimeInMinutes - currentTimeInMinutes > OrderConstant.TIME_WARNING_SHOP_PREPARE_ORDER_EARLY_IN_MINUTES)
-            // {
-            //     var timeEarlyInHours = TimeFrameUtils.ConvertMinutesToHour(startTimeInMinutes - currentTimeInMinutes);
-            //     return Result.Warning(new
-            //     {
-            //         Code = MessageCode.W_ORDER_PREPARING_EARLY.GetDescription(),
-            //         Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_PREPARING_EARLY.GetDescription(),
-            //             new string[] { order.Id.ToString(), TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), TimeFrameUtils.GetTimeHoursFormat(timeEarlyInHours) }),
-            //     });
-            // }
-
             var now = TimeFrameUtils.GetCurrentDateInUTC7();
             var intendedReceiveDateTime = new DateTime(
                 order.IntendedReceiveDate.Year,
@@ -77,14 +63,14 @@ public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCom
                 order.StartTime / 100,
                 order.StartTime % 100,
                 0);
-            var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-OrderConstant.TIME_WARNING_SHOP_DELIVERING_ORDER_EARLY_IN_HOURS);
+            var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-OrderConstant.TIME_WARNING_SHOP_ASSIGN_ORDER_EARLY_IN_HOURS);
             if (now < endTime)
             {
-                var diffDate = endTime.AddHours(OrderConstant.TIME_WARNING_SHOP_DELIVERING_ORDER_EARLY_IN_HOURS) - now;
+                var diffDate = endTime.AddHours(OrderConstant.TIME_WARNING_SHOP_ASSIGN_ORDER_EARLY_IN_HOURS) - now;
                 return Result.Success(new
                 {
-                    Code = MessageCode.W_ORDER_PREPARING_EARLY.GetDescription(),
-                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_PREPARING_EARLY.GetDescription(),
+                    Code = MessageCode.W_ORDER_ASSIGN_EARLY.GetDescription(),
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_ASSIGN_EARLY.GetDescription(),
                         new string[] { order.Id.ToString(), TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), $"{diffDate.Hours}:{diffDate.Minutes}" }),
                 });
             }
@@ -93,8 +79,6 @@ public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCom
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-            order.Status = OrderStatus.Delivering;
-
             // Get delivery package of shipper in this frame if not exist create
             var dp = await CreateOrAddOrderInDeliveryPackageAsync(order, request).ConfigureAwait(false);
 
@@ -115,8 +99,8 @@ public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCom
             _notifierService.NotifyRangeAsync(listNoti);
             return Result.Success(new
             {
-                Code = MessageCode.I_ORDER_DELIVERING.GetDescription(),
-                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_DELIVERING.GetDescription(), order.Id),
+                Code = MessageCode.I_ORDER_ASSIGN_SUCCESS.GetDescription(),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_ASSIGN_SUCCESS.GetDescription(), order.Id),
             });
         }
         catch (Exception e)
@@ -127,7 +111,7 @@ public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCom
         }
     }
 
-    private async Task<DeliveryPackage> CreateOrAddOrderInDeliveryPackageAsync(Order order, ShopDeliveringOrderCommand request)
+    private async Task<DeliveryPackage> CreateOrAddOrderInDeliveryPackageAsync(Order order, ShopAssignOrderCommand request)
     {
         var shipId = request.ShopDeliveryStaffId ?? _currentPrincipalService.CurrentPrincipalId.Value;
         var deliveryPackge = _deliveryPackageRepository.GetPackageByShipIdAndTimeFrame(request.ShopDeliveryStaffId == null, shipId, order.StartTime, order.EndTime);
@@ -165,7 +149,7 @@ public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCom
         }
     }
 
-    private void Validate(ShopDeliveringOrderCommand request)
+    private void Validate(ShopAssignOrderCommand request)
     {
         var order = _orderRepository
             .Get(o => o.Id == request.OrderId && o.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)
@@ -178,5 +162,12 @@ public class ShopDeliveringOrderHandler : ICommandHandler<ShopDeliveringOrderCom
 
         if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERING_IN_WRONG_DATE.GetDescription(), new object[] { order.Id, order.IntendedReceiveDate.Date.ToString("dd-MM-yyyy") });
+
+        if (request.ShopDeliveryStaffId != null)
+        {
+            var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(request.ShopDeliveryStaffId.Value);
+            if (shopDeliveryStaff == null || shopDeliveryStaff.ShopId != _currentPrincipalService.CurrentPrincipalId)
+                throw new InvalidBusinessException(MessageCode.E_ORDER_ASSIGN_NOT_FOUND_SHOP_STAFF.GetDescription(), new object[] { request.ShopDeliveryStaffId.Value });
+        }
     }
 }
