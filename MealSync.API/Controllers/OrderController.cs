@@ -120,9 +120,9 @@ public class OrderController : BaseApiController
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
-    [HttpPut(Endpoints.SHOP_DELIVERING_ORDER)]
+    [HttpPut(Endpoints.SHOP_ASSIGN_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopChangeToDeliveringOrder([FromBody]ShopDeliveringOrderCommand command, long id)
+    public async Task<IActionResult> ShopaAssignOrder([FromBody]ShopAssignOrderCommand command, long id)
     {
         command.OrderId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));

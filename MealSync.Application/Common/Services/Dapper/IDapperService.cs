@@ -32,4 +32,5 @@ public enum QueryName
     GetOrderHistoryOfCustomer,
     GetListOrderForShopWebByStatus,
     GetListOrderByPackageId,
+    GetListShopDeliveryStaffToAssign,
 }

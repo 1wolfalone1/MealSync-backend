@@ -2,9 +2,9 @@
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
 
-public class ShopDeliveringOrderValidator : AbstractValidator<ShopDeliveringOrderCommand>
+public class ShopAssignOrderValidator : AbstractValidator<ShopAssignOrderCommand>
 {
-    public ShopDeliveringOrderValidator()
+    public ShopAssignOrderValidator()
     {
         RuleFor(x => x.OrderId)
             .NotEmpty()

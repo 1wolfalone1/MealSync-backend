@@ -8,4 +8,10 @@ public class GetListShopStaffForShopQuery : ICommand<Result>
     public string? SearchText { get; set; }
 
     public int OrderByMode { get; set; }
+
+    public DateTime IntendedReceiveDate { get; set; }
+
+    public int StartTime { get; set; }
+
+    public int EndTime { get; set; }
 }
