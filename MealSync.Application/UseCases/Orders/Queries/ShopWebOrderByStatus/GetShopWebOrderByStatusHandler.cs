@@ -6,6 +6,7 @@ using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Application.UseCases.Orders.Queries.ShopOrderByStatus;
+using Microsoft.Extensions.Logging;
 
 namespace MealSync.Application.UseCases.Orders.Queries.ShopWebOrderByStatus;
 
@@ -13,11 +14,13 @@ public class GetShopWebOrderByStatusHandler : IQueryHandler<GetShopWebOrderBySta
 {
     private readonly IDapperService _dapperService;
     private readonly ICurrentPrincipalService _currentPrincipalService;
+    private readonly ILogger<GetShopOrderByStatusHandler> _logger;
 
-    public GetShopWebOrderByStatusHandler(IDapperService dapperService, ICurrentPrincipalService currentPrincipalService)
+    public GetShopWebOrderByStatusHandler(IDapperService dapperService, ICurrentPrincipalService currentPrincipalService, ILogger<GetShopOrderByStatusHandler> logger)
     {
         _dapperService = dapperService;
         _currentPrincipalService = currentPrincipalService;
+        _logger = logger;
     }
 
     public async Task<Result<Result>> Handle(GetShopWebOrderByStatusQuery request, CancellationToken cancellationToken)
@@ -46,6 +49,7 @@ public class GetShopWebOrderByStatusHandler : IQueryHandler<GetShopWebOrderBySta
             return parent;
         };
 
+        _logger.LogInformation($"Date filter request: {(request.IntendedRecieveDate != null ? request.IntendedRecieveDate.ToString() : string.Empty)}");
         await _dapperService.SelectAsync<OrderForShopWebByStatusResponse, OrderForShopWebByStatusResponse.CustomerInforInOrderForShop, OrderForShopWebByStatusResponse.ShopDeliveryStaffInOrderForShop,OrderForShopWebByStatusResponse.FoodInOrderForShop, OrderForShopWebByStatusResponse>(
             QueryName.GetListOrderForShopWebByStatus,
             map,

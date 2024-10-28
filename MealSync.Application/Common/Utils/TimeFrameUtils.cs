@@ -56,6 +56,12 @@ public class TimeFrameUtils
         return utcTime;
     }
 
+    public static DateTimeOffset GetCurrentDateInUTC7()
+    {
+        DateTimeOffset utcTime = DateTimeOffset.UtcNow;
+        return utcTime.ToOffset(TimeSpan.FromHours(7));
+    }
+
     public static int ConvertEndTime(int endTime)
     {
         if (endTime == 2400)

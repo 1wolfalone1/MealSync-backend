@@ -24,7 +24,7 @@ public interface INotificationFactory
 
     Notification CreateOrderCustomerDeliveringNotification(Order order, Shop shop);
 
-    Notification CreateOrderAssignedToStaffdNotification(Order order, Account accShip, Shop shop);
+    Notification CreateOrderAssignedToStaffNotification(DeliveryPackage deliveryPackage, Account accShip, Shop shop);
 
     Notification CreateOrderDeliveryFailedToCustomerNotification(Order order, Shop shop);
 
