@@ -54,7 +54,7 @@ public class GetOrderHistoryHandler : IQueryHandler<GetOrderHistoryQuery, Result
                     OrderStatus.Resolved,
                 },
             ReviewMode = request.ReviewMode,
-            ReviewStatusList = new OrderStatus[] { OrderStatus.Delivered, OrderStatus.IssueReported, OrderStatus.UnderReview, OrderStatus.Resolved },
+            ReviewStatusList = new OrderStatus[] { OrderStatus.Delivered, OrderStatus.IssueReported, OrderStatus.UnderReview, OrderStatus.Resolved, OrderStatus.Completed },
             Now = now,
             PageSize = request.PageSize,
             Offset = (request.PageIndex - 1) * request.PageSize,

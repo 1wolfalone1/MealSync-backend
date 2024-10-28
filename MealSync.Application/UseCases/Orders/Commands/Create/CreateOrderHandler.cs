@@ -72,7 +72,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         var customerId = _currentPrincipalService.CurrentPrincipalId!;
         var shop = await _shopRepository.GetByIdIncludeLocation(request.ShopId).ConfigureAwait(false);
         var buildingOrder = await _buildingRepository.GetByIdIncludeLocation(request.BuildingId).ConfigureAwait(false);
-        var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+        var now = DateTimeOffset.UtcNow;
 
         // Validate business rules for the shop.
         await ValidateShopRequest(request, shop, buildingOrder).ConfigureAwait(false);
@@ -145,7 +145,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             FullName = request.FullName,
             PhoneNumber = request.PhoneNumber,
             OrderDate = now,
-            IntendedReceiveDate = request.OrderTime.IsOrderNextDay ? now.AddDays(1).Date : now.Date,
+            IntendedReceiveDate = request.OrderTime.IsOrderNextDay ? now.ToOffset(TimeSpan.FromHours(7)).AddDays(1).Date : now.ToOffset(TimeSpan.FromHours(7)).Date,
             ReceiveAt = null,
             CompletedAt = null,
             StartTime = request.OrderTime.StartTime,
@@ -239,7 +239,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
     private static void ValidateOrderTime(CreateOrderCommand request, DateTimeOffset now)
     {
         var startTimeInMinutes = TimeUtils.ConvertToMinutes(request.OrderTime.StartTime);
-        var currentTimeMinutes = (now.Hour * 60) + now.Minute;
+        var currentTimeMinutes = (now.ToOffset(TimeSpan.FromHours(7)).Hour * 60) + now.ToOffset(TimeSpan.FromHours(7)).Minute;
         if (!request.OrderTime.IsOrderNextDay && startTimeInMinutes < currentTimeMinutes)
         {
             throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERY_START_TIME_EXCEEDED.GetDescription());
@@ -313,7 +313,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                         }
                         else
                         {
-                            // Do nothing
                             return promotion;
                         }
                     }
@@ -329,14 +328,12 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                         }
                         else
                         {
-                            // Do nothing
                             return promotion;
                         }
                     }
                     else
                     {
-                        // Do nothing
-                        return promotion;
+                        throw new InvalidBusinessException(MessageCode.E_PROMOTION_NOT_FOUND.GetDescription(), new object[] { request.VoucherId });
                     }
                 }
             }

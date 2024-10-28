@@ -13,7 +13,7 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
 
     public async Task<IEnumerable<Promotion>> GetShopAvailablePromotionsByShopId(long id)
     {
-        var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+        var now = DateTimeOffset.UtcNow;
 
         return await DbSet.Where(
                 p => p.ShopId == id
@@ -33,7 +33,7 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
     public async Task<(IEnumerable<Promotion> EligibleList, IEnumerable<Promotion> IneligibleList)>
         GetShopAvailablePromotionsByShopIdAndTotalPrice(long shopId, double totalPrice)
     {
-        var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+        var now = DateTimeOffset.UtcNow;
 
         var promotions = await DbSet.Where(p =>
             p.ShopId == shopId &&

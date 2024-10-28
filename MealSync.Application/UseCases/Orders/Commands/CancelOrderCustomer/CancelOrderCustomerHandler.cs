@@ -76,7 +76,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                 }
                 else if (order.Status == OrderStatus.Confirmed)
                 {
-                    var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+                    var now = DateTimeOffset.UtcNow;
                     var intendedReceiveDateTime = new DateTime(
                         order.IntendedReceiveDate.Year,
                         order.IntendedReceiveDate.Month,
@@ -165,6 +165,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             order.Status = OrderStatus.Cancelled;
             order.IsRefund = isRefund;
             order.Reason = reason;
+            order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIndentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription());;
             _orderRepository.Update(order);
 
             // Commit transaction

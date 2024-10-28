@@ -17,7 +17,7 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
                                         || !isShopOwnerShip && dp.ShopDeliveryStaffId == shipperId)
                                        && dp.StartTime == startTime
                                        && dp.EndTime == endTime
-                                       && dp.DeliveryDate.Date == TimeFrameUtils.GetCurrentDate().Date)
+                                       && dp.DeliveryDate.Date == TimeFrameUtils.GetCurrentDateInUTC7().Date)
             .Include(dp => dp.Orders).FirstOrDefault();
         return result;
     }

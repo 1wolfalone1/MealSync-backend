@@ -114,9 +114,13 @@ public static class Endpoints
     public const string GET_ORDER_FOR_SHOP_WEB_BY_STATUS = "web/shop-owner/order";
 
     // Delivery package
+    public const string CREATE_DELIVERY_PACKAGE = "shop-owner/delivery-package";
 
     // Review
     public const string REVIEW_ORDER = "customer/order/review";
     public const string REVIEW_OF_SHOP = "shop/{shopId:long}/review";
     public const string REVIEW_SUMMARY_OF_SHOP = "shop/{shopId:long}/review/overview";
+
+    // Promotion
+    public const string CREATE_PROMOTION = "/shop-owner/promotion/create";
 }
