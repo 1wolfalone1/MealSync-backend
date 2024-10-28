@@ -79,7 +79,7 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                             var minAllowed = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MaxOrderHoursInAdvance);
                             var maxAllowed = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MinOrderHoursInAdvance);
 
-                            if (payment.Order.CreatedDate >= minAllowed && payment.Order.CreatedDate <= maxAllowed)
+                            if (payment.Order.CreatedDate.ToOffset(TimeSpan.FromHours(7)) >= minAllowed && payment.Order.CreatedDate.ToOffset(TimeSpan.FromHours(7)) <= maxAllowed)
                             {
                                 payment.Order.Status = OrderStatus.Confirmed;
                             }

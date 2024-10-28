@@ -38,7 +38,10 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
 
         // Total Discount validation
         RuleFor(x => x.TotalDiscount)
-            .GreaterThanOrEqualTo(0).WithMessage("Tổng giảm giá không được nhỏ hơn 0.");
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("Tổng giảm giá không được nhỏ hơn 0.")
+            .LessThanOrEqualTo(x => x.TotalFoodCost)
+            .WithMessage("Tiền giảm giá phải nhỏ hơn hoặc bằng tổng tiền đồ ăn.");;
 
         // Total Food Cost validation
         RuleFor(x => x.TotalFoodCost)

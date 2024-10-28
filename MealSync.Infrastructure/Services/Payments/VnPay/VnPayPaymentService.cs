@@ -50,14 +50,14 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
         vnPay.AddRequestData(VnPayRequestParam.VNP_TMN_CODE, _vnPaySetting.TmpCode);
         vnPay.AddRequestData(VnPayRequestParam.VNP_AMOUNT, (payment.Amount * 100).ToString());
         vnPay.AddRequestData(VnPayRequestParam.VNP_BANK_CODE, VN_BANK);
-        vnPay.AddRequestData(VnPayRequestParam.VNP_CREATE_DATE, payment.CreatedDate.ToString(DATE_FORMAT));
+        vnPay.AddRequestData(VnPayRequestParam.VNP_CREATE_DATE, payment.CreatedDate.ToOffset(TimeSpan.FromHours(7)).ToString(DATE_FORMAT));
         vnPay.AddRequestData(VnPayRequestParam.VNP_CURR_CODE, CURRENCY_CODE);
         vnPay.AddRequestData(VnPayRequestParam.VNP_IP_ADDRESS, Utils.GetIpAddress(context));
         vnPay.AddRequestData(VnPayRequestParam.VNP_LOCALE, LOCALE);
         vnPay.AddRequestData(VnPayRequestParam.VNP_ORDER_INFO, "Thanh toan don hang: " + payment.OrderId);
         vnPay.AddRequestData(VnPayRequestParam.VNP_ORDER_TYPE, ORDER_TYPE);
         vnPay.AddRequestData(VnPayRequestParam.VNP_RETURN_URL, _vnPaySetting.ReturnUrl);
-        vnPay.AddRequestData(VnPayRequestParam.VNP_EXPIRE_DATE, payment.CreatedDate.AddMinutes(10).ToString(DATE_FORMAT));
+        vnPay.AddRequestData(VnPayRequestParam.VNP_EXPIRE_DATE, payment.CreatedDate.ToOffset(TimeSpan.FromHours(7)).AddMinutes(10).ToString(DATE_FORMAT));
         vnPay.AddRequestData(VnPayRequestParam.VNP_TXN_REF, payment.OrderId.ToString());
 
         return vnPay.CreateRequestUrl(_vnPaySetting.PaymentUrl, _vnPaySetting.HashSecret);
@@ -82,7 +82,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
         var vnpTxnRef = payment.OrderId;
         var vnpOrderInfo = "Hoan tien giao dich don hang: " + payment.OrderId;
         var vnPayTransactionNo = Convert.ToInt64(payment.PaymentThirdPartyId);
-        var vnpTransactionDate = payment.CreatedDate.ToString(DATE_FORMAT);
+        var vnpTransactionDate = payment.CreatedDate.ToOffset(TimeSpan.FromHours(7)).ToString(DATE_FORMAT);
         var vnpCreateDate = DateTime.Now.ToString(DATE_FORMAT);
         var vnpCreateBy = "Admin";
         var ipAddress = Utils.GetIpAddress(context);

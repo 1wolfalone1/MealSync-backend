@@ -89,8 +89,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Dormitories, opt => opt.MapFrom(src => src.ShopDormitories.Select(sd => sd.Dormitory)));
         CreateMap<Food, ShopFoodResponse.FoodResponse>();
         CreateMap<Promotion, PromotionSummaryResponse>()
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.AddHours(-7).ToUnixTimeMilliseconds()))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.AddHours(-7).ToUnixTimeMilliseconds()));
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.ToUnixTimeMilliseconds()))
+            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToUnixTimeMilliseconds()));
         CreateMap<PlatformCategory, PlatformCategoryResponse>();
         CreateMap<CustomerBuilding, CustomerBuildingResponse>()
             .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
@@ -115,14 +115,14 @@ public class MappingProfile : Profile
         CreateMap<OperatingSlot, OperatingSlotResponse>();
 
         CreateMap<Order, OrderResponse>()
-            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.ToUnixTimeMilliseconds()))
             .ForMember(
                 dest => dest.IntendedReceiveDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeSeconds())
             )
-            .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
-            .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
+            .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.ToUnixTimeMilliseconds() : default))
+            .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails));
         CreateMap<OrderDetail, OrderResponse.OrderDetailResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Food.Id))
@@ -144,15 +144,15 @@ public class MappingProfile : Profile
         CreateMap<Order, DetailOrderCustomerResponse>()
             .ForMember(dest => dest.IsReviewAllowed, opt => opt.MapFrom(src => IsReviewAllowed(src)))
             .ForMember(dest => dest.IsCancelAllowed, opt => opt.MapFrom(src => IsCancelAllowed(src)))
-            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.ToUnixTimeMilliseconds()))
             .ForMember(
                 dest => dest.IntendedReceiveDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeSeconds())
             )
             .ForMember(dest => dest.IsOrderNextDay, opt => opt.MapFrom(src => src.OrderDate.Day != src.IntendedReceiveDate.Day))
-            .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
-            .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.AddHours(-7).ToUnixTimeMilliseconds() : default))
+            .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.ToUnixTimeMilliseconds() : default))
+            .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.CustomerLocation.Longitude))
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.CustomerLocation.Latitude))
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails))
@@ -185,15 +185,15 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.ShopLocation.Latitude));
 
         CreateMap<Promotion, DetailOrderCustomerResponse.PromotionOrderResponse>()
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.AddHours(-7).ToUnixTimeMilliseconds()))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.AddHours(-7).ToUnixTimeMilliseconds()));
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.ToUnixTimeMilliseconds()))
+            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToUnixTimeMilliseconds()));
 
         CreateMap<Order, OrderSummaryResponse>()
-            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.AddHours(-7).ToUnixTimeMilliseconds()))
+            .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.ToUnixTimeMilliseconds()))
             .ForMember(
                 dest => dest.IntendedReceiveDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeSeconds())
             )
             // .ForMember(dest => dest.TotalOrderDetail, opt => opt.MapFrom(src => src.OrderDetails.Count))
             .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
@@ -203,12 +203,12 @@ public class MappingProfile : Profile
             .ForMember(
                 dest => dest.OrderDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.OrderDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.OrderDate, TimeSpan.Zero).ToUnixTimeSeconds())
             )
             .ForMember(
                 dest => dest.IntendedReceiveDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.IntendedReceiveDate.AddHours(-7), TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeSeconds())
             );
 
         CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
@@ -222,11 +222,13 @@ public class MappingProfile : Profile
                     string.IsNullOrEmpty(opt.ImageUrl)
                         ? new List<string>()
                         : opt.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList()));
+
+        CreateMap<Promotion, PromotionDetailOfShop>();
     }
 
     private bool IsReviewAllowed(Order order)
     {
-        var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7));
+        var now = DateTimeOffset.UtcNow;
 
         var receiveDate = new DateTime(
             order.IntendedReceiveDate.Year,
@@ -240,13 +242,13 @@ public class MappingProfile : Profile
         var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
 
         return (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.IssueReported ||
-                order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved)
+                order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved || order.Status == OrderStatus.Completed)
                && order.Reviews.Count == 0 && now >= endTime && now <= endTime.AddHours(24);
     }
 
     private bool IsCancelAllowed(Order order)
     {
-        var now = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(7));
+        var now = DateTimeOffset.UtcNow;
         var intendedReceiveDateTime = new DateTime(
             order.IntendedReceiveDate.Year,
             order.IntendedReceiveDate.Month,
