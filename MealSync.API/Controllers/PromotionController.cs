@@ -33,7 +33,7 @@ public class PromotionController : BaseApiController
     }
 
     [HttpPost(Endpoints.CREATE_PROMOTION)]
-    // [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> CreateShopPromotion(CreatePromotionCommand request)
     {
         return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
