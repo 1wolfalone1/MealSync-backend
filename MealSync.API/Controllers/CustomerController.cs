@@ -1,4 +1,5 @@
 using MealSync.Application.UseCases.Customers.Commands.UpdateAvatar;
+using MealSync.Application.UseCases.Customers.Commands.UpdateProfile;
 
 namespace MealSync.API.Controllers;
 
@@ -26,5 +27,12 @@ public class CustomerController : BaseApiController
         {
             File = file,
         }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_CUSTOMER_PROFILE)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> UpdateCustomerProfile(UpdateProfileCommand request)
+    {
+        return this.HandleResult(await this.Mediator.Send(request).ConfigureAwait(false));
     }
 }
