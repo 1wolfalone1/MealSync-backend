@@ -222,6 +222,8 @@ public class MappingProfile : Profile
                     string.IsNullOrEmpty(opt.ImageUrl)
                         ? new List<string>()
                         : opt.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList()));
+
+        CreateMap<Promotion, PromotionDetailOfShop>();
     }
 
     private bool IsReviewAllowed(Order order)

@@ -313,7 +313,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                         }
                         else
                         {
-                            // Do nothing
                             return promotion;
                         }
                     }
@@ -329,14 +328,12 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                         }
                         else
                         {
-                            // Do nothing
                             return promotion;
                         }
                     }
                     else
                     {
-                        // Do nothing
-                        return promotion;
+                        throw new InvalidBusinessException(MessageCode.E_PROMOTION_NOT_FOUND.GetDescription(), new object[] { request.VoucherId });
                     }
                 }
             }
