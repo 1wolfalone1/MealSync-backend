@@ -12,7 +12,7 @@ public class ShopRegisterCommand : ICommand<Result>
 
     public string PhoneNumber { get; set; }
 
-    public Genders Gender { get; set; } = Genders.Unknow;
+    public Genders Gender { get; set; } = Genders.UnKnown;
 
     public string Password { get; set; }
 

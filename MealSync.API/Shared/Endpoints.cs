@@ -90,6 +90,7 @@ public static class Endpoints
     public const string GET_CUSTOMER_INFO = "customer/profile";
     public const string GET_ALL_CUSTOMER_BUILDING = "customer/building";
     public const string UPDATE_AVATAR = "customer/avatar";
+    public const string UPDATE_CUSTOMER_PROFILE = "customer/profile";
 
     // Order
     public const string CREATE_ORDER = "customer/order";
