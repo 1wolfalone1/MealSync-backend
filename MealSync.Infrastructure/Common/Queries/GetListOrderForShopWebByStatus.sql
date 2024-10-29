@@ -49,7 +49,7 @@ WITH OrdersOfShop AS (
             ORDER BY
                 o.id
         ) AS RowNum,
-            COUNT(id) OVER () AS TotalPages
+        COUNT(id) OVER () AS TotalPages
     FROM
         `order` o
     WHERE
@@ -99,10 +99,12 @@ SELECT
     o.full_name AS FullName,
     accCus.avatar_url AS AvatarUrl,
     -- Shop Delivery Staff
-    accShip.id AS ShopDeliverySection,
+    dp.id AS ShopDeliverySection,
+    dp.id AS DeliveryPackageId,
     accShip.id AS Id,
     accShip.full_name AS FullName,
     accShip.avatar_url AS AvatarUrl,
+    (dp.shop_delivery_staff_id IS NULL) AS IsShopOwnerShip,
     -- Food
     f.id AS FoodSection,
     f.id AS Id,
@@ -111,15 +113,16 @@ SELECT
     od.quantity AS Quantity
 FROM
     OrdersOfShop o
-        INNER JOIN building b ON o.building_id = b.id
-        INNER JOIN dormitory d ON b.dormitory_id = d.id
-        INNER JOIN account accCus ON o.customer_id = accCus.id
-        LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
-        LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
-        INNER JOIN order_detail od ON o.id = od.order_id
-        INNER JOIN food f ON od.food_id = f.id
+    INNER JOIN building b ON o.building_id = b.id
+    INNER JOIN dormitory d ON b.dormitory_id = d.id
+    INNER JOIN account accCus ON o.customer_id = accCus.id
+    LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
+    LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
+    INNER JOIN order_detail od ON o.id = od.order_id
+    INNER JOIN food f ON od.food_id = f.id
 WHERE
-    RowNum BETWEEN (@PageIndex - 1) * @PageSize + 1 AND @PageIndex * @PageSize
+    RowNum BETWEEN (@PageIndex - 1) * @PageSize + 1
+    AND @PageIndex * @PageSize
 ORDER BY
     o.start_time ASC,
     o.order_date ASC;

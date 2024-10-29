@@ -93,13 +93,15 @@ SELECT
     p.min_ordervalue AS MinOrderValue,
     p.apply_type AS ApplyType,
     p.maximum_apply_value AS MaximumApplyValue,
-    -- Delivery Package
+    -- Shop Delivery Staff
     dp.id AS DeliveryPackageSection,
+    dp.id AS DeliveryPackageId,
     dp.shop_delivery_staff_id AS Id,
     a2.full_name AS FullName,
     a2.phone_number AS PhoneNumber,
     a2.email AS Email,
     a2.avatar_url AS AvatarUrl,
+    (dp.shop_delivery_staff_id IS NULL) AS IsShopOwnerShip,
     -- OrderDetail
     od.id AS OrderDetailSection,
     od.id AS Id,
