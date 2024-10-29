@@ -125,4 +125,5 @@ public static class Endpoints
     public const string CREATE_PROMOTION = "shop-owner/promotion/create";
     public const string UPDATE_PROMOTION_INFO = "shop-owner/promotion/info/update";
     public const string UPDATE_PROMOTION_STATUS = "shop-owner/promotion/status/update";
+    public const string GET_SHOP_OWNER_PROMOTION = "shop-owner/promotion";
 }
