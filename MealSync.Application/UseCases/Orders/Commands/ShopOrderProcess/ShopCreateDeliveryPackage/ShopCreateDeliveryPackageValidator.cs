@@ -2,19 +2,22 @@
 using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Utils;
 
-namespace MealSync.Application.UseCases.ShopDeliveryStaffs.Queries.GetListShopStaffForShop;
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCreateDeliveryPackage;
 
-public class GetListShopStaffForShopValidator : AbstractValidator<GetListShopStaffForShopQuery>
+public class ShopCreateDeliveryPackageValidator : AbstractValidator<ShopCreateDeliveryPackageCommand>
 {
-    public GetListShopStaffForShopValidator()
+    public ShopCreateDeliveryPackageValidator()
     {
-        RuleFor(x => x.OrderByMode)
-            .Must(x => x >= 0 && x <= 1)
-            .WithMessage("Vui lòng chọn 0 hoặc 1 cho order by mode");
+        When(x => x.ShopDeliveryStaffId != null, (() =>
+        {
+            RuleFor(x => x.ShopDeliveryStaffId)
+                .GreaterThan(0)
+                .WithMessage("Vui lòng cung cấp id của nhân viên giao hàng");
+        }));
 
-        RuleFor(x => x.IntendedReceiveDate)
-            .Must(x => x != null || x != default)
-            .WithMessage("Vui lòng cung cấp ngày nhận hàng");
+        RuleFor(x => x.OrderIds)
+            .Must(x => x.Length > 0)
+            .WithMessage("Phải có ít nhất 1 đơn hàng để tạo gói hàng");
 
         RuleFor(x => x.StartTime)
             .Must(TimeUtils.IsValidOperatingSlot)

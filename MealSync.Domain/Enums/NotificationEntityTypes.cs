@@ -4,5 +4,6 @@ public enum NotificationEntityTypes
 {
     Account = 0,
     Order = 1,
-    Report = 2,
+    DeliveryPackage = 2,
+    Report = 3,
 }

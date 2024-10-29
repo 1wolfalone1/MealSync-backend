@@ -277,6 +277,9 @@ public enum MessageCode
     [Description("I-Order-DeliveryFail")]
     I_ORDER_DELIVERY_FAIL,
 
+    [Description("I-Order-AssignSuccess")]
+    I_ORDER_ASSIGN_SUCCESS,
+
     [Description("E-Order-NotInCorrectStatus")]
     E_ORDER_NOT_IN_CORRECT_STATUS,
 
@@ -289,11 +292,26 @@ public enum MessageCode
     [Description("W-Order-PreparingEarly")]
     W_ORDER_PREPARING_EARLY,
 
+    [Description("W-Order-AssignEarly")]
+    W_ORDER_ASSIGN_EARLY,
+
     [Description("E-Order-NotCorrectCustomer")]
     E_ORDER_NOT_CORRECT_CUSTOMER,
 
     [Description("E-Order-DeliveringInWrongDate")]
     E_ORDER_NOT_DELIVERING_IN_WRONG_DATE,
+
+    [Description("E-Order-InOtherPackage")]
+    E_ORDER_IN_OTHER_PACKAGE,
+
+    [Description("E-Order-InDifferentFrame")]
+    E_ORDER_IN_DIFFERENT_FRAME,
+
+    [Description("E-Order-DeliveringEarly")]
+    E_ORDER_DELIVERING_EARLY,
+
+    [Description("E-OrderAssign-NotFoundShopStaff")]
+    E_ORDER_ASSIGN_NOT_FOUND_SHOP_STAFF,
 
     // Promotion
     [Description("E-Promotion-NotFound")]

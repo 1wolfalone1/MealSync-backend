@@ -3,11 +3,11 @@ using MealSync.Application.Shared;
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
 
-public class ShopDeliveringOrderCommand : ICommand<Result>
+public class ShopAssignOrderCommand : ICommand<Result>
 {
     public long OrderId { get; set; }
 
-    public long? ShipperId { get; set; }
+    public long? ShopDeliveryStaffId { get; set; }
 
     public bool? IsConfirm { get; set; }
 }

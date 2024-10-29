@@ -2,9 +2,9 @@
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
 
-public class ShopDeliveringOrderValidator : AbstractValidator<ShopDeliveringOrderCommand>
+public class ShopAssignOrderValidator : AbstractValidator<ShopAssignOrderCommand>
 {
-    public ShopDeliveringOrderValidator()
+    public ShopAssignOrderValidator()
     {
         RuleFor(x => x.OrderId)
             .NotEmpty()
@@ -14,9 +14,9 @@ public class ShopDeliveringOrderValidator : AbstractValidator<ShopDeliveringOrde
             .NotNull()
             .WithMessage("Vui lòng cung cấp là bạn cho chấp nhận bỏ quan confirm không");
 
-        RuleFor(x => x.ShipperId)
+        RuleFor(x => x.ShopDeliveryStaffId)
             .GreaterThan(0)
             .WithMessage("Vui lòng cung cấp id của người giao hàng")
-            .When(x => x.ShipperId != null);
+            .When(x => x.ShopDeliveryStaffId != null);
     }
 }

@@ -73,20 +73,22 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
         // Warning
         if (!request.IsConfirm.Value)
         {
-            var currentTime = TimeFrameUtils.GetCurrentDate();
-            var currentTimeInMinutes = (currentTime.Hour * 60) + currentTime.Minute;
-            var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
-            var deadlineInMinutes = startTimeInMinutes - currentTimeInMinutes;
-            if (order.IntendedReceiveDate.Date == currentTime.Date)
+            var now = TimeFrameUtils.GetCurrentDateInUTC7();
+            var intendedReceiveDateTime = new DateTime(
+                order.IntendedReceiveDate.Year,
+                order.IntendedReceiveDate.Month,
+                order.IntendedReceiveDate.Day,
+                order.StartTime / 100,
+                order.StartTime % 100,
+                0);
+            var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-OrderConstant.TIME_SHOP_CANCEL_ORDER_CONFIRMED_IN_HOURS);
+            if (now >= endTime)
             {
-                if (deadlineInMinutes <= OrderConstant.TIME_SHOP_CANCEL_ORDER_CONFIRMED_IN_MINUTES)
+                return Result.Warning(new
                 {
-                    return Result.Warning(new
-                    {
-                        Code = MessageCode.W_ORDER_CANCEL_ORDER_LESS_THAN_A_HOUR.GetDescription(),
-                        Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_CANCEL_ORDER_LESS_THAN_A_HOUR.GetDescription(), order.Id),
-                    });
-                }
+                    Code = MessageCode.W_ORDER_CANCEL_ORDER_LESS_THAN_A_HOUR.GetDescription(),
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_CANCEL_ORDER_LESS_THAN_A_HOUR.GetDescription(), order.Id),
+                });
             }
         }
 
@@ -185,45 +187,47 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
     {
         // Check see is shop cancel order late than 1 hour near time frame
         var systemConfig = _systemConfigRepository.Get().FirstOrDefault();
-        var currentTime = TimeFrameUtils.GetCurrentDate();
-        var currentTimeInMinutes = (currentTime.Hour * 60) + currentTime.Minute;
-        var startTimeInMinutes = TimeUtils.ConvertToMinutes(order.StartTime);
-        var deadlineInMinutes = startTimeInMinutes - currentTimeInMinutes;
-        if (order.IntendedReceiveDate.Date == currentTime.Date)
+        var now = TimeFrameUtils.GetCurrentDateInUTC7();
+        var intendedReceiveDateTime = new DateTime(
+            order.IntendedReceiveDate.Year,
+            order.IntendedReceiveDate.Month,
+            order.IntendedReceiveDate.Day,
+            order.StartTime / 100,
+            order.StartTime % 100,
+            0);
+        var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-OrderConstant.TIME_SHOP_CANCEL_ORDER_CONFIRMED_IN_HOURS);
+        if (now >= endTime)
         {
-            if (deadlineInMinutes <= OrderConstant.TIME_SHOP_CANCEL_ORDER_CONFIRMED_IN_MINUTES)
+            shop.NumOfWarning++;
+            if (shop.NumOfWarning >= 3 && shop.NumOfWarning < systemConfig.MaxWarningBeforeInscreaseFlag)
             {
-                shop.NumOfWarning++;
-                if (shop.NumOfWarning >= 3 && shop.NumOfWarning < systemConfig.MaxWarningBeforeInscreaseFlag)
-                {
-                    // Send email for shop
-                    _emailService.SendEmailToAnnounceWarningForShop(_currentPrincipalService.CurrentPrincipal, shop.NumOfWarning);
-                }
-                else if (shop.NumOfWarning >= systemConfig.MaxWarningBeforeInscreaseFlag)
-                {
-                    // Apply flag for shop account and increase flag
-                    var account = _currentAccountService.GetCurrentAccount();
-                    account.NumOfFlag += 1;
+                // Send email for shop
+                _emailService.SendEmailToAnnounceWarningForShop(_currentPrincipalService.CurrentPrincipal, shop.NumOfWarning);
+            }
+            else if (shop.NumOfWarning >= systemConfig.MaxWarningBeforeInscreaseFlag)
+            {
+                // Apply flag for shop account and increase flag
+                var account = _currentAccountService.GetCurrentAccount();
+                account.NumOfFlag += 1;
 
-                    // Send email for shop annouce flag increase
-                    if (account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
-                    {
-                        _emailService.SendEmailToAnnounceAccountGotBanned(_currentPrincipalService.CurrentPrincipal, account.FullName);
-                        account.Status = AccountStatus.Banned;
-                        _accountRepository.Update(account);
-                    }
-                    else
-                    {
-                        _emailService.SendEmailToAnnounceApplyFlagForShop(_currentPrincipalService.CurrentPrincipal, account.NumOfFlag);
-                    }
-
+                // Send email for shop annouce flag increase
+                if (account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
+                {
+                    _emailService.SendEmailToAnnounceAccountGotBanned(_currentPrincipalService.CurrentPrincipal, account.FullName);
+                    account.Status = AccountStatus.Banned;
                     _accountRepository.Update(account);
-                    var accountFlag = new AccountFlag(AccountActionTypes.CancelConfirmOrder, _currentPrincipalService.CurrentPrincipalId.Value);
-                    await _accountFlagRepository.AddAsync(accountFlag).ConfigureAwait(false);
-
-                    // Reset warning
-                    shop.NumOfWarning = 0;
                 }
+                else
+                {
+                    _emailService.SendEmailToAnnounceApplyFlagForShop(_currentPrincipalService.CurrentPrincipal, account.NumOfFlag);
+                }
+
+                _accountRepository.Update(account);
+                var accountFlag = new AccountFlag(AccountActionTypes.CancelConfirmOrder, _currentPrincipalService.CurrentPrincipalId.Value);
+                await _accountFlagRepository.AddAsync(accountFlag).ConfigureAwait(false);
+
+                // Reset warning
+                shop.NumOfWarning = 0;
             }
         }
     }
