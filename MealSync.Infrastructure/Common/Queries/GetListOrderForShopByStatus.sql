@@ -97,6 +97,13 @@ SELECT
     o.customer_id AS Id,
     o.full_name AS FullName,
     o.phone_number AS PhoneNumber,
+    -- Shop Delivery Staff
+    dp.id AS ShopDeliverySection,
+    dp.id AS DeliveryPackageId,
+    accShip.id AS Id,
+    accShip.full_name AS FullName,
+    accShip.avatar_url AS AvatarUrl,
+    (dp.shop_delivery_staff_id IS NULL) AS IsShopOwnerShip,
     -- Food
     f.id AS FoodSection,
     f.id AS Id,
@@ -107,6 +114,9 @@ FROM
     OrdersOfShop o
     INNER JOIN building b ON o.building_id = b.id
     INNER JOIN dormitory d ON b.dormitory_id = d.id
+    INNER JOIN account accCus ON o.customer_id = accCus.id
+    LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
+    LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
     INNER JOIN order_detail od ON o.id = od.order_id
     INNER JOIN food f ON od.food_id = f.id
 WHERE

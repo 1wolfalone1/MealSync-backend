@@ -25,17 +25,22 @@ public class GetShopOrderByStatusHandler : IQueryHandler<GetShopOrderByStatusQue
     public async Task<Result<Result>> Handle(GetShopOrderByStatusQuery request, CancellationToken cancellationToken)
     {
         var orderUniq = new Dictionary<long, OrderForShopByStatusResponse>();
-        Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop, OrderForShopByStatusResponse> map = (parent, child1, child2) =>
+        Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop, OrderForShopByStatusResponse> map = (parent, child1, child2, child3) =>
         {
             if (!orderUniq.TryGetValue(parent.Id, out var order))
             {
                 parent.Customer = child1;
-                parent.Foods.Add(child2);
+                if (child2.DeliveryPackageId != 0 && (child2.Id != 0 || child2.IsShopOwnerShip))
+                {
+                    parent.ShopDeliveryStaff = child2;
+                }
+
+                parent.Foods.Add(child3);
                 orderUniq.Add(parent.Id, parent);
             }
             else
             {
-                order.Foods.Add(child2);
+                order.Foods.Add(child3);
                 orderUniq.Remove(order.Id);
                 orderUniq.Add(order.Id, order);
             }
@@ -43,8 +48,8 @@ public class GetShopOrderByStatusHandler : IQueryHandler<GetShopOrderByStatusQue
             return parent;
         };
 
-        _logger.LogInformation($"{(request.IntendedRecieveDate != null ? request.IntendedRecieveDate.ToString() : string.Empty)} Date filter request");
-        await _dapperService.SelectAsync<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop, OrderForShopByStatusResponse>(
+        _logger.LogInformation($"Date filter request: {(request.IntendedRecieveDate != null ? request.IntendedRecieveDate.ToString() : string.Empty)}");
+        await _dapperService.SelectAsync<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop,OrderForShopByStatusResponse.FoodInOrderForShop, OrderForShopByStatusResponse>(
             QueryName.GetListOrderForShopByStatus,
             map,
             new
@@ -59,7 +64,7 @@ public class GetShopOrderByStatusHandler : IQueryHandler<GetShopOrderByStatusQue
                 PageIndex = request.PageIndex,
                 PageSize = request.PageSize,
             },
-            "CustomerSection, FoodSection").ConfigureAwait(false);
+            "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
 
         var result = new PaginationResponse<OrderForShopByStatusResponse>(
             orderUniq.Values.ToList(), orderUniq.Values.ToList().Count > 0 ? orderUniq.Values.ToList().First().TotalPages : 0, request.PageIndex, request.PageSize

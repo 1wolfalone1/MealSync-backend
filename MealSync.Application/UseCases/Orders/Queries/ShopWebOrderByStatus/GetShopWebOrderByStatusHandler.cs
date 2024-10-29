@@ -31,7 +31,7 @@ public class GetShopWebOrderByStatusHandler : IQueryHandler<GetShopWebOrderBySta
             if (!orderUniq.TryGetValue(parent.Id, out var order))
             {
                 parent.Customer = child1;
-                if (child2.Id != 0)
+                if (child2.DeliveryPackageId != 0 && (child2.Id != 0 || child2.IsShopOwnerShip))
                 {
                     parent.ShopDeliveryStaff = child2;
                 }
