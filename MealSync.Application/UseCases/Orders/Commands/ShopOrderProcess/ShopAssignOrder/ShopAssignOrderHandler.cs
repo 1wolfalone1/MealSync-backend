@@ -68,7 +68,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 order.StartTime % 100,
                 0);
             var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-OrderConstant.TIME_WARNING_SHOP_ASSIGN_ORDER_EARLY_IN_HOURS);
-            if (now < endTime)
+            if (now < endTime && order.DeliveryPackageId == null)
             {
                 var diffDate = endTime.AddHours(OrderConstant.TIME_WARNING_SHOP_ASSIGN_ORDER_EARLY_IN_HOURS) - now;
                 return Result.Warning(new
@@ -78,13 +78,31 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                         new string[] { order.Id.ToString(), TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), $"{diffDate.Hours}:{diffDate.Minutes}" }),
                 });
             }
+
+            if (order.DeliveryPackageId != null)
+            {
+                return Result.Warning(new
+                {
+                    Code = MessageCode.W_ORDER_IN_OTHER_DELIVERY_PACKAGE.GetDescription(),
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_IN_OTHER_DELIVERY_PACKAGE.GetDescription(), order.Id),
+                });
+            }
         }
 
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-            // Get delivery package of shipper in this frame if not exist create
-            var dp = await CreateOrAddOrderInDeliveryPackageAsync(order, request).ConfigureAwait(false);
+
+            DeliveryPackage dp;
+            if (order.DeliveryPackageId == null)
+            {
+                // Get delivery package of shipper in this frame if not exist create
+                dp = await CreateOrAddOrderInDeliveryPackageAsync(order, request).ConfigureAwait(false);
+            }
+            else
+            {
+                dp = await ReAssignOrderInDeliveryPackageAsync(order, request).ConfigureAwait(false);
+            }
 
             // Todo: Generate QR to order
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
@@ -106,7 +124,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 .Include(dp => dp.ShopDeliveryStaff)
                 .ThenInclude(sds => sds.Account)
                 .Include(dp => dp.Shop)
-                .ThenInclude(sds => sds.Account).Single();
+                .ThenInclude(s => s.Account).Single();
             return Result.Success(_mapper.Map<OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail>(deliveryPackageResponse));
         }
         catch (Exception e)
@@ -120,13 +138,13 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
     private async Task<DeliveryPackage> CreateOrAddOrderInDeliveryPackageAsync(Order order, ShopAssignOrderCommand request)
     {
         var shipId = request.ShopDeliveryStaffId ?? _currentPrincipalService.CurrentPrincipalId.Value;
-        var deliveryPackge = _deliveryPackageRepository.GetPackageByShipIdAndTimeFrame(request.ShopDeliveryStaffId == null, shipId, order.StartTime, order.EndTime);
-        if (deliveryPackge != null)
+        var deliveryPackage = _deliveryPackageRepository.GetPackageByShipIdAndTimeFrame(request.ShopDeliveryStaffId == null, shipId, order.StartTime, order.EndTime);
+        if (deliveryPackage != null)
         {
             // Add order to current package
-            deliveryPackge.Orders.Add(order);
-            _deliveryPackageRepository.Update(deliveryPackge);
-            return deliveryPackge;
+            deliveryPackage.Orders.Add(order);
+            _deliveryPackageRepository.Update(deliveryPackage);
+            return deliveryPackage;
         }
         else
         {
@@ -155,6 +173,71 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
         }
     }
 
+    private async Task<DeliveryPackage> ReAssignOrderInDeliveryPackageAsync(Order order, ShopAssignOrderCommand request)
+    {
+        var shipId = request.ShopDeliveryStaffId ?? _currentPrincipalService.CurrentPrincipalId.Value;
+        var deliveryPackage = _deliveryPackageRepository.GetPackageByShipIdAndTimeFrame(request.ShopDeliveryStaffId == null, shipId, order.StartTime, order.EndTime);
+        if (deliveryPackage != null)
+        {
+            // Add order to current package
+            var oldDeliveryPackageId = order.DeliveryPackageId;
+            order.DeliveryPackageId = deliveryPackage.Id;
+            _orderRepository.Update(order);
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            // Delete delivery package if have no order left
+            var deliveryPackageDelete = _deliveryPackageRepository.Get(dp => dp.Id == oldDeliveryPackageId)
+                .Include(dp => dp.Orders).Single();
+
+            if (deliveryPackageDelete.Orders == null || deliveryPackageDelete.Orders.Count() == 0)
+            {
+                _deliveryPackageRepository.Remove(deliveryPackageDelete);
+            }
+
+            return deliveryPackage;
+        }
+        else
+        {
+            // Need create new delivery package
+            var dp = new DeliveryPackage()
+            {
+                ShopDeliveryStaffId = request.ShopDeliveryStaffId,
+                ShopId = request.ShopDeliveryStaffId == null ? _currentPrincipalService.CurrentPrincipalId.Value : null,
+                DeliveryDate = order.IntendedReceiveDate,
+                StartTime = order.StartTime,
+                EndTime = order.EndTime,
+                Status = DeliveryPackageStatus.Created,
+
+            };
+            await _deliveryPackageRepository.AddAsync(dp).ConfigureAwait(false);
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            // Update to order
+            var oldDeliveryPackageId = order.DeliveryPackageId;
+            order.DeliveryPackageId = dp.Id;
+            _orderRepository.Update(order);
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            // Delete delivery package if have no order left
+            var deliveryPackageDelete = _deliveryPackageRepository.Get(dp => dp.Id == oldDeliveryPackageId)
+                .Include(dp => dp.Orders).Single();
+
+            if (deliveryPackageDelete.Orders == null || deliveryPackageDelete.Orders.Count() == 0)
+            {
+                _deliveryPackageRepository.Remove(deliveryPackageDelete);
+            }
+
+            if (request.ShopDeliveryStaffId != null)
+            {
+                var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(request.ShopDeliveryStaffId.Value);
+                shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
+                _shopDeliveryStaffRepository.Update(shopDeliveryStaff);
+            }
+
+            return dp;
+        }
+    }
+
     private void Validate(ShopAssignOrderCommand request)
     {
         var order = _orderRepository
@@ -168,9 +251,6 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
 
         if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERING_IN_WRONG_DATE.GetDescription(), new object[] { order.Id, order.IntendedReceiveDate.Date.ToString("dd-MM-yyyy") });
-
-        if (order.DeliveryPackageId != null)
-            throw new InvalidBusinessException(MessageCode.E_ORDER_IN_OTHER_PACKAGE.GetDescription(), new object[] { order.Id });
 
         if (request.ShopDeliveryStaffId != null)
         {
