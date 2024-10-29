@@ -192,4 +192,10 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
         return (totalCount, foods);
     }
+
+    public Task<Food?> GetActiveAndNotSoldOut(long id)
+    {
+        return DbSet.FirstOrDefaultAsync(f => f.Id == id && f.Status == FoodStatus.Active
+                                              && !f.IsSoldOut && f.Shop.Status == ShopStatus.Active && !f.Shop.IsReceivingOrderPaused);
+    }
 }

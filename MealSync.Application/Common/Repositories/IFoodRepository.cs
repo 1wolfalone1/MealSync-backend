@@ -27,4 +27,6 @@ public interface IFoodRepository : IBaseRepository<Food>
     Task<Food?> GetByIdAndShopId(long id, long shopId);
 
     Task<(int TotalCount, IEnumerable<Food> Foods)> GetAllShopFoodForWeb(long shopId, int pageIndex, int pageSize, int statusMode, long? operatingSlotId, string? name);
+
+    Task<Food?> GetActiveAndNotSoldOut(long id);
 }

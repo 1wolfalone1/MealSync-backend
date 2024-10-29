@@ -358,7 +358,12 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             var orderDetailDescriptionList = new List<OrderDetailDescriptionDto>();
 
             // Extract food ID from the request
-            var id = long.Parse(foodRequest.Id.Split('-')[0]);
+            var validId = long.TryParse(foodRequest.Id.Split('-')[0], out var id);
+            if (!validId)
+            {
+                throw new InvalidBusinessException(MessageCode.E_FOOD_NOT_FOUND.GetDescription(), new object[] { id });
+            }
+
             var food = await _foodRepository.GetByIdAndShopId(id, request.ShopId).ConfigureAwait(false);
 
             // Check if the food item exists

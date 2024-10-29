@@ -1,7 +1,8 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
+using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageGroupDetailByTimeFrames;
+using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListTimeFrameUnAssigns;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCreateDeliveryPackage;
-using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopPreparingOrder;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,5 +16,19 @@ public class DeliveryPackageController : BaseApiController
     public async Task<IActionResult> AddShopProfile([FromBody] ShopCreateDeliveryPackageCommand command)
     {
         return HandleResult(await Mediator.Send(command));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpGet(Endpoints.GET_DELIVERY_PACKAGE_GROUP)]
+    public async Task<IActionResult> AddShopProfile([FromQuery] GetDeliveryPackageGroupDetailByTimeFrameQuery query)
+    {
+        return HandleResult(await Mediator.Send(query));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpGet(Endpoints.GET_TIME_FRAME_ALL_ORDER_UN_ASSIGN)]
+    public async Task<IActionResult> GetTimeFrameOrderUnAssignProfile([FromQuery] GetListTimeFrameUnAssignQuery query)
+    {
+        return HandleResult(await Mediator.Send(query));
     }
 }

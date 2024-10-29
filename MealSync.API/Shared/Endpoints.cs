@@ -115,6 +115,8 @@ public static class Endpoints
 
     // Delivery package
     public const string CREATE_DELIVERY_PACKAGE = "shop-owner/delivery-package";
+    public const string GET_DELIVERY_PACKAGE_GROUP = "shop-owner/delivery-package-group";
+    public const string GET_TIME_FRAME_ALL_ORDER_UN_ASSIGN = "shop-owner/delivery-package/time-frame/un-assign";
 
     // Review
     public const string REVIEW_ORDER = "customer/order/review";
@@ -125,4 +127,5 @@ public static class Endpoints
     public const string CREATE_PROMOTION = "shop-owner/promotion/create";
     public const string UPDATE_PROMOTION_INFO = "shop-owner/promotion/info/update";
     public const string UPDATE_PROMOTION_STATUS = "shop-owner/promotion/status/update";
+    public const string GET_SHOP_OWNER_PROMOTION = "shop-owner/promotion";
 }

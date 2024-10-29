@@ -69,6 +69,10 @@
         <EmbeddedResource Include="Common\Queries\GetListOrderByPackageId.sql" />
         <None Remove="Common\Queries\GetListShopDeliveryStaffToAssign.sql" />
         <EmbeddedResource Include="Common\Queries\GetListShopDeliveryStaffToAssign.sql" />
+        <None Remove="Common\Queries\GetListDeliveryDetailStasticByTimeFrame.sql" />
+        <EmbeddedResource Include="Common\Queries\GetListDeliveryDetailStasticByTimeFrame.sql" />
+        <None Remove="Common\Queries\GetListOrderUnAssignInTimeFrame.sql" />
+        <EmbeddedResource Include="Common\Queries\GetListOrderUnAssignInTimeFrame.sql" />
     </ItemGroup>
 
 </Project>
