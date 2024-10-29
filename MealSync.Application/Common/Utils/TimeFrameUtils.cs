@@ -24,6 +24,12 @@ public class TimeFrameUtils
         return hour + minute;
     }
 
+    public static int GetCurrentHoursInUTC7()
+    {
+        var currentDate = GetCurrentDateInUTC7();
+        var hour = currentDate.Hour * 100;
+        return hour + currentDate.Minute;
+    }
 
     public static int GetTimeHoursInRound()
     {

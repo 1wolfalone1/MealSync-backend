@@ -1,4 +1,5 @@
 using MealSync.Application.Common.Repositories;
+using MealSync.Application.Common.Utils;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -190,5 +191,17 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     public Task<Order?> GetByIdAndCustomerId(long id, long customerId)
     {
         return DbSet.FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == customerId);
+    }
+
+    public List<(int StartTime, int EndTime)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate)
+    {
+        var result = DbSet.Where(o => o.IntendedReceiveDate.Date == intendedReceiveDate.Date &&
+                                TimeFrameUtils.GetCurrentHoursInUTC7() <= o.EndTime)
+            .GroupBy(o => new { o.StartTime, o.EndTime })
+            .Where(g => g.All(o => o.DeliveryPackageId == null && o.Status == OrderStatus.Preparing))
+            .Select(g => new { g.Key.StartTime, g.Key.EndTime })
+            .ToList();
+
+        return result.Select(x => (x.StartTime, x.EndTime)).ToList();
     }
 }
