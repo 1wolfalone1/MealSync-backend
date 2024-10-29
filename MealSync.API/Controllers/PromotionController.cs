@@ -1,6 +1,8 @@
 using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Promotions.Commands.Create;
+using MealSync.Application.UseCases.Promotions.Commands.UpdateInfo;
+using MealSync.Application.UseCases.Promotions.Commands.UpdateStatus;
 using MealSync.Application.UseCases.Promotions.Queries.GetEligibleAndIneligiblePromotions;
 using MealSync.Application.UseCases.Promotions.Queries.GetShopPromotion;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +37,20 @@ public class PromotionController : BaseApiController
     [HttpPost(Endpoints.CREATE_PROMOTION)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> CreateShopPromotion(CreatePromotionCommand request)
+    {
+        return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_PROMOTION_INFO)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdatePromotionInfo(UpdatePromotionInfoCommand request)
+    {
+        return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_PROMOTION_STATUS)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdatePromotionStatus(UpdatePromotionStatusCommand request)
     {
         return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
     }

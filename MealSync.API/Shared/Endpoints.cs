@@ -121,5 +121,7 @@ public static class Endpoints
     public const string REVIEW_SUMMARY_OF_SHOP = "shop/{shopId:long}/review/overview";
 
     // Promotion
-    public const string CREATE_PROMOTION = "/shop-owner/promotion/create";
+    public const string CREATE_PROMOTION = "shop-owner/promotion/create";
+    public const string UPDATE_PROMOTION_INFO = "shop-owner/promotion/info/update";
+    public const string UPDATE_PROMOTION_STATUS = "shop-owner/promotion/status/update";
 }

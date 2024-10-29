@@ -314,6 +314,18 @@ public enum MessageCode
     [Description("E-Promotion-Not-Enough-Condition")]
     E_PROMOTION_NOT_ENOUGH_CONDITION,
 
+    [Description("E-Promotion-Must-Be-Greater-Or-Equal-To-Used-Quantity")]
+    E_PROMOTION_MUST_BE_GREATER_OR_EQUAL_TO_USED_QUANTITY,
+
+    [Description("I-Promotion-Create-Success")]
+    I_PROMOTION_CREATE_SUCCESS,
+
+    [Description("I-Promotion-Update-Info-Success")]
+    I_PROMOTION_UPDATE_INFO_SUCCESS,
+
+    [Description("I-Promotion-Update-Status-Success")]
+    I_PROMOTION_UPDATE_STATUS_SUCCESS,
+
     // Payment
     [Description("E-Payment-NotFound")]
     E_PAYMENT_NOT_FOUND,
