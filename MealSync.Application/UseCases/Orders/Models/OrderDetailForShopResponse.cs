@@ -53,7 +53,7 @@ public class OrderDetailForShopResponse
 
     public PromotionInShopOrderDetail Promotion { get; set; }
 
-    public DeliveryPackageInShopOrderDetail DeliveryPackage { get; set; }
+    public ShopDeliveryStaffInShopOrderDetail ShopDeliveryStaff { get; set; }
 
     public List<FoodInShopOrderDetail> OrderDetails { get; set; } = new();
 
@@ -97,8 +97,10 @@ public class OrderDetailForShopResponse
         public double MaximumApplyValue { get; set; }
     }
 
-    public class DeliveryPackageInShopOrderDetail
+    public class ShopDeliveryStaffInShopOrderDetail
     {
+        public long DeliveryPackageId { get; set; }
+
         public long Id { get; set; }
 
         public string FullName { get; set; }
@@ -108,6 +110,8 @@ public class OrderDetailForShopResponse
         public string Email { get; set; }
 
         public string AvatarUrl { get; set; }
+
+        public bool IsShopOwnerShip { get; set; }
     }
 
     public class FoodInShopOrderDetail

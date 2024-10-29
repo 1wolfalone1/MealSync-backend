@@ -49,7 +49,7 @@ WITH OrdersOfShop AS (
             ORDER BY
                 o.id
         ) AS RowNum,
-            COUNT(id) OVER () AS TotalPages
+        COUNT(id) OVER () AS TotalPages
     FROM
         `order` o
     WHERE
@@ -97,12 +97,27 @@ SELECT
     o.customer_id AS CustomerSection,
     o.customer_id AS Id,
     o.full_name AS FullName,
+    o.phone_number AS PhoneNumber,
     accCus.avatar_url AS AvatarUrl,
-    -- Shop Delivery Staff
-    accShip.id AS ShopDeliverySection,
-    accShip.id AS Id,
-    accShip.full_name AS FullName,
-    accShip.avatar_url AS AvatarUrl,
+    -- Shop Delivery Staff or Shop Owner Information (conditional)
+    dp.id AS ShopDeliverySection,
+    dp.id AS DeliveryPackageId,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN dp.shop_delivery_staff_id
+        ELSE 0
+    END AS Id,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.full_name
+        ELSE accShop.full_name
+    END AS FullName,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.avatar_url
+        ELSE accShop.avatar_url
+    END AS AvatarUrl,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NULL THEN TRUE
+        ELSE FALSE
+    END AS IsShopOwnerShip,
     -- Food
     f.id AS FoodSection,
     f.id AS Id,
@@ -111,15 +126,17 @@ SELECT
     od.quantity AS Quantity
 FROM
     OrdersOfShop o
-        INNER JOIN building b ON o.building_id = b.id
-        INNER JOIN dormitory d ON b.dormitory_id = d.id
-        INNER JOIN account accCus ON o.customer_id = accCus.id
-        LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
-        LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
-        INNER JOIN order_detail od ON o.id = od.order_id
-        INNER JOIN food f ON od.food_id = f.id
+    INNER JOIN building b ON o.building_id = b.id
+    INNER JOIN dormitory d ON b.dormitory_id = d.id
+    INNER JOIN account accCus ON o.customer_id = accCus.id
+    LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
+    LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
+    LEFT JOIN account accShop ON dp.shop_id = accShop.id
+    INNER JOIN order_detail od ON o.id = od.order_id
+    INNER JOIN food f ON od.food_id = f.id
 WHERE
-    RowNum BETWEEN (@PageIndex - 1) * @PageSize + 1 AND @PageIndex * @PageSize
+    RowNum BETWEEN (@PageIndex - 1) * @PageSize + 1
+    AND @PageIndex * @PageSize
 ORDER BY
     o.start_time ASC,
     o.order_date ASC;

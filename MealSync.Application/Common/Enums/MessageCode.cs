@@ -295,6 +295,9 @@ public enum MessageCode
     [Description("W-Order-AssignEarly")]
     W_ORDER_ASSIGN_EARLY,
 
+    [Description("W-Order-InOtherDeliveryPackage")]
+    W_ORDER_IN_OTHER_DELIVERY_PACKAGE,
+
     [Description("E-Order-NotCorrectCustomer")]
     E_ORDER_NOT_CORRECT_CUSTOMER,
 
@@ -312,6 +315,10 @@ public enum MessageCode
 
     [Description("E-OrderAssign-NotFoundShopStaff")]
     E_ORDER_ASSIGN_NOT_FOUND_SHOP_STAFF,
+
+    // Delivery package
+    [Description("E-DeliveryPackage-StaffAlreadyHaveOtherPackage")]
+    E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE,
 
     // Promotion
     [Description("E-Promotion-NotFound")]

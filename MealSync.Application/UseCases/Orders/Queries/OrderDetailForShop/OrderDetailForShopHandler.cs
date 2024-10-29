@@ -30,7 +30,7 @@ public class OrderDetailForShopHandler : IQueryHandler<OrderDetailForShopQuery, 
         Validate(request);
 
         var uniqOrder = new Dictionary<long, OrderDetailForShopResponse>();
-        Func<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail, OrderDetailForShopResponse.DeliveryPackageInShopOrderDetail,
+        Func<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail, OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail,
             OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse> map =
             (parent, child1, child2, child3, child4) =>
             {
@@ -42,9 +42,9 @@ public class OrderDetailForShopHandler : IQueryHandler<OrderDetailForShopQuery, 
                         parent.Promotion = child2;
                     }
 
-                    if (child3.Id != 0)
+                    if (child3.DeliveryPackageId != 0 && (child3.Id != 0 || child3.IsShopOwnerShip))
                     {
-                        parent.DeliveryPackage = child3;
+                        parent.ShopDeliveryStaff = child3;
                     }
 
                     parent.OrderDetails.Add(child4);
@@ -62,7 +62,7 @@ public class OrderDetailForShopHandler : IQueryHandler<OrderDetailForShopQuery, 
 
         await _dapperService
             .SelectAsync<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail,
-                OrderDetailForShopResponse.DeliveryPackageInShopOrderDetail, OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse>(
+                OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail, OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse>(
                 QueryName.GetShopOrderDetail,
                 map,
                 new

@@ -76,11 +76,15 @@ public class OrderForShopWebByStatusResponse
 
     public class ShopDeliveryStaffInOrderForShop
     {
+        public long DeliveryPackageId { get; set; }
+
         public long Id { get; set; }
 
         public string FullName { get; set; }
 
         public string AvatarUrl { get; set; }
+
+        public bool IsShopOwnerShip { get; set; }
     }
 
     public class FoodInOrderForShop

@@ -93,13 +93,29 @@ SELECT
     p.min_ordervalue AS MinOrderValue,
     p.apply_type AS ApplyType,
     p.maximum_apply_value AS MaximumApplyValue,
-    -- Delivery Package
+    -- Shop Delivery Staff or Shop Owner Information (conditional)
     dp.id AS DeliveryPackageSection,
-    dp.shop_delivery_staff_id AS Id,
-    a2.full_name AS FullName,
-    a2.phone_number AS PhoneNumber,
-    a2.email AS Email,
-    a2.avatar_url AS AvatarUrl,
+    dp.id AS DeliveryPackageId,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN dp.shop_delivery_staff_id
+        ELSE 0
+    END AS Id,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.full_name
+        ELSE accShop.full_name
+    END AS FullName,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.avatar_url
+        ELSE accShop.avatar_url
+    END AS AvatarUrl,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.email
+        ELSE accShop.email
+    END AS Email,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NULL THEN TRUE
+        ELSE FALSE
+    END AS IsShopOwnerShip,
     -- OrderDetail
     od.id AS OrderDetailSection,
     od.id AS Id,
@@ -120,4 +136,5 @@ FROM
     LEFT JOIN promotion p ON o.promotion_id = p.id
     INNER JOIN account a ON a.id = o.customer_id
     LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
-    LEFT JOIN account a2 ON dp.shop_delivery_staff_id = a2.id;
+    LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
+    LEFT JOIN account accShop ON dp.shop_id = accShop.id;

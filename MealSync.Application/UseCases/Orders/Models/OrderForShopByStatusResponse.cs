@@ -51,6 +51,8 @@ public class OrderForShopByStatusResponse
 
     public CustomerInforInOrderForShop Customer { get; set; }
 
+    public ShopDeliveryStaffInOrderForShop ShopDeliveryStaff { get; set; }
+
     public List<FoodInOrderForShop> Foods { get; set; } = new();
 
     public class CustomerInforInOrderForShop
@@ -60,6 +62,21 @@ public class OrderForShopByStatusResponse
         public string FullName { get; set; }
 
         public string PhoneNumber { get; set; }
+
+        public string AvatarUrl { get; set; }
+    }
+
+    public class ShopDeliveryStaffInOrderForShop
+    {
+        public long DeliveryPackageId { get; set; }
+
+        public long Id { get; set; }
+
+        public string FullName { get; set; }
+
+        public string AvatarUrl { get; set; }
+
+        public bool IsShopOwnerShip { get; set; }
     }
 
     public class FoodInOrderForShop
