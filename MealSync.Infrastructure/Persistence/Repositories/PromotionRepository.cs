@@ -53,4 +53,76 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
 
         return (eligibleList, ineligibleList);
     }
+
+    public async Task<(int TotalCount, IEnumerable<Promotion> Promotions)> GetShopPromotionByFilter(
+        long shopId, string? searchValue, PromotionStatus? status, PromotionApplyTypes? applyTypes,
+        DateTime? startTime, DateTime? endTime, int pageIndex, int pageSize
+    )
+    {
+        var query = DbSet.Where(p => p.ShopId == shopId && p.Status != PromotionStatus.Delete).AsQueryable();
+
+        if (status.HasValue)
+        {
+            query = query.Where(p => p.Status == status.Value);
+        }
+
+        if (applyTypes.HasValue)
+        {
+            query = query.Where(p => p.ApplyType == applyTypes.Value);
+        }
+
+        if (startTime.HasValue)
+        {
+            query = query.Where(p => p.StartDate >= new DateTimeOffset(startTime.Value, TimeSpan.Zero));
+        }
+
+        if (endTime.HasValue)
+        {
+            query = query.Where(p => p.EndDate <= new DateTimeOffset(endTime.Value, TimeSpan.Zero));
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchValue))
+        {
+            searchValue = EscapeLikeParameter(searchValue);
+            bool isNumeric = double.TryParse(searchValue, out var numericValue);
+            string numericString = numericValue.ToString();
+
+            query = query.Where(p =>
+                EF.Functions.Like(p.Title, $"%{searchValue}%") ||
+                EF.Functions.Like(p.Description ?? string.Empty, $"%{searchValue}%") ||
+                (isNumeric && applyTypes == PromotionApplyTypes.Percent &&
+                 (EF.Functions.Like(p.Id.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.AmountRate.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.MaximumApplyValue.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.MinOrdervalue.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.UsageLimit.ToString(), $"%{numericString}%"))) ||
+                (isNumeric && applyTypes == PromotionApplyTypes.Absolute &&
+                 (EF.Functions.Like(p.Id.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.AmountValue.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.MinOrdervalue.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.UsageLimit.ToString(), $"%{numericString}%"))) ||
+                (isNumeric && applyTypes == null &&
+                 (EF.Functions.Like(p.Id.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.AmountRate.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.MaximumApplyValue.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.AmountValue.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.MinOrdervalue.ToString(), $"%{numericString}%") ||
+                  EF.Functions.Like(p.UsageLimit.ToString(), $"%{numericString}%")))
+            );
+        }
+
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+        query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+        var promotions = await query.ToListAsync().ConfigureAwait(false);
+
+        return (totalCount, promotions);
+    }
+
+    private static string EscapeLikeParameter(string input)
+    {
+        return input
+            .Replace("\\", "\\\\") // Escape backslash
+            .Replace("%", "\\%") // Escape percentage
+            .Replace("_", "\\_"); // Escape underscore
+    }
 }

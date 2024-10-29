@@ -45,4 +45,27 @@ public class OptionGroupRepository : BaseRepository<OptionGroup>, IOptionGroupRe
             ? DbSet.Any(og => og.Title == title && og.ShopId == shopId)
             : DbSet.Any(og => og.Title == title && og.ShopId == shopId && og.Id != id);
     }
+
+    public Task<OptionGroup?> GetByIdAndOptionIds(long id, long[] optionIds)
+    {
+        return DbSet
+            .Where(og => og.Id == id && og.Status == OptionGroupStatus.Active)
+            .Select(og => new OptionGroup
+            {
+                Id = og.Id,
+                Title = og.Title,
+                Options = og.Options
+                    .Where(o => optionIds.Contains(o.Id) && o.Status == OptionStatus.Active)
+                    .Select(o => new Option
+                    {
+                        Id = o.Id,
+                        Title = o.Title,
+                        ImageUrl = o.ImageUrl,
+                        IsCalculatePrice = o.IsCalculatePrice,
+                        Price = o.Price,
+                        Status = o.Status,
+                    }).ToList(),
+            })
+            .FirstOrDefaultAsync();
+    }
 }

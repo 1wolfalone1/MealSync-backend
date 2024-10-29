@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.Promotions.Commands.UpdateInfo;
 using MealSync.Application.UseCases.Promotions.Commands.UpdateStatus;
 using MealSync.Application.UseCases.Promotions.Queries.GetEligibleAndIneligiblePromotions;
 using MealSync.Application.UseCases.Promotions.Queries.GetShopPromotion;
+using MealSync.Application.UseCases.Promotions.Queries.Shop.GetPromotionByFilter;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -51,6 +52,13 @@ public class PromotionController : BaseApiController
     [HttpPut(Endpoints.UPDATE_PROMOTION_STATUS)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> UpdatePromotionStatus(UpdatePromotionStatusCommand request)
+    {
+        return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_SHOP_OWNER_PROMOTION)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetShopOwnerPromotion([FromQuery] GetPromotionByFilterQuery request)
     {
         return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
     }

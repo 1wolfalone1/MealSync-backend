@@ -11,4 +11,6 @@ public interface IOptionGroupRepository : IBaseRepository<OptionGroup>
     (int TotalCount, List<OptionGroup> OptionGroups) GetAllShopOptonGroup(long? currentPrincipalId, int requestPageIndex, int requestPageSize);
 
     bool CheckExistTitleOptionGroup(string title, long shopId, long? id = null);
+
+    Task<OptionGroup?> GetByIdAndOptionIds(long id, long[] optionIds);
 }

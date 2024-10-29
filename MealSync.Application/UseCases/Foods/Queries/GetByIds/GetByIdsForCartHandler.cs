@@ -1,4 +1,3 @@
-using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
@@ -12,38 +11,143 @@ namespace MealSync.Application.UseCases.Foods.Queries.GetByIds;
 public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result>
 {
     private readonly IFoodRepository _foodRepository;
-    private readonly ISystemResourceRepository _systemResourceRepository;
-    private readonly IMapper _mapper;
+    private readonly IOptionGroupRepository _optionGroupRepository;
 
-    public GetByIdsForCartHandler(IFoodRepository foodRepository, ISystemResourceRepository systemResourceRepository, IMapper mapper)
+    public GetByIdsForCartHandler(IFoodRepository foodRepository, IOptionGroupRepository optionGroupRepository)
     {
         _foodRepository = foodRepository;
-        _systemResourceRepository = systemResourceRepository;
-        _mapper = mapper;
+        _optionGroupRepository = optionGroupRepository;
     }
 
     public async Task<Result<Result>> Handle(GetByIdsForCartQuery request, CancellationToken cancellationToken)
     {
-        var isAllIdsInOneShop = await _foodRepository.CheckAllIdsInOneShop(request.Ids).ConfigureAwait(false);
-        if (isAllIdsInOneShop)
-        {
-            var data = await _foodRepository.GetByIds(request.Ids).ConfigureAwait(false);
-            var foods = _mapper.Map<List<FoodCartSummaryResponse>>(data.Foods);
+        var idsNotFound = new List<string>();
+        var foodsResponses = new List<FoodCartCheckResponse.DetailFoodResponse>();
 
-            return Result.Success(new
-            {
-                Foods = foods,
-                IsHaveNotFound = data.IdsNotFound.Count > 0,
-                IdsNotFound = data.IdsNotFound.Count > 0 ? data.IdsNotFound : null,
-                Message = data.IdsNotFound.Count > 0
-                    ? _systemResourceRepository.GetByResourceCode(
-                        MessageCode.E_FOOD_CART_NOT_FOUND.GetDescription(), data.IdsNotFound.Count)
-                    : null,
-            });
-        }
-        else
+        foreach (var foodRequest in request.Foods)
         {
-            throw new InvalidBusinessException(MessageCode.E_FOOD_IN_CART_NOT_IN_ONE_SHOP.GetDescription());
+            var validId = long.TryParse(foodRequest.Id.Split('-')[0], out var id);
+
+            if (!validId)
+            {
+                throw new InvalidBusinessException(MessageCode.E_FOOD_NOT_FOUND.GetDescription(), new object[] { id });
+            }
+            else
+            {
+                var food = await _foodRepository.GetActiveAndNotSoldOut(id).ConfigureAwait(false);
+
+                if (food == default)
+                {
+                    idsNotFound.Add(foodRequest.Id);
+                }
+                else
+                {
+                    var foodResponse = new FoodCartCheckResponse.DetailFoodResponse
+                    {
+                        Id = food.Id,
+                        Name = food.Name,
+                        Description = food.Description,
+                        Price = food.Price,
+                        ImageUrl = food.ImageUrl,
+                        ShopId = food.ShopId,
+                    };
+                    bool isNotFound = false;
+
+                    if (foodRequest.OptionGroupRadio != default && foodRequest.OptionGroupRadio.Count > 0 && !isNotFound)
+                    {
+                        var optionGroupRadioResponses = new List<FoodCartCheckResponse.OptionGroupRadioResponse>();
+
+                        foreach (var optionGroupRequest in foodRequest.OptionGroupRadio)
+                        {
+                            var optionGroup = await _optionGroupRepository.GetByIdAndOptionIds(
+                                optionGroupRequest.Id, new[] { optionGroupRequest.OptionId }
+                            ).ConfigureAwait(false);
+
+                            if (optionGroup == default || !optionGroup.Options.Select(o => o.Id).Contains(optionGroupRequest.OptionId))
+                            {
+                                idsNotFound.Add(foodRequest.Id);
+                                isNotFound = true;
+                                break;
+                            }
+                            else
+                            {
+                                var option = optionGroup.Options.First();
+                                optionGroupRadioResponses.Add(new FoodCartCheckResponse.OptionGroupRadioResponse
+                                {
+                                    Id = optionGroup.Id,
+                                    Title = optionGroup.Title,
+                                    Option = new FoodCartCheckResponse.OptionResponse
+                                    {
+                                        Id = option.Id,
+                                        Title = option.Title,
+                                        ImageUrl = option.ImageUrl,
+                                        Price = option.Price,
+                                        IsCalculatePrice = option.IsCalculatePrice,
+                                    },
+                                });
+                            }
+                        }
+
+                        foodResponse.OptionGroupRadio = optionGroupRadioResponses;
+                    }
+
+                    if (foodRequest.OptionGroupCheckbox != default && foodRequest.OptionGroupCheckbox.Count > 0 && !isNotFound)
+                    {
+                        var optionGroupCheckboxResponses = new List<FoodCartCheckResponse.OptionGroupCheckboxResponse>();
+
+                        foreach (var optionGroupRequest in foodRequest.OptionGroupCheckbox)
+                        {
+                            var optionGroup = await _optionGroupRepository.GetByIdAndOptionIds(
+                                optionGroupRequest.Id, optionGroupRequest.OptionIds
+                            ).ConfigureAwait(false);
+                            var availableOptionIds = optionGroup?.Options.Select(o => o.Id).ToList() ?? new List<long>();
+
+                            if (optionGroup == default || !optionGroupRequest.OptionIds.All(optionId => availableOptionIds.Contains(optionId)))
+                            {
+                                idsNotFound.Add(foodRequest.Id);
+                                isNotFound = true;
+                                break;
+                            }
+                            else
+                            {
+                                var matchingOptions = optionGroup.Options
+                                    .Where(o => optionGroupRequest.OptionIds.Contains(o.Id))
+                                    .Select(o => new FoodCartCheckResponse.OptionResponse
+                                    {
+                                        Id = o.Id,
+                                        Title = o.Title,
+                                        ImageUrl = o.ImageUrl,
+                                        Price = o.Price,
+                                        IsCalculatePrice = o.IsCalculatePrice,
+                                    })
+                                    .ToList();
+
+                                var optionGroupCheckboxResponse = new FoodCartCheckResponse.OptionGroupCheckboxResponse
+                                {
+                                    Id = optionGroup.Id,
+                                    Title = optionGroup.Title,
+                                    Options = matchingOptions,
+                                };
+
+                                optionGroupCheckboxResponses.Add(optionGroupCheckboxResponse);
+                            }
+                        }
+
+                        foodResponse.OptionGroupCheckbox = optionGroupCheckboxResponses;
+                    }
+
+                    if (!isNotFound)
+                    {
+                        foodsResponses.Add(foodResponse);
+                    }
+                }
+            }
         }
+
+        return Result.Success(new FoodCartCheckResponse
+        {
+            Foods = foodsResponses,
+            IdNotFounds = idsNotFound,
+        });
     }
 }

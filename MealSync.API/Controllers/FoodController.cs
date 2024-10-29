@@ -79,14 +79,11 @@ public class FoodController : BaseApiController
         return HandleResult(await Mediator.Send(request));
     }
 
-    [HttpGet(Endpoints.GET_FOOD_BY_IDS)]
+    [HttpPost(Endpoints.GET_FOOD_BY_IDS)]
     [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
-    public async Task<IActionResult> GetFoodInCart([FromQuery] List<long> ids)
+    public async Task<IActionResult> GetFoodInCart(GetByIdsForCartQuery request)
     {
-        return HandleResult(await Mediator.Send(new GetByIdsForCartQuery()
-        {
-            Ids = ids,
-        }).ConfigureAwait(false));
+        return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
     }
 
     [HttpGet(Endpoints.GET_FOOD)]
