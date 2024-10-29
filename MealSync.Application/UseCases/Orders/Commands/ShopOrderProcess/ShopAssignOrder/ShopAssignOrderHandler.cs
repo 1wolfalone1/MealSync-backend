@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
@@ -7,6 +8,7 @@ using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
+using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
@@ -28,10 +30,11 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
     private readonly IAccountRepository _accountRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
+    private readonly IMapper _mapper;
 
     public ShopAssignOrderHandler(IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IUnitOfWork unitOfWork, ILogger<ShopAssignOrderCommand> logger,
         IDeliveryPackageRepository deliveryPackageRepository, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository, IAccountRepository accountRepository,
-        ISystemResourceRepository systemResourceRepository, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
+        ISystemResourceRepository systemResourceRepository, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapper mapper)
     {
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
@@ -44,6 +47,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
         _accountRepository = accountRepository;
         _systemResourceRepository = systemResourceRepository;
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
+        _mapper = mapper;
     }
 
     public async Task<Result<Result>> Handle(ShopAssignOrderCommand request, CancellationToken cancellationToken)
@@ -97,11 +101,13 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
             }
 
             _notifierService.NotifyRangeAsync(listNoti);
-            return Result.Success(new
-            {
-                Code = MessageCode.I_ORDER_ASSIGN_SUCCESS.GetDescription(),
-                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_ASSIGN_SUCCESS.GetDescription(), order.Id),
-            });
+
+            var deliveryPackageResponse = _deliveryPackageRepository.Get(deliveryPackage => deliveryPackage.Id == dp.Id)
+                .Include(dp => dp.ShopDeliveryStaff)
+                .ThenInclude(sds => sds.Account)
+                .Include(dp => dp.Shop)
+                .ThenInclude(sds => sds.Account).Single();
+            return Result.Success(_mapper.Map<OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail>(deliveryPackageResponse));
         }
         catch (Exception e)
         {
@@ -162,6 +168,9 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
 
         if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERING_IN_WRONG_DATE.GetDescription(), new object[] { order.Id, order.IntendedReceiveDate.Date.ToString("dd-MM-yyyy") });
+
+        if (order.DeliveryPackageId != null)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_IN_OTHER_PACKAGE.GetDescription(), new object[] { order.Id });
 
         if (request.ShopDeliveryStaffId != null)
         {
