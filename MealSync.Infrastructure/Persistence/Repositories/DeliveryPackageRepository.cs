@@ -21,4 +21,13 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
             .Include(dp => dp.Orders).FirstOrDefault();
         return result;
     }
+
+    public List<DeliveryPackage> GetPackagesByFrameAndDate(DateTime deliveryDate, int startTime, int endTime)
+    {
+        var result = DbSet.Where(dp => dp.StartTime == startTime
+                                       && dp.EndTime == endTime
+                                       && dp.DeliveryDate.Date == deliveryDate.Date)
+            .Include(dp => dp.Orders).ToList();
+        return result;
+    }
 }

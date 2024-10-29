@@ -10,6 +10,7 @@ using MealSync.Application.Common.Services.Dapper;
 using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
+using MealSync.Application.UseCases.DeliveryPackages.Models;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
@@ -60,7 +61,8 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         Validate(request);
 
         // Warning
-        var order = _orderRepository.GetById(request.DeliveryPackages.First().OrderIds.First());
+        var firstOrderId = request.DeliveryPackages.First().OrderIds.First();
+        var order = _orderRepository.GetById(firstOrderId);
         if (!request.IsConfirm.Value)
         {
             var now = TimeFrameUtils.GetCurrentDateInUTC7();
@@ -112,13 +114,14 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
             }
 
             _notifierService.NotifyRangeAsync(listNoti);
-            var response = _mapper.Map<List<DeliveryPackageResponse>>(deliveryPackages);
-            foreach (var deliveryPackageResponse in response)
-            {
-                deliveryPackageResponse.Orders = await GetListOrderByDeliveryPackageIdAsync(deliveryPackageResponse.Id).ConfigureAwait(false);
-            }
+            var deliveryPackageGroup = await GetListDeliveryPackageGroupDetailAsync(order.IntendedReceiveDate, order.StartTime, order.EndTime).ConfigureAwait(false);
 
-            return Result.Success(response);
+            var unAssignOrder = await GetListOrderUnAssignByTimeFrameAsync(order.IntendedReceiveDate, order.StartTime, order.EndTime).ConfigureAwait(false);
+            return Result.Success(new
+            {
+                DeliverPackageGroup = deliveryPackageGroup,
+                UnassignOrder = unAssignOrder,
+            });
         }
         catch (Exception e)
         {
@@ -224,20 +227,74 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         return differentOrders.Any() ? differentOrders : null;
     }
 
-    private async Task<List<OrderForShopByStatusResponse>> GetListOrderByDeliveryPackageIdAsync(long packageId)
+    private async Task<List<DeliveryPackageGroupDetailResponse>> GetListDeliveryPackageGroupDetailAsync(DateTime intendedReceiveDate, int startTime, int endTime)
+    {
+        var dicDormitoryUniq = new Dictionary<long, DeliveryPackageGroupDetailResponse>();
+        Func<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
+            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse> map =
+            (parent, child1, child2, child3) =>
+            {
+                if (!dicDormitoryUniq.TryGetValue(parent.DeliveryPackageId, out var deliveryPackage))
+                {
+                    parent.ShopDeliveryStaff = child1;
+
+                    child2.ShopDeliveryStaff = child3;
+                    parent.Dormitories.Add(child2);
+                    dicDormitoryUniq.Add(parent.DeliveryPackageId, parent);
+                }
+                else
+                {
+                    child2.ShopDeliveryStaff = child3;
+                    deliveryPackage.Dormitories.Add(child2);
+                    dicDormitoryUniq.Remove(deliveryPackage.DeliveryPackageId);
+                    dicDormitoryUniq.Add(deliveryPackage.DeliveryPackageId, deliveryPackage);
+                }
+
+                return parent;
+            };
+
+        await _dapperService.SelectAsync<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
+            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse>(
+            QueryName.GetListDeliveryDetailStasticByTimeFrame,
+            map,
+            new
+            {
+                IntendedReceiveDate = intendedReceiveDate.ToString("yyyy-M-d"),
+                StartTime = startTime,
+                EndTime = endTime,
+                ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
+            },
+            "ShopDeliverySection, DormitorySection, ShopDeliveryInDorSection").ConfigureAwait(false);
+
+        var deliveryPackages = dicDormitoryUniq.Values.ToList();
+        foreach (var deliveryPackage in deliveryPackages)
+        {
+            deliveryPackage.Orders = await GetListOrderByDeliveryPackageIdAsync(deliveryPackage.DeliveryPackageId).ConfigureAwait(false);
+        }
+
+        return deliveryPackages;
+    }
+
+    private async Task<List<OrderForShopByStatusResponse>> GetListOrderByDeliveryPackageIdAsync(long? packageId)
     {
         var orderUniq = new Dictionary<long, OrderForShopByStatusResponse>();
-        Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop, OrderForShopByStatusResponse> map = (parent, child1, child2) =>
+        Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
+            OrderForShopByStatusResponse> map = (parent, child1, child2, child3) =>
         {
             if (!orderUniq.TryGetValue(parent.Id, out var order))
             {
                 parent.Customer = child1;
-                parent.Foods.Add(child2);
+                if (child2.DeliveryPackageId != 0 && (child2.Id != 0 || child2.IsShopOwnerShip))
+                {
+                    parent.ShopDeliveryStaff = child2;
+                }
+
+                parent.Foods.Add(child3);
                 orderUniq.Add(parent.Id, parent);
             }
             else
             {
-                order.Foods.Add(child2);
+                order.Foods.Add(child3);
                 orderUniq.Remove(order.Id);
                 orderUniq.Add(order.Id, order);
             }
@@ -245,15 +302,61 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
             return parent;
         };
 
-        await _dapperService.SelectAsync<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop, OrderForShopByStatusResponse>(
-            QueryName.GetListOrderByPackageId,
-            map,
-            new
+        await _dapperService
+            .SelectAsync<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
+                OrderForShopByStatusResponse>(
+                QueryName.GetListOrderByPackageId,
+                map,
+                new
+                {
+                    ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
+                    DeliveryPackageId = packageId,
+                },
+                "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
+
+        return orderUniq.Values.ToList();
+    }
+
+    private async Task<List<OrderForShopByStatusResponse>> GetListOrderUnAssignByTimeFrameAsync(DateTime intendedReceiveDate, int startTime, int endTime)
+    {
+        var orderUniq = new Dictionary<long, OrderForShopByStatusResponse>();
+        Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
+            OrderForShopByStatusResponse> map = (parent, child1, child2, child3) =>
+        {
+            if (!orderUniq.TryGetValue(parent.Id, out var order))
             {
-                ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
-                DeliveryPackageId = packageId,
-            },
-            "CustomerSection, FoodSection").ConfigureAwait(false);
+                parent.Customer = child1;
+                if (child2.DeliveryPackageId != 0 && (child2.Id != 0 || child2.IsShopOwnerShip))
+                {
+                    parent.ShopDeliveryStaff = child2;
+                }
+
+                parent.Foods.Add(child3);
+                orderUniq.Add(parent.Id, parent);
+            }
+            else
+            {
+                order.Foods.Add(child3);
+                orderUniq.Remove(order.Id);
+                orderUniq.Add(order.Id, order);
+            }
+
+            return parent;
+        };
+
+        await _dapperService
+            .SelectAsync<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
+                OrderForShopByStatusResponse>(
+                QueryName.GetListOrderUnAssignInTimeFrame,
+                map,
+                new
+                {
+                    IntendedReceiveDate = intendedReceiveDate.ToString("yyyy-M-d"),
+                    StartTime = startTime,
+                    EndTime = endTime,
+                    ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
+                },
+                "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
 
         return orderUniq.Values.ToList();
     }

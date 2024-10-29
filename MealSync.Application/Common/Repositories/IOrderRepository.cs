@@ -14,4 +14,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<bool> CheckExistedByIdAndCustomerId(long id, long customerId);
 
     Task<Order?> GetByIdAndCustomerId(long id, long customerId);
+
+    List<(int StartTime, int EndTime)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate);
 }
