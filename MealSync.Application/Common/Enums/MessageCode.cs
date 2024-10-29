@@ -313,6 +313,10 @@ public enum MessageCode
     [Description("E-OrderAssign-NotFoundShopStaff")]
     E_ORDER_ASSIGN_NOT_FOUND_SHOP_STAFF,
 
+    // Delivery package
+    [Description("E-DeliveryPackage-StaffAlreadyHaveOtherPackage")]
+    E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE,
+
     // Promotion
     [Description("E-Promotion-NotFound")]
     E_PROMOTION_NOT_FOUND,

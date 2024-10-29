@@ -1,6 +1,8 @@
 ﻿using System.Net;
+using System.Runtime.Intrinsics.Arm;
 using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
@@ -34,7 +36,8 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
     private readonly IMapper _mapper;
 
     public ShopCreateDeliveryPackageHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, IDeliveryPackageRepository deliveryPackageRepository, ILogger<ShopCreateDeliveryPackageHandler> logger,
-        INotificationFactory notificationFactory, INotifierService notifierService, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IShopRepository shopRepository, IAccountRepository accountRepository, ISystemResourceRepository systemResourceRepository, IDapperService dapperService, IMapper mapper)
+        INotificationFactory notificationFactory, INotifierService notifierService, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IShopRepository shopRepository,
+        IAccountRepository accountRepository, ISystemResourceRepository systemResourceRepository, IDapperService dapperService, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
@@ -56,55 +59,65 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         // Validate
         Validate(request);
 
+        // Warning
+        var order = _orderRepository.GetById(request.DeliveryPackages.First().OrderIds.First());
+        if (!request.IsConfirm.Value)
+        {
+            var now = TimeFrameUtils.GetCurrentDateInUTC7();
+            var intendedReceiveDateTime = new DateTime(
+                order.IntendedReceiveDate.Year,
+                order.IntendedReceiveDate.Month,
+                order.IntendedReceiveDate.Day,
+                order.StartTime / 100,
+                order.StartTime % 100,
+                0);
+            var endTime = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-OrderConstant.TIME_WARNING_SHOP_ASSIGN_ORDER_EARLY_IN_HOURS);
+            if (now < endTime)
+            {
+                var diffDate = endTime.AddHours(OrderConstant.TIME_WARNING_SHOP_ASSIGN_ORDER_EARLY_IN_HOURS) - now;
+                return Result.Success(new
+                {
+                    Code = MessageCode.W_ORDER_ASSIGN_EARLY.GetDescription(),
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_ASSIGN_EARLY.GetDescription(),
+                        new string[] { order.Id.ToString(), TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), $"{diffDate.Hours}:{diffDate.Minutes}" }),
+                });
+            }
+        }
+
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-            var orders = _orderRepository.Get(o => request.OrderIds.Contains(o.Id)).ToList();
-
-            // Need create new delivery package
-            var dp = new DeliveryPackage()
+            var deliveryPackages = new List<DeliveryPackage>();
+            foreach (var deliveryPackageRequest in request.DeliveryPackages)
             {
-                ShopDeliveryStaffId = request.ShopDeliveryStaffId,
-                ShopId = request.ShopDeliveryStaffId == null ? _currentPrincipalService.CurrentPrincipalId.Value : null,
-                DeliveryDate = TimeFrameUtils.GetCurrentDateInUTC7().Date,
-                StartTime = request.StartTime,
-                EndTime = request.EndTime,
-                Status = DeliveryPackageStatus.Created,
-
-            };
-            dp.Orders = orders;
-            await _deliveryPackageRepository.AddAsync(dp).ConfigureAwait(false);
-
-            if (request.ShopDeliveryStaffId != null)
-            {
-                var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(request.ShopDeliveryStaffId.Value);
-                shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
-                _shopDeliveryStaffRepository.Update(shopDeliveryStaff);
+                var deliveryPackage = await CreateOrderSaveDeliveryPackageAsync(deliveryPackageRequest).ConfigureAwait(false);
+                deliveryPackages.Add(deliveryPackage);
             }
 
+            await _deliveryPackageRepository.AddRangeAsync(deliveryPackages).ConfigureAwait(false);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
-            // Noti to customer
             var listNoti = new List<Notification>();
             var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
-            foreach (var order in orders)
-            {
-                var notiCus = _notificationFactory.CreateOrderCustomerDeliveringNotification(order, shop);
-                listNoti.Add(notiCus);
-            }
 
             // Noti to shop staff about delivery package
-            if (request.ShopDeliveryStaffId != null)
+            foreach (var dp in deliveryPackages)
             {
-                var accShip = _accountRepository.GetById(request.ShopDeliveryStaffId.Value);
-                var notiShopStaff = _notificationFactory.CreateOrderAssignedToStaffNotification(dp, accShip, shop);
-                listNoti.Add(notiShopStaff);
+                if (dp.ShopDeliveryStaffId.HasValue)
+                {
+                    var accShip = _accountRepository.GetById(dp.ShopDeliveryStaffId.Value);
+                    var notiShopStaff = _notificationFactory.CreateOrderAssignedToStaffNotification(dp, accShip, shop);
+                    listNoti.Add(notiShopStaff);
+                }
             }
 
             _notifierService.NotifyRangeAsync(listNoti);
+            var response = _mapper.Map<List<DeliveryPackageResponse>>(deliveryPackages);
+            foreach (var deliveryPackageResponse in response)
+            {
+                deliveryPackageResponse.Orders = await GetListOrderByDeliveryPackageIdAsync(deliveryPackageResponse.Id).ConfigureAwait(false);
+            }
 
-            var response = _mapper.Map<DeliveryPackageResponse>(dp);
-            response.Orders = await GetListOrderByDeliveryPackageIdAsync(dp.Id).ConfigureAwait(false);
             return Result.Success(response);
         }
         catch (Exception e)
@@ -115,32 +128,100 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         }
     }
 
+    private async Task<DeliveryPackage> CreateOrderSaveDeliveryPackageAsync(DeliveryPackageRequest request)
+    {
+        var orders = _orderRepository.Get(o => request.OrderIds.Contains(o.Id)).ToList();
+
+        // Need create new delivery package
+        var dp = new DeliveryPackage()
+        {
+            ShopDeliveryStaffId = request.ShopDeliveryStaffId,
+            ShopId = request.ShopDeliveryStaffId == null ? _currentPrincipalService.CurrentPrincipalId.Value : null,
+            DeliveryDate = TimeFrameUtils.GetCurrentDateInUTC7().Date,
+            StartTime = orders.First().StartTime,
+            EndTime = orders.First().EndTime,
+            Status = DeliveryPackageStatus.Created,
+
+        };
+        dp.Orders = orders;
+
+        if (request.ShopDeliveryStaffId != null)
+        {
+            var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(request.ShopDeliveryStaffId.Value);
+            shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
+            _shopDeliveryStaffRepository.Update(shopDeliveryStaff);
+        }
+
+        return dp;
+    }
+
     private void Validate(ShopCreateDeliveryPackageCommand request)
     {
-        foreach (var orderId in request.OrderIds)
+        var listOrder = new List<Order>();
+        foreach (var deliveryPackage in request.DeliveryPackages)
         {
-            var order = _orderRepository
-                .Get(o => o.Id == orderId && o.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)
-                .Include(o => o.DeliveryPackage).SingleOrDefault();
+            foreach (var orderId in deliveryPackage.OrderIds)
+            {
+                var order = _orderRepository
+                    .Get(o => o.Id == orderId && o.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)
+                    .Include(o => o.DeliveryPackage).SingleOrDefault();
 
-            if (order == default)
-                throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { orderId }, HttpStatusCode.NotFound);
+                if (order == default)
+                    throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { orderId }, HttpStatusCode.NotFound);
 
-            if (order.Status != OrderStatus.Preparing)
-                throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { orderId });
+                if (order.Status != OrderStatus.Preparing)
+                    throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { orderId });
 
-            if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
-                throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERING_IN_WRONG_DATE.GetDescription(), new object[] { order.Id, order.IntendedReceiveDate.Date.ToString("dd-MM-yyyy") });
+                if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
+                    throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERING_IN_WRONG_DATE.GetDescription(), new object[] { order.Id, order.IntendedReceiveDate.Date.ToString("dd-MM-yyyy") });
 
-            if (order.DeliveryPackageId != null)
-                throw new InvalidBusinessException(MessageCode.E_ORDER_IN_OTHER_PACKAGE.GetDescription(), new object[] { orderId });
+                if (order.DeliveryPackageId != null)
+                    throw new InvalidBusinessException(MessageCode.E_ORDER_IN_OTHER_PACKAGE.GetDescription(), new object[] { orderId });
 
-            if (order.StartTime != request.StartTime || order.EndTime != request.EndTime)
-                throw new InvalidBusinessException(MessageCode.E_ORDER_IN_DIFFERENT_FRAME.GetDescription(), new object[]
-                {
-                    orderId, TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), TimeFrameUtils.GetTimeFrameString(request.StartTime, request.EndTime),
-                });
+                listOrder.Add(order);
+            }
+
+            var firstOrderInPackage = listOrder.FirstOrDefault() ?? new Order();
+            var shipperId = deliveryPackage.ShopDeliveryStaffId.HasValue ? deliveryPackage.ShopDeliveryStaffId.Value : _currentPrincipalService.CurrentPrincipalId.Value;
+            var deliveryPackageCheck = _deliveryPackageRepository.GetPackageByShipIdAndTimeFrame(!deliveryPackage.ShopDeliveryStaffId.HasValue,
+                shipperId, firstOrderInPackage.StartTime, firstOrderInPackage.EndTime);
+            if (deliveryPackageCheck != null)
+            {
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE.GetDescription(), new object[] { shipperId });
+            }
         }
+
+        var differentOrders = GetDifferentTimeOrders(listOrder);
+        if (differentOrders != null)
+        {
+            var listOrderIds = differentOrders.Select(x => string.Concat(IdPatternConstant.PREFIX_ID, x.Id)).ToList();
+            var joinListOrderIds = string.Join(',', listOrderIds);
+            var firstOrderCompare = listOrder.FirstOrDefault() ?? new Order();
+            throw new InvalidBusinessException(MessageCode.E_ORDER_IN_DIFFERENT_FRAME.GetDescription(), new object[]
+            {
+                joinListOrderIds, TimeFrameUtils.GetTimeFrameString(firstOrderCompare.StartTime, firstOrderCompare.EndTime),
+            });
+        }
+    }
+
+    public List<Order> GetDifferentTimeOrders(List<Order> orders)
+    {
+        // Check if the list is empty or only contains one order (no comparison needed)
+        if (orders == null || orders.Count <= 1)
+            return null;
+
+        // Get the reference times from the first order
+        var firstOrder = orders.First();
+        var startTime = firstOrder.StartTime;
+        var endTime = firstOrder.EndTime;
+
+        // Find orders with different StartTime or EndTime
+        var differentOrders = orders
+            .Where(o => o.StartTime != startTime || o.EndTime != endTime)
+            .ToList();
+
+        // Return the list of different orders, or null if there are none
+        return differentOrders.Any() ? differentOrders : null;
     }
 
     private async Task<List<OrderForShopByStatusResponse>> GetListOrderByDeliveryPackageIdAsync(long packageId)
