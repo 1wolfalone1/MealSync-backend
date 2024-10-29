@@ -295,6 +295,9 @@ public enum MessageCode
     [Description("W-Order-AssignEarly")]
     W_ORDER_ASSIGN_EARLY,
 
+    [Description("W-Order-InOtherDeliveryPackage")]
+    W_ORDER_IN_OTHER_DELIVERY_PACKAGE,
+
     [Description("E-Order-NotCorrectCustomer")]
     E_ORDER_NOT_CORRECT_CUSTOMER,
 
