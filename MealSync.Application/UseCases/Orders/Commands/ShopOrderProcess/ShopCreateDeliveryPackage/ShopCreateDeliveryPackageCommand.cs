@@ -5,11 +5,14 @@ namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCre
 
 public class ShopCreateDeliveryPackageCommand : ICommand<Result>
 {
+    public List<DeliveryPackageRequest> DeliveryPackages { get; set; }
+
+    public bool? IsConfirm { get; set; }
+}
+
+public class DeliveryPackageRequest
+{
     public long? ShopDeliveryStaffId { get; set; }
 
     public long[] OrderIds { get; set; }
-
-    public int StartTime { get; set; }
-
-    public int EndTime { get; set; }
 }
