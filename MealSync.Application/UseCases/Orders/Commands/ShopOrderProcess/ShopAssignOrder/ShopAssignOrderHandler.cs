@@ -71,7 +71,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
             if (now < endTime)
             {
                 var diffDate = endTime.AddHours(OrderConstant.TIME_WARNING_SHOP_ASSIGN_ORDER_EARLY_IN_HOURS) - now;
-                return Result.Success(new
+                return Result.Warning(new
                 {
                     Code = MessageCode.W_ORDER_ASSIGN_EARLY.GetDescription(),
                     Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_ASSIGN_EARLY.GetDescription(),
