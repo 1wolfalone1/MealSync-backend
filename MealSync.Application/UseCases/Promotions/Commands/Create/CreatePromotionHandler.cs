@@ -1,5 +1,6 @@
 using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
@@ -17,16 +18,18 @@ public class CreatePromotionHandler : ICommandHandler<CreatePromotionCommand, Re
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<CreatePromotionHandler> _logger;
+    private readonly ISystemResourceRepository _systemResourceRepository;
 
     public CreatePromotionHandler(
         IPromotionRepository promotionRepository, ICurrentPrincipalService currentPrincipalService,
-        IUnitOfWork unitOfWork, IMapper mapper, ILogger<CreatePromotionHandler> logger)
+        IUnitOfWork unitOfWork, IMapper mapper, ILogger<CreatePromotionHandler> logger, ISystemResourceRepository systemResourceRepository)
     {
         _promotionRepository = promotionRepository;
         _currentPrincipalService = currentPrincipalService;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
+        _systemResourceRepository = systemResourceRepository;
     }
 
     public async Task<Result<Result>> Handle(CreatePromotionCommand request, CancellationToken cancellationToken)
@@ -57,7 +60,11 @@ public class CreatePromotionHandler : ICommandHandler<CreatePromotionCommand, Re
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             await _promotionRepository.AddAsync(promotion).ConfigureAwait(false);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-            return Result.Create(_mapper.Map<PromotionDetailOfShop>(promotion));
+            return Result.Create(new
+            {
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_PROMOTION_CREATE_SUCCESS.GetDescription()),
+                PromotionInfo = _mapper.Map<PromotionDetailOfShop>(promotion),
+            });
         }
         catch (Exception e)
         {
