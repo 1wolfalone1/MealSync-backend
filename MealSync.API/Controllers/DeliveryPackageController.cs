@@ -1,5 +1,6 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
+using MealSync.Application.UseCases.DeliveryPackages.Commands.AutoAssignDeliveryPackages;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageGroupDetailByTimeFrames;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListTimeFrameUnAssigns;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCreateDeliveryPackage;
@@ -28,6 +29,13 @@ public class DeliveryPackageController : BaseApiController
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     [HttpGet(Endpoints.GET_TIME_FRAME_ALL_ORDER_UN_ASSIGN)]
     public async Task<IActionResult> GetTimeFrameOrderUnAssignProfile([FromQuery] GetListTimeFrameUnAssignQuery query)
+    {
+        return HandleResult(await Mediator.Send(query));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpGet(Endpoints.SUGGEST_CREATE_ASSIGN_ORDER)]
+    public async Task<IActionResult> GetSuggestAssignOrder([FromQuery] AutoAssignDeliveryPackageCommand query)
     {
         return HandleResult(await Mediator.Send(query));
     }
