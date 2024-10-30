@@ -135,4 +135,5 @@ public static class Endpoints
     public const string GET_SHOP_WALLET = "shop-owner/wallet/summary";
     public const string WITHDRAWAL_REQUEST_SEND_VERIFY_CODE = "shop-owner/withdrawal/send-verify-code";
     public const string WITHDRAWAL_REQUEST = "shop-owner/withdrawal";
+    public const string WITHDRAWAL_REQUEST_HISTORY = "shop-owner/withdrawal/history";
 }
