@@ -175,12 +175,12 @@ ShopDeliveryStaffTaskAndInfor AS (
     WHERE
         sds.shop_id = @ShopId
         AND sds.status != 3
-        AND (
-            @SearchText IS NULL
-            OR a.full_name LIKE CONCAT('%', @SearchText, '%')
-            OR a.phone_number LIKE CONCAT('%', @SearchText, '%')
-            OR a.email LIKE CONCAT('%', @SearchText, '%')
-        )
+--         AND (
+--             @SearchText IS NULL
+--             OR a.full_name LIKE CONCAT('%', @SearchText, '%')
+--             OR a.phone_number LIKE CONCAT('%', @SearchText, '%')
+--             OR a.email LIKE CONCAT('%', @SearchText, '%')
+--         )
     ORDER BY
         (waiting + delivering)
 )

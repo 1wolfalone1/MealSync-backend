@@ -6,7 +6,7 @@ public class TimeFrameUtils
     {
         var startFrame = GetTimeHoursFormat(startTime);
         var endFame = GetTimeHoursFormat(endTime);
-        return startFrame + "-" + endFame;
+        return startFrame + " - " + endFame;
     }
 
     public static string GetTimeHoursFormat(int time)
