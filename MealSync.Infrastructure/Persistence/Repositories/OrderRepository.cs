@@ -1,3 +1,4 @@
+using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Utils;
 using MealSync.Domain.Entities;
@@ -196,13 +197,14 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     public List<(int StartTime, int EndTime, int numberOfOrder, bool IsCreated)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate)
     {
         var result = DbSet.Where(o => o.IntendedReceiveDate.Date == intendedReceiveDate.Date &&
-                                      TimeFrameUtils.GetCurrentHoursInUTC7() <= o.EndTime)
+                                      TimeFrameUtils.GetCurrentHoursInUTC7() <= o.EndTime
+                                      && OrderConstant.LIST_ORDER_STATUS_IN_SHOP_ASSIGN_PROCESS.Contains(o.Status))
             .GroupBy(o => new { o.StartTime, o.EndTime })
             .Select(g => new
             {
                 g.Key.StartTime,
                 g.Key.EndTime,
-                numberOfOrder = g.Where(g => g.Status == OrderStatus.Preparing).Count(), // Count the number of orders in the group
+                numberOfOrder = g.Count(), // Count the number of orders in the group
                 IsCreated = g.Any(o => o.DeliveryPackageId != null) // Check if any order has a DeliveryPackageId
             })
             .ToList();

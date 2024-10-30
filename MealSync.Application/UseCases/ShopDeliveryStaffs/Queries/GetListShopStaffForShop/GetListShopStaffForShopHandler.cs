@@ -37,7 +37,7 @@ public class GetListShopStaffForShopHandler : ICommandHandler<GetListShopStaffFo
             },
             new
             {
-                SearchText = request.SearchText,
+                // SearchText = request.SearchText,
                 IntendedReceiveDate = request.IntendedReceiveDate,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
