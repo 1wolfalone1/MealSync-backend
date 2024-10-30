@@ -33,4 +33,6 @@ public enum QueryName
     GetListOrderForShopWebByStatus,
     GetListOrderByPackageId,
     GetListShopDeliveryStaffToAssign,
+    GetListDeliveryDetailStasticByTimeFrame,
+    GetListOrderUnAssignInTimeFrame,
 }

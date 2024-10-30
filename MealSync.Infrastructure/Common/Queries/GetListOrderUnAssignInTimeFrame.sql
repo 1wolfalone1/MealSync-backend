@@ -2,11 +2,15 @@
  CreatedBy: ThongNV
  Date: 16/10/2024
  
- @PageSize
- @DeliveryPackageId
+ @IntendedReceiveDate:='2024-10-28';
+ @StartTime:=2000;
+ @EndTime:=2030;
+ @ShopId:=2;
  */
+-- SET @IntendedReceiveDate:='2024-10-28';
+-- SET @StartTime:=2000;
+-- SET @EndTime:=2030;
 -- SET @ShopId:=2;
--- SET @DeliveryPackageId:=11;
 WITH OrdersOfShop AS (
     SELECT
         id,
@@ -37,7 +41,10 @@ WITH OrdersOfShop AS (
         `order` o
     WHERE
         o.shop_id = @ShopId
-        AND delivery_package_id = @DeliveryPackageId
+        AND o.delivery_package_id IS NULL
+        AND o.intended_receive_date = @IntendedReceiveDate
+        AND start_time = @StartTime
+        AND end_time = @EndTime
     ORDER BY
         o.start_time ASC,
         o.order_date ASC
