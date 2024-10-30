@@ -192,6 +192,11 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
             {
                 throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE.GetDescription(), new object[] { shipperId });
             }
+
+            // Check is exist any delivery package for this frame
+            var deliveryPackageCheckExist = _deliveryPackageRepository.GetPackagesByFrameAndDate(TimeFrameUtils.GetCurrentDateInUTC7().Date, firstOrderInPackage.StartTime, firstOrderInPackage.EndTime);
+            if (deliveryPackageCheckExist != null && deliveryPackageCheckExist.Count > 0)
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_TIME_FRAME_CREATED.GetDescription(), new object[] { TimeFrameUtils.GetTimeFrameString(firstOrderInPackage.StartTime, firstOrderInPackage.EndTime) });
         }
 
         var differentOrders = GetDifferentTimeOrders(listOrder);

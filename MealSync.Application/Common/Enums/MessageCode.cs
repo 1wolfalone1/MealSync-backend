@@ -320,6 +320,9 @@ public enum MessageCode
     [Description("E-DeliveryPackage-StaffAlreadyHaveOtherPackage")]
     E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE,
 
+    [Description("E-DeliveryPackage-TimeFrameCreated")]
+    E_DELIVERY_PACKAGE_TIME_FRAME_CREATED,
+
     // Promotion
     [Description("E-Promotion-NotFound")]
     E_PROMOTION_NOT_FOUND,

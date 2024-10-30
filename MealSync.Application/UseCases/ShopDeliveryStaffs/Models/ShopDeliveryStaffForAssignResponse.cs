@@ -1,4 +1,5 @@
-﻿using MealSync.Domain.Enums;
+﻿using System.Text.Json.Serialization;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.ShopDeliveryStaffs.Models;
 
