@@ -45,6 +45,7 @@ WITH OrdersOfShop AS (
         AND o.intended_receive_date = @IntendedReceiveDate
         AND start_time = @StartTime
         AND end_time = @EndTime
+        AND o.status = 5 -- Preparing
     ORDER BY
         o.start_time ASC,
         o.order_date ASC
