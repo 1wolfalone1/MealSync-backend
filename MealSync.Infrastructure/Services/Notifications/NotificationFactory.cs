@@ -301,4 +301,24 @@ public class NotificationFactory : INotificationFactory
             IsSave = true,
         };
     }
+
+    public Notification CreateWithdrawalRequestToModeratorNotification(WithdrawalRequest withdrawalRequest, Account accMod, Shop shop, string content)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var withdrawalRequestNotification = mapper.Map<WithdrawalRequestNotification>(withdrawalRequest);
+
+        return new Notification
+        {
+            AccountId = accMod.Id,
+            ReferenceId = withdrawalRequest.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = content,
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(withdrawalRequestNotification),
+            Type = NotificationTypes.SendToModerator,
+            EntityType = NotificationEntityTypes.WithdrawalRequest,
+            IsSave = true,
+        };
+    }
 }

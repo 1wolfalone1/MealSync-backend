@@ -41,6 +41,12 @@ public enum ResourceCode
     [Description("Email-Body-Account-EnoughFlagForBan")]
     EMAIL_BODY_ACCOUNT_ENOUGH_FLAG_FOR_BAN,
 
+    [Description("Email-Subject-WithdrawalRequest")]
+    EMAIL_SUBJECT_WITHDRAWAL_REQUEST,
+
+    [Description("Email-Body-WithdrawalRequest")]
+    EMAIL_BODY_WITHDRAWAL_REQUEST,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,
