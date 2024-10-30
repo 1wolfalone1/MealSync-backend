@@ -207,7 +207,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             })
             .ToList();
 
-        return result.Select(x => (x.StartTime, x.EndTime, x.numberOfOrder, x.IsCreated)).ToList();
+        return result.Select(x => (x.StartTime, x.EndTime, x.numberOfOrder, x.IsCreated)).OrderBy(x => x.StartTime).ToList();
     }
 
 }
