@@ -9,4 +9,8 @@ public class TimeFrameResponse
     public int EndTime { get; set; }
 
     public string TimeFrameFormat => TimeFrameUtils.GetTimeFrameString(StartTime, EndTime);
+
+    public int NumberOfOrder { get; set; }
+
+    public bool IsCreated { get; set; }
 }
