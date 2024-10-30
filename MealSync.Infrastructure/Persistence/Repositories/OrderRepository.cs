@@ -202,7 +202,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             {
                 g.Key.StartTime,
                 g.Key.EndTime,
-                numberOfOrder = g.Count(), // Count the number of orders in the group
+                numberOfOrder = g.Where(g => g.Status == OrderStatus.Preparing).Count(), // Count the number of orders in the group
                 IsCreated = g.Any(o => o.DeliveryPackageId != null) // Check if any order has a DeliveryPackageId
             })
             .ToList();
