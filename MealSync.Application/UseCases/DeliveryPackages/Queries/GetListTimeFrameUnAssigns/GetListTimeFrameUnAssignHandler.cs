@@ -22,6 +22,12 @@ public class GetListTimeFrameUnAssignHandler : IQueryHandler<GetListTimeFrameUnA
     public async Task<Result<Result>> Handle(GetListTimeFrameUnAssignQuery request, CancellationToken cancellationToken)
     {
         var timeFrames = _orderRepository.GetListTimeFrameUnAssignByReceiveDate(request.IntendedRecieveDate);
-        return Result.Success(_mapper.Map<List<TimeFrameResponse>>(timeFrames));
+        var listTimeFrame = _mapper.Map<List<TimeFrameResponse>>(timeFrames);
+        var totalOrder = listTimeFrame.Sum(tf => tf.NumberOfOrder);
+        return Result.Success(new
+        {
+            TotalOrder = totalOrder,
+            timeFrames = listTimeFrame,
+        });
     }
 }

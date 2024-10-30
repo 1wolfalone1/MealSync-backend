@@ -193,15 +193,21 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         return DbSet.FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == customerId);
     }
 
-    public List<(int StartTime, int EndTime)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate)
+    public List<(int StartTime, int EndTime, int numberOfOrder, bool IsCreated)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate)
     {
         var result = DbSet.Where(o => o.IntendedReceiveDate.Date == intendedReceiveDate.Date &&
-                                TimeFrameUtils.GetCurrentHoursInUTC7() <= o.EndTime)
+                                      TimeFrameUtils.GetCurrentHoursInUTC7() <= o.EndTime)
             .GroupBy(o => new { o.StartTime, o.EndTime })
-            .Where(g => g.All(o => o.DeliveryPackageId == null && o.Status == OrderStatus.Preparing))
-            .Select(g => new { g.Key.StartTime, g.Key.EndTime })
+            .Select(g => new
+            {
+                g.Key.StartTime,
+                g.Key.EndTime,
+                numberOfOrder = g.Count(), // Count the number of orders in the group
+                IsCreated = g.Any(o => o.DeliveryPackageId != null) // Check if any order has a DeliveryPackageId
+            })
             .ToList();
 
-        return result.Select(x => (x.StartTime, x.EndTime)).ToList();
+        return result.Select(x => (x.StartTime, x.EndTime, x.numberOfOrder, x.IsCreated)).ToList();
     }
+
 }
