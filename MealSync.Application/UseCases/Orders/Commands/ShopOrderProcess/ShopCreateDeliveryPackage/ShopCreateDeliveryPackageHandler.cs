@@ -163,6 +163,9 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         var listOrder = new List<Order>();
         foreach (var deliveryPackage in request.DeliveryPackages)
         {
+            if (deliveryPackage.ShopDeliveryStaffId.HasValue && _shopDeliveryStaffRepository.Get(sds => sds.Id == deliveryPackage.ShopDeliveryStaffId && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault() == default)
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_NOT_BELONG_TO_SHOP.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId }, HttpStatusCode.NotFound);
+
             foreach (var orderId in deliveryPackage.OrderIds)
             {
                 var order = _orderRepository
@@ -212,7 +215,7 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         }
     }
 
-    public List<Order> GetDifferentTimeOrders(List<Order> orders)
+    private List<Order> GetDifferentTimeOrders(List<Order> orders)
     {
         // Check if the list is empty or only contains one order (no comparison needed)
         if (orders == null || orders.Count <= 1)

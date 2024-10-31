@@ -6,6 +6,8 @@ namespace MealSync.Application.UseCases.ShopDeliveryStaffs.Models;
 
 public class DeliveryPackageForAssignResponse
 {
+    public long DeliveryPackageId { get; set; }
+
     public int Total { get; set; }
 
     public int Waiting { get; set; }
