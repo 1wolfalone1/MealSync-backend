@@ -2,11 +2,11 @@
 using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Utils;
 
-namespace MealSync.Application.UseCases.DeliveryPackages.Commands.AutoAssignDeliveryPackages;
+namespace MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
 
-public class AutoAssignDeliveryPackageValidator : AbstractValidator<AutoAssignDeliveryPackageCommand>
+public class SuggestAssignDeliveryPackageValidator : AbstractValidator<SuggestAssignDeliveryPackageQuery>
 {
-    public AutoAssignDeliveryPackageValidator()
+    public SuggestAssignDeliveryPackageValidator()
     {
         RuleFor(x => x.StartTime)
             .Must(TimeUtils.IsValidOperatingSlot)

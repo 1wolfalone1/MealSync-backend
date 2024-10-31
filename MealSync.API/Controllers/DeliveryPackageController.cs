@@ -1,9 +1,10 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
-using MealSync.Application.UseCases.DeliveryPackages.Commands.AutoAssignDeliveryPackages;
+using MealSync.Application.UseCases.DeliveryPackages.Commands.UpdateDeliveryPackageGroups;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllDeliveryPackageGroupByTimeFrames;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageGroupDetailByTimeFrames;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListTimeFrameUnAssigns;
+using MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCreateDeliveryPackage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +37,7 @@ public class DeliveryPackageController : BaseApiController
 
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     [HttpGet(Endpoints.SUGGEST_CREATE_ASSIGN_ORDER)]
-    public async Task<IActionResult> GetSuggestAssignOrder([FromQuery] AutoAssignDeliveryPackageCommand query)
+    public async Task<IActionResult> GetSuggestAssignOrder([FromQuery] SuggestAssignDeliveryPackageQuery query)
     {
         return HandleResult(await Mediator.Send(query));
     }
@@ -46,5 +47,12 @@ public class DeliveryPackageController : BaseApiController
     public async Task<IActionResult> GetSuggestAssignOrder([FromQuery] GetAllDeliveryPackageGroupByTimeFrameQuery query)
     {
         return HandleResult(await Mediator.Send(query));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpPut(Endpoints.UPDATE_DELIVERY_PACKAGE_GROUP)]
+    public async Task<IActionResult> GetSuggestAssignOrder([FromBody] UpdateDeliveryPackageGroupCommand command)
+    {
+        return HandleResult(await Mediator.Send(command));
     }
 }
