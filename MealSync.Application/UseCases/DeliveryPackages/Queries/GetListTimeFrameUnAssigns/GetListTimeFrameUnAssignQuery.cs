@@ -5,5 +5,5 @@ namespace MealSync.Application.UseCases.DeliveryPackages.Queries.GetListTimeFram
 
 public class GetListTimeFrameUnAssignQuery : IQuery<Result>
 {
-    public DateTime IntendedRecieveDate { get; set; }
+    public DateTime IntendedReceiveDate { get; set; }
 }
