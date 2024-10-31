@@ -15,5 +15,5 @@ public interface IOrderRepository : IBaseRepository<Order>
 
     Task<Order?> GetByIdAndCustomerId(long id, long customerId);
 
-    List<(int StartTime, int EndTime, int numberOfOrder, bool IsCreated)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate);
+    List<(int StartTime, int EndTime, int NumberOfOrder, bool IsCreated)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate, long shopId);
 }

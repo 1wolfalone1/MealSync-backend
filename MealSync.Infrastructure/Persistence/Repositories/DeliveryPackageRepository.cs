@@ -22,12 +22,32 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
         return result;
     }
 
-    public List<DeliveryPackage> GetPackagesByFrameAndDate(DateTime deliveryDate, int startTime, int endTime)
+    public List<DeliveryPackage> GetPackagesByFrameAndDate(DateTime deliveryDate, int startTime, int endTime, long shopId)
     {
-        var result = DbSet.Where(dp => dp.StartTime == startTime
-                                       && dp.EndTime == endTime
-                                       && dp.DeliveryDate.Date == deliveryDate.Date)
-            .Include(dp => dp.Orders).ToList();
+        var result = DbSet.Include(dp => dp.Orders)
+            .Where(dp => dp.StartTime == startTime
+                         && dp.EndTime == endTime
+                         && dp.DeliveryDate.Date == deliveryDate.Date
+                         && dp.Orders.All(o => o.ShopId == shopId))
+            .ToList();
         return result;
+    }
+
+    public List<(int StartTime, int EndTime)> GetTimeFramesByFrameIntervalAndDate(DateTime deliveryDate, int startTime, int endTime, long shopId)
+    {
+        var result = DbSet.Include(dp => dp.Orders)
+            .Where(dp => dp.StartTime >= startTime
+                         && dp.EndTime <= endTime
+                         && dp.DeliveryDate.Date == deliveryDate.Date
+                         && dp.Orders.All(o => o.ShopId == shopId))
+            .GroupBy(o => new { o.StartTime, o.EndTime })
+            .Select(g => new
+            {
+                g.Key.StartTime,
+                g.Key.EndTime,
+            })
+            .ToList();
+
+        return result.Select(x => (x.StartTime, x.EndTime)).OrderBy(x => x.StartTime).ToList();
     }
 }
