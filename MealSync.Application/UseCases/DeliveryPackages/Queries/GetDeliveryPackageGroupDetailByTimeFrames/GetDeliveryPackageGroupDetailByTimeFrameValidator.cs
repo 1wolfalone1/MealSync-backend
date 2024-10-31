@@ -18,7 +18,7 @@ public class GetDeliveryPackageGroupDetailByTimeFrameValidator : AbstractValidat
             .GreaterThanOrEqualTo(x => x.StartTime + FrameConstant.TIME_FRAME_IN_MINUTES)
             .WithMessage($"Thời gian kết thúc phải lớn hơn thời gian bắt đầu {FrameConstant.TIME_FRAME_IN_MINUTES} phút");
 
-        RuleFor(x => x.IntendedRecieveDate)
+        RuleFor(x => x.IntendedReceiveDate)
             .Must(x => x != default)
             .WithMessage("Vui lòng cung cấp ngày giao hàng");
     }

@@ -5,7 +5,7 @@ namespace MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPack
 
 public class GetDeliveryPackageGroupDetailByTimeFrameQuery : IQuery<Result>
 {
-    public DateTime IntendedRecieveDate { get; set; }
+    public DateTime IntendedReceiveDate { get; set; }
 
     public int StartTime { get; set; }
 

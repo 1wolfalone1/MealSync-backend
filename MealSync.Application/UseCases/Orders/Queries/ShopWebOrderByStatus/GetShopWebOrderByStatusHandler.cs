@@ -49,7 +49,7 @@ public class GetShopWebOrderByStatusHandler : IQueryHandler<GetShopWebOrderBySta
             return parent;
         };
 
-        _logger.LogInformation($"Date filter request: {(request.IntendedRecieveDate != null ? request.IntendedRecieveDate.ToString() : string.Empty)}");
+        _logger.LogInformation($"Date filter request: {(request.IntendedReceiveDate != null ? request.IntendedReceiveDate.ToString() : string.Empty)}");
         await _dapperService.SelectAsync<OrderForShopWebByStatusResponse, OrderForShopWebByStatusResponse.CustomerInforInOrderForShop, OrderForShopWebByStatusResponse.ShopDeliveryStaffInOrderForShop,OrderForShopWebByStatusResponse.FoodInOrderForShop, OrderForShopWebByStatusResponse>(
             QueryName.GetListOrderForShopWebByStatus,
             map,
@@ -57,7 +57,7 @@ public class GetShopWebOrderByStatusHandler : IQueryHandler<GetShopWebOrderBySta
             {
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
                 Status = request.Status,
-                IntendedRecieveDate = request.IntendedRecieveDate != null ? request.IntendedRecieveDate.Value.ToString("yyyy-M-d") : null,
+                IntendedRecieveDate = request.IntendedReceiveDate != null ? request.IntendedReceiveDate.Value.ToString("yyyy-M-d") : null,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
                 PhoneNumber = request.PhoneNumber,
