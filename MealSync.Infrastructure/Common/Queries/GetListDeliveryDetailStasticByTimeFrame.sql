@@ -229,4 +229,5 @@ FROM
     INNER JOIN DormitoryStasticAndInfor do ON dp.id = do.delivery_package_id
     INNER JOIN account accShipperInDor ON do.ship_id = accShipperInDor.id
 ORDER BY
+    accShipperInDp.id,
     dp.created_date;
