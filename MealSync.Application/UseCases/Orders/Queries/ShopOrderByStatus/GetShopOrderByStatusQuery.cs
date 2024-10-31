@@ -11,7 +11,7 @@ public class GetShopOrderByStatusQuery : PaginationRequest, IQuery<Result>
 
     public string? PhoneNumber { get; set; }
 
-    public DateTime? IntendedRecieveDate { get; set; }
+    public DateTime? IntendedReceiveDate { get; set; }
 
     public int StartTime { get; set; }
 

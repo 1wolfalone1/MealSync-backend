@@ -23,22 +23,68 @@ public class GetAllDeliveryPackageGroupByTimeFrameHandler : IQueryHandler<GetAll
 
     public async Task<Result<Result>> Handle(GetAllDeliveryPackageGroupByTimeFrameQuery request, CancellationToken cancellationToken)
     {
-        var timeFrames =  _deliveryPackageRepository.GetTimeFramesByFrameIntervalAndDate(request.IntendedRecieveDate, request.StartTime, request.EndTime, _currentPrincipalService.CurrentPrincipalId.Value);
+        var timeFrames =  _deliveryPackageRepository.GetTimeFramesByFrameIntervalAndDate(request.IntendedReceiveDate, request.StartTime, request.EndTime, _currentPrincipalService.CurrentPrincipalId.Value);
 
         var deliveryPackageIntervals = new List<DeliveryPackageIntervalResponse>();
         foreach (var timeFrame in timeFrames)
         {
-            var deliveryPackageGroup = await GetDeliveryDetailGroupDetailOfEachTimeFrameAsync(request.IntendedRecieveDate, timeFrame.StartTime, timeFrame.EndTime).ConfigureAwait(false);
+            var deliveryPackageGroup = await GetDeliveryDetailGroupDetailOfEachTimeFrameAsync(request.IntendedReceiveDate, timeFrame.StartTime, timeFrame.EndTime).ConfigureAwait(false);
+            var unassignOrders = await GetListOrderUnAssignByTimeFrameAsync(request.IntendedReceiveDate, timeFrame.StartTime, timeFrame.EndTime).ConfigureAwait(false);
             deliveryPackageIntervals.Add(new DeliveryPackageIntervalResponse()
             {
-                IntendedReceiveDate = request.IntendedRecieveDate,
+                IntendedReceiveDate = request.IntendedReceiveDate,
                 StartTime = timeFrame.StartTime,
                 EndTime = timeFrame.EndTime,
                 DeliveryPackageGroups = deliveryPackageGroup,
+                UnassignOrders = unassignOrders,
             });
         }
 
         return Result.Success(deliveryPackageIntervals);
+    }
+
+    private async Task<List<OrderForShopByStatusResponse>> GetListOrderUnAssignByTimeFrameAsync(DateTime intendedReceiveDate, int startTime, int endTime)
+    {
+        var orderUniq = new Dictionary<long, OrderForShopByStatusResponse>();
+        Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
+            OrderForShopByStatusResponse> map = (parent, child1, child2, child3) =>
+        {
+            if (!orderUniq.TryGetValue(parent.Id, out var order))
+            {
+                parent.Customer = child1;
+                if (child2.DeliveryPackageId != 0 && (child2.Id != 0 || child2.IsShopOwnerShip))
+                {
+                    parent.ShopDeliveryStaff = child2;
+                }
+
+                parent.Foods.Add(child3);
+                orderUniq.Add(parent.Id, parent);
+            }
+            else
+            {
+                order.Foods.Add(child3);
+                orderUniq.Remove(order.Id);
+                orderUniq.Add(order.Id, order);
+            }
+
+            return parent;
+        };
+
+        await _dapperService
+            .SelectAsync<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
+                OrderForShopByStatusResponse>(
+                QueryName.GetListOrderUnAssignInTimeFrame,
+                map,
+                new
+                {
+                    IntendedReceiveDate = intendedReceiveDate.ToString("yyyy-M-d"),
+                    StartTime = startTime,
+                    EndTime = endTime,
+                    ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
+                },
+                "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
+
+        return orderUniq.Values.ToList();
     }
 
     private async Task<List<DeliveryPackageGroupDetailResponse>> GetDeliveryDetailGroupDetailOfEachTimeFrameAsync(DateTime intendedReceiveDate, int startTime, int endTime)

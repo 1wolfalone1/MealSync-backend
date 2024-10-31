@@ -6,7 +6,7 @@ public class GetListTimeFrameUnAssignValidator : AbstractValidator<GetListTimeFr
 {
     public GetListTimeFrameUnAssignValidator()
     {
-        RuleFor(x => x.IntendedRecieveDate)
+        RuleFor(x => x.IntendedReceiveDate)
             .Must(x => x != default)
             .WithMessage("Vui lòng cung cấp ngày giao hàng");
     }

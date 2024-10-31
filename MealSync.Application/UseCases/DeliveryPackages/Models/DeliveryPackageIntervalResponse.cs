@@ -1,4 +1,6 @@
-﻿namespace MealSync.Application.UseCases.DeliveryPackages.Models;
+﻿using MealSync.Application.UseCases.Orders.Models;
+
+namespace MealSync.Application.UseCases.DeliveryPackages.Models;
 
 public class DeliveryPackageIntervalResponse
 {
@@ -9,4 +11,6 @@ public class DeliveryPackageIntervalResponse
     public int EndTime { get; set; }
 
     public List<DeliveryPackageGroupDetailResponse> DeliveryPackageGroups { get; set; } = new();
+
+    public List<OrderForShopByStatusResponse> UnassignOrders { get; set; } = new();
 }

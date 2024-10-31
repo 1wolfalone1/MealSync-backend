@@ -15,7 +15,7 @@ public class GetAllDeliveryPackageGroupByTimeFrameValidator : AbstractValidator<
             .Must(TimeUtils.IsValidOperatingSlot)
             .WithMessage("Vui lòng cung cấp thời gian kết thúc đúng định dạng hhMM");
 
-        RuleFor(x => x.IntendedRecieveDate)
+        RuleFor(x => x.IntendedReceiveDate)
             .Must(x => x != default)
             .WithMessage("Vui lòng cung cấp ngày giao hàng");
     }

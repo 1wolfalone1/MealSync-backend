@@ -56,7 +56,7 @@ public class GetDeliveryPackageGroupDetailByTimeFrameHandler : IQueryHandler<Get
             map,
             new
             {
-                IntendedReceiveDate = request.IntendedRecieveDate.ToString("yyyy-M-d"),
+                IntendedReceiveDate = request.IntendedReceiveDate.ToString("yyyy-M-d"),
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
@@ -71,10 +71,13 @@ public class GetDeliveryPackageGroupDetailByTimeFrameHandler : IQueryHandler<Get
 
         var unassignOrder = await GetListOrderUnAssignByTimeFrameAsync(request).ConfigureAwait(false);
 
-        return Result.Success(new
+        return Result.Success(new DeliveryPackageIntervalResponse()
         {
-            DeliverPackageGroup = deliveryPackages,
-            UnassignOrder = unassignOrder,
+            IntendedReceiveDate = request.IntendedReceiveDate,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+            DeliveryPackageGroups = deliveryPackages,
+            UnassignOrders = unassignOrder,
         });
     }
 
@@ -154,7 +157,7 @@ public class GetDeliveryPackageGroupDetailByTimeFrameHandler : IQueryHandler<Get
                 map,
                 new
                 {
-                    IntendedReceiveDate = request.IntendedRecieveDate.ToString("yyyy-M-d"),
+                    IntendedReceiveDate = request.IntendedReceiveDate.ToString("yyyy-M-d"),
                     StartTime = request.StartTime,
                     EndTime = request.EndTime,
                     ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
