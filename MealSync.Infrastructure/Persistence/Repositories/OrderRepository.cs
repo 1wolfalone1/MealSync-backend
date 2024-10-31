@@ -194,11 +194,12 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         return DbSet.FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == customerId);
     }
 
-    public List<(int StartTime, int EndTime, int numberOfOrder, bool IsCreated)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate)
+    public List<(int StartTime, int EndTime, int NumberOfOrder, bool IsCreated)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate, long shopId)
     {
         var result = DbSet.Where(o => o.IntendedReceiveDate.Date == intendedReceiveDate.Date &&
                                       TimeFrameUtils.GetCurrentHoursInUTC7() <= o.EndTime
-                                      && OrderConstant.LIST_ORDER_STATUS_IN_SHOP_ASSIGN_PROCESS.Contains(o.Status))
+                                      && OrderConstant.LIST_ORDER_STATUS_IN_SHOP_ASSIGN_PROCESS.Contains(o.Status)
+                                      && o.ShopId == shopId)
             .GroupBy(o => new { o.StartTime, o.EndTime })
             .Select(g => new
             {

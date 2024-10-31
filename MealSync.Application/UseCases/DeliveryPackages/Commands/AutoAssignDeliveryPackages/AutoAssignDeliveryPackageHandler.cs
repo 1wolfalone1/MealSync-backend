@@ -50,7 +50,7 @@ public class AutoAssignDeliveryPackageHandler : ICommandHandler<AutoAssignDelive
 
     private void Validate(AutoAssignDeliveryPackageCommand request)
     {
-        var deliveryPackage = _deliveryPackageRepository.GetPackagesByFrameAndDate(TimeFrameUtils.GetCurrentDateInUTC7().Date, request.StartTime, request.EndTime);
+        var deliveryPackage = _deliveryPackageRepository.GetPackagesByFrameAndDate(TimeFrameUtils.GetCurrentDateInUTC7().Date, request.StartTime, request.EndTime, _currentPrincipalService.CurrentPrincipalId.Value);
         if (deliveryPackage != null && deliveryPackage.Count > 0)
             throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_TIME_FRAME_CREATED.GetDescription(), new object[] { TimeFrameUtils.GetTimeFrameString(request.StartTime, request.EndTime) });
     }

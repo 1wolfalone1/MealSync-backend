@@ -6,4 +6,9 @@ public static class MoneyUtils
     {
         return (int)Math.Round(amount, MidpointRounding.AwayFromZero);
     }
+
+    public static string FormatMoneyWithDots(double amount)
+    {
+        return string.Format("{0:N0}", amount).Replace(",", ".");
+    }
 }
