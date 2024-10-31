@@ -64,6 +64,13 @@ public class EmailService : IEmailService, IBaseService
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ACCOUNT_ENOUGH_FLAG_FOR_BAN.GetDescription(), fullName));
     }
 
+    public bool SendVerificationCodeWithdrawalRequest(string email, string code, string amount)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_WITHDRAWAL_REQUEST.GetDescription()),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_WITHDRAWAL_REQUEST.GetDescription(), amount, code));
+    }
+
     private bool SendEmail(string toEmail, string subject, string body)
     {
         try

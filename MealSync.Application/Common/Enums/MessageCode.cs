@@ -385,4 +385,20 @@ public enum MessageCode
 
     [Description("E-Review-Customer_Already_Review")]
     E_REVIEW_CUSTOMER_ALREADY_REVIEW,
+
+    // Wallet
+    [Description("E-Withdrawal-Not-Enough-Available-Amount")]
+    E_WITHDRAWAL_NOT_ENOUGH_AVAILABLE_AMOUNT,
+
+    [Description("E-Withdrawal-Must-Less-Than-Or-Equal-Available-Amount")]
+    E_WITHDRAWAL_AMOUNT_MUST_LESS_THAN_OR_EQUAL_AVAILABLE_AMOUNT,
+
+    [Description("I-Withdrawal-Request-Success")]
+    I_WITHDRAWAL_REQUEST_SUCCESS,
+
+    [Description("I-Withdrawal-Request-Send-Mail-Success")]
+    I_WITHDRAWAL_REQUEST_SEND_MAIL_SUCCESS,
+
+    [Description("E-Withdrawal-Invalid-Code")]
+    E_WITHDRAWAL_INVALID_CODE,
 }

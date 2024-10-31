@@ -14,4 +14,9 @@ public class ShopDormitoryRepository : BaseRepository<ShopDormitory>, IShopDormi
     {
         return DbSet.AnyAsync(sd => sd.ShopId == shopId && sd.DormitoryId == dormitoryId);
     }
+
+    public Task<List<ShopDormitory>> GetByShopId(long shopId)
+    {
+        return DbSet.Where(sd => sd.ShopId == shopId).ToListAsync();
+    }
 }

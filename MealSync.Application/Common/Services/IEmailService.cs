@@ -13,4 +13,6 @@ public interface IEmailService
     bool SendEmailToAnnounceModeratorRefundFail(string email, long orderId);
 
     bool SendEmailToAnnounceAccountGotBanned(string email, string fullName);
+
+    bool SendVerificationCodeWithdrawalRequest(string email, string code, string amount);
 }

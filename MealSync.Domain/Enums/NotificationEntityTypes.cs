@@ -6,4 +6,5 @@ public enum NotificationEntityTypes
     Order = 1,
     DeliveryPackage = 2,
     Report = 3,
+    WithdrawalRequest = 4,
 }

@@ -130,4 +130,10 @@ public static class Endpoints
     public const string UPDATE_PROMOTION_STATUS = "shop-owner/promotion/status/update";
     public const string GET_SHOP_OWNER_PROMOTION = "shop-owner/promotion";
     public const string GET_SHOP_OWNER_PROMOTION_DETAIL = "shop-owner/promotion/{id:long}/detail";
+
+    // Wallet
+    public const string GET_SHOP_WALLET = "shop-owner/wallet/summary";
+    public const string WITHDRAWAL_REQUEST_SEND_VERIFY_CODE = "shop-owner/withdrawal/send-verify-code";
+    public const string WITHDRAWAL_REQUEST = "shop-owner/withdrawal";
+    public const string WITHDRAWAL_REQUEST_HISTORY = "shop-owner/withdrawal/history";
 }
