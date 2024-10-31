@@ -1,9 +1,9 @@
 ﻿using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Shared;
 
-namespace MealSync.Application.UseCases.DeliveryPackages.Commands.AutoAssignDeliveryPackages;
+namespace MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
 
-public class AutoAssignDeliveryPackageCommand : ICommand<Result>
+public class SuggestAssignDeliveryPackageQuery : IQuery<Result>
 {
     public int StartTime { get; set; }
 

@@ -6,27 +6,28 @@ using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Dapper;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
+using MealSync.Application.UseCases.DeliveryPackages.Models;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Application.UseCases.ShopDeliveryStaffs.Models;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 
-namespace MealSync.Application.UseCases.DeliveryPackages.Commands.AutoAssignDeliveryPackages;
+namespace MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
 
-public class AutoAssignDeliveryPackageHandler : ICommandHandler<AutoAssignDeliveryPackageCommand, Result>
+public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDeliveryPackageQuery, Result>
 {
     private readonly IDapperService _dapperService;
     private readonly IDeliveryPackageRepository _deliveryPackageRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
 
-    public AutoAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService)
+    public SuggestAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService)
     {
         _dapperService = dapperService;
         _deliveryPackageRepository = deliveryPackageRepository;
         _currentPrincipalService = currentPrincipalService;
     }
 
-    public async Task<Result<Result>> Handle(AutoAssignDeliveryPackageCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(SuggestAssignDeliveryPackageQuery request, CancellationToken cancellationToken)
     {
         // Valiate
         Validate(request);
@@ -41,14 +42,18 @@ public class AutoAssignDeliveryPackageHandler : ICommandHandler<AutoAssignDelive
         }
 
         var assignOrder = AssignOrder(shopStaffs, unAssignOrders);
+
         return Result.Success(new
         {
-            DeliverPackageGroup = assignOrder.AssignedStaff,
-            UnassignOrder = assignOrder.UnAssignOrder,
+            IntendedReceiveDate = TimeFrameUtils.GetCurrentDateInUTC7().Date,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+            DeliveryPackageGroups = assignOrder.AssignedStaff,
+            UnassignOrders = assignOrder.UnAssignOrder,
         });
     }
 
-    private void Validate(AutoAssignDeliveryPackageCommand request)
+    private void Validate(SuggestAssignDeliveryPackageQuery request)
     {
         var deliveryPackage = _deliveryPackageRepository.GetPackagesByFrameAndDate(TimeFrameUtils.GetCurrentDateInUTC7().Date, request.StartTime, request.EndTime, _currentPrincipalService.CurrentPrincipalId.Value);
         if (deliveryPackage != null && deliveryPackage.Count > 0)
@@ -290,7 +295,7 @@ public class AutoAssignDeliveryPackageHandler : ICommandHandler<AutoAssignDelive
         return staff;
     }
 
-    private async Task<List<DeliveryPackageForAssignResponse>> GetListShopDeliveryStaffAsync(AutoAssignDeliveryPackageCommand request)
+    private async Task<List<DeliveryPackageForAssignResponse>> GetListShopDeliveryStaffAsync(SuggestAssignDeliveryPackageQuery request)
     {
         var response = await _dapperService.SelectAsync<DeliveryPackageForAssignResponse, DeliveryPackageForAssignResponse.ShopStaffInforResponse, DeliveryPackageForAssignResponse>(
             QueryName.GetListShopDeliveryStaffToAssign,
@@ -311,7 +316,7 @@ public class AutoAssignDeliveryPackageHandler : ICommandHandler<AutoAssignDelive
         return response.ToList();
     }
 
-    private async Task<List<OrderForShopByStatusResponse>> GetListOrderUnAssignByTimeFrameAsync(AutoAssignDeliveryPackageCommand request)
+    private async Task<List<OrderForShopByStatusResponse>> GetListOrderUnAssignByTimeFrameAsync(SuggestAssignDeliveryPackageQuery request)
     {
         var orderUniq = new Dictionary<long, OrderForShopByStatusResponse>();
         Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,

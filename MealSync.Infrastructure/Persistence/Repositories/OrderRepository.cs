@@ -213,4 +213,9 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         return result.Select(x => (x.StartTime, x.EndTime, x.numberOfOrder, x.IsCreated)).OrderBy(x => x.StartTime).ToList();
     }
 
+    public List<Order> GetByIds(List<long> ids)
+    {
+        return DbSet.Where(o => ids.Contains(o.Id)).ToList();
+    }
+
 }
