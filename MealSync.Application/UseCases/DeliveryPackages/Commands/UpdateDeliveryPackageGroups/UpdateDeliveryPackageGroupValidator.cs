@@ -22,9 +22,9 @@ public class UpdateDeliveryPackageGroupValidator : AbstractValidator<UpdateDeliv
             .Must(NoDuplicateOrderIds)
             .WithMessage("Không thể tồn tại 1 đơn hàng có mặt trong nhiều hơn 2 gói hàng");
 
-        RuleFor(command => command.DeliveryPackages)
-            .Must(NoDuplicateDeliveryPackageIds)
-            .WithMessage("Vui lòng không truyền trùng deliveryPackageId về");
+        // RuleFor(command => command.DeliveryPackages)
+        //     .Must(NoDuplicateDeliveryPackageIds)
+        //     .WithMessage("Vui lòng không truyền trùng deliveryPackageId về");
 
         RuleForEach(x => x.DeliveryPackages)
             .SetValidator(new DeliveryPackageRequestValidator());
@@ -52,13 +52,13 @@ public class UpdateDeliveryPackageGroupValidator : AbstractValidator<UpdateDeliv
         return allOrderIds.Distinct().Count() == allOrderIds.Count();
     }
 
-    private bool NoDuplicateDeliveryPackageIds(List<UpdateDeliveryPackageGroupCommand.DeliveryPackageInUpdateRequest> packages)
-    {
-        var deliveryPackageIds = packages
-            .Select(p => p.DeliveryPackageId);
-
-        return deliveryPackageIds.Distinct().Count() == deliveryPackageIds.Count();
-    }
+    // private bool NoDuplicateDeliveryPackageIds(List<UpdateDeliveryPackageGroupCommand.DeliveryPackageInUpdateRequest> packages)
+    // {
+    //     var deliveryPackageIds = packages.Where(p => p.DeliveryPackageId.HasValue)
+    //         .Select(p => p.DeliveryPackageId);
+    //
+    //     return deliveryPackageIds.Distinct().Count() == deliveryPackageIds.Where(p => p.HasValue).Count();
+    // }
 }
 
 public class DeliveryPackageRequestValidator : AbstractValidator<UpdateDeliveryPackageGroupCommand.DeliveryPackageInUpdateRequest>
