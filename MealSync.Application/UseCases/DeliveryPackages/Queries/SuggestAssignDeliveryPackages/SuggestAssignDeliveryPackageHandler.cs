@@ -306,7 +306,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             },
             new
             {
-                IntendedReceiveDate = TimeFrameUtils.GetCurrentDateInUTC7().ToString("yyyy-M-d"),
+                IntendedReceiveDate = TimeFrameUtils.GetCurrentDateInUTC7().ToString("yyyy-MM-dd"),
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
@@ -350,7 +350,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                 map,
                 new
                 {
-                    IntendedReceiveDate = TimeFrameUtils.GetCurrentDateInUTC7().ToString("yyyy-M-d"),
+                    IntendedReceiveDate = TimeFrameUtils.GetCurrentDateInUTC7().ToString("yyyy-MM-dd"),
                     StartTime = request.StartTime,
                     EndTime = request.EndTime,
                     ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
