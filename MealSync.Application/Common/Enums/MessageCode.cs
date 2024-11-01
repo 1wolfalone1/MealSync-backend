@@ -344,6 +344,16 @@ public enum MessageCode
     [Description("E-DeliveryPackage-TimeFrameCreated")]
     E_DELIVERY_PACKAGE_TIME_FRAME_CREATED,
 
+    // Delivery package group
+    [Description("E-DeliveryPackageGroup-NotFoudAny")]
+    E_DELIVERY_PACKAGE_GROUP_NOT_FOUND_ANY,
+
+    [Description("E-DeliveryPackage-NotFound")]
+    E_DELIVERY_PACKAGE_NOT_FOUND,
+
+    [Description("E-DeliveryPackage-StaffNotBelongToShop")]
+    E_DELIVERY_PACKAGE_STAFF_NOT_BELONG_TO_SHOP,
+
     // Promotion
     [Description("E-Promotion-NotFound")]
     E_PROMOTION_NOT_FOUND,
