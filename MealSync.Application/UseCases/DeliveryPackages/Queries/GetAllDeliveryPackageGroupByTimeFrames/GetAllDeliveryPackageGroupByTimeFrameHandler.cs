@@ -77,7 +77,7 @@ public class GetAllDeliveryPackageGroupByTimeFrameHandler : IQueryHandler<GetAll
                 map,
                 new
                 {
-                    IntendedReceiveDate = intendedReceiveDate.ToString("yyyy-M-d"),
+                    IntendedReceiveDate = intendedReceiveDate.ToString("yyyy-MM-dd"),
                     StartTime = startTime,
                     EndTime = endTime,
                     ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
@@ -119,7 +119,7 @@ public class GetAllDeliveryPackageGroupByTimeFrameHandler : IQueryHandler<GetAll
             map,
             new
             {
-                IntendedReceiveDate = intendedReceiveDate.ToString("yyyy-M-d"),
+                IntendedReceiveDate = intendedReceiveDate.ToString("yyyy-MM-dd"),
                 StartTime = startTime,
                 EndTime = endTime,
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
