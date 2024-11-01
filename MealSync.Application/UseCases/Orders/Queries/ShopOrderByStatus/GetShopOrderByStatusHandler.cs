@@ -56,7 +56,7 @@ public class GetShopOrderByStatusHandler : IQueryHandler<GetShopOrderByStatusQue
             {
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
                 Status = request.Status,
-                IntendedRecieveDate = request.IntendedReceiveDate != null ? request.IntendedReceiveDate.Value.ToString("yyyy-M-d") : null,
+                IntendedRecieveDate = request.IntendedReceiveDate != null ? request.IntendedReceiveDate.Value.ToString("yyyy-MM-dd") : null,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
                 PhoneNumber = request.PhoneNumber,
