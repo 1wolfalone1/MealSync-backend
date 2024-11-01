@@ -344,6 +344,9 @@ public enum MessageCode
     [Description("E-DeliveryPackage-TimeFrameCreated")]
     E_DELIVERY_PACKAGE_TIME_FRAME_CREATED,
 
+    [Description("E-DeliveryPackage-DateUpdateNotNew")]
+    E_DELIVERY_PACKAGE_DATE_UPDATE_NOT_NEW,
+
     // Delivery package group
     [Description("E-DeliveryPackageGroup-NotFoudAny")]
     E_DELIVERY_PACKAGE_GROUP_NOT_FOUND_ANY,

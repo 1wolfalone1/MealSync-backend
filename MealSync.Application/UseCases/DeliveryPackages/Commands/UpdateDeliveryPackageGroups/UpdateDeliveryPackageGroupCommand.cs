@@ -11,7 +11,7 @@ public class UpdateDeliveryPackageGroupCommand : ICommand<Result>
 
     public class DeliveryPackageInUpdateRequest
     {
-        public long? DeliveryPackageId { get; set; }
+        // public long? DeliveryPackageId { get; set; }
 
         public long? ShopDeliveryStaffId { get; set; }
 
