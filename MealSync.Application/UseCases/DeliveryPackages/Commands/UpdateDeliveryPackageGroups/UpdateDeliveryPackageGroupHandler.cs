@@ -8,7 +8,6 @@ using MealSync.Application.Common.Services.Dapper;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.DeliveryPackages.Models;
-using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageGroupDetailByTimeFrames;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
@@ -50,12 +49,28 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
+            var firstOrder = _orderRepository.GetById(request.DeliveryPackages.First().OrderIds.First());
+
             // Update list
-            var deliveryPackageUpdateIds = request.DeliveryPackages.Where(dp => dp.DeliveryPackageId.HasValue).Select(dp => dp.DeliveryPackageId.Value).ToList();
+            var staffIds = request.DeliveryPackages.Select(x =>
+            {
+                if (x.ShopDeliveryStaffId.HasValue)
+                    return x.ShopDeliveryStaffId.Value;
+
+                return _currentPrincipalService.CurrentPrincipalId.Value;
+            }).ToList();
+            var deliveryPackageRequestUpdate = _deliveryPackageRepository.GetAllRequestUpdate(firstOrder.IntendedReceiveDate, firstOrder.StartTime, firstOrder.StartTime, staffIds);
+            var deliveryPackageUpdateIds = deliveryPackageRequestUpdate.Select(dp => dp.Id).ToList();
             var orderUpdateIds = request.DeliveryPackages.SelectMany(dp => dp.OrderIds).ToList();
+            var staffIdsInPackageRequestLocatedInDb = deliveryPackageRequestUpdate.Select(dp =>
+            {
+                if (dp.ShopDeliveryStaffId.HasValue)
+                    return dp.ShopDeliveryStaffId.Value;
+
+                return dp.ShopId.Value;
+            }).ToList();
 
             // OriginList
-            var firstOrder = _orderRepository.GetById(request.DeliveryPackages.First().OrderIds.First());
             var deliveryPackages = _deliveryPackageRepository.GetPackagesByFrameAndDate(firstOrder.IntendedReceiveDate, firstOrder.StartTime, firstOrder.EndTime,
                 _currentPrincipalService.CurrentPrincipalId.Value);
             var deliveryPackageOriginIds = deliveryPackages.Select(dp => dp.Id).ToList();
@@ -64,13 +79,14 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
             // Delivery package
             var dpIdsUp = deliveryPackageUpdateIds.Intersect(deliveryPackageOriginIds).ToList();
             var dpIdsDel = deliveryPackageOriginIds.Except(deliveryPackageUpdateIds).ToList();
+            var dpStaffIdsNew = staffIds.Except(staffIdsInPackageRequestLocatedInDb).ToList();
 
             // Order
             var oIdsUp = orderUpdateIds.Intersect(orderOriginIds).ToList();
             var oIdsDel = orderOriginIds.Except(orderUpdateIds).ToList();
 
             // Process update, add, delete delivery package
-            await UpdateAndAddDeliveryPackageAsync(deliveryPackages, dpIdsUp, dpIdsDel, oIdsUp, oIdsDel, request).ConfigureAwait(false);
+            await UpdateAndAddDeliveryPackageAsync(deliveryPackages, dpIdsUp, dpIdsDel, dpStaffIdsNew, oIdsUp, oIdsDel, request).ConfigureAwait(false);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
             return Result.Success(await GetUpdatedDeliveryPackageGroupAsync(firstOrder.IntendedReceiveDate, firstOrder.StartTime, firstOrder.EndTime).ConfigureAwait(false));
@@ -228,7 +244,7 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
         return orderUniq.Values.ToList();
     }
 
-    private async Task UpdateAndAddDeliveryPackageAsync(List<DeliveryPackage> dpOrigins, List<long> dpIdsUp, List<long> dpIdsDel, List<long> oIdsUp, List<long> oIdsDel, UpdateDeliveryPackageGroupCommand request)
+    private async Task UpdateAndAddDeliveryPackageAsync(List<DeliveryPackage> dpOrigins, List<long> dpIdsUp, List<long> dpIdsDel, List<long> dpStaffIdsAddNew, List<long> oIdsUp, List<long> oIdsDel, UpdateDeliveryPackageGroupCommand request)
     {
         var ordersUpdateSaveChange = new List<Order>();
         var deliveryPackageUpdateSaveChange = new List<DeliveryPackage>();
@@ -239,26 +255,10 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
             // Update
             if (dpIdsUp.Contains(dpO.Id))
             {
-                var deliverPackage = request.DeliveryPackages.Single(dp => dp.DeliveryPackageId.HasValue && dp.DeliveryPackageId.Value == dpO.Id);
-                dpO.ShopDeliveryStaffId = deliverPackage.ShopDeliveryStaffId;
-                dpO.ShopId = deliverPackage.ShopDeliveryStaffId == null ? _currentPrincipalService.CurrentPrincipalId.Value : null;
-
-
-                if (deliverPackage.ShopDeliveryStaffId != null)
-                {
-                    var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(deliverPackage.ShopDeliveryStaffId.Value);
-                    shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
-                    _shopDeliveryStaffRepository.Update(shopDeliveryStaff);
-                }
-
                 // Update order exist
-                var oIdsUpOfDp = request.DeliveryPackages.Where(dp => dp.DeliveryPackageId.Value == dpO.Id).First();
+                var oIdsUpOfDp = request.DeliveryPackages.Where(dp => dpO.ShopId.HasValue && !dp.ShopDeliveryStaffId.HasValue ||
+                                                                      !dpO.ShopId.HasValue && dpO.ShopDeliveryStaffId.Value == dp.ShopDeliveryStaffId.Value).First();
                 var ordersUpdate = _orderRepository.GetByIds(oIdsUpOfDp.OrderIds.ToList());
-                // ordersUpdate.ForEach(o =>
-                // {
-                //     o.DeliveryPackageId = dpO.Id;
-                // });
-                // ordersUpdateSaveChange.AddRange(ordersUpdate);
                 dpO.Orders = ordersUpdate;
                 deliveryPackageUpdateSaveChange.Add(dpO);
             }
@@ -281,7 +281,8 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
 
         // Add new
         var firstOrder = _orderRepository.GetById(request.DeliveryPackages.First().OrderIds.First());
-        foreach (var dpRequest in request.DeliveryPackages.Where(dp => !dp.DeliveryPackageId.HasValue))
+        foreach (var dpRequest in request.DeliveryPackages.Where(dp => dp.ShopDeliveryStaffId.HasValue && dpStaffIdsAddNew.Contains(dp.ShopDeliveryStaffId.Value) ||
+                                                                       !dp.ShopDeliveryStaffId.HasValue && dpStaffIdsAddNew.Contains(_currentPrincipalService.CurrentPrincipalId.Value)))
         {
             // Need create new delivery package
             var dp = new DeliveryPackage()
@@ -328,12 +329,13 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
         var listOrder = new List<Order>();
         foreach (var deliveryPackage in request.DeliveryPackages)
         {
-            if (deliveryPackage.DeliveryPackageId.HasValue && _deliveryPackageRepository.Get(dp => dp.Id == deliveryPackage.DeliveryPackageId.Value && (
-                    dp.ShopId != null && dp.ShopId == _currentPrincipalService.CurrentPrincipalId.Value ||
-                    dp.ShopDeliveryStaffId != null && dp.ShopDeliveryStaff.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)).SingleOrDefault() == default)
-                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_NOT_FOUND.GetDescription(), new object[] { deliveryPackage.DeliveryPackageId.Value }, HttpStatusCode.NotFound);
+            // if (deliveryPackage.DeliveryPackageId.HasValue && _deliveryPackageRepository.Get(dp => dp.Id == deliveryPackage.DeliveryPackageId.Value && (
+            //         dp.ShopId != null && dp.ShopId == _currentPrincipalService.CurrentPrincipalId.Value ||
+            //         dp.ShopDeliveryStaffId != null && dp.ShopDeliveryStaff.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)).SingleOrDefault() == default)
+            //     throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_NOT_FOUND.GetDescription(), new object[] { deliveryPackage.DeliveryPackageId.Value }, HttpStatusCode.NotFound);
 
-            if (deliveryPackage.ShopDeliveryStaffId.HasValue && _shopDeliveryStaffRepository.Get(sds => sds.Id == deliveryPackage.ShopDeliveryStaffId && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault() == default)
+            if (deliveryPackage.ShopDeliveryStaffId.HasValue
+                && _shopDeliveryStaffRepository.Get(sds => sds.Id == deliveryPackage.ShopDeliveryStaffId && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault() == default)
                 throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_NOT_BELONG_TO_SHOP.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId }, HttpStatusCode.NotFound);
 
             foreach (var orderId in deliveryPackage.OrderIds)
@@ -345,11 +347,15 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
                 if (order == default)
                     throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { orderId }, HttpStatusCode.NotFound);
 
-                if (order.Status != OrderStatus.Preparing)
-                    throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { orderId });
-
                 if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
                     throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERING_IN_WRONG_DATE.GetDescription(), new object[] { order.Id, order.IntendedReceiveDate.Date.ToString("dd-MM-yyyy") });
+
+                if (OrderConstant.LIST_ORDER_STATUS_FIX_ORDER_ASSIGN_PROCESS.Contains(order.Status) && order.DeliveryPackage != null
+                                                                                                    && (order.DeliveryPackage.ShopDeliveryStaffId.HasValue
+                                                                                                        && order.DeliveryPackage.ShopDeliveryStaffId != deliveryPackage.ShopDeliveryStaffId.Value
+                                                                                                        || !order.DeliveryPackage.ShopDeliveryStaffId.HasValue
+                                                                                                        && order.DeliveryPackage.ShopId != _currentPrincipalService.CurrentPrincipalId.Value))
+                    throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_DATE_UPDATE_NOT_NEW.GetDescription());
 
                 listOrder.Add(order);
             }

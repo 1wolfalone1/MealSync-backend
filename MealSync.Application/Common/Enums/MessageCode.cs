@@ -29,6 +29,27 @@ public enum MessageCode
     [Description("I-Account-RegisterSuccessfully")]
     I_ACCOUNT_REGISTER_SUCCESSFULLY,
 
+    [Description("E-Account-NotFound")]
+    E_ACCOUNT_NOT_FOUND,
+
+    [Description("E-Account-AlreadyVerify")]
+    E_ACCOUNT_ALREADY_VERIFY,
+
+    [Description("I-Account-SendVerifyCodeSuccess")]
+    I_ACCOUNT_SEND_VERIFY_CODE_SUCCESS,
+
+    [Description("E-Account-VerifyInvalidRole")]
+    E_ACCOUNT_VERIFY_INVALID_ROLE,
+
+    [Description("E-Account-InvalidVerifyCode")]
+    E_ACCOUNT_INVALID_VERIFY_CODE,
+
+    [Description("I-Account-VerifySuccess")]
+    I_ACCOUNT_VERIFY_SUCCESS,
+
+    [Description("I-Account-ChangePasswordSuccess")]
+    I_ACCOUNT_CHANGE_PASSWORD_SUCCESS,
+
     // Platform Category
     [Description("E-PlatformCategory-NotFound")]
     E_PLATFORM_CATEGORY_NOT_FOUND,
@@ -322,6 +343,9 @@ public enum MessageCode
 
     [Description("E-DeliveryPackage-TimeFrameCreated")]
     E_DELIVERY_PACKAGE_TIME_FRAME_CREATED,
+
+    [Description("E-DeliveryPackage-DateUpdateNotNew")]
+    E_DELIVERY_PACKAGE_DATE_UPDATE_NOT_NEW,
 
     // Delivery package group
     [Description("E-DeliveryPackageGroup-NotFoudAny")]
