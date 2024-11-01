@@ -8,6 +8,8 @@ public static class Endpoints
     public const string LOGIN_USERNAME_PASS = "auth/login";
     public const string SHOP_REGISTER = "auth/shop-register";
     public const string REGISTER_CUSTOMER = "auth/customer-register";
+    public const string SEND_VERIFY_CODE = "auth/send-code";
+    public const string VERIFY_CODE = "auth/verify-code";
 
     // Shop Owner
     public const string GET_FOOD = "shop-owner/food";
@@ -57,6 +59,7 @@ public static class Endpoints
 
     // Shop delivery staff
     public const string GET_SHOP_DELIVER_STAFF_AVAILABLE = "shop/shop-delivery-staff/available";
+    public const string CREATE_SHOP_DELIVERY_STAFF = "shop-owner/delivery-staff/create";
 
     // Dormitory
     public const string ALL_DORMITORY = "dormitory/all";

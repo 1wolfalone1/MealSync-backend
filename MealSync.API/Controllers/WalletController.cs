@@ -33,7 +33,7 @@ public class WalletController : BaseApiController
         return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
     }
 
-    [HttpGet(Endpoints.WITHDRAWAL_REQUEST)]
+    [HttpGet(Endpoints.WITHDRAWAL_REQUEST_HISTORY)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> WithdrawalRequestHistory([FromQuery] GetWithdrawalRequestHistoryQuery request)
     {
