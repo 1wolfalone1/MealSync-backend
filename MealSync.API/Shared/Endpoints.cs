@@ -119,6 +119,7 @@ public static class Endpoints
 
     // Delivery package
     public const string CREATE_DELIVERY_PACKAGE = "shop-owner/delivery-package";
+    public const string GET_ALL_DELIVERY_PACKAGE = "shop-owner-staff/delivery-package";
     public const string GET_DELIVERY_PACKAGE_GROUP = "shop-owner/delivery-package-group";
     public const string UPDATE_DELIVERY_PACKAGE_GROUP = "shop-owner/delivery-package-group";
     public const string GET_TIME_FRAME_ALL_ORDER_UN_ASSIGN = "shop-owner/delivery-package/time-frame/un-assign";
