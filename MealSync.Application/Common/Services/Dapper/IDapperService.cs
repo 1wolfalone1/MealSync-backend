@@ -35,4 +35,5 @@ public enum QueryName
     GetListShopDeliveryStaffToAssign,
     GetListDeliveryDetailStasticByTimeFrame,
     GetListOrderUnAssignInTimeFrame,
+    GetDeliveryPackageStasisticById,
 }
