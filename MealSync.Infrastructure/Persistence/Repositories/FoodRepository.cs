@@ -36,7 +36,6 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
     public async Task<(int TotalCount, IEnumerable<Food> Foods)> GetTopFood(long dormitoryId, int pageIndex, int pageSize)
     {
         var query = DbSet.Where(food => food.Status == FoodStatus.Active // The food item must be active
-                                        && !food.IsSoldOut // The food item must not be sold out
                                         && food.Shop.ShopDormitories
                                             .Select(shopDormitory => shopDormitory.DormitoryId)
                                             .Contains(dormitoryId) // The shop must be in the specified dormitory
@@ -193,9 +192,9 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
         return (totalCount, foods);
     }
 
-    public Task<Food?> GetActiveAndNotSoldOut(long id)
+    public Task<Food?> GetActiveFood(long id)
     {
         return DbSet.FirstOrDefaultAsync(f => f.Id == id && f.Status == FoodStatus.Active
-                                              && !f.IsSoldOut && f.Shop.Status == ShopStatus.Active && !f.Shop.IsReceivingOrderPaused);
+                                                         && f.Shop.Status == ShopStatus.Active && !f.Shop.IsReceivingOrderPaused);
     }
 }

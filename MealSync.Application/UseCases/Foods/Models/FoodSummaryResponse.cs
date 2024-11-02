@@ -11,4 +11,6 @@ public class FoodSummaryResponse
     public string ImageUrl { get; set; } = null!;
 
     public long ShopId { get; set; }
+
+    public bool IsSoldOut { get; set; }
 }

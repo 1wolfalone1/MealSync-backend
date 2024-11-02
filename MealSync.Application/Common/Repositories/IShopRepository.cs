@@ -1,4 +1,5 @@
-﻿using MealSync.Domain.Entities;
+﻿using MealSync.Application.UseCases.Shops.Queries.SearchShop;
+using MealSync.Domain.Entities;
 
 namespace MealSync.Application.Common.Repositories;
 
@@ -13,4 +14,10 @@ public interface IShopRepository : IBaseRepository<Shop>
     Task<(int TotalCount, IEnumerable<Shop> Shops)> GetTopShop(long dormitoryId, int pageIndex, int pageSize);
 
     Task<Shop?> GetByIdIncludeLocation(long id);
+
+    Task<(int TotalCounts, List<Shop> Shops)> SearchShops(
+        long dormitoryId, string? searchValue, int? platformCategoryId,
+        int? startTime, int? endTime, int foodSize,
+        SearchShopQuery.OrderBy? orderBy, SearchShopQuery.Direction direction,
+        int pageIndex, int pageSize);
 }

@@ -3,6 +3,7 @@ using MealSync.API.Shared;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopProfile;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopStatus;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
+using MealSync.Application.UseCases.Shops.Queries.SearchShop;
 using MealSync.Application.UseCases.Shops.Queries.ShopInfo;
 using MealSync.Application.UseCases.Shops.Queries.TopShop;
 using Microsoft.AspNetCore.Authorization;
@@ -53,5 +54,12 @@ public class ShopController : BaseApiController
         {
             ShopId = id,
         }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.SEARCH_SHOP)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> SearchShop([FromQuery] SearchShopQuery searchShopQuery)
+    {
+        return HandleResult(await Mediator.Send(searchShopQuery).ConfigureAwait(false));
     }
 }
