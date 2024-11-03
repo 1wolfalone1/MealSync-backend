@@ -74,7 +74,8 @@
         <None Remove="Common\Queries\GetListOrderUnAssignInTimeFrame.sql" />
         <EmbeddedResource Include="Common\Queries\GetListOrderUnAssignInTimeFrame.sql" />
         <None Remove="Common\Queries\GetDeliveryPackageStasisticById.sql" />
-        <EmbeddedResource Include="Common\Queries\GetDeliveryPackageStasisticById.sql" />
+        <None Remove="Common\Queries\GetAllDeliveryPackageStasisticByTimeFrame.sql" />
+        <EmbeddedResource Include="Common\Queries\GetAllDeliveryPackageStasisticByTimeFrame.sql" />
     </ItemGroup>
 
 </Project>
