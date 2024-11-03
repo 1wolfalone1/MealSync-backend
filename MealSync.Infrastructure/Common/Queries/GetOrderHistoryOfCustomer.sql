@@ -20,7 +20,10 @@ WITH FilteredOrders AS (
     LEFT JOIN `review` r ON o.id = r.order_id
   WHERE
     o.customer_id = @CustomerId
-    AND o.status IN @FilterStatusList
+    AND (
+      @ReviewMode = 0
+      OR o.status IN @FilterStatusList
+    )
   GROUP BY
     o.id,
     o.status,

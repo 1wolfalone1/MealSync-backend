@@ -34,7 +34,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
             }
             else
             {
-                var food = await _foodRepository.GetActiveAndNotSoldOut(id).ConfigureAwait(false);
+                var food = await _foodRepository.GetActiveFood(id).ConfigureAwait(false);
 
                 if (food == default)
                 {
