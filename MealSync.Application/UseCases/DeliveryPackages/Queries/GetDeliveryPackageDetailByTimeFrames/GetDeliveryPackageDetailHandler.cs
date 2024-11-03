@@ -1,40 +1,49 @@
-﻿using MealSync.Application.Common.Abstractions.Messaging;
+﻿using System.Net;
+using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Dapper;
-using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.DeliveryPackages.Models;
 using MealSync.Application.UseCases.Orders.Models;
-using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
+using MealSync.Domain.Exceptions.Base;
 
-namespace MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllDeliveryPackages;
+namespace MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageDetailByTimeFrames;
 
-public class GetAllDeliveryPackageHandler : IQueryHandler<GetAllDeliveryPackageQuery, Result>
+public class GetDeliveryPackageDetailHandler : IQueryHandler<GetDeliveryPackageDetailQuery, Result>
 {
-    private readonly ICurrentAccountService _currentAccountService;
-    private readonly IDeliveryPackageRepository _deliveryPackageRepository;
     private readonly IDapperService _dapperService;
+    private readonly IDeliveryPackageRepository _deliveryPackageRepository;
+    private readonly ICurrentAccountService _currentAccountService;
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
 
-    public GetAllDeliveryPackageHandler(ICurrentAccountService currentAccountService, IDeliveryPackageRepository deliveryPackageRepository, IDapperService dapperService, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
+    public GetDeliveryPackageDetailHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
     {
-        _currentAccountService = currentAccountService;
-        _deliveryPackageRepository = deliveryPackageRepository;
         _dapperService = dapperService;
+        _deliveryPackageRepository = deliveryPackageRepository;
+        _currentAccountService = currentAccountService;
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
     }
 
-    public async Task<Result<Result>> Handle(GetAllDeliveryPackageQuery request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(GetDeliveryPackageDetailQuery request, CancellationToken cancellationToken)
     {
+        // Validate
+        Validate(request);
+
         var account = _currentAccountService.GetCurrentAccount();
+        var deliveryPackage = _deliveryPackageRepository.GetById(request.Id);
         long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
-        var response = await GetDeliveryPackageStatsisticAsync(request, shopId, account.RoleId == (int)Domain.Enums.Roles.ShopDelivery ? account.Id : null, request.Status);
+        var response = await GetDeliveryPackageStatsisticAsync(deliveryPackage.StartTime, deliveryPackage.EndTime, deliveryPackage.DeliveryDate, shopId, deliveryPackage.ShopDeliveryStaffId, new DeliveryPackageStatus[]
+        {
+            DeliveryPackageStatus.Created, DeliveryPackageStatus.Done, DeliveryPackageStatus.OnGoing
+        }).ConfigureAwait(false);
+
         return Result.Success(response);
     }
 
-    private async Task<List<DeliveryPackageGroupDetailResponse>> GetDeliveryPackageStatsisticAsync(GetAllDeliveryPackageQuery request, long shopId, long? shopDeliveryStaffId, DeliveryPackageStatus[] status)
+    private async Task<DeliveryPackageGroupDetailResponse> GetDeliveryPackageStatsisticAsync(int startTime, int endTime, DateTime deliveryDate, long shopId, long? shopDeliveryStaffId, DeliveryPackageStatus[] status)
     {
         var dicDormitoryUniq = new Dictionary<long, DeliveryPackageGroupDetailResponse>();
         Func<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
@@ -62,13 +71,13 @@ public class GetAllDeliveryPackageHandler : IQueryHandler<GetAllDeliveryPackageQ
 
         var parameter = new
         {
-            IntendedReceiveDate = request.IntendedReceiveDate.ToString("yyyy-MM-dd"),
+            IntendedReceiveDate = deliveryDate.ToString("yyyy-MM-dd"),
             ShopDeliveryStaffId = shopDeliveryStaffId.HasValue ? shopDeliveryStaffId.Value : (long?)null,
             IsShopOwnerShip = !shopDeliveryStaffId.HasValue,
             Status = status,
             ShopId = shopId,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
+            StartTime = startTime,
+            EndTime = endTime,
         };
 
         await _dapperService.SelectAsync<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
@@ -78,13 +87,11 @@ public class GetAllDeliveryPackageHandler : IQueryHandler<GetAllDeliveryPackageQ
             parameter,
             "ShopDeliverySection, DormitorySection, ShopDeliveryInDorSection").ConfigureAwait(false);
 
-        var deliveryPackages = dicDormitoryUniq.Values.ToList();
-        foreach (var deliveryPackage in deliveryPackages)
-        {
-            deliveryPackage.Orders = await GetListOrderByDeliveryPackageIdAsync(deliveryPackage.DeliveryPackageId, shopId).ConfigureAwait(false);
-        }
+        var deliveryPackage = dicDormitoryUniq.Values.ToList().FirstOrDefault();
 
-        return deliveryPackages;
+        deliveryPackage.Orders = await GetListOrderByDeliveryPackageIdAsync(deliveryPackage.DeliveryPackageId, shopId).ConfigureAwait(false);
+
+        return deliveryPackage;
     }
 
     private async Task<List<OrderForShopByStatusResponse>> GetListOrderByDeliveryPackageIdAsync(long? packageId, long shopId)
@@ -127,5 +134,13 @@ public class GetAllDeliveryPackageHandler : IQueryHandler<GetAllDeliveryPackageQ
                 "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
 
         return orderUniq.Values.ToList();
+    }
+
+    private void Validate(GetDeliveryPackageDetailQuery request)
+    {
+        var isShopOwner = _currentAccountService.GetCurrentAccount().RoleId == (int)Domain.Enums.Roles.ShopOwner;
+        if (_deliveryPackageRepository.Get(dp => dp.Id == request.Id && (isShopOwner && dp.ShopId == _currentAccountService.GetCurrentAccount().Id ||
+                                                                         !isShopOwner && dp.ShopDeliveryStaffId == _currentAccountService.GetCurrentAccount().Id)).SingleOrDefault() == default)
+            throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_NOT_FOUND.GetDescription(), new object[] { request.Id }, HttpStatusCode.NotFound);
     }
 }
