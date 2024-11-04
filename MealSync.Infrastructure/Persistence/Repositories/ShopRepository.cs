@@ -39,6 +39,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
                 shop => shop.ShopDormitories.Select(shopDormitory => shopDormitory.DormitoryId).Contains(dormitoryId)
                         && !shop.IsReceivingOrderPaused
                         && shop.Status == ShopStatus.Active
+                        && shop.OperatingSlots.Any(os => os.IsActive)
             );
         var totalCount = await query.CountAsync().ConfigureAwait(false);
         var shops = await query
@@ -59,10 +60,13 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
 
     public async Task<Shop?> GetShopInfoById(long id)
     {
-        return await DbSet.Include(s => s.OperatingSlots)
+        return await DbSet
+            .Where(s => s.OperatingSlots.Any(os => os.IsActive))
+            .Include(s => s.OperatingSlots.Where(os => os.IsActive))
             .Include(s => s.Location)
             .Include(s => s.ShopDormitories)
             .ThenInclude(sd => sd.Dormitory)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(s => s.Id == id && s.Status != ShopStatus.Deleted && s.Status != ShopStatus.UnApprove).ConfigureAwait(false);
     }
 
@@ -76,7 +80,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             .Where(shop =>
                 shop.ShopDormitories.Any(sd => sd.DormitoryId == dormitoryId) &&
                 shop.Status == ShopStatus.Active &&
-                !shop.IsReceivingOrderPaused
+                !shop.IsReceivingOrderPaused && shop.OperatingSlots.Any(os => os.IsActive)
             ).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchValue))

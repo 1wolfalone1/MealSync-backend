@@ -419,7 +419,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                     {
                         throw new InvalidBusinessException(MessageCode.E_FOOD_IS_SOLD_OUT.GetDescription(), new object[] { food.Name });
                     }
-                    else if (!await _foodOperatingSlotRepository.ExistedByFoodIdAndOperatingSlotId(food.Id, shopOperatingSlot!.Id).ConfigureAwait(false))
+                    else if (!await _foodOperatingSlotRepository.ExistedByFoodIdAndOperatingSlotId(food.Id, shopOperatingSlot!.Id, request.OrderTime.IsOrderNextDay).ConfigureAwait(false))
                     {
                         // Throw an exception if the food not sold during the requested order time
                         throw new InvalidBusinessException(

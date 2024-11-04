@@ -60,7 +60,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.OperatingSlot.Id))
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.OperatingSlot.Title))
             .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.OperatingSlot.StartTime))
-            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime));
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime))
+            .ForMember(dest => dest.IsReceivingOrderPaused, opt => opt.MapFrom(src => src.OperatingSlot.IsReceivingOrderPaused));
         CreateMap<FoodOptionGroup, FoodDetailResponse.FoodOptionGroupResponse>()
             .ForMember(dest => dest.OptionGroup, opt => opt.MapFrom(src => src.OptionGroup));
         CreateMap<OptionGroup, FoodDetailResponse.OptionGroupResponse>()
