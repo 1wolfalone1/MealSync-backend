@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliverySuccess;
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
 
-public class ShopDeliverySuccessValidator : AbstractValidator<ShopDeliverySuccessCommand>
+public class ShopAndStaffDeliverySuccessValidator : AbstractValidator<ShopAndStaffDeliverySuccessCommand>
 {
-    public ShopDeliverySuccessValidator()
+    public ShopAndStaffDeliverySuccessValidator()
     {
         RuleFor(x => x.OrderId)
             .NotEmpty()
@@ -21,5 +21,9 @@ public class ShopDeliverySuccessValidator : AbstractValidator<ShopDeliverySucces
         RuleFor(x => x.OrderDate)
             .NotNull()
             .WithMessage("Vui lòng cung cấp ngày đặt hàng");
+
+        RuleFor(x => x.Token)
+            .NotEmpty()
+            .WithMessage("Vui lòng cung cấp token");
     }
 }
