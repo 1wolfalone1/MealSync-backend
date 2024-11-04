@@ -1,6 +1,8 @@
 using MealSync.Application.Common.Constants;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Utils;
+using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -218,4 +220,108 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         return DbSet.Where(o => ids.Contains(o.Id)).ToList();
     }
 
+    public async Task<ShopStatisticDto> GetShopOrderStatistic(long shopId, DateTime startDate, DateTime endDate)
+    {
+        var totalOrdersQuery = DbSet
+            .Where(o => o.ShopId == shopId && o.IntendedReceiveDate >= startDate && o.IntendedReceiveDate <= endDate);
+
+        var totalOrders = await totalOrdersQuery.CountAsync().ConfigureAwait(false);
+        if (totalOrders == 0)
+        {
+            return new ShopStatisticDto();
+        }
+
+        int totalCancelByCustomer = 0; // Đơn hủy, từ chối Status: Cancelled, ReasonIdentity: CustomerCancel
+        int totalCancelByShop = 0; // Đơn hủy, từ chối Status: Cancelled, ReasonIdentity: ShopCancel
+        int totalReject = 0; // Đơn hủy, từ chối Status: Rejected
+        int totalDeliveredCompleted = 0; // Đơn hàng thành công Status: Completed, ReasonIdentity: default => Có Revenue
+        int totalFailDeliveredByCustomerCompleted = 0; // Đơn hàng thất bại / hoàn tiền Status: Completed, ReasonIdentity: DeliveryFailByCustomer
+        int totalFailDeliveredByShopCompleted = 0; // Đơn hàng thất bại / hoàn tiền Status: Completed, ReasonIdentity: DeliveryFailByShop
+        int totalReportResolvedHaveRefund = 0; // Đơn hàng thất bại / hoàn tiền Status: Resolved, ReasonIdentity: DeliveredReportedByCustomer || DeliveryFailReportedByCustomer, IsReport: true, IsRefund: True
+        int totalReportResolved = 0; // Status: Resolved, ReasonIdentity: DeliveredReportedByCustomer || DeliveryFailReportedByCustomer, IsReport: true
+
+        totalCancelByCustomer = await totalOrdersQuery
+            .CountAsync(o => o.Status == OrderStatus.Cancelled
+                             && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription())
+            .ConfigureAwait(false);
+
+        totalCancelByShop = await totalOrdersQuery
+            .CountAsync(o => o.Status == OrderStatus.Cancelled
+                             && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription())
+            .ConfigureAwait(false);
+
+        totalReject = await totalOrdersQuery
+            .CountAsync(o => o.Status == OrderStatus.Rejected).ConfigureAwait(false);
+
+        totalDeliveredCompleted = await totalOrdersQuery
+            .CountAsync(o => o.Status == OrderStatus.Completed
+                             && string.IsNullOrEmpty(o.ReasonIdentity))
+            .ConfigureAwait(false);
+
+        totalFailDeliveredByCustomerCompleted = await totalOrdersQuery
+            .CountAsync(o => o.Status == OrderStatus.Completed
+                             && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription()
+            ).ConfigureAwait(false);
+
+        totalFailDeliveredByShopCompleted = await totalOrdersQuery
+            .CountAsync(o => o.Status == OrderStatus.Completed
+                             && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription()
+            ).ConfigureAwait(false);
+
+        totalReportResolvedHaveRefund = await totalOrdersQuery
+            .CountAsync(o => o.Status == OrderStatus.Resolved && o.IsReport &&
+                             (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
+                              || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription())
+                             && o.IsRefund).ConfigureAwait(false);
+
+        totalReportResolved = await totalOrdersQuery
+            .CountAsync(o => o.Status == OrderStatus.Resolved && o.IsReport &&
+                             (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
+                              || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription()))
+            .ConfigureAwait(false);
+
+        // Status: Completed, ReasonIdentity: default => Có Revenue
+        // Status: Completed, ReasonIdentity: DeliveryFailByCustomer, PaymentType = Payment, PaymentMethod != COD => Có Revenue
+        // Status: Resolved, ReasonIdentity: DeliveredReportedByCustomer, IsReport: true => Có Revenue
+        var revenue = await totalOrdersQuery
+            .Where(o => (o.Status == OrderStatus.Completed && o.ReasonIdentity == default)
+                        || (o.Status == OrderStatus.Completed && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription()
+                                                              && o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.PaymentMethods == PaymentMethods.VnPay))
+                        || (o.Status == OrderStatus.Completed && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() && o.IsReport)
+            ).SumAsync(o => o.TotalPrice - o.TotalPromotion - o.ChargeFee).ConfigureAwait(false);
+
+        var topFoodItems = await totalOrdersQuery
+            .Where(o => o.Status == OrderStatus.Completed && o.ReasonIdentity == default)
+            .SelectMany(o => o.OrderDetails
+                    .GroupBy(od => new { od.OrderId, od.FoodId }) // Group by OrderId and FoodId to get unique food per order
+                    .Select(g => g.First()) // Select only one record per unique food item in the order
+            )
+            .GroupBy(od => new { od.FoodId, od.Food.Name }) // Group by Food Name to get total orders
+            .Select(g => new ShopStatisticDto.TopFoodItemDto
+            {
+                Id = g.Key.FoodId,
+                Name = g.Key.Name,
+                TotalOrders = g.Count(),
+            })
+            .OrderByDescending(f => f.TotalOrders)
+            .Take(5)
+            .ToListAsync().ConfigureAwait(false);
+
+        var successfulOrderPercentage = Math.Round((double)totalDeliveredCompleted / totalOrders * 100, 2);
+
+        return new ShopStatisticDto
+        {
+            SuccessfulOrderPercentage = successfulOrderPercentage,
+            Revenue = revenue,
+            TotalCancelByCustomer = totalCancelByCustomer,
+            TotalCancelByShop = totalCancelByShop,
+            TotalReject = totalReject,
+            TotalDeliveredCompleted = totalDeliveredCompleted,
+            TotalFailDeliveredByCustomerCompleted = totalFailDeliveredByCustomerCompleted,
+            TotalFailDeliveredByShopCompleted = totalFailDeliveredByShopCompleted,
+            TotalReportResolvedHaveRefund = totalReportResolvedHaveRefund,
+            TotalReportResolved = totalReportResolved,
+            TopFoodItems = topFoodItems,
+        };
+    }
 }
