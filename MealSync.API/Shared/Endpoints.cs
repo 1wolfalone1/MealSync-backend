@@ -113,6 +113,7 @@ public static class Endpoints
     public const string SHOP_ASSIGN_ORDER = "shop-owner/order/{id:long}/assign";
     public const string SHOP_DELIVERED_ORDER = "shop-owner/order/{id:long}/delivered";
     public const string SHOP_DELIVERED_FAIl_ORDER = "shop-owner/order/{id:long}/delivery-fail";
+    public const string SHOP_DELIVERING_ORDER = "shop-owner/order/delivering";
 
     // Shop order for web
     public const string GET_ORDER_FOR_SHOP_WEB_BY_STATUS = "web/shop-owner/order";

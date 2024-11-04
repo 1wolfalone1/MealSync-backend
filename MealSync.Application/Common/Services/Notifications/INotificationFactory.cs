@@ -33,4 +33,6 @@ public interface INotificationFactory
     Notification CreateOrderDeliveryFailedToModeratorNotification(Order order, Account accMod, Shop shop);
 
     Notification CreateWithdrawalRequestToModeratorNotification(WithdrawalRequest withdrawalRequest, Account accMod, Shop shop, string content);
+
+    Notification CreateOrderDeliveringNotification(Order order, Shop shop);
 }
