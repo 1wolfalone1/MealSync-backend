@@ -51,7 +51,7 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
         if (!request.IsConfirm)
         {
             var listProduct = _foodOperatingSlotRepository.Get(op => op.OperatingSlotId == request.Id).ToList();
-            if (listProduct != null && listProduct.Count > 0)
+            if ((!request.IsActive || request.IsReceivingOrderPaused) && listProduct != null && listProduct.Count > 0)
             {
                 var operatingSlot = _operatingSlotRepository.GetById(request.Id);
                 var message = _systemResourceRepository.GetByResourceCode(MessageCode.W_OPERATING_SLOT_CHANGE_INCLUDE_PRODUCT.GetDescription(), new object[]
@@ -76,6 +76,8 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
             operatingSlot.Title = request.Title;
             operatingSlot.StartTime = request.StartTime;
             operatingSlot.EndTime = request.EndTime;
+            request.IsActive = request.IsActive;
+            operatingSlot.IsReceivingOrderPaused = request.IsReceivingOrderPaused;
             _operatingSlotRepository.Update(operatingSlot);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
             var response = _mapper.Map<OperatingSlotResponse>(operatingSlot);
