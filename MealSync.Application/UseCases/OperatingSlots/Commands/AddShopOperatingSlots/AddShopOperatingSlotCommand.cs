@@ -10,4 +10,8 @@ public class AddShopOperatingSlotCommand : ICommand<Result>
     public int StartTime { get; set; }
 
     public int EndTime { get; set; }
+
+    public bool IsActive { get; set; }
+
+    public bool IsReceivingOrderPaused { get; set; }
 }

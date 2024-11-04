@@ -25,6 +25,10 @@ public class OperatingSlotResponse
         }
     }
 
+    public bool IsActive { get; set; }
+
+    public bool IsReceivingOrderPaused { get; set; }
+
     public string FrameFormat
     {
         get

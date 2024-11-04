@@ -48,6 +48,8 @@ public class AddShopOperatingSlotHandler : ICommandHandler<AddShopOperatingSlotC
                 Title = request.Title,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
+                IsReceivingOrderPaused = request.IsReceivingOrderPaused,
+                IsActive = request.IsActive,
                 ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
             };
             await _operatingSlotRepository.AddAsync(operatingSlot).ConfigureAwait(false);
