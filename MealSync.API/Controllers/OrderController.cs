@@ -2,6 +2,7 @@ using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Orders.Commands.CancelOrderCustomer;
 using MealSync.Application.UseCases.Orders.Commands.Create;
+using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveringOrders;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCancelOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopConfirmOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
@@ -122,7 +123,7 @@ public class OrderController : BaseApiController
 
     [HttpPut(Endpoints.SHOP_ASSIGN_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopaAssignOrder([FromBody]ShopAssignOrderCommand command, long id)
+    public async Task<IActionResult> ShopAssignOrder([FromBody]ShopAssignOrderCommand command, long id)
     {
         command.OrderId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
@@ -141,6 +142,13 @@ public class OrderController : BaseApiController
     public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody]ShopDeliveryFailOrderCommand command, long id)
     {
         command.OrderId = id;
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.SHOP_DELIVERING_ORDER)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, ${IdentityConst.ShopDeliveryClaimName}")]
+    public async Task<IActionResult> ShopChangeToDeliveringOrder([FromBody]ShopAndStaffDeliveringOrderCommand command)
+    {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }
