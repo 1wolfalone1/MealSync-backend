@@ -1,3 +1,5 @@
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Net;
 using Amazon;
 using Amazon.Runtime;
@@ -101,5 +103,39 @@ public class StorageService : IStorageService, IBaseService
             _logger.LogError("Failed to delete file from S3: {0}", key);
             return false;
         }
+    }
+
+    public async Task<string> UploadFileAsync(Bitmap bitmap, string contentType = "image/png")
+    {
+        var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
+        using var ms = new MemoryStream();
+        bitmap.Save(ms, ImageFormat.Png);  // Adjust format if needed (e.g., JPEG, BMP)
+        ms.Position = 0;  // Reset stream position after writing
+
+        // Use a unique file name based on timestamp and GUID
+        var fileName = $"image/{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{Guid.NewGuid()}.png";
+        return await UploadToS3(ms, contentType, fileName);
+    }
+
+    // Common upload logic
+    private async Task<string> UploadToS3(Stream stream, string contentType, string fileName)
+    {
+        var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
+
+        var uploadRequest = new TransferUtilityUploadRequest
+        {
+            InputStream = stream,
+            Key = fileName,
+            BucketName = bucketName,
+            ContentType = contentType
+        };
+
+        var transferUtility = new TransferUtility(_client);
+        await transferUtility.UploadAsync(uploadRequest).ConfigureAwait(false);
+
+        var imageUrl = _configuration["AWS_BASE_URL"] + fileName;
+        _logger.LogInformation("Uploaded to S3 with URL: {0}", imageUrl);
+
+        return imageUrl;
     }
 }

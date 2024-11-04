@@ -3,6 +3,7 @@ using MealSync.API.Identites;
 using MealSync.Application.Common.Services;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Accounts.Queries;
+using MealSync.Application.UseCases.Orders.Queries.ShopGetQrCodeOfOrders;
 using MealSync.Application.UseCases.Roles.Commands.CreateRole;
 using MealSync.Application.UseCases.Roles.Commands.UpdateRole;
 using MealSync.Application.UseCases.Test.Commands.TestModeratorCreateLog;
@@ -80,5 +81,14 @@ public class TestController : BaseApiController
     public async Task<IActionResult> TestModeratorLogError(TestModeratorLogCommand command)
     {
         return this.HandleResult(await this.Mediator.Send(command));
+    }
+
+    [HttpGet("/api/v1/test/order/{id:long}")]
+    public async Task<IActionResult> TestShopGetQRCodeError(long id)
+    {
+        return this.HandleResult(await this.Mediator.Send(new ShopGetQrCodeOfOrderQuery()
+        {
+            Id = id,
+        }));
     }
 }

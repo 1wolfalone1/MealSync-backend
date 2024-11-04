@@ -104,7 +104,6 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 dp = await ReAssignOrderInDeliveryPackageAsync(order, request).ConfigureAwait(false);
             }
 
-            // Todo: Generate QR to order
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
             var listNoti = new List<Notification>();

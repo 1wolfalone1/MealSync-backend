@@ -358,6 +358,9 @@ public enum MessageCode
     [Description("E-OrderAssign-NotFoundShopStaff")]
     E_ORDER_ASSIGN_NOT_FOUND_SHOP_STAFF,
 
+    [Description("E-Order-NotAssignYet")]
+    E_ORDER_NOT_ASSIGN_YET,
+
     // Delivery package
     [Description("E-DeliveryPackage-StaffAlreadyHaveOtherPackage")]
     E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE,
