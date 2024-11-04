@@ -40,6 +40,4 @@ public static class OrderConstant
     public static readonly int TIME_WARNING_SHOP_PREPARE_ORDER_EARLY_IN_HOURS = 4;
 
     public static readonly int TIME_WARNING_SHOP_ASSIGN_ORDER_EARLY_IN_HOURS = 1;
-
-    public static readonly string KEY_HASH_TOKEN_ORDER_DELIVERING = "We _are_just_friend_@_@";
 }

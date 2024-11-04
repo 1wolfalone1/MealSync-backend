@@ -10,6 +10,7 @@ using MealSync.Application.Shared;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -31,8 +32,11 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
     private readonly IAccountRepository _accountRepository;
     private readonly IShopRepository _shopRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
+    private readonly IDeliveryPackageRepository _deliveryPackageRepository;
+    private readonly IConfiguration _configuration;
+    private const string QR_KEY = "QR_KEY";
 
-    public ShopAndStaffDeliveringOrderHandler(ICurrentAccountService currentAccountService, IOrderRepository orderRepository, INotificationRepository notificationRepository, INotificationFactory notificationFactory, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IUnitOfWork unitOfWork, IStorageService storageService, ILogger<ShopAndStaffDeliveringOrderHandler> logger, IAccountRepository accountRepository, IShopRepository shopRepository, INotifierService notifierService, ISystemResourceRepository systemResourceRepository)
+    public ShopAndStaffDeliveringOrderHandler(ICurrentAccountService currentAccountService, IOrderRepository orderRepository, INotificationRepository notificationRepository, INotificationFactory notificationFactory, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IUnitOfWork unitOfWork, IStorageService storageService, ILogger<ShopAndStaffDeliveringOrderHandler> logger, IAccountRepository accountRepository, IShopRepository shopRepository, INotifierService notifierService, ISystemResourceRepository systemResourceRepository, IDeliveryPackageRepository deliveryPackageRepository, IConfiguration configuration)
     {
         _currentAccountService = currentAccountService;
         _orderRepository = orderRepository;
@@ -46,6 +50,8 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
         _shopRepository = shopRepository;
         _notifierService = notifierService;
         _systemResourceRepository = systemResourceRepository;
+        _deliveryPackageRepository = deliveryPackageRepository;
+        _configuration = configuration;
     }
 
     public async Task<Result<Result>> Handle(ShopAndStaffDeliveringOrderCommand request, CancellationToken cancellationToken)
@@ -59,9 +65,11 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
             var orders = _orderRepository.GetByIds(request.Ids.ToList());
             foreach (var order in orders)
             {
-                var hashString = order.Id + order.DeliveryPackageId + order.CustomerId + order.PhoneNumber + order.FullName;
+                var hashString = order.Id + order.DeliveryPackageId + order.CustomerId + order.PhoneNumber + order.FullName + _configuration[QR_KEY];
                 var token = BCrypUnitls.Hash(hashString);
-                Bitmap qrCode = GenerateOrderQRCodeBitmap(order, token);
+                var deliveryPackage = _deliveryPackageRepository.GetById(order.DeliveryPackageId);
+                var shipperId = deliveryPackage.ShopId.HasValue ? deliveryPackage.ShopId.Value : deliveryPackage.ShopDeliveryStaffId.Value;
+                Bitmap qrCode = GenerateOrderQRCodeBitmap(order, token, shipperId);
                 var imageUrl = await _storageService.UploadFileAsync(qrCode).ConfigureAwait(false);
                 order.QrScanToDeliveried = imageUrl;
                 order.Status = OrderStatus.Delivering;
@@ -99,22 +107,32 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
 
     private void Validate(ShopAndStaffDeliveringOrderCommand request)
     {
-        var idsNotFound = new List<long>();
         var account = _currentAccountService.GetCurrentAccount();
         long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
         foreach (var id in request.Ids)
         {
-            if (_orderRepository.Get(o => o.Id == id && o.ShopId == shopId).SingleOrDefault() == default)
-                idsNotFound.Add(id);
-        }
+            var order = _orderRepository.Get(o => o.Id == id && o.ShopId == shopId).SingleOrDefault();
+            if (order == default)
+                throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { id }, HttpStatusCode.NotFound);
 
-        if (idsNotFound.Count > 0)
-            throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { string.Join(", ", idsNotFound) }, HttpStatusCode.NotFound);
+            if (order.Status != OrderStatus.Preparing)
+                throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { id });
+
+            if (order.DeliveryPackageId == default)
+                throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_ASSIGN_YET.GetDescription(), new object[] { id });
+        }
     }
 
-    public Bitmap GenerateOrderQRCodeBitmap(Order orderInfo, string token)
+    public Bitmap GenerateOrderQRCodeBitmap(Order orderInfo, string token, long shipperId)
     {
-        string orderDataJson = JsonConvert.SerializeObject(orderInfo);
+        string orderDataJson = JsonConvert.SerializeObject(new
+        {
+            OrderId = orderInfo.Id,
+            CustomerId = orderInfo.CustomerId,
+            ShipperId = shipperId,
+            OrderDate = orderInfo.OrderDate,
+            Token = token,
+        });
         using (var qrGenerator = new QRCodeGenerator())
         {
             QRCodeData qrCodeData = qrGenerator.CreateQrCode(orderDataJson, QRCodeGenerator.ECCLevel.Q);
