@@ -1,6 +1,9 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopProfile;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAcceptOrderNextDays;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAutoConfirmConditions;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAutoConfirms;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopStatus;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatistics;
@@ -77,5 +80,26 @@ public class ShopController : BaseApiController
     public async Task<IActionResult> GetShopStatisticsSummary()
     {
         return HandleResult(await Mediator.Send(new ShopStatisticSummaryQuery()).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_SHOP_IS_ACCEPT_ORDER_NEXT_DAY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateShopSettingAcceptOrderNextDayShop([FromBody] UpdateShopSettingAcceptOrderNextDayCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_SHOP_IS_AUTO_CONFIRM)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult>UpdateShopSettingIsAutoConfirmShop([FromBody] UpdateShopSettingAutoConfirmCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_SHOP_IS_AUTO_CONFIRM_CONDITION)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateShopSettingAutoConfirmConditionShop([FromBody] UpdateShopSettingAutoConfirmConditionCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }

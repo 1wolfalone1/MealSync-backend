@@ -13,6 +13,9 @@ public class UpdateShopOperatingSlotCommand : ICommand<Result>
 
     public int EndTime { get; set; }
 
-    public bool IsConfirm { get; set; }
+    public bool IsActive { get; set; }
 
+    public bool IsReceivingOrderPaused { get; set; }
+
+    public bool IsConfirm { get; set; }
 }

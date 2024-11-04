@@ -79,6 +79,10 @@ public class ShopOperatingSlotResponse
 
     public int EndTime { get; set; }
 
+    public bool IsActive { get; set; }
+
+    public bool IsReceivingOrderPaused { get; set; }
+
     public string TimeSlot
     {
         get => TimeFrameUtils.GetTimeFrameString(StartTime, EndTime);

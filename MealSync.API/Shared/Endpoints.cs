@@ -23,6 +23,9 @@ public static class Endpoints
     public const string GET_SHOP_FOOD_DETAIL = "shop-owner/food/{id}/detail";
     public const string GET_SHOP_STATISTICS = "shop-owner/order/statistics";
     public const string GET_SHOP_STATISTICS_SUMMARY = "shop-owner/order/statistics/summary";
+    public const string UPDATE_SHOP_IS_ACCEPT_ORDER_NEXT_DAY = "shop-owner/is-accept-order-next-day";
+    public const string UPDATE_SHOP_IS_AUTO_CONFIRM = "shop-owner/is-auto-confirm";
+    public const string UPDATE_SHOP_IS_AUTO_CONFIRM_CONDITION = "shop-owner/is-auto-confirm-condition";
 
     // Shop Owner For Web
     public const string GET_FOOD_FOR_WEB = "web/shop-owner/food";
@@ -115,6 +118,7 @@ public static class Endpoints
     public const string SHOP_ASSIGN_ORDER = "shop-owner/order/{id:long}/assign";
     public const string SHOP_DELIVERED_ORDER = "shop-owner/order/{id:long}/delivered";
     public const string SHOP_DELIVERED_FAIl_ORDER = "shop-owner/order/{id:long}/delivery-fail";
+    public const string SHOP_DELIVERING_ORDER = "shop-owner/order/delivering";
 
     // Shop order for web
     public const string GET_ORDER_FOR_SHOP_WEB_BY_STATUS = "web/shop-owner/order";
