@@ -3,11 +3,11 @@ using MealSync.API.Shared;
 using MealSync.Application.UseCases.Orders.Commands.CancelOrderCustomer;
 using MealSync.Application.UseCases.Orders.Commands.Create;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveringOrders;
+using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCancelOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopConfirmOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveryFailOrder;
-using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliverySuccess;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopPreparingOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRejectOrder;
 using MealSync.Application.UseCases.Orders.Commands.UpdatePaymentStatusIPN;
@@ -131,7 +131,7 @@ public class OrderController : BaseApiController
 
     [HttpPut(Endpoints.SHOP_DELIVERED_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody]ShopDeliverySuccessCommand command, long id)
+    public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody]ShopAndStaffDeliverySuccessCommand command, long id)
     {
         command.OrderId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
