@@ -56,6 +56,7 @@ public static class Endpoints
     public const string GET_ALL_SHOP_FOOD = "shop/{id}/food/all";
     public const string GET_SHOP_PROMOTION = "shop/{id:long}/promotion";
     public const string GET_SHOP_PROMOTION_BY_CONDITION = "shop/{id:long}/promotion/filter";
+    public const string SEARCH_SHOP = "shop/search";
 
     // Shop delivery staff
     public const string GET_SHOP_DELIVER_STAFF_AVAILABLE = "shop/shop-delivery-staff/available";
@@ -118,6 +119,8 @@ public static class Endpoints
 
     // Delivery package
     public const string CREATE_DELIVERY_PACKAGE = "shop-owner/delivery-package";
+    public const string GET_ALL_DELIVERY_PACKAGE = "shop-owner-staff/delivery-package";
+    public const string GET_DELIVERY_PACKAGE = "shop-owner-staff/delivery-package/{id:long}";
     public const string GET_DELIVERY_PACKAGE_GROUP = "shop-owner/delivery-package-group";
     public const string UPDATE_DELIVERY_PACKAGE_GROUP = "shop-owner/delivery-package-group";
     public const string GET_TIME_FRAME_ALL_ORDER_UN_ASSIGN = "shop-owner/delivery-package/time-frame/un-assign";

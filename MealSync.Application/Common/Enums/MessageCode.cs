@@ -223,6 +223,9 @@ public enum MessageCode
     [Description("I-Shop-ChangeStatusToInActiveSuccess")]
     I_SHOP_CHANGE_STATUS_TO_INAC_SUCC,
 
+    [Description("I-Shop-PausedReceiveOrderSuccess")]
+    I_SHOP_CHANGE_PAUSED_RECEIVE_ORDER_SUCCESS,
+
     // Food option group
     [Description("E-FoodOptionGroup-AlreadyLink")]
     E_FOOD_OPTION_GROUP_ALREADY_LINK,
@@ -318,6 +321,9 @@ public enum MessageCode
 
     [Description("W-Order-InOtherDeliveryPackage")]
     W_ORDER_IN_OTHER_DELIVERY_PACKAGE,
+
+    [Description("W-Shop-HaveOrderToPausedReceive")]
+    W_ORDER_HAVE_ORDER_TO_PAUSED_RECEIVE,
 
     [Description("E-Order-NotCorrectCustomer")]
     E_ORDER_NOT_CORRECT_CUSTOMER,

@@ -52,13 +52,19 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
         return result.Select(x => (x.StartTime, x.EndTime)).OrderBy(x => x.StartTime).ToList();
     }
 
-    public List<DeliveryPackage> GetAllDeliveryPackageInDate(DateTime deliveryDate, bool isShopOwnerShip, long shipperId)
+    public List<DeliveryPackage> GetAllDeliveryPackageInDate(DateTime deliveryDate, bool isShopOwnerShip, long shipperId, DeliveryPackageStatus[] status)
     {
         var result = DbSet.Where(dp => dp.DeliveryDate.Date == deliveryDate.Date
-                                       && dp.Status != DeliveryPackageStatus.Done
-                                       && (isShopOwnerShip && dp.ShopId == shipperId ||
-                                           dp.ShopDeliveryStaffId == shipperId)).ToList();
-        return result;
+                                       && status.Contains(dp.Status)
+                                       && (isShopOwnerShip && dp.ShopId.Value == shipperId ||
+                                           !isShopOwnerShip && dp.ShopDeliveryStaffId.Value == shipperId)
+        ).ToList();
+
+        // Order by StartTime, then EndTime, then DeliveryDate
+        return result.OrderBy(dp => dp.StartTime)
+            .ThenBy(dp => dp.EndTime)
+            .ThenBy(dp => dp.DeliveryDate)
+            .ToList();
     }
 
     public List<DeliveryPackage> GetAllRequestUpdate(DateTime deliveryDate, int startTime, int endTime, List<long> staffIds)

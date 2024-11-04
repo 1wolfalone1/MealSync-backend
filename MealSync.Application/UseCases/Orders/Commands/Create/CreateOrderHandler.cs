@@ -388,7 +388,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 else
                 {
                     // Check if the food item is sold out
-                    if (food.IsSoldOut)
+                    if (!request.OrderTime.IsOrderNextDay && food.IsSoldOut)
                     {
                         throw new InvalidBusinessException(MessageCode.E_FOOD_IS_SOLD_OUT.GetDescription(), new object[] { food.Name });
                     }

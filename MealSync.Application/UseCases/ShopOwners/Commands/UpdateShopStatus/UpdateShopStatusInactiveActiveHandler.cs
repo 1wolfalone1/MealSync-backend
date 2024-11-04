@@ -52,13 +52,11 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
         // Validate
         await ValidateAsync(request).ConfigureAwait(false);
 
-        // Change to InActive
-        if (request.Status == (int)ShopStatus.InActive)
+        // Warning
+        if (!request.IsConfirm)
         {
-            if (!request.IsConfirm)
-            {
                 var listOrderProcessing = _orderRepository.Get(o => OrderConstant.LIST_ORDER_STATUS_IN_PROCESSING.Any(x => x == o.Status)).ToList();
-                if (listOrderProcessing != default && listOrderProcessing.Count > 1)
+                if (request.Status == ShopStatus.InActive && listOrderProcessing != default && listOrderProcessing.Count > 1)
                 {
                     var numOfPendingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Pending).Count();
                     var numOfConfirmOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Confirmed).Count();
@@ -72,11 +70,31 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                             numOfPreparingOrder),
                     });
                 }
-            }
+
+                if (request.IsReceivingOrderPaused && listOrderProcessing != default && listOrderProcessing.Count > 1)
+                {
+                    var numOfPendingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Pending).Count();
+                    var numOfConfirmOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Confirmed).Count();
+                    var numOfPreparingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Preparing).Count();
+                    return Result.Warning(new
+                    {
+                        Code = MessageCode.W_ORDER_HAVE_ORDER_TO_PAUSED_RECEIVE.GetDescription(),
+                        Message = string.Format(_systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_HAVE_ORDER_TO_PAUSED_RECEIVE.GetDescription()),
+                            numOfPendingOrder,
+                            numOfConfirmOrder,
+                            numOfPreparingOrder),
+                    });
+                }
+        }
+
+        // Change to InActive
+        if (request.Status == ShopStatus.InActive)
+        {
 
             try
             {
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+                var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
 
                 // Process cancel order
                 var listOrderProcessing = _orderRepository.Get(o => OrderConstant.LIST_ORDER_STATUS_IN_PROCESSING.Any(x => x == o.Status)).ToList();
@@ -104,7 +122,6 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                 }
 
                 // Check order is in 1 hours to warning. if > 3 need to send mail warning, 5 -> flag account.
-                var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
                 if (numberConfirmOrderOverAHour > 0)
                 {
                     var systemConfig = _systemConfigRepository.Get().FirstOrDefault();
@@ -166,13 +183,23 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
             shop.Status = ShopStatus.Active;
+            shop.IsReceivingOrderPaused = request.IsReceivingOrderPaused;
             _shopRepository.Update(shop);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
+            if (request.Status == ShopStatus.Active && !request.IsReceivingOrderPaused)
+            {
+                return Result.Success(new
+                {
+                    Code = MessageCode.I_SHOP_CHANGE_STATUS_TO_ACTIVE_SUCC.GetDescription(),
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_SHOP_CHANGE_STATUS_TO_ACTIVE_SUCC.GetDescription()),
+                });
+            }
+
             return Result.Success(new
             {
-                Code = MessageCode.I_SHOP_CHANGE_STATUS_TO_ACTIVE_SUCC.GetDescription(),
-                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_SHOP_CHANGE_STATUS_TO_ACTIVE_SUCC.GetDescription()),
+                Code = MessageCode.I_SHOP_CHANGE_PAUSED_RECEIVE_ORDER_SUCCESS.GetDescription(),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_SHOP_CHANGE_PAUSED_RECEIVE_ORDER_SUCCESS.GetDescription()),
             });
         }
         catch (Exception e)
@@ -208,10 +235,10 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
     private async Task ValidateAsync(UpdateShopStatusInactiveActiveCommand request)
     {
         var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
-        if (shop.Status != ShopStatus.Active && (request.Status == (int)ShopStatus.InActive || request.Status == (int)ShopStatus.Active))
+        if (shop.Status != ShopStatus.Active && shop.Status != ShopStatus.InActive && request.Status == ShopStatus.InActive)
             throw new InvalidBusinessException(MessageCode.E_SHOP_NOT_ABLE_TO_IN_ACTIVE.GetDescription());
 
-        if (shop.Status != ShopStatus.InActive && (request.Status == (int)ShopStatus.InActive || request.Status == (int)ShopStatus.Active))
+        if (shop.Status != ShopStatus.Active && shop.Status != ShopStatus.InActive && request.Status == ShopStatus.Active)
             throw new InvalidBusinessException(MessageCode.E_SHOP_NOT_ABLE_TO_ACTIVE.GetDescription());
     }
 }
