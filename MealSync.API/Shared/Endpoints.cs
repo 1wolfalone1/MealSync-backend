@@ -21,6 +21,8 @@ public static class Endpoints
     public const string UPDATE_SHOP_PROFILE = "shop-owner/profile";
     public const string UPDATE_SHOP_ACTIVE_INACTIVE = "shop-owner/shop-owner/active-inactive";
     public const string GET_SHOP_FOOD_DETAIL = "shop-owner/food/{id}/detail";
+    public const string GET_SHOP_STATISTICS = "shop-owner/order/statistics";
+    public const string GET_SHOP_STATISTICS_SUMMARY = "shop-owner/order/statistics/summary";
 
     // Shop Owner For Web
     public const string GET_FOOD_FOR_WEB = "web/shop-owner/food";
