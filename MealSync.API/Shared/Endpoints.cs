@@ -21,6 +21,9 @@ public static class Endpoints
     public const string UPDATE_SHOP_PROFILE = "shop-owner/profile";
     public const string UPDATE_SHOP_ACTIVE_INACTIVE = "shop-owner/shop-owner/active-inactive";
     public const string GET_SHOP_FOOD_DETAIL = "shop-owner/food/{id}/detail";
+    public const string UPDATE_SHOP_IS_ACCEPT_ORDER_NEXT_DAY = "shop-owner/is-accept-order-next-day";
+    public const string UPDATE_SHOP_IS_AUTO_CONFIRM = "shop-owner/is-auto-confirm";
+    public const string UPDATE_SHOP_IS_AUTO_CONFIRM_CONDITION = "shop-owner/is-auto-confirm-condition";
 
     // Shop Owner For Web
     public const string GET_FOOD_FOR_WEB = "web/shop-owner/food";

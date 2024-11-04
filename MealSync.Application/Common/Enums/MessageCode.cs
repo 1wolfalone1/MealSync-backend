@@ -204,7 +204,7 @@ public enum MessageCode
     [Description("E-Food-NotSelectSlot")]
     E_FOOD_NOT_SELECT_SLOT,
 
-    // Shop
+    // Shopowner
     [Description("E-Shop-NotAbleToInActive")]
     E_SHOP_NOT_ABLE_TO_IN_ACTIVE,
 
@@ -222,6 +222,24 @@ public enum MessageCode
 
     [Description("I-Shop-ChangeStatusToInActiveSuccess")]
     I_SHOP_CHANGE_STATUS_TO_INAC_SUCC,
+
+    [Description("I-Shop-PausedReceiveOrderSuccess")]
+    I_SHOP_CHANGE_PAUSED_RECEIVE_ORDER_SUCCESS,
+
+    [Description("I-Shop-AccepOrderNextDaySuccess")]
+    I_SHOP_ACCEPT_ORDER_NEXT_DAY_SUCCESS,
+
+    [Description("I-Shop-NotAccepOrderNextDaySuccess")]
+    I_SHOP_NOT_ACCEPT_ORDER_NEXT_DAY_SUCCESS,
+
+    [Description("I-Shop-SetAutoConfirmOrderSuccess")]
+    I_SHOP_SET_AUTO_CONFIRM_ORDER_SUCCESS,
+
+    [Description("I-Shop-SetNotAutoConfirmOrderSuccess")]
+    I_SHOP_SET_NOT_AUTO_CONFIRM_ORDER_SUCCESS,
+
+    [Description("I-Shop-SetAutoConfirmConditionSucess")]
+    I_SHOP_SET_AUTO_CONFIRM_CONDITION_SUCCESS,
 
     // Food option group
     [Description("E-FoodOptionGroup-AlreadyLink")]
@@ -318,6 +336,9 @@ public enum MessageCode
 
     [Description("W-Order-InOtherDeliveryPackage")]
     W_ORDER_IN_OTHER_DELIVERY_PACKAGE,
+
+    [Description("W-Shop-HaveOrderToPausedReceive")]
+    W_ORDER_HAVE_ORDER_TO_PAUSED_RECEIVE,
 
     [Description("E-Order-NotCorrectCustomer")]
     E_ORDER_NOT_CORRECT_CUSTOMER,

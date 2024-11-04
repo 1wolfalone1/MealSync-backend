@@ -21,5 +21,12 @@ public class UpdateShopOperatingSlotValidator : AbstractValidator<UpdateShopOper
             .WithMessage("Vui lòng cung cấp thời gian kết thúc đúng định dạng hhMM")
             .GreaterThanOrEqualTo(x => x.StartTime + FrameConstant.TIME_FRAME_IN_MINUTES)
             .WithMessage($"Thời gian kết thúc phải lớn hơn thời gian bắt đầu {FrameConstant.TIME_FRAME_IN_MINUTES} phút");
+
+        When(x => !x.IsActive, () =>
+        {
+            RuleFor(x => x.IsReceivingOrderPaused)
+                .Must(x => !x)
+                .WithMessage("Không có trường hợp khoảng thời gian bán hàng tắt và tạm ngưng nhận hàng");
+        });
     }
 }

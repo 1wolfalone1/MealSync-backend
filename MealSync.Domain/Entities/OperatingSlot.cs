@@ -18,6 +18,10 @@ public class OperatingSlot : BaseEntity
 
     public int EndTime { get; set; }
 
+    public bool IsActive { get; set; }
+
+    public bool IsReceivingOrderPaused { get; set; }
+
     public virtual Shop Shop { get; set; }
 
     public virtual ICollection<FoodOperatingSlot> FoodOperatingSlots { get; set; } = new List<FoodOperatingSlot>();
