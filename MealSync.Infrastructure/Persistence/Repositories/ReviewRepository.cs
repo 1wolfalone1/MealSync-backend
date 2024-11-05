@@ -1,6 +1,7 @@
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.UseCases.Reviews.Models;
 using MealSync.Application.UseCases.Reviews.Queries.GetReviewOfShop;
+using MealSync.Application.UseCases.Reviews.Queries.Shop.GetReviewByFilter;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -56,7 +57,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
                     ImageUrls = string.IsNullOrEmpty(r.ImageUrl)
                         ? new List<string>()
                         : r.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList(),
-                    CreatedDate = r.CreatedDate.AddHours(-7).ToUnixTimeMilliseconds(),
+                    CreatedDate = r.CreatedDate.ToUnixTimeMilliseconds(),
                 }).ToList(),
             });
 
@@ -105,5 +106,74 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
             TotalFourStar = overview.TotalFourStar,
             TotalFiveStar = overview.TotalFiveStar,
         };
+    }
+
+    public async Task<(int TotalCount, List<ReviewOfShopOwnerDto> Reviews)> GetShopReview(
+        long shopId, string? searchValue, RatingRanges? rating, GetReviewByFilterQuery.FilterQuery filter, int pageIndex, int pageSize)
+    {
+        var query = DbSet.Where(r => r.Order.ShopId == shopId);
+
+        switch (filter)
+        {
+            case GetReviewByFilterQuery.FilterQuery.ContainComment:
+                query = query.Where(r => !string.IsNullOrEmpty(r.Comment));
+                break;
+
+            case GetReviewByFilterQuery.FilterQuery.ContainImageAndComment:
+                query = query.Where(r =>
+                    !string.IsNullOrEmpty(r.Comment) &&
+                    !string.IsNullOrEmpty(r.ImageUrl));
+                break;
+
+            case GetReviewByFilterQuery.FilterQuery.All:
+            default:
+                break;
+        }
+
+        if (rating.HasValue)
+        {
+            query = query.Where(r =>
+                r.Entity != ReviewEntities.Customer || r.Rating == rating.Value);
+        }
+
+        if (!string.IsNullOrEmpty(searchValue))
+        {
+            query = query.Where(r =>
+                (!string.IsNullOrEmpty(r.Comment) && r.Comment.Contains(searchValue)) ||
+                r.Order.OrderDetails.Any(od => od.Food.Name.Contains(searchValue)) ||
+                (r.Customer != null && !string.IsNullOrEmpty(r.Customer.Account.FullName) && r.Customer.Account.FullName.Contains(searchValue))
+            );
+        }
+
+        var groupedQuery = query
+            .GroupBy(r => r.OrderId)
+            .Where(g => g.Any(r => r.Entity == ReviewEntities.Customer &&
+                                   (rating == null || r.Rating == rating)))
+            .Select(g => new ReviewOfShopOwnerDto
+            {
+                OrderId = g.Key,
+                Reviews = g.Select(r => new ReviewOfShopOwnerDto.ReviewDetailDto
+                {
+                    Id = r.Id,
+                    Name = r.Entity == ReviewEntities.Customer ? r.Customer!.Account.FullName : r.Shop!.Name,
+                    Avatar = r.Entity == ReviewEntities.Customer ? r.Customer!.Account.AvatarUrl : r.Shop!.LogoUrl,
+                    Reviewer = r.Entity,
+                    Rating = r.Rating,
+                    Comment = r.Comment ?? string.Empty,
+                    ImageUrls = string.IsNullOrEmpty(r.ImageUrl)
+                        ? new List<string>()
+                        : r.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList(),
+                    CreatedDate = r.CreatedDate.DateTime,
+                }).ToList(),
+            });
+
+        var reviews = await groupedQuery
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync().ConfigureAwait(false);
+
+        var totalCount = await groupedQuery.CountAsync().ConfigureAwait(false);
+
+        return (totalCount, reviews);
     }
 }
