@@ -1,4 +1,5 @@
 ﻿using MealSync.Domain.Entities;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.Common.Repositories;
 
@@ -8,7 +9,7 @@ public interface IOptionGroupRepository : IBaseRepository<OptionGroup>
 
     OptionGroup GetByIdIncludeOption(long id);
 
-    (int TotalCount, List<OptionGroup> OptionGroups) GetAllShopOptonGroup(long? currentPrincipalId, int requestPageIndex, int requestPageSize);
+    (int TotalCount, List<OptionGroup> OptionGroups) GetAllShopOptonGroup(long? currentPrincipalId, string? title, int optionGroupStatus, int requestPageIndex, int requestPageSize);
 
     bool CheckExistTitleOptionGroup(string title, long shopId, long? id = null);
 

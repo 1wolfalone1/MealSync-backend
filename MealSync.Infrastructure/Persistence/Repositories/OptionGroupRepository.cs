@@ -22,12 +22,22 @@ public class OptionGroupRepository : BaseRepository<OptionGroup>, IOptionGroupRe
             .First(og => og.Id == id && og.Status != OptionGroupStatus.Delete);
     }
 
-    public (int TotalCount, List<OptionGroup> OptionGroups) GetAllShopOptonGroup(long? currentPrincipalId, int requestPageIndex, int requestPageSize)
+    public (int TotalCount, List<OptionGroup> OptionGroups) GetAllShopOptonGroup(long? currentPrincipalId, string? title, int status, int requestPageIndex, int requestPageSize)
     {
         var query = DbSet
             .Include(op => op.FoodOptionGroups)
             .Include(op => op.Options)
             .Where(op => op.ShopId == currentPrincipalId.Value && op.Status != OptionGroupStatus.Delete);
+
+        if (title != default)
+        {
+            query = query.Where(op => op.Title.Contains(title));
+        }
+
+        if (status != 0)
+        {
+            query = query.Where(op => status == 1 && op.Status == OptionGroupStatus.Active || status == 2 && op.Status == OptionGroupStatus.UnActive);
+        }
 
         var totalCount = query.Count();
         var optionGroups = query
