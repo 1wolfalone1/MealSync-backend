@@ -22,6 +22,8 @@ WITH TopFoodOrder AS (
 SELECT
   tfo.food_id AS id,
   f.name AS Name,
+  f.image_url AS ImageUrl,
+  f.status AS Status,
   tfo.total_orders AS TotalOrders
 FROM
   food f
