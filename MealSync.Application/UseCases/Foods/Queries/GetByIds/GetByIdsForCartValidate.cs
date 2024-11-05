@@ -1,4 +1,6 @@
 using FluentValidation;
+using MealSync.Application.Common.Constants;
+using MealSync.Application.Common.Utils;
 
 namespace MealSync.Application.UseCases.Foods.Queries.GetByIds;
 
@@ -6,6 +8,12 @@ public class GetByIdsForCartValidate : AbstractValidator<GetByIdsForCartQuery>
 {
     public GetByIdsForCartValidate()
     {
+        RuleFor(x => x.ShopId)
+            .GreaterThan(0).WithMessage("Shop id phải lớn hơn 0.");
+
+        RuleFor(x => x.OrderTime)
+            .SetValidator(new OrderTimeQueryValidator());
+
         RuleFor(x => x.Foods)
             .NotEmpty()
             .WithMessage("Đồ ăn kiểm tra bắt buộc");
@@ -40,5 +48,24 @@ public class GetByIdsForCartValidate : AbstractValidator<GetByIdsForCartQuery>
                     .WithMessage("Lựa chọn ids phải lớn hơn 0");
             });
         });
+    }
+
+    public class OrderTimeQueryValidator : AbstractValidator<GetByIdsForCartQuery.OrderTimeQuery>
+    {
+        public OrderTimeQueryValidator()
+        {
+            // Validate start and end times (within 24 hours, 0-23 range)
+            RuleFor(x => x.StartTime)
+                .Must(TimeUtils.IsValidOperatingSlot)
+                .WithMessage("Vui lòng cung cấp thời gian bắt đầu đúng định dạng hhMM.");
+
+            RuleFor(x => x)
+                .Must(x => x.EndTime > x.StartTime && TimeUtils.IsValidOperatingSlot(x.EndTime) && TimeUtils.IsThirtyMinuteDifference(x.StartTime, x.EndTime))
+                .WithMessage($"Thời gian kết thúc bằng thời gian bắt đầu cộng {FrameConstant.TIME_FRAME_IN_MINUTES} phút.");
+
+            // Future orders validation (if order is for the next day)
+            RuleFor(x => x.IsOrderNextDay)
+                .NotNull().WithMessage("Phải xác định rõ có phải là đơn hàng cho ngày tiếp theo hay không.");
+        }
     }
 }
