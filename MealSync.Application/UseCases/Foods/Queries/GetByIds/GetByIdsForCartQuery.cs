@@ -9,9 +9,9 @@ public class GetByIdsForCartQuery : IQuery<Result>
 
     public List<DetailFoodQuery> Foods { get; set; }
 
-    public OrderTimeFrame OrderTime { get; set; }
+    public OrderTimeQuery OrderTime { get; set; }
 
-    public class OrderTimeFrame
+    public class OrderTimeQuery
     {
         public bool IsOrderNextDay { get; set; }
 
