@@ -208,13 +208,13 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
         return (totalCount, foods);
     }
 
-    public Task<Food?> GetActiveFood(long id)
+    public Task<Food?> GetActiveFood(long id, long operatingSlotId)
     {
         return DbSet.Include(f => f.FoodOperatingSlots)
             .ThenInclude(fos => fos.OperatingSlot)
             .AsSplitQuery()
             .FirstOrDefaultAsync(f => f.Id == id && f.Status == FoodStatus.Active
                                                  && f.Shop.Status == ShopStatus.Active && !f.Shop.IsReceivingOrderPaused
-                                                 && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive));
+                                                 && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive && fo.OperatingSlot.Id == operatingSlotId));
     }
 }

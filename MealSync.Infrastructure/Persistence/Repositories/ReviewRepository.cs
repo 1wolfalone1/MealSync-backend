@@ -21,7 +21,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
     public async Task<(int TotalCount, List<ReviewShopDto> Reviews)> GetByShopId(
         long shopId, GetReviewOfShopQuery.ReviewFilter filter, int pageIndex, int pageSize)
     {
-        var query = DbSet.Where(r => r.ShopId == shopId);
+        var query = DbSet.Where(r => r.Order.ShopId == shopId);
 
         switch (filter)
         {
