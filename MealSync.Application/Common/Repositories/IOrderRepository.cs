@@ -1,4 +1,5 @@
-﻿using MealSync.Domain.Entities;
+﻿using MealSync.Application.UseCases.ShopOwners.Models;
+using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Application.Common.Repositories;
@@ -18,4 +19,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     List<(int StartTime, int EndTime, int NumberOfOrder, bool IsCreated)> GetListTimeFrameUnAssignByReceiveDate(DateTime intendedReceiveDate, long shopId);
 
     List<Order> GetByIds(List<long> ids);
+
+    Task<ShopStatisticDto> GetShopOrderStatistic(long shopId, DateTime startDate, DateTime endDate);
 }

@@ -5,7 +5,20 @@ namespace MealSync.Application.UseCases.Foods.Queries.GetByIds;
 
 public class GetByIdsForCartQuery : IQuery<Result>
 {
+    public long ShopId { get; set; }
+
     public List<DetailFoodQuery> Foods { get; set; }
+
+    public OrderTimeQuery OrderTime { get; set; }
+
+    public class OrderTimeQuery
+    {
+        public bool IsOrderNextDay { get; set; }
+
+        public int StartTime { get; set; }
+
+        public int EndTime { get; set; }
+    }
 
     public class DetailFoodQuery
     {

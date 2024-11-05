@@ -6,6 +6,8 @@ using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAutoCon
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAutoConfirms;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopStatus;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
+using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatistics;
+using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatisticSummary;
 using MealSync.Application.UseCases.Shops.Queries.SearchShop;
 using MealSync.Application.UseCases.Shops.Queries.ShopInfo;
 using MealSync.Application.UseCases.Shops.Queries.TopShop;
@@ -64,6 +66,20 @@ public class ShopController : BaseApiController
     public async Task<IActionResult> SearchShop([FromQuery] SearchShopQuery searchShopQuery)
     {
         return HandleResult(await Mediator.Send(searchShopQuery).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_SHOP_STATISTICS)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetShopStatistics([FromQuery] ShopStatisticQuery searchShopQuery)
+    {
+        return HandleResult(await Mediator.Send(searchShopQuery).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_SHOP_STATISTICS_SUMMARY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetShopStatisticsSummary()
+    {
+        return HandleResult(await Mediator.Send(new ShopStatisticSummaryQuery()).ConfigureAwait(false));
     }
 
     [HttpPut(Endpoints.UPDATE_SHOP_IS_ACCEPT_ORDER_NEXT_DAY)]

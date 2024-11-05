@@ -57,5 +57,7 @@ public class ShopInfoResponse
         public int StartTime { get; set; }
 
         public int EndTime { get; set; }
+
+        public bool IsReceivingOrderPaused { get; set; }
     }
 }

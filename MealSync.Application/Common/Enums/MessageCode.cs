@@ -361,6 +361,12 @@ public enum MessageCode
     [Description("E-Order-NotAssignYet")]
     E_ORDER_NOT_ASSIGN_YET,
 
+    [Description("W-Order-NotDeliveryByYou")]
+    W_ORDER_NOT_DELIVERY_BY_YOU,
+
+    [Description("E-Order-QRScanNotCorrect")]
+    E_ORDER_QR_SCAN_NOT_CORRECT,
+
     // Delivery package
     [Description("E-DeliveryPackage-StaffAlreadyHaveOtherPackage")]
     E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE,
