@@ -20,6 +20,7 @@ public class OperatingSlotRepository : BaseRepository<OperatingSlot>, IOperating
     {
         return DbSet.FirstOrDefaultAsync(slot =>
             slot.ShopId == shopId &&
+            slot.IsActive &&
             slot.StartTime <= orderStartTimeReceiving &&
             slot.EndTime >= orderEndTimeReceiving);
     }

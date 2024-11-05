@@ -12,17 +12,39 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
 {
     private readonly IFoodRepository _foodRepository;
     private readonly IOptionGroupRepository _optionGroupRepository;
+    private readonly IOperatingSlotRepository _operatingSlotRepository;
 
-    public GetByIdsForCartHandler(IFoodRepository foodRepository, IOptionGroupRepository optionGroupRepository)
+    public GetByIdsForCartHandler(IFoodRepository foodRepository, IOptionGroupRepository optionGroupRepository, IOperatingSlotRepository operatingSlotRepository)
     {
         _foodRepository = foodRepository;
         _optionGroupRepository = optionGroupRepository;
+        _operatingSlotRepository = operatingSlotRepository;
     }
 
     public async Task<Result<Result>> Handle(GetByIdsForCartQuery request, CancellationToken cancellationToken)
     {
         var idsNotFound = new List<string>();
         var foodsResponses = new List<FoodCartCheckResponse.DetailFoodResponse>();
+        var shopOperatingSlot = await _operatingSlotRepository.GetAvailableForTimeRangeOrder(
+                request.ShopId, request.OrderTime.StartTime, request.OrderTime.EndTime)
+            .ConfigureAwait(false);
+
+        if (shopOperatingSlot == default)
+        {
+            return Result.Success(new FoodCartCheckResponse
+            {
+                Foods = foodsResponses,
+                IdNotFounds = request.Foods.Select(f => f.Id).ToList(),
+            });
+        }
+        else if (!request.OrderTime.IsOrderNextDay && shopOperatingSlot.IsReceivingOrderPaused)
+        {
+            return Result.Success(new FoodCartCheckResponse
+            {
+                Foods = foodsResponses,
+                IdNotFounds = request.Foods.Select(f => f.Id).ToList(),
+            });
+        }
 
         foreach (var foodRequest in request.Foods)
         {
@@ -30,7 +52,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
 
             if (!validId)
             {
-                throw new InvalidBusinessException(MessageCode.E_FOOD_NOT_FOUND.GetDescription(), new object[] { id });
+                idsNotFound.Add(foodRequest.Id);
             }
             else
             {

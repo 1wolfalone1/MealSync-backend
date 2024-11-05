@@ -60,7 +60,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.OperatingSlot.Id))
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.OperatingSlot.Title))
             .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.OperatingSlot.StartTime))
-            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime));
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.OperatingSlot.EndTime))
+            .ForMember(dest => dest.IsReceivingOrderPaused, opt => opt.MapFrom(src => src.OperatingSlot.IsReceivingOrderPaused));
         CreateMap<FoodOptionGroup, FoodDetailResponse.FoodOptionGroupResponse>()
             .ForMember(dest => dest.OptionGroup, opt => opt.MapFrom(src => src.OptionGroup));
         CreateMap<OptionGroup, FoodDetailResponse.OptionGroupResponse>()
@@ -230,14 +231,28 @@ public class MappingProfile : Profile
     {
         var now = DateTimeOffset.UtcNow;
 
-        var receiveDate = new DateTime(
-            order.IntendedReceiveDate.Year,
-            order.IntendedReceiveDate.Month,
-            order.IntendedReceiveDate.Day,
-            order.EndTime / 100,
-            order.EndTime % 100,
-            0
-        );
+        DateTime receiveDate;
+        if (order.EndTime == 2400)
+        {
+            receiveDate = new DateTime(
+                    order.IntendedReceiveDate.Year,
+                    order.IntendedReceiveDate.Month,
+                    order.IntendedReceiveDate.Day,
+                    0,
+                    0,
+                    0)
+                .AddDays(1);
+        }
+        else
+        {
+            receiveDate = new DateTime(
+                order.IntendedReceiveDate.Year,
+                order.IntendedReceiveDate.Month,
+                order.IntendedReceiveDate.Day,
+                order.EndTime / 100,
+                order.EndTime % 100,
+                0);
+        }
 
         var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
 

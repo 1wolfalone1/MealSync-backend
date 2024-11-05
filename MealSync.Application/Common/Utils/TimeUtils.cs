@@ -99,11 +99,18 @@ public static class TimeUtils
 
     public static bool IsThirtyMinuteDifference(int startTime, int endTime)
     {
-        // Convert both StartTime and EndTime to total minutes
-        int startMinutes = ConvertToMinutes(startTime);
-        int endMinutes = ConvertToMinutes(endTime);
+        if (startTime == 2330 && endTime == 2400)
+        {
+            return true;
+        }
+        else
+        {
+            // Convert both StartTime and EndTime to total minutes
+            int startMinutes = ConvertToMinutes(startTime);
+            int endMinutes = ConvertToMinutes(endTime);
 
-        // Check if the difference is exactly 30 minutes
-        return (endMinutes - startMinutes) == FrameConstant.TIME_FRAME_IN_MINUTES;
+            // Check if the difference is exactly 30 minutes
+            return (endMinutes - startMinutes) == FrameConstant.TIME_FRAME_IN_MINUTES;
+        }
     }
 }

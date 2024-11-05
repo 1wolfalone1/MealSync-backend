@@ -18,8 +18,8 @@ public class FoodOperatingSlotRepository : BaseRepository<FoodOperatingSlot>, IF
             .Include(fos => fos.Food).ToList();
     }
 
-    public Task<bool> ExistedByFoodIdAndOperatingSlotId(long foodId, long operatingSlotId)
+    public Task<bool> ExistedByFoodIdAndOperatingSlotId(long foodId, long operatingSlotId, bool isOrderNextDay)
     {
-        return DbSet.AnyAsync(fos => fos.FoodId == foodId && fos.OperatingSlotId == operatingSlotId);
+        return DbSet.AnyAsync(fos => fos.FoodId == foodId && fos.OperatingSlotId == operatingSlotId && (isOrderNextDay || !fos.OperatingSlot.IsReceivingOrderPaused));
     }
 }

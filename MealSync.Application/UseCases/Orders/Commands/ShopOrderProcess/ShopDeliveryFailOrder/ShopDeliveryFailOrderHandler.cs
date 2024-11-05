@@ -54,7 +54,7 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
             var order = _orderRepository.GetById(request.OrderId);
             order.Status = OrderStatus.FailDelivery;
             order.Reason = request.Reason;
-            order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIndentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription());
+            order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription());
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
             // Send notification

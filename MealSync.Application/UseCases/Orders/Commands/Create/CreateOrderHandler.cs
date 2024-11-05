@@ -161,7 +161,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
 
         if (shop.IsAutoOrderConfirmation && !request.OrderTime.IsOrderNextDay && request.PaymentMethod == PaymentMethods.COD)
         {
-            var intendedReceiveDateTime = new DateTime(
+            var intendedReceiveStartDateTime = new DateTime(
                 order.IntendedReceiveDate.Year,
                 order.IntendedReceiveDate.Month,
                 order.IntendedReceiveDate.Day,
@@ -169,10 +169,37 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 order.StartTime % 100,
                 0);
 
-            var minAllowed = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MaxOrderHoursInAdvance);
-            var maxAllowed = new DateTimeOffset(intendedReceiveDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MinOrderHoursInAdvance);
+            DateTime intendedReceiveEndDateTime;
+            if (order.EndTime == 2400)
+            {
+                intendedReceiveEndDateTime = new DateTime(
+                        order.IntendedReceiveDate.Year,
+                        order.IntendedReceiveDate.Month,
+                        order.IntendedReceiveDate.Day,
+                        0,
+                        0,
+                        0)
+                    .AddDays(1);
+            }
+            else
+            {
+                intendedReceiveEndDateTime = new DateTime(
+                    order.IntendedReceiveDate.Year,
+                    order.IntendedReceiveDate.Month,
+                    order.IntendedReceiveDate.Day,
+                    order.EndTime / 100,
+                    order.EndTime % 100,
+                    0);
+            }
 
-            if (now >= minAllowed && now <= maxAllowed)
+            var startTimeDateTimeOffset = new DateTimeOffset(intendedReceiveStartDateTime, TimeSpan.FromHours(7));
+            var endTimeDateTimeOffset = new DateTimeOffset(intendedReceiveEndDateTime, TimeSpan.FromHours(7));
+            var isNowInOrderFrame = now >= startTimeDateTimeOffset && now <= endTimeDateTimeOffset;
+
+            var minAllowed = new DateTimeOffset(intendedReceiveStartDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MaxOrderHoursInAdvance);
+            var maxAllowed = new DateTimeOffset(intendedReceiveStartDateTime, TimeSpan.FromHours(7)).AddHours(-shop.MinOrderHoursInAdvance);
+
+            if (!isNowInOrderFrame && now >= minAllowed && now <= maxAllowed)
             {
                 order.Status = OrderStatus.Confirmed;
             }
@@ -236,11 +263,11 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         }
     }
 
-    private static void ValidateOrderTime(CreateOrderCommand request, DateTimeOffset now)
+    private void ValidateOrderTime(CreateOrderCommand request, DateTimeOffset now)
     {
-        var startTimeInMinutes = TimeUtils.ConvertToMinutes(request.OrderTime.StartTime);
+        var endTimeInMinutes = TimeUtils.ConvertToMinutes(request.OrderTime.EndTime);
         var currentTimeMinutes = (now.ToOffset(TimeSpan.FromHours(7)).Hour * 60) + now.ToOffset(TimeSpan.FromHours(7)).Minute;
-        if (!request.OrderTime.IsOrderNextDay && startTimeInMinutes < currentTimeMinutes)
+        if (!request.OrderTime.IsOrderNextDay && request.OrderTime.EndTime != 2400 && currentTimeMinutes >= endTimeInMinutes)
         {
             throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERY_START_TIME_EXCEEDED.GetDescription());
         }
@@ -392,7 +419,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                     {
                         throw new InvalidBusinessException(MessageCode.E_FOOD_IS_SOLD_OUT.GetDescription(), new object[] { food.Name });
                     }
-                    else if (!await _foodOperatingSlotRepository.ExistedByFoodIdAndOperatingSlotId(food.Id, shopOperatingSlot!.Id).ConfigureAwait(false))
+                    else if (!await _foodOperatingSlotRepository.ExistedByFoodIdAndOperatingSlotId(food.Id, shopOperatingSlot!.Id, request.OrderTime.IsOrderNextDay).ConfigureAwait(false))
                     {
                         // Throw an exception if the food not sold during the requested order time
                         throw new InvalidBusinessException(
@@ -599,7 +626,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         }
     }
 
-    private static void ValidateOrderTimeSlotRequest(CreateOrderCommand request, OperatingSlot? shopOperatingSlot)
+    private void ValidateOrderTimeSlotRequest(CreateOrderCommand request, OperatingSlot? shopOperatingSlot)
     {
         if (shopOperatingSlot == default)
         {

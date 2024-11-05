@@ -59,13 +59,28 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
                 order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved || order.Status == OrderStatus.Completed)
             {
                 var now = DateTimeOffset.UtcNow;
-                var receiveDate = new DateTime(
-                    order.IntendedReceiveDate.Year,
-                    order.IntendedReceiveDate.Month,
-                    order.IntendedReceiveDate.Day,
-                    order.EndTime / 100,
-                    order.EndTime % 100,
-                    0);
+                DateTime receiveDate;
+                if (order.EndTime == 2400)
+                {
+                    receiveDate = new DateTime(
+                            order.IntendedReceiveDate.Year,
+                            order.IntendedReceiveDate.Month,
+                            order.IntendedReceiveDate.Day,
+                            0,
+                            0,
+                            0)
+                        .AddDays(1);
+                }
+                else
+                {
+                    receiveDate = new DateTime(
+                        order.IntendedReceiveDate.Year,
+                        order.IntendedReceiveDate.Month,
+                        order.IntendedReceiveDate.Day,
+                        order.EndTime / 100,
+                        order.EndTime % 100,
+                        0);
+                }
 
                 var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
 
