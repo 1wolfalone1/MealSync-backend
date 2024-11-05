@@ -8,4 +8,6 @@ public class ShopDeliveryFailOrderCommand : ICommand<Result>
     public long OrderId { get; set; }
 
     public string? Reason { get; set; }
+
+    public int ReasonIndentity { get; set; }
 }

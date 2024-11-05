@@ -135,6 +135,8 @@ public static class Endpoints
     public const string REVIEW_ORDER = "customer/order/review";
     public const string REVIEW_OF_SHOP = "shop/{shopId:long}/review";
     public const string REVIEW_SUMMARY_OF_SHOP = "shop/{shopId:long}/review/overview";
+    public const string GET_REVIEW_OF_SHOP_OWNER = "shop-onwer/review";
+    public const string CREATE_REVIEW_OF_SHOP_OWNER = "shop-onwer/review";
 
     // Promotion
     public const string CREATE_PROMOTION = "shop-owner/promotion/create";

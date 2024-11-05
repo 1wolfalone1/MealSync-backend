@@ -444,6 +444,12 @@ public enum MessageCode
     [Description("E-Review-Customer_Already_Review")]
     E_REVIEW_CUSTOMER_ALREADY_REVIEW,
 
+    [Description("E-Review_Shop_Already_Review")]
+    E_REVIEW_SHOP_ALREADY_REVIEW,
+
+    [Description("E-Review_CustomerNotReviewYet")]
+    E_REVIEW_CUSTOMER_NOT_REVIEW_YET,
+
     // Wallet
     [Description("E-Withdrawal-Not-Enough-Available-Amount")]
     E_WITHDRAWAL_NOT_ENOUGH_AVAILABLE_AMOUNT,

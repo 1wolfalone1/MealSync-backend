@@ -1,6 +1,7 @@
 using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Reviews.Commands.ReviewOrderOfCustomer;
+using MealSync.Application.UseCases.Reviews.Commands.ShopReplyReviewOfCustomers;
 using MealSync.Application.UseCases.Reviews.Queries.GetOverviewOfShop;
 using MealSync.Application.UseCases.Reviews.Queries.GetReviewOfShop;
 using Microsoft.AspNetCore.Mvc;
@@ -39,5 +40,12 @@ public class ReviewController : BaseApiController
         {
             ShopId = shopId,
         }).ConfigureAwait(false));
+    }
+
+    [HttpPost(Endpoints.CREATE_REVIEW_OF_SHOP_OWNER)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> CreateReviewOfShopOwner([FromBody] ShopReplyReviewOfCustomerCommand command)
+    {
+        return this.HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }
