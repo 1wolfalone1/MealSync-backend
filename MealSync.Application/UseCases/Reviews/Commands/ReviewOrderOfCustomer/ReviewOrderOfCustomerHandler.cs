@@ -100,7 +100,7 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
                     Review review = new Review
                     {
                         CustomerId = customerId,
-                        ShopId = order.ShopId,
+                        ShopId = null,
                         OrderId = request.OrderId,
                         Rating = request.Rating,
                         Comment = request.Comment,
