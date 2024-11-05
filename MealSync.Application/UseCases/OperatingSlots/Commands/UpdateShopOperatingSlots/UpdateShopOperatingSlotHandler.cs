@@ -76,7 +76,7 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
             operatingSlot.Title = request.Title;
             operatingSlot.StartTime = request.StartTime;
             operatingSlot.EndTime = request.EndTime;
-            request.IsActive = request.IsActive;
+            operatingSlot.IsActive = request.IsActive;
             operatingSlot.IsReceivingOrderPaused = request.IsReceivingOrderPaused;
             _operatingSlotRepository.Update(operatingSlot);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
