@@ -6,5 +6,5 @@ public interface IFoodOperatingSlotRepository : IBaseRepository<FoodOperatingSlo
 {
     List<FoodOperatingSlot> GetOperatingSlotsWithFoodByOpId(long operatingId);
 
-    Task<bool> ExistedByFoodIdAndOperatingSlotId(long foodId, long operatingSlotId);
+    Task<bool> ExistedByFoodIdAndOperatingSlotId(long foodId, long operatingSlotId, bool isOrderNextDay);
 }

@@ -13,13 +13,19 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
     public Food GetByIdIncludeAllInfoForCustomer(long id)
     {
-        return DbSet.Include(f => f.PlatformCategory)
+        var food = DbSet.Include(f => f.PlatformCategory)
             .Include(f => f.ShopCategory)
             .Include(f => f.FoodOperatingSlots).ThenInclude(op => op.OperatingSlot)
             .Include(f => f.FoodOptionGroups.Where(fog => fog.OptionGroup.Status == OptionGroupStatus.Active))
             .ThenInclude(fog => fog.OptionGroup)
             .ThenInclude(og => og.Options.Where(o => o.Status == OptionStatus.Active))
-            .First(f => f.Id == id);
+            .First(f => f.Id == id && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive));
+
+        food.FoodOperatingSlots = food.FoodOperatingSlots
+            .Where(fo => fo.OperatingSlot.IsActive)
+            .ToList();
+
+        return food;
     }
 
     public Food GetByIdIncludeAllInfoForShop(long id)
@@ -41,6 +47,7 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
                                             .Contains(dormitoryId) // The shop must be in the specified dormitory
                                         && !food.Shop.IsReceivingOrderPaused // The shop must be accepting orders
                                         && food.Shop.Status == ShopStatus.Active // The shop must be active
+                                        && food.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive)
         ).AsQueryable();
         var totalCount = await query.CountAsync().ConfigureAwait(false);
         List<Food> foods;
@@ -64,7 +71,10 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
     public async Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopFood(long shopId)
     {
         var groupedFoods = await DbSet
-            .Where(f => f.ShopId == shopId && f.Status == FoodStatus.Active && f.ShopCategoryId.HasValue)
+            .Where(f => f.ShopId == shopId
+                        && f.Status == FoodStatus.Active
+                        && f.ShopCategoryId.HasValue
+                        && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive))
             .GroupBy(f => new { f.ShopCategoryId, f.ShopCategory!.DisplayOrder, f.ShopCategory.Name }) // Group by ShopCategoryId and include DisplayOrder
             .OrderBy(g => g.Key.DisplayOrder) // Order by DisplayOrder of ShopCategory
             .Select(g => new { CategoryId = g.Key.ShopCategoryId!.Value, CategoryName = g.Key.Name, Foods = g.ToList() })
@@ -78,7 +88,11 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
     public async Task<bool> CheckExistedAndActiveByIdAndShopId(long id, long shopId)
     {
-        return await DbSet.AnyAsync(f => f.Id == id && f.ShopId == shopId && f.Status == FoodStatus.Active).ConfigureAwait(false);
+        return await DbSet.AnyAsync(f => f.Id == id
+                                         && f.ShopId == shopId
+                                         && f.Status == FoodStatus.Active
+                                         && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive)
+        ).ConfigureAwait(false);
     }
 
     public async Task<bool> CheckExistedByIdAndShopId(long id, long shopId)
@@ -88,7 +102,9 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
     public async Task<(int TotalCount, IEnumerable<Food> Foods)> GetAllActiveFoodByShopId(long shopId, int pageIndex, int pageSize)
     {
-        var query = DbSet.Where(f => f.ShopId == shopId && f.Status == FoodStatus.Active);
+        var query = DbSet.Where(f => f.ShopId == shopId
+                                     && f.Status == FoodStatus.Active
+                                     && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive));
         var totalCount = await query.CountAsync().ConfigureAwait(false);
         var foods = await query.OrderByDescending(f => f.TotalOrder)
             .Skip((pageIndex - 1) * pageSize)
@@ -194,7 +210,11 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
     public Task<Food?> GetActiveFood(long id)
     {
-        return DbSet.FirstOrDefaultAsync(f => f.Id == id && f.Status == FoodStatus.Active
-                                                         && f.Shop.Status == ShopStatus.Active && !f.Shop.IsReceivingOrderPaused);
+        return DbSet.Include(f => f.FoodOperatingSlots)
+            .ThenInclude(fos => fos.OperatingSlot)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(f => f.Id == id && f.Status == FoodStatus.Active
+                                                 && f.Shop.Status == ShopStatus.Active && !f.Shop.IsReceivingOrderPaused
+                                                 && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive));
     }
 }

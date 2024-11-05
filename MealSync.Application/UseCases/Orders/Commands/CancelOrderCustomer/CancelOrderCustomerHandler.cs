@@ -165,7 +165,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             order.Status = OrderStatus.Cancelled;
             order.IsRefund = isRefund;
             order.Reason = reason;
-            order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIndentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription());;
+            order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription());;
             _orderRepository.Update(order);
 
             // Commit transaction

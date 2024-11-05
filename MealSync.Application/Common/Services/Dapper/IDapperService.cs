@@ -36,4 +36,8 @@ public enum QueryName
     GetListDeliveryDetailStasticByTimeFrame,
     GetListOrderUnAssignInTimeFrame,
     GetAllDeliveryPackageStasisticByTimeFrame,
+    GetOrderStatistics,
+    GetTopFoodOrderOfShop,
+    GetOrderStatisticsInTodaySummary,
+    GetOrderStatisticsInMonthSummary,
 }

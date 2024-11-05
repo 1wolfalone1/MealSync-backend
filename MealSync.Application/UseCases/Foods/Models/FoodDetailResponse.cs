@@ -71,6 +71,8 @@ public class FoodDetailResponse
                 _endTime = value; // Set the backing field
             }
         }
+
+        public bool IsReceivingOrderPaused { get; set; }
     }
 
     public class FoodOptionGroupResponse

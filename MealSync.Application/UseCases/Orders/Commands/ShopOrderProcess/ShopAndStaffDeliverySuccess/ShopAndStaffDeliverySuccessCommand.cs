@@ -1,9 +1,9 @@
 ﻿using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Shared;
 
-namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliverySuccess;
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
 
-public class ShopDeliverySuccessCommand : ICommand<Result>
+public class ShopAndStaffDeliverySuccessCommand : ICommand<Result>
 {
     public long OrderId { get; set; }
 
@@ -14,4 +14,6 @@ public class ShopDeliverySuccessCommand : ICommand<Result>
     public DateTime OrderDate { get; set; }
 
     public string Token { get; set; }
+
+    public bool IsConfirm { get; set; }
 }
