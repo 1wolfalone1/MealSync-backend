@@ -55,8 +55,10 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
         else
         {
             if (
-                order.Status == OrderStatus.Delivered || order.Status == OrderStatus.IssueReported ||
-                order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved || order.Status == OrderStatus.Completed)
+                order.Status == OrderStatus.Delivered ||
+                ((order.Status == OrderStatus.IssueReported || order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved)
+                 && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() && order.IsReport)
+                || (order.Status == OrderStatus.Completed && order.ReasonIdentity == default))
             {
                 var now = DateTimeOffset.UtcNow;
                 DateTime receiveDate;

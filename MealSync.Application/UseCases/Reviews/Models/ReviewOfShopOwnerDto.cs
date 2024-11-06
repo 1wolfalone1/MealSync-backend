@@ -8,6 +8,8 @@ public class ReviewOfShopOwnerDto
 
     public string Description { get; set; }
 
+    public bool IsAllowShopReply { get; set; }
+
     public List<ReviewDetailDto> Reviews { get; set; }
 
     public class ReviewDetailDto
