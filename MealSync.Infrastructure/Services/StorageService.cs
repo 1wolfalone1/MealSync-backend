@@ -10,6 +10,7 @@ using MealSync.Application.Common.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using QRCoder;
 
 namespace MealSync.Infrastructure.Services;
 
@@ -137,5 +138,41 @@ public class StorageService : IStorageService, IBaseService
         _logger.LogInformation("Uploaded to S3 with URL: {0}", imageUrl);
 
         return imageUrl;
+    }
+
+    public async Task<Bitmap> GenerateQRCodeWithLogoAsync(string qrText)
+    {
+        // Download the logo from S3
+        var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
+        var logoKey = _configuration["MEAL_SYNC_LOGO_KEY"] ?? string.Empty;
+        Bitmap logoBitmap = await GetLogoFromS3Async(bucketName, logoKey);
+
+        // Generate QR code
+        using (var qrGenerator = new QRCodeGenerator())
+        {
+            var qrData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
+            using (var qrCode = new QRCode(qrData))
+            {
+                // Generate QR code with logo in the center
+                Bitmap qrCodeImage = qrCode.GetGraphic(20, Color.Black, Color.White, logoBitmap, 15, 6, true);
+                return qrCodeImage;
+            }
+        }
+    }
+
+    private async Task<Bitmap> GetLogoFromS3Async(string bucketName, string logoKey)
+    {
+        using (var response = await _client.GetObjectAsync(bucketName, logoKey))
+        {
+            // Load the logo into a MemoryStream
+            using (var ms = new MemoryStream())
+            {
+                await response.ResponseStream.CopyToAsync(ms);
+                ms.Position = 0; // Reset stream position
+
+                // Convert MemoryStream to Bitmap
+                return new Bitmap(ms);
+            }
+        }
     }
 }
