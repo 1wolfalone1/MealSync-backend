@@ -18,4 +18,8 @@ public class GetShopWebOrderByStatusQuery : PaginationRequest, IQuery<Result>
     public int EndTime { get; set; }
 
     public OrderStatus[] Status { get; set; }
+
+    public DateTime? DateFrom { get; set; }
+
+    public DateTime? DateTo { get; set; }
 }
