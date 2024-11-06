@@ -100,4 +100,10 @@ public enum ResourceCode
 
     [Description("Notification-Order-DeliveryFailToModerator")]
     NOTIFICATION_ORDER_DELIVERY_FAIL_TO_MODERATOR,
+
+    [Description("Notification-Order-Customer-Cancel")]
+    NOTIFICATION_ORDER_CUSTOMER_CANCEL,
+
+    [Description("Notification-Order-Customer-Confirm-Completed")]
+    NOTIFICATION_ORDER_CUSTOMER_CONFIRM_COMPLETED,
 }

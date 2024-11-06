@@ -165,11 +165,15 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             order.Status = OrderStatus.Cancelled;
             order.IsRefund = isRefund;
             order.Reason = reason;
-            order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription());;
+            order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription());
             _orderRepository.Update(order);
 
             // Commit transaction
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+
+            var account = _accountRepository.GetById(order.CustomerId)!;
+            var notification = _notificationFactory.CreateCustomerCancelOrderNotification(order, account);
+            await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
 
             return Result.Success(new
             {
