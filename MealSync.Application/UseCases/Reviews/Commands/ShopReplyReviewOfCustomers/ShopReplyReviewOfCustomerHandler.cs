@@ -3,6 +3,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Reviews.Commands.ShopReplyReviewOfCustomers;
 using MealSync.Application.UseCases.Reviews.Models;
@@ -43,7 +44,7 @@ public class ShopReplyReviewOfCustomerHandler : ICommandHandler<ShopReplyReviewO
             OrderId = request.OrderId,
             Rating = RatingRanges.FiveStar,
             Comment = request.Comment,
-            ImageUrl = request.ImageUrl,
+            ImageUrl = string.Join(",", request.ImageUrls),
             Entity = ReviewEntities.Shop,
         };
 
@@ -79,5 +80,12 @@ public class ShopReplyReviewOfCustomerHandler : ICommandHandler<ShopReplyReviewO
         {
             throw new InvalidBusinessException(MessageCode.E_REVIEW_SHOP_ALREADY_REVIEW.GetDescription(), new object[] { request.OrderId });
         }
+
+        // Shop only have 24h after customer review
+        var customerReview = _reviewRepository.Get(rv => rv.OrderId == request.OrderId && rv.Entity == ReviewEntities.Customer).FirstOrDefault();
+        TimeSpan difference = TimeFrameUtils.GetCurrentDate().Date - customerReview.CreatedDate.Date;
+        if (customerReview != null && difference.TotalHours > 24)
+            throw new InvalidBusinessException(MessageCode.E_REVIEW_SHOP_OVER_TIME_REPLY.GetDescription(), new object[]{ request.OrderId });
+
     }
 }

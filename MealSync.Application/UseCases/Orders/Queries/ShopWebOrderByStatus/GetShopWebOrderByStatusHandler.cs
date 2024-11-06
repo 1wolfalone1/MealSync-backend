@@ -64,6 +64,8 @@ public class GetShopWebOrderByStatusHandler : IQueryHandler<GetShopWebOrderBySta
                 OrderId = request.Id != null ? request.Id.ToUpper() : null,
                 PageIndex = request.PageIndex,
                 PageSize = request.PageSize,
+                DateFrom = request.DateFrom.HasValue ? request.DateFrom.Value.ToString("yyyy-MM-dd") : null,
+                DateTo = request.DateTo.HasValue ? request.DateTo.Value.ToString("yyyy-MM-dd") : null,
             },
             "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
 

@@ -132,6 +132,7 @@ public static class Endpoints
     public const string GET_TIME_FRAME_ALL_ORDER_UN_ASSIGN = "shop-owner/delivery-package/time-frame/un-assign";
     public const string SUGGEST_CREATE_ASSIGN_ORDER = "shop-owner/delivery-package/suggest-create";
     public const string GET_ALL_DELIVERY_PACKAGE_GROUP_BY_INTERVAL = "shop-owner/delivery-package-group/interval";
+    public const string GET_DELIVERY_PACKAGE_FOR_WEB = "web/shop-owner/delivery-package";
 
     // Review
     public const string REVIEW_ORDER = "customer/order/review";
