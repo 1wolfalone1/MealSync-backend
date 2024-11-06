@@ -9,7 +9,9 @@ public class GetWithdrawalRequestHistoryQuery : PaginationRequest, IQuery<Result
 {
     public string? SearchValue { get; set; }
 
-    public WithdrawalRequestStatus? Status { get; set; }
+    public List<WithdrawalRequestStatus>? Status { get; set; }
 
-    public DateTime? CreatedDate { get; set; }
+    public DateTime? StartDate { get; set; }
+
+    public DateTime? EndDate { get; set; }
 }
