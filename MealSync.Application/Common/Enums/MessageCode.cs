@@ -204,6 +204,9 @@ public enum MessageCode
     [Description("E-Food-NotSelectSlot")]
     E_FOOD_NOT_SELECT_SLOT,
 
+    [Description("I-Food-ShopCategoryLinkSuccess")]
+    I_FOOD_SHOP_CATEGORY_LINK_SUCCESS,
+
     // Shopowner
     [Description("E-Shop-NotAbleToInActive")]
     E_SHOP_NOT_ABLE_TO_IN_ACTIVE,

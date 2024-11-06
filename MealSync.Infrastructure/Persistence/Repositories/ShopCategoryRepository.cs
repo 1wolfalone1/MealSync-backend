@@ -48,7 +48,7 @@ public class ShopCategoryRepository : BaseRepository<ShopCategory>, IShopCategor
         }
 
         var totalCount = await query.CountAsync().ConfigureAwait(false);
-        var shopCategories = await query.OrderByDescending(f => f.UpdatedDate)
+        var shopCategories = await query
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync()

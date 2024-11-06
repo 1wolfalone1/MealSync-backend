@@ -10,4 +10,6 @@ public interface IStorageService
     Task<bool> DeleteFileAsync(string url);
 
     Task<string> UploadFileAsync(Bitmap bitmap, string contentType = "image/png");
+
+    Task<Bitmap> GenerateQRCodeWithLogoAsync(string qrText);
 }
