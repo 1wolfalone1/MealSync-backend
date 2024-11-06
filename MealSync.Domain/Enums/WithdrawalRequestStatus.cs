@@ -3,6 +3,8 @@
 public enum WithdrawalRequestStatus
 {
     Pending = 1,
-    Approved = 2,
-    Rejected = 3
+    Cancelled = 2,
+    UnderReview = 3,
+    Approved = 4,
+    Rejected = 5
 }
