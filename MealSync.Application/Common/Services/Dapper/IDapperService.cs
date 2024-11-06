@@ -40,4 +40,5 @@ public enum QueryName
     GetTopFoodOrderOfShop,
     GetOrderStatisticsInTodaySummary,
     GetOrderStatisticsInMonthSummary,
+    GetDeliveryPackackageStasisticById,
 }

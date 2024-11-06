@@ -52,6 +52,38 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
         return result.Select(x => (x.StartTime, x.EndTime)).OrderBy(x => x.StartTime).ToList();
     }
 
+    public (int Total, List<DeliveryPackage> DeliveryPackages) GetTimeFramesByFrameIntervalAndDatePaging(int pageIndex, int pageSize, DateTime deliveryDate, int startTime, int endTime, long shopId, string? deliveryPackageId, string? fullName)
+    {
+        var query = DbSet.Include(dp => dp.Orders)
+            .Include(dp => dp.Shop)
+            .ThenInclude(s => s.Account)
+            .Include(dp => dp.ShopDeliveryStaff)
+            .ThenInclude(sds => sds.Account)
+            .Where(dp => dp.StartTime >= startTime
+                         && dp.EndTime <= endTime
+                         && dp.DeliveryDate.Date == deliveryDate.Date
+                         && dp.Orders.All(o => o.ShopId == shopId))
+            .AsQueryable();
+
+        if (deliveryPackageId != default)
+        {
+            query = query.Where(dp => string.Concat("DP-", dp.Id).Contains(deliveryPackageId));
+        }
+
+        if (fullName != default)
+        {
+            query = query.Where(dp => dp.ShopId.HasValue && dp.Shop.Account.FullName.Contains(fullName) ||
+                                      dp.ShopDeliveryStaffId.HasValue && dp.ShopDeliveryStaff.Account.FullName.Contains(fullName));
+        }
+
+        var total = query.Count();
+        var results = query
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize).ToList();
+
+        return (total, results);
+    }
+
     public List<DeliveryPackage> GetAllDeliveryPackageInDate(DateTime deliveryDate, bool isShopOwnerShip, long shipperId, DeliveryPackageStatus[] status)
     {
         var result = DbSet.Where(dp => dp.DeliveryDate.Date == deliveryDate.Date

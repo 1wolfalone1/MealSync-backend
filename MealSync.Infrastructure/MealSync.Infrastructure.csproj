@@ -80,6 +80,8 @@
         <None Remove="Common\Queries\GetDeliveryPackageStasisticById.sql" />
         <None Remove="Common\Queries\GetAllDeliveryPackageStasisticByTimeFrame.sql" />
         <EmbeddedResource Include="Common\Queries\GetAllDeliveryPackageStasisticByTimeFrame.sql" />
+        <None Remove="Common\Queries\GetDeliveryPackackageStasisticById.sql" />
+        <EmbeddedResource Include="Common\Queries\GetDeliveryPackackageStasisticById.sql" />
     </ItemGroup>
 
 </Project>
