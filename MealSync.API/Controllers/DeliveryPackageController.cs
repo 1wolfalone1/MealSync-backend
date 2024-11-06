@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllDeliveryPacka
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllDeliveryPackages;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageDetailByTimeFrames;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageGroupDetailByTimeFrames;
+using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListDeliveryPackageForShopWebs;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListTimeFrameUnAssigns;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCreateDeliveryPackage;
@@ -73,5 +74,12 @@ public class DeliveryPackageController : BaseApiController
         {
             Id = id,
         }));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpGet(Endpoints.GET_DELIVERY_PACKAGE_FOR_WEB)]
+    public async Task<IActionResult> GetListDeliveryPackageForShopWebOrder([FromQuery] GetListDeliveryPackageForShopWebQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }
