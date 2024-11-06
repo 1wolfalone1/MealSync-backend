@@ -1,21 +1,23 @@
 using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
-using MealSync.Application.Common.Models.Responses;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Wallets.Models;
+using MealSync.Domain.Enums;
+using MealSync.Domain.Exceptions.Base;
 
-namespace MealSync.Application.UseCases.Wallets.Queries.Shop.GetWithdrawalRequestHistory;
+namespace MealSync.Application.UseCases.Wallets.Queries.Shop.GetWithdrawalRequestDetail;
 
-public class GetWithdrawalRequestHistoryHandler : IQueryHandler<GetWithdrawalRequestHistoryQuery, Result>
+public class GetWithdrawalRequestDetailHandler : IQueryHandler<GetWithdrawalRequestDetailQuery, Result>
 {
     private readonly IWithdrawalRequestRepository _withdrawalRequestRepository;
     private readonly IShopRepository _shopRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IMapper _mapper;
 
-    public GetWithdrawalRequestHistoryHandler(
+    public GetWithdrawalRequestDetailHandler(
         IWithdrawalRequestRepository withdrawalRequestRepository, IShopRepository shopRepository,
         ICurrentPrincipalService currentPrincipalService, IMapper mapper)
     {
@@ -25,18 +27,20 @@ public class GetWithdrawalRequestHistoryHandler : IQueryHandler<GetWithdrawalReq
         _mapper = mapper;
     }
 
-    public async Task<Result<Result>> Handle(GetWithdrawalRequestHistoryQuery request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(GetWithdrawalRequestDetailQuery request, CancellationToken cancellationToken)
     {
         var shopId = _currentPrincipalService.CurrentPrincipalId!.Value;
         var shop = await _shopRepository.GetByAccountId(shopId).ConfigureAwait(false);
 
-        var data = await _withdrawalRequestRepository.GetByFilter(
-                shop.WalletId, request.Status, request.SearchValue, request.StartDate, request.EndDate, request.PageIndex, request.PageSize)
-            .ConfigureAwait(false);
+        var withdrawalRequest = await _withdrawalRequestRepository.GetDetailByIdAndWalletId(request.Id, shop.WalletId).ConfigureAwait(false);
 
-        var result = new PaginationResponse<WithdrawalRequestHistoryResponse>(
-            _mapper.Map<List<WithdrawalRequestHistoryResponse>>(data.WithdrawalRequests), data.TotalCount, request.PageIndex, request.PageSize);
-
-        return Result.Success(result);
+        if (withdrawalRequest == default)
+        {
+            throw new InvalidBusinessException(MessageCode.E_WITHDRAWAL_NOT_FOUND.GetDescription(), new object[] { request.Id });
+        }
+        else
+        {
+            return Result.Success(_mapper.Map<WithdrawalRequestHistoryResponse>(withdrawalRequest));
+        }
     }
 }

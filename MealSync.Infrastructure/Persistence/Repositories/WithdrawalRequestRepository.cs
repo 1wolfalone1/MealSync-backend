@@ -5,26 +5,31 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
 
-public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IWithdrawalRequestRepository
+internal class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IWithdrawalRequestRepository
 {
     public WithdrawalRequestRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
 
     public async Task<(int TotalCount, List<WithdrawalRequest> WithdrawalRequests)> GetByFilter(
-        long walletId, WithdrawalRequestStatus? status, string? searchValue, DateTime? createdDate, int pageIndex, int pageSize
+        long walletId, List<WithdrawalRequestStatus>? status, string? searchValue, DateTime? startDate, DateTime? endDate, int pageIndex, int pageSize
     )
     {
         var query = DbSet.Where(wr => wr.WalletId == walletId).AsQueryable();
 
-        if (status.HasValue)
+        if (status != default && status.Count > 0)
         {
-            query = query.Where(p => p.Status == status.Value);
+            query = query.Where(p => status.Contains(p.Status));
         }
 
-        if (createdDate.HasValue)
+        if (startDate.HasValue)
         {
-            query = query.Where(p => p.CreatedDate >= new DateTimeOffset(createdDate.Value, TimeSpan.Zero));
+            query = query.Where(p => p.CreatedDate >= new DateTimeOffset(startDate.Value, TimeSpan.Zero));
+        }
+
+        if (endDate.HasValue)
+        {
+            query = query.Where(p => p.CreatedDate <= new DateTimeOffset(endDate.Value, TimeSpan.Zero));
         }
 
         if (!string.IsNullOrWhiteSpace(searchValue))
@@ -68,6 +73,17 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
         var withdrawalRequests = await query.ToListAsync().ConfigureAwait(false);
 
         return (totalCount, withdrawalRequests);
+    }
+
+    public Task<WithdrawalRequest?> GetDetailByIdAndWalletId(long id, long walletId)
+    {
+        return DbSet.Include(wr => wr.WalletTransaction)
+            .FirstOrDefaultAsync(wr => wr.WalletId == walletId && wr.Id == id);
+    }
+
+    public Task<WithdrawalRequest?> GetByIdAndWalletId(long id, long walletId)
+    {
+        return DbSet.FirstOrDefaultAsync(wr => wr.WalletId == walletId && wr.Id == id);
     }
 
     private static string EscapeLikeParameter(string input)
