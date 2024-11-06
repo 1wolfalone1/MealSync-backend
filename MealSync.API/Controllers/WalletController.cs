@@ -3,6 +3,7 @@ using MealSync.API.Shared;
 using MealSync.Application.UseCases.Wallets.Commands.Shop.CancelWithdrawalRequest;
 using MealSync.Application.UseCases.Wallets.Commands.Shop.SendCodeWithdrawalRequest;
 using MealSync.Application.UseCases.Wallets.Commands.Shop.VerifyWithdrawalRequest;
+using MealSync.Application.UseCases.Wallets.Queries.Shop.GetTransactionHistorys;
 using MealSync.Application.UseCases.Wallets.Queries.Shop.GetWalletSummary;
 using MealSync.Application.UseCases.Wallets.Queries.Shop.GetWithdrawalRequestDetail;
 using MealSync.Application.UseCases.Wallets.Queries.Shop.GetWithdrawalRequestHistory;
@@ -52,6 +53,13 @@ public class WalletController : BaseApiController
     [HttpPut(Endpoints.WITHDRAWAL_REQUEST_CANCEL)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> CancelWithdrawalRequest(CancelWithdrawalRequestCommand request)
+    {
+        return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_WALLET_TRANSACTION)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetWalletTransactionHistory([FromQuery] GetTransactionHistoryQuery request)
     {
         return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
     }
