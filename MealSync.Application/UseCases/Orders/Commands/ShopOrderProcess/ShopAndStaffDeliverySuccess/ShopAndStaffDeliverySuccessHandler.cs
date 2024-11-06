@@ -80,6 +80,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             var order = _orderRepository.Get(o => o.Id == request.OrderId)
+                .Include(o => o.Payments)
                 .Include(o => o.DeliveryPackage).Single();
             order.Status = OrderStatus.Delivered;
 
@@ -97,7 +98,8 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
 
             // Increase money shop wallet
             var amountIncrease = order.TotalPrice - order.ChargeFee - order.TotalPromotion;
-            await CreateTransactionToShopAsync(amountIncrease).ConfigureAwait(false);
+            var payment = order.Payments.Where(p => p.Type == PaymentTypes.Payment).First();
+            await CreateTransactionToShopAsync(payment.Id, order.Id, amountIncrease).ConfigureAwait(false);
 
             _foodRepository.UpdateRange(listFood);
             _orderRepository.Update(order);
@@ -135,7 +137,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         }
     }
 
-    private async Task CreateTransactionToShopAsync(double amountSendToShop)
+    private async Task CreateTransactionToShopAsync(long paymentId, long orderId, double amountSendToShop)
     {
         var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
         var account = _currentAccountService.GetCurrentAccount();
@@ -153,7 +155,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             ReportingAmountBefore = systemTotalWallet.ReportingAmount,
             Amount = amountSendToShop,
             Type = WalletTransactionType.Withdrawal,
-            Description = $"Rút tiền từ ví tổng hệ thống ${amountSendToShop} VNĐ về ví shop id ${shopId}",
+            Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví shop id {shopId} từ đơn hàng MS-{orderId}",
         };
         transactionsAdds.Add(transactionWithdrawalSystemTotalToShopWallet);
 
@@ -166,7 +168,8 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             ReportingAmountBefore = shop.Wallet.ReportingAmount,
             Amount = amountSendToShop,
             Type = WalletTransactionType.Transfer,
-            Description = $"Tiền từ ví tổng hệ thống chuyển về ví của bạn {amountSendToShop} VNĐ",
+            PaymentId = paymentId,
+            Description = $"Tiền thanh toán cho đơn hàng MS-{orderId} {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ",
         };
         transactionsAdds.Add(transactionAddFromSystemTotalToShop);
 
