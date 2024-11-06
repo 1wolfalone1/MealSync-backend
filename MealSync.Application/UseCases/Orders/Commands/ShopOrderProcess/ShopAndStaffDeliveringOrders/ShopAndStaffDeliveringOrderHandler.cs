@@ -69,7 +69,7 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
                 var token = BCrypUnitls.Hash(hashString);
                 var deliveryPackage = _deliveryPackageRepository.GetById(order.DeliveryPackageId);
                 var shipperId = deliveryPackage.ShopId.HasValue ? deliveryPackage.ShopId.Value : deliveryPackage.ShopDeliveryStaffId.Value;
-                Bitmap qrCode = GenerateOrderQRCodeBitmap(order, token, shipperId);
+                Bitmap qrCode = await GenerateOrderQRCodeBitmapAsync(order, token, shipperId).ConfigureAwait(false);
                 var imageUrl = await _storageService.UploadFileAsync(qrCode).ConfigureAwait(false);
                 order.QrScanToDeliveried = imageUrl;
                 order.Status = OrderStatus.Delivering;
@@ -123,7 +123,7 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
         }
     }
 
-    public Bitmap GenerateOrderQRCodeBitmap(Order orderInfo, string token, long shipperId)
+    public async Task<Bitmap> GenerateOrderQRCodeBitmapAsync(Order orderInfo, string token, long shipperId)
     {
         string orderDataJson = JsonConvert.SerializeObject(new
         {
@@ -133,13 +133,7 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
             OrderDate = orderInfo.OrderDate,
             Token = token,
         });
-        using (var qrGenerator = new QRCodeGenerator())
-        {
-            QRCodeData qrCodeData = qrGenerator.CreateQrCode(orderDataJson, QRCodeGenerator.ECCLevel.Q);
-            using (var qrCode = new QRCoder.QRCode(qrCodeData))
-            {
-                return qrCode.GetGraphic(20); // Creates a Bitmap QR code
-            }
-        }
+
+        return await _storageService.GenerateQRCodeWithLogoAsync(orderDataJson).ConfigureAwait(false);
     }
 }
