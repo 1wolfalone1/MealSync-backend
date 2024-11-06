@@ -13,6 +13,7 @@ using MealSync.Application.UseCases.Foods.Queries.ShopFood;
 using MealSync.Application.UseCases.Foods.Queries.ShopOwnerFood;
 using MealSync.Application.UseCases.Foods.Queries.TopFood;
 using MealSync.Application.UseCases.Foods.Queries.Web.GetAllShopFood;
+using MealSync.Application.UseCases.ShopCategories.Commands.LinkFoods;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopStatus;
 using Microsoft.AspNetCore.Authorization;
 
@@ -126,5 +127,12 @@ public class FoodController : BaseApiController
     public async Task<IActionResult> GetAllShopFoodForWeb ([FromQuery] AllShopFoodQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.FOOD_LINK_SHOP_CATEGORY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> LinkFoodToShopCategory ([FromBody] LinkFoodCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }
