@@ -6,5 +6,9 @@ namespace MealSync.Application.Common.Repositories;
 public interface IWithdrawalRequestRepository : IBaseRepository<WithdrawalRequest>
 {
     Task<(int TotalCount, List<WithdrawalRequest> WithdrawalRequests)> GetByFilter(
-        long walletId, WithdrawalRequestStatus? status, string? searchValue, DateTime? createdDate, int pageIndex, int pageSize);
+        long walletId, List<WithdrawalRequestStatus>? status, string? searchValue, DateTime? startDate, DateTime? endDate, int pageIndex, int pageSize);
+
+    Task<WithdrawalRequest?> GetDetailByIdAndWalletId(long id, long walletId);
+
+    Task<WithdrawalRequest?> GetByIdAndWalletId(long id, long walletId);
 }
