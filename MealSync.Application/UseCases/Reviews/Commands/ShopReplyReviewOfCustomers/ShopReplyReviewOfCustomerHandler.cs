@@ -44,7 +44,7 @@ public class ShopReplyReviewOfCustomerHandler : ICommandHandler<ShopReplyReviewO
             OrderId = request.OrderId,
             Rating = RatingRanges.FiveStar,
             Comment = request.Comment,
-            ImageUrl = request.ImageUrl,
+            ImageUrl = string.Join(",", request.ImageUrls),
             Entity = ReviewEntities.Shop,
         };
 

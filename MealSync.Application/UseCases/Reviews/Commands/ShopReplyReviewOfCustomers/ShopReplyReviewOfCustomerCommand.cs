@@ -12,5 +12,5 @@ public class ShopReplyReviewOfCustomerCommand : ICommand<Result>
 
     public string? Comment { get; set; }
 
-    public string? ImageUrl { get; set; }
+    public string[] ImageUrls { get; set; } = new string[0];
 }
