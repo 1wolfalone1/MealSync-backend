@@ -23,11 +23,18 @@ public class OrderDetailRepository : BaseRepository<OrderDetail>, IOrderDetailRe
 
     public async Task<string> GetOrderDescriptionByOrderId(long orderId)
     {
-        var foodNames = await DbSet.Where(od => od.OrderId == orderId)
-            .Select(od => od.Food.Name)
-            .Distinct()
+        var foodDescriptions = await DbSet
+            .Where(od => od.OrderId == orderId)
+            .GroupBy(od => new { od.Food.Id, od.Food.Name })
+            .Select(g => new
+            {
+                Name = g.Key.Name,
+                Quantity = g.Sum(od => od.Quantity),
+            })
             .ToListAsync()
             .ConfigureAwait(false);
-        return string.Join(", ", foodNames);
+
+        return string.Join(", ", foodDescriptions
+            .Select(fd => fd.Quantity > 1 ? $"{fd.Name} x{fd.Quantity}" : fd.Name));
     }
 }
