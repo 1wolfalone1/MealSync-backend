@@ -107,7 +107,7 @@ public class WithdrawalRequestHandler : ICommandHandler<WithdrawalRequestCommand
 
     private async Task<Result<Result>> InsertWithdrawalRequestData(WithdrawalRequestCommand request, Domain.Entities.Shop shop, Wallet wallet)
     {
-        var description = $"Yêu cầu rút tiền từ shop id {shop.Id} với số tiền {MoneyUtils.FormatMoneyWithDots(request.Amount)} VNĐ";
+        var description = $"Yêu cầu rút tiền từ shop MS-{shop.Id} với số tiền {MoneyUtils.FormatMoneyWithDots(request.Amount)} VNĐ";
         var walletTransaction = new WalletTransaction
         {
             AvaiableAmountBefore = wallet.AvailableAmount,
