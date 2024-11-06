@@ -45,6 +45,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
             .GroupBy(r => r.OrderId)
             .Select(g => new ReviewShopDto
             {
+                MinCreatedDate = g.Min(r => r.CreatedDate),
                 OrderId = g.Key,
                 Reviews = g.Select(r => new ReviewShopDto.ReviewDto
                 {
@@ -59,7 +60,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
                         : r.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList(),
                     CreatedDate = r.CreatedDate.ToUnixTimeMilliseconds(),
                 }).ToList(),
-            });
+            }).OrderByDescending(g => g.MinCreatedDate);
 
         var reviews = await groupedQuery
             .Skip((pageIndex - 1) * pageSize)
@@ -152,6 +153,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
             .Select(g => new ReviewOfShopOwnerDto
             {
                 OrderId = g.Key,
+                MinCreatedDate = g.Min(r => r.CreatedDate),
                 Reviews = g.Select(r => new ReviewOfShopOwnerDto.ReviewDetailDto
                 {
                     Id = r.Id,
@@ -165,7 +167,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
                         : r.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList(),
                     CreatedDate = r.CreatedDate.DateTime,
                 }).ToList(),
-            });
+            }).OrderByDescending(g => g.MinCreatedDate);
 
         var reviews = await groupedQuery
             .Skip((pageIndex - 1) * pageSize)

@@ -367,6 +367,18 @@ public enum MessageCode
     [Description("E-Order-QRScanNotCorrect")]
     E_ORDER_QR_SCAN_NOT_CORRECT,
 
+    [Description("E-Order-NotInStatusForShowQRScan")]
+    E_ORDER_NOT_IN_STATUS_FOR_SHOW_QR_SCAN,
+
+    [Description("E-Order-NotInStatusForCompleted")]
+    E_ORDER_NOT_IN_STATUS_FOR_COMPLETED,
+
+    [Description("W-Order-ConfirmOrderCompleted")]
+    W_ORDER_CONFIRM_ORDER_COMPLETED,
+
+    [Description("I-Order-ConfirmOrderCompleted")]
+    I_ORDER_CONFIRM_ORDER_COMPLETED,
+
     // Delivery package
     [Description("E-DeliveryPackage-StaffAlreadyHaveOtherPackage")]
     E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE,
@@ -474,4 +486,16 @@ public enum MessageCode
 
     [Description("E-Withdrawal-Invalid-Code")]
     E_WITHDRAWAL_INVALID_CODE,
+
+    [Description("E-Withdrawal-Not-Found")]
+    E_WITHDRAWAL_NOT_FOUND,
+
+    [Description("E-Withdrawal-Can-Not-Cancel")]
+    E_WITHDRAWAL_CAN_NOT_CANCEL,
+
+    [Description("W-Withdrawal-Request-Cancel")]
+    W_WITHDRAWAL_REQUEST_CANCEL,
+
+    [Description("I-Withdrawal-Cancel-Success")]
+    I_WITHDRAWAL_CANCEL_SUCCESS,
 }

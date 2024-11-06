@@ -1,9 +1,11 @@
 using MealSync.API.Identites;
 using MealSync.API.Shared;
+using MealSync.Application.UseCases.Wallets.Commands.Shop.CancelWithdrawalRequest;
 using MealSync.Application.UseCases.Wallets.Commands.Shop.SendCodeWithdrawalRequest;
 using MealSync.Application.UseCases.Wallets.Commands.Shop.VerifyWithdrawalRequest;
 using MealSync.Application.UseCases.Wallets.Queries.Shop.GetTransactionHistorys;
 using MealSync.Application.UseCases.Wallets.Queries.Shop.GetWalletSummary;
+using MealSync.Application.UseCases.Wallets.Queries.Shop.GetWithdrawalRequestDetail;
 using MealSync.Application.UseCases.Wallets.Queries.Shop.GetWithdrawalRequestHistory;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -37,6 +39,20 @@ public class WalletController : BaseApiController
     [HttpGet(Endpoints.WITHDRAWAL_REQUEST_HISTORY)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> WithdrawalRequestHistory([FromQuery] GetWithdrawalRequestHistoryQuery request)
+    {
+        return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.WITHDRAWAL_REQUEST_DETAIL)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> WithdrawalRequestDetail(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetWithdrawalRequestDetailQuery { Id = id }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.WITHDRAWAL_REQUEST_CANCEL)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> CancelWithdrawalRequest(CancelWithdrawalRequestCommand request)
     {
         return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
     }

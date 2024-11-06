@@ -119,6 +119,8 @@ public static class Endpoints
     public const string SHOP_DELIVERED_ORDER = "shop-owner/order/{id:long}/delivered";
     public const string SHOP_DELIVERED_FAIl_ORDER = "shop-owner/order/{id:long}/delivery-fail";
     public const string SHOP_DELIVERING_ORDER = "shop-owner/order/delivering";
+    public const string SHOW_QR_FOR_CONFIRM = "customer/order/{id:long}/qr/received";
+    public const string COMPLETED_ORDER = "customer/order/confirm/complete";
 
     // Shop order for web
     public const string GET_ORDER_FOR_SHOP_WEB_BY_STATUS = "web/shop-owner/order";
@@ -153,5 +155,7 @@ public static class Endpoints
     public const string WITHDRAWAL_REQUEST_SEND_VERIFY_CODE = "shop-owner/withdrawal/send-verify-code";
     public const string WITHDRAWAL_REQUEST = "shop-owner/withdrawal";
     public const string WITHDRAWAL_REQUEST_HISTORY = "shop-owner/withdrawal/history";
+    public const string WITHDRAWAL_REQUEST_DETAIL = "shop-owner/withdrawal/{id:long}";
+    public const string WITHDRAWAL_REQUEST_CANCEL = "shop-owner/withdrawal/cancel";
     public const string GET_WALLET_TRANSACTION = "shop-owner/walet-transaction";
 }

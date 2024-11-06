@@ -1,9 +1,13 @@
+using System.Text.Json.Serialization;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Reviews.Models;
 
 public class ReviewShopDto
 {
+    [JsonIgnore]
+    public DateTimeOffset MinCreatedDate { get; set; }
+
     public long OrderId { get; set; }
 
     public string Description { get; set; }
