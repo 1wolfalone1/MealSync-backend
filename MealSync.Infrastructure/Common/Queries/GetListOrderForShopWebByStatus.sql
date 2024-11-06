@@ -71,6 +71,12 @@ WITH OrdersOfShop AS (
             o.start_time >= @StartTime
             AND o.end_time <= @EndTime
         )
+        AND(
+            @DateFrom IS NULL
+            AND @DateTo IS NULL
+            OR DATE_FORMAT(o.intended_receive_date, '%Y-%m-%d') >= @DateFrom
+            AND DATE_FORMAT(o.intended_receive_date, '%Y-%m-%d') <= @DateTo
+        )
     ORDER BY
         o.start_time ASC,
         o.order_date ASC
