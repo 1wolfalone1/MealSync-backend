@@ -39,4 +39,45 @@ public class ShopDeliveryStaffRepository : BaseRepository<ShopDeliveryStaff>, IS
 
         return query.ToList();
     }
+
+    public async Task<(int TotalCounts, List<ShopDeliveryStaff> ShopDeliveryStaffs)> GetAllStaffOfShop(
+        long shopId, string? searchValue, ShopDeliveryStaffStatus? status, int pageIndex, int pageSize)
+    {
+        var query = DbSet.Include(sds => sds.Account)
+            .Where(sds => sds.ShopId == shopId).AsQueryable();
+
+        if (status.HasValue)
+        {
+            query = query.Where(sds => sds.Status == status.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchValue))
+        {
+            searchValue = EscapeLikeParameter(searchValue);
+            query = query.Where(sds =>
+                EF.Functions.Like(sds.Account.FullName ?? string.Empty, $"%{searchValue}%") ||
+                EF.Functions.Like(sds.Account.Email, $"%{searchValue}%") ||
+                EF.Functions.Like(sds.Account.PhoneNumber, $"%{searchValue}%")
+            );
+        }
+
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+        query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+        var shopDeliveryStaffs = await query.ToListAsync().ConfigureAwait(false);
+
+        return (totalCount, shopDeliveryStaffs);
+    }
+
+    public Task<ShopDeliveryStaff?> GetByIdAndShopId(long id, long shopId)
+    {
+        return DbSet.Include(sds => sds.Account).FirstOrDefaultAsync(sds => sds.Id == id && sds.ShopId == shopId);
+    }
+
+    private static string EscapeLikeParameter(string input)
+    {
+        return input
+            .Replace("\\", "\\\\") // Escape backslash
+            .Replace("%", "\\%") // Escape percentage
+            .Replace("_", "\\_"); // Escape underscore
+    }
 }

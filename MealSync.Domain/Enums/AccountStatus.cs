@@ -6,4 +6,3 @@ public enum AccountStatus
     Verify = 2,
     Banned = 3,
 }
-

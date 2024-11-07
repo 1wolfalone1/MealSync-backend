@@ -11,5 +11,15 @@ public class ShopDeliveryStaffMapping : Profile
         CreateMap<Account, ShopDeliveryStaffInfoResponse>()
             .ForMember(dest => dest.AccountStatus, opt => opt.MapFrom(src => src.Status))
             .ForMember(dest => dest.ShopDeliveryStaffStatus, opt => opt.MapFrom(src => src.ShopDeliveryStaff!.Status));
+
+        CreateMap<ShopDeliveryStaff, ShopDeliveryStaffInfoResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Account.PhoneNumber))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Account.Email))
+            .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(src => src.Account.AvatarUrl))
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Account.FullName))
+            .ForMember(dest => dest.Genders, opt => opt.MapFrom(src => src.Account.Genders))
+            .ForMember(dest => dest.AccountStatus, opt => opt.MapFrom(src => src.Account.Status))
+            .ForMember(dest => dest.ShopDeliveryStaffStatus, opt => opt.MapFrom(src => src.Status));
     }
 }
