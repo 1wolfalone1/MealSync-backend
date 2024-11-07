@@ -7,8 +7,8 @@ public class WithdrawalRequestValidate : AbstractValidator<WithdrawalRequestComm
     public WithdrawalRequestValidate()
     {
         RuleFor(p => p.Amount)
-            .GreaterThan(0)
-            .WithMessage("Số tiền rút phải lớn hơn 0.");
+            .GreaterThanOrEqualTo(50000)
+            .WithMessage("Số tiền rút phải lớn hơn hoặc bằng 50.000 VNĐ.");
 
         RuleFor(p => p.BankCode)
             .NotEmpty()
