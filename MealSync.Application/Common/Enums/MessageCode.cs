@@ -504,4 +504,8 @@ public enum MessageCode
 
     [Description("E-Withdrawal-Request-Only-One-Pending")]
     E_WITHDRAWAL_REQUEST_ONLY_ONE_PENDING,
+
+    //Shop Delivery Staff
+    [Description("E-ShopDeliveryStaff-Not-Found")]
+    E_SHOP_DELIVERY_STAFF_NOT_FOUND,
 }

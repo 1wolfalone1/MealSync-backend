@@ -66,6 +66,8 @@ public static class Endpoints
     // Shop delivery staff
     public const string GET_SHOP_DELIVER_STAFF_AVAILABLE = "shop/shop-delivery-staff/available";
     public const string CREATE_SHOP_DELIVERY_STAFF = "shop-owner/delivery-staff/create";
+    public const string GET_SHOP_DELIVER_STAFF_OF_SHOP = "shop-owner/delivery-staff";
+    public const string GET_DETAIL_SHOP_DELIVER_STAFF = "shop-owner/delivery-staff/{id:long}";
 
     // Dormitory
     public const string ALL_DORMITORY = "dormitory/all";

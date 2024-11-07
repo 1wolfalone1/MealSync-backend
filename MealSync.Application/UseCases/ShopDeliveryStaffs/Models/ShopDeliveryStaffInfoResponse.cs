@@ -14,6 +14,8 @@ public class ShopDeliveryStaffInfoResponse
 
     public string? FullName { get; set; }
 
+    public Genders Genders { get; set; }
+
     public AccountStatus AccountStatus { get; set; }
 
     public ShopDeliveryStaffStatus ShopDeliveryStaffStatus { get; set; }
