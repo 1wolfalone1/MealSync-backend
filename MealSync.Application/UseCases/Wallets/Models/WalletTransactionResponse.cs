@@ -4,6 +4,8 @@ namespace MealSync.Application.UseCases.Wallets.Models;
 
 public class WalletTransactionResponse
 {
+    public long Id { get; set; }
+
     public long? WalletFromId { get; set; }
 
     public string NameOfWalletOwnerFrom { get; set; }
