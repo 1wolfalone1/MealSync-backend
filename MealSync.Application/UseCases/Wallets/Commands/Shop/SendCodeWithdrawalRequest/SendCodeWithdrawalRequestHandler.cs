@@ -78,7 +78,7 @@ public class SendCodeWithdrawalRequestHandler : ICommandHandler<SendCodeWithdraw
         withdrawalRequestCacheDtoDto.Code = code;
 
         _cacheService.SetCacheResponseAsync(
-            GenerateCacheKey(VerificationCodeTypes.Withdrawal, email), withdrawalRequestCacheDtoDto, TimeSpan.FromSeconds(RedisConstant.TIME_VERIFY_CODE_LIVE * 10));
+            GenerateCacheKey(VerificationCodeTypes.Withdrawal, email), withdrawalRequestCacheDtoDto, TimeSpan.FromSeconds(RedisConstant.TIME_VERIFY_CODE_LIVE));
 
         var isSendMail = _emailService.SendVerificationCodeWithdrawalRequest(email, code, amount);
 

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using AutoMapper;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.UseCases.Dormitories.Models;
@@ -256,8 +257,10 @@ public class MappingProfile : Profile
 
         var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
 
-        return (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.IssueReported ||
-                order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved || order.Status == OrderStatus.Completed)
+        return (order.Status == OrderStatus.Delivered ||
+                ((order.Status == OrderStatus.IssueReported || order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved)
+                 && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() && order.IsReport)
+                || (order.Status == OrderStatus.Completed && order.ReasonIdentity == default))
                && order.Reviews.Count == 0 && now >= endTime && now <= endTime.AddHours(24);
     }
 

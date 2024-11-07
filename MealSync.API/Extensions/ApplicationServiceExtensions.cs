@@ -5,6 +5,7 @@ using System.Data;
 using MediatR;
 using MealSync.Application.Behaviors;
 using System.Text.Json.Serialization;
+using MealSync.API.Converters;
 using MealSync.Domain.Enums;
 using MySqlConnector;
 
@@ -60,6 +61,8 @@ public static class ApplicationServiceExtensions
         // Config Json Convert
         services.AddControllers().AddJsonOptions(options =>
         {
+            options.JsonSerializerOptions.Converters.Add(new DateTimeOffsetConverter());
+            options.JsonSerializerOptions.Converters.Add(new DateTimeUtcConverter());
             options.JsonSerializerOptions.Converters.Add(new JsonNumericEnumConverter());
         });
 
