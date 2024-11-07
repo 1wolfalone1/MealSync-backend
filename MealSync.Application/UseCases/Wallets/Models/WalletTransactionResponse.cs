@@ -26,6 +26,8 @@ public class WalletTransactionResponse
 
     public double Amount { get; set; }
 
+    public double TotalAmountAfter { get; set; }
+
     public WalletTransactionType Type { get; set; }
 
     public string Description { get; set; }
