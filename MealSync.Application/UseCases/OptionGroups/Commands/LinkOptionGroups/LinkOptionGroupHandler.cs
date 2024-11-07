@@ -77,11 +77,11 @@ public class LinkOptionGroupHandler : ICommandHandler<LinkOptionGroupCommand, Re
 
     private void Validate(LinkOptionGroupCommand request)
     {
-        var optionGroup = _optionGroupRepository.Get(og => og.Id == request.OptionGroupId && og.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
+        var optionGroup = _optionGroupRepository.Get(og => og.Id == request.OptionGroupId && og.ShopId == _currentPrincipalService.CurrentPrincipalId && og.Status != OptionGroupStatus.Delete).SingleOrDefault();
         if (optionGroup == default)
             throw new InvalidBusinessException(MessageCode.E_OPTION_GROUP_NOT_FOUND.GetDescription(), new object[] { request.OptionGroupId }, HttpStatusCode.NotFound);
 
-        var food = _foodRepository.Get(og => og.Id == request.FoodId && og.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault();
+        var food = _foodRepository.Get(og => og.Id == request.FoodId && og.ShopId == _currentPrincipalService.CurrentPrincipalId && og.Status != FoodStatus.Delete).SingleOrDefault();
         if (food == default)
             throw new InvalidBusinessException(MessageCode.E_FOOD_NOT_FOUND.GetDescription(), new object[] { request.FoodId }, HttpStatusCode.NotFound);
     }

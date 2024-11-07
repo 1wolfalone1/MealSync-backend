@@ -52,8 +52,8 @@ public class OptionGroupRepository : BaseRepository<OptionGroup>, IOptionGroupRe
     public bool CheckExistTitleOptionGroup(string title, long shopId, long? id = null)
     {
         return id == null
-            ? DbSet.Any(og => og.Title == title && og.ShopId == shopId)
-            : DbSet.Any(og => og.Title == title && og.ShopId == shopId && og.Id != id);
+            ? DbSet.Any(og => og.Title == title && og.ShopId == shopId && og.Status != OptionGroupStatus.Delete)
+            : DbSet.Any(og => og.Title == title && og.ShopId == shopId && og.Id != id && og.Status != OptionGroupStatus.Delete);
     }
 
     public Task<OptionGroup?> GetByIdAndOptionIds(long id, long[] optionIds)
