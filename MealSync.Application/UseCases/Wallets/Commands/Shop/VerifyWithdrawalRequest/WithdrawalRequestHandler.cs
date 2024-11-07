@@ -60,8 +60,13 @@ public class WithdrawalRequestHandler : ICommandHandler<WithdrawalRequestCommand
         var shop = await _shopRepository.GetByAccountId(shopId).ConfigureAwait(false);
         var account = _accountRepository.GetById(shopId)!;
         var wallet = _walletRepository.GetById(shop.WalletId);
+        var existingPendingRequest = await _withdrawalRequestRepository.CheckExistingPendingRequestByWalletId(wallet!.Id).ConfigureAwait(false);
 
-        if (wallet.AvailableAmount <= 0)
+        if (existingPendingRequest)
+        {
+            throw new InvalidBusinessException(MessageCode.E_WITHDRAWAL_REQUEST_ONLY_ONE_PENDING.GetDescription());
+        }
+        else if (wallet.AvailableAmount <= 0)
         {
             throw new InvalidBusinessException(MessageCode.E_WITHDRAWAL_NOT_ENOUGH_AVAILABLE_AMOUNT.GetDescription());
         }
@@ -108,15 +113,7 @@ public class WithdrawalRequestHandler : ICommandHandler<WithdrawalRequestCommand
     private async Task<Result<Result>> InsertWithdrawalRequestData(WithdrawalRequestCommand request, Domain.Entities.Shop shop, Wallet wallet)
     {
         var description = $"Yêu cầu rút tiền từ shop MS-{shop.Id} với số tiền {MoneyUtils.FormatMoneyWithDots(request.Amount)} VNĐ";
-        var walletTransaction = new WalletTransaction
-        {
-            AvaiableAmountBefore = wallet.AvailableAmount,
-            IncomingAmountBefore = wallet.IncomingAmount,
-            ReportingAmountBefore = wallet.ReportingAmount,
-            Amount = request.Amount,
-            Type = WalletTransactionType.Withdrawal,
-            Description = description,
-        };
+
         var withdrawalRequest = new WithdrawalRequest
         {
             WalletId = wallet.Id,
@@ -125,17 +122,13 @@ public class WithdrawalRequestHandler : ICommandHandler<WithdrawalRequestCommand
             BankShortName = request.BankShortName,
             BankCode = request.BankCode,
             BankAccountNumber = request.BankAccountNumber,
-            WalletTransaction = walletTransaction,
         };
-
-        wallet.AvailableAmount -= request.Amount;
 
         try
         {
             // Begin transaction
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
-            _walletRepository.Update(wallet);
             await _withdrawalRequestRepository.AddAsync(withdrawalRequest).ConfigureAwait(false);
 
             // Commit transaction

@@ -12,11 +12,12 @@ public class WithdrawalRequestMapping : Profile
         CreateMap<WithdrawalRequest, WithdrawalRequestNotification>();
 
         CreateMap<WithdrawalRequest, WithdrawalRequestHistoryResponse>()
-            .ForMember(dest => dest.WalletHistory, opt => opt.MapFrom(src => src));
+            .ForMember(dest => dest.WalletHistory, opt => opt.MapFrom(src => src.WalletTransaction == default ? default : src));
 
         CreateMap<WithdrawalRequest, WithdrawalRequestHistoryResponse.WalletHistoryResponse>()
             .ForMember(dest => dest.WalletId, opt => opt.MapFrom(src => src.WalletId))
             .ForMember(dest => dest.AvaiableAmountBefore, opt => opt.MapFrom(src => src.WalletTransaction!.AvaiableAmountBefore))
+            .ForMember(dest => dest.AvaiableAmountAfter, opt => opt.MapFrom(src => (src.WalletTransaction!.AvaiableAmountBefore + src.WalletTransaction.Amount)))
             .ForMember(dest => dest.IncomingAmountBefore, opt => opt.MapFrom(src => src.WalletTransaction!.IncomingAmountBefore))
             .ForMember(dest => dest.ReportingAmountBefore, opt => opt.MapFrom(src => src.WalletTransaction!.ReportingAmountBefore));
     }

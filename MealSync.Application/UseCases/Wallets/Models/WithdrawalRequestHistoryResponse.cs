@@ -28,6 +28,8 @@ public class WithdrawalRequestHistoryResponse
 
         public double AvaiableAmountBefore { get; set; }
 
+        public double AvaiableAmountAfter { get; set; }
+
         public double IncomingAmountBefore { get; set; }
 
         public double ReportingAmountBefore { get; set; }

@@ -68,6 +68,7 @@ internal class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, 
                     AvaiableAmountBefore = wr.WalletTransaction.AvaiableAmountBefore,
                     IncomingAmountBefore = wr.WalletTransaction.IncomingAmountBefore,
                     ReportingAmountBefore = wr.WalletTransaction.ReportingAmountBefore,
+                    Amount = wr.WalletTransaction.Amount,
                 },
         }).OrderByDescending(wr => wr.CreatedDate).Skip((pageIndex - 1) * pageSize).Take(pageSize);
         var withdrawalRequests = await query.ToListAsync().ConfigureAwait(false);
@@ -84,6 +85,11 @@ internal class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, 
     public Task<WithdrawalRequest?> GetByIdAndWalletId(long id, long walletId)
     {
         return DbSet.FirstOrDefaultAsync(wr => wr.WalletId == walletId && wr.Id == id);
+    }
+
+    public Task<bool> CheckExistingPendingRequestByWalletId(long walletId)
+    {
+        return DbSet.AnyAsync(wr => wr.WalletId == walletId && wr.Status == WithdrawalRequestStatus.Pending);
     }
 
     private static string EscapeLikeParameter(string input)

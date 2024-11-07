@@ -17,6 +17,7 @@ public class SendCodeWithdrawalRequestHandler : ICommandHandler<SendCodeWithdraw
     private readonly IShopRepository _shopRepository;
     private readonly IAccountRepository _accountRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
+    private readonly IWithdrawalRequestRepository _withdrawalRequestRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly ICacheService _cacheService;
     private readonly IEmailService _emailService;
@@ -24,7 +25,8 @@ public class SendCodeWithdrawalRequestHandler : ICommandHandler<SendCodeWithdraw
     public SendCodeWithdrawalRequestHandler(
         IWalletRepository walletRepository, IShopRepository shopRepository,
         ICurrentPrincipalService currentPrincipalService, ICacheService cacheService,
-        IEmailService emailService, IAccountRepository accountRepository, ISystemResourceRepository systemResourceRepository)
+        IEmailService emailService, IAccountRepository accountRepository,
+        ISystemResourceRepository systemResourceRepository, IWithdrawalRequestRepository withdrawalRequestRepository)
     {
         _walletRepository = walletRepository;
         _shopRepository = shopRepository;
@@ -33,6 +35,7 @@ public class SendCodeWithdrawalRequestHandler : ICommandHandler<SendCodeWithdraw
         _emailService = emailService;
         _accountRepository = accountRepository;
         _systemResourceRepository = systemResourceRepository;
+        _withdrawalRequestRepository = withdrawalRequestRepository;
     }
 
     public async Task<Result<Result>> Handle(SendCodeWithdrawalRequestCommand request, CancellationToken cancellationToken)
@@ -41,8 +44,13 @@ public class SendCodeWithdrawalRequestHandler : ICommandHandler<SendCodeWithdraw
         var shop = await _shopRepository.GetByAccountId(shopId).ConfigureAwait(false);
         var account = _accountRepository.GetById(shopId)!;
         var wallet = _walletRepository.GetById(shop.WalletId);
+        var existingPendingRequest = await _withdrawalRequestRepository.CheckExistingPendingRequestByWalletId(wallet!.Id).ConfigureAwait(false);
 
-        if (wallet.AvailableAmount <= 0)
+        if (existingPendingRequest)
+        {
+            throw new InvalidBusinessException(MessageCode.E_WITHDRAWAL_REQUEST_ONLY_ONE_PENDING.GetDescription());
+        }
+        else if (wallet.AvailableAmount <= 0)
         {
             throw new InvalidBusinessException(MessageCode.E_WITHDRAWAL_NOT_ENOUGH_AVAILABLE_AMOUNT.GetDescription());
         }

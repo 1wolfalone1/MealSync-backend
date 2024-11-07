@@ -76,19 +76,8 @@ public class CancelWithdrawalRequestHandler : ICommandHandler<CancelWithdrawalRe
             else
             {
                 var wallet = _walletRepository.GetById(shop.WalletId)!;
-                var description = $"Hoàn trả tiền về shop MS-{shop.Id} sau khi hủy yêu cầu rút tiền MS-{withdrawalRequest.Id} với số tiền {MoneyUtils.FormatMoneyWithDots(withdrawalRequest.Amount)} VNĐ";
-                var walletTransaction = new WalletTransaction
-                {
-                    AvaiableAmountBefore = wallet.AvailableAmount,
-                    IncomingAmountBefore = wallet.IncomingAmount,
-                    ReportingAmountBefore = wallet.ReportingAmount,
-                    Amount = withdrawalRequest.Amount,
-                    Type = WalletTransactionType.Withdrawal,
-                    Description = description,
-                };
 
                 withdrawalRequest.Status = WithdrawalRequestStatus.Cancelled;
-                wallet.AvailableAmount += withdrawalRequest.Amount;
 
                 try
                 {
@@ -96,8 +85,6 @@ public class CancelWithdrawalRequestHandler : ICommandHandler<CancelWithdrawalRe
                     await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
                     _withdrawalRequestRepository.Update(withdrawalRequest);
-                    _walletRepository.Update(wallet);
-                    await _walletTransactionRepository.AddAsync(walletTransaction).ConfigureAwait(false);
 
                     // Commit transaction
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
