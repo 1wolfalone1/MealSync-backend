@@ -108,4 +108,27 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
 
         return result;
     }
+
+    public (int Total, List<DeliveryPackage> DeliveryPackages) GetAllOwnDeliveryPackageFilter(int pageIndex, int pageSize, DateTime deliveryDate, int startTime, int endTime, DeliveryPackageStatus[] status, long shopId)
+    {
+        var query = DbSet.Include(dp => dp.Orders)
+            .Include(dp => dp.Shop)
+            .ThenInclude(s => s.Account)
+            .Include(dp => dp.ShopDeliveryStaff)
+            .ThenInclude(sds => sds.Account)
+            .Where(dp => dp.StartTime >= startTime
+                         && dp.EndTime <= endTime
+                         && dp.DeliveryDate.Date == deliveryDate.Date
+                         && dp.Orders.All(o => o.ShopId == shopId)
+                         && dp.ShopId == shopId
+                         && status.Contains(dp.Status))
+            .AsQueryable();
+
+        var total = query.Count();
+        var results = query
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize).ToList();
+
+        return (total, results);
+    }
 }

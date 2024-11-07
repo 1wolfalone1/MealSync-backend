@@ -16,4 +16,6 @@ public interface IDeliveryPackageRepository : IBaseRepository<DeliveryPackage>
     List<DeliveryPackage> GetAllRequestUpdate(DateTime deliveryDate, int startTime, int endTime, List<long> staffIds);
 
     (int Total, List<DeliveryPackage> DeliveryPackages) GetTimeFramesByFrameIntervalAndDatePaging(int pageIndex, int pageSize, DateTime deliveryDate, int startTime, int endTime, long shopId, string? deliveryPackageId, string? fullName);
+
+    (int Total, List<DeliveryPackage> DeliveryPackages) GetAllOwnDeliveryPackageFilter(int pageIndex, int pageSize, DateTime deliveryDate, int startTime, int endTime, DeliveryPackageStatus[] status, long shopId);
 }
