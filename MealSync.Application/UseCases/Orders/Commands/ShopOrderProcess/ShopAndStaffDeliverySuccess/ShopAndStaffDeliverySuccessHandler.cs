@@ -153,7 +153,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
             IncomingAmountBefore = systemTotalWallet.IncomingAmount,
             ReportingAmountBefore = systemTotalWallet.ReportingAmount,
-            Amount = amountSendToShop,
+            Amount = -amountSendToShop,
             Type = WalletTransactionType.Withdrawal,
             Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví shop id {shopId} từ đơn hàng MS-{orderId}",
         };
