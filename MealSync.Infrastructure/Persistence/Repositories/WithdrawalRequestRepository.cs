@@ -68,6 +68,7 @@ internal class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, 
                     AvaiableAmountBefore = wr.WalletTransaction.AvaiableAmountBefore,
                     IncomingAmountBefore = wr.WalletTransaction.IncomingAmountBefore,
                     ReportingAmountBefore = wr.WalletTransaction.ReportingAmountBefore,
+                    Amount = wr.WalletTransaction.Amount,
                 },
         }).OrderByDescending(wr => wr.CreatedDate).Skip((pageIndex - 1) * pageSize).Take(pageSize);
         var withdrawalRequests = await query.ToListAsync().ConfigureAwait(false);
