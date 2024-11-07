@@ -29,21 +29,21 @@ public class GetListDeliveryPackageForShopWebHandler : IQueryHandler<GetListDeli
         var deliveryPackages = _deliveryPackageRepository.GetTimeFramesByFrameIntervalAndDatePaging(request.PageIndex, request.PageSize, request.IntendedReceiveDate, request.StartTime, request.EndTime,
             _currentPrincipalService.CurrentPrincipalId.Value, request.DeliveryPackageId, request.DeliveryShopStaffFullName);
 
-        var deliveryPackageResponse = new List<DeliveryPackageGroupDetailResponse>();
+        var deliveryPackageResponse = new List<DeliveryPackageGroupDetailForWebResponse>();
         foreach (var deliveryPackage in deliveryPackages.DeliveryPackages)
         {
             deliveryPackageResponse.Add(await GetDeliveryPackageStatsisticAsync(deliveryPackage.Id).ConfigureAwait(false));
         }
 
-        var response = new PaginationResponse<DeliveryPackageGroupDetailResponse>(deliveryPackageResponse, deliveryPackages.Total, request.PageIndex, request.PageSize);
+        var response = new PaginationResponse<DeliveryPackageGroupDetailForWebResponse>(deliveryPackageResponse, deliveryPackages.Total, request.PageIndex, request.PageSize);
         return Result.Success(response);
     }
 
-    private async Task<DeliveryPackageGroupDetailResponse> GetDeliveryPackageStatsisticAsync(long id)
+    private async Task<DeliveryPackageGroupDetailForWebResponse> GetDeliveryPackageStatsisticAsync(long id)
     {
-        var dicDormitoryUniq = new Dictionary<long, DeliveryPackageGroupDetailResponse>();
-        Func<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
-            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse> map =
+        var dicDormitoryUniq = new Dictionary<long, DeliveryPackageGroupDetailForWebResponse>();
+        Func<DeliveryPackageGroupDetailForWebResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
+            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailForWebResponse> map =
             (parent, child1, child2, child3) =>
             {
                 if (!dicDormitoryUniq.TryGetValue(parent.DeliveryPackageId, out var deliveryPackage))
@@ -65,8 +65,8 @@ public class GetListDeliveryPackageForShopWebHandler : IQueryHandler<GetListDeli
                 return parent;
             };
 
-        await _dapperService.SelectAsync<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
-            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse>(
+        await _dapperService.SelectAsync<DeliveryPackageGroupDetailForWebResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
+            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailForWebResponse>(
             QueryName.GetDeliveryPackackageStasisticById,
             map,
             new
