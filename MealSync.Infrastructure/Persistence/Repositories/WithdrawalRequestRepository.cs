@@ -86,6 +86,11 @@ internal class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, 
         return DbSet.FirstOrDefaultAsync(wr => wr.WalletId == walletId && wr.Id == id);
     }
 
+    public Task<bool> CheckExistingPendingRequestByWalletId(long walletId)
+    {
+        return DbSet.AnyAsync(wr => wr.WalletId == walletId && wr.Status == WithdrawalRequestStatus.Pending);
+    }
+
     private static string EscapeLikeParameter(string input)
     {
         return input

@@ -501,4 +501,7 @@ public enum MessageCode
 
     [Description("I-Withdrawal-Cancel-Success")]
     I_WITHDRAWAL_CANCEL_SUCCESS,
+
+    [Description("E-Withdrawal-Request-Only-One-Pending")]
+    E_WITHDRAWAL_REQUEST_ONLY_ONE_PENDING,
 }

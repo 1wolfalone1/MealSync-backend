@@ -11,4 +11,6 @@ public interface IWithdrawalRequestRepository : IBaseRepository<WithdrawalReques
     Task<WithdrawalRequest?> GetDetailByIdAndWalletId(long id, long walletId);
 
     Task<WithdrawalRequest?> GetByIdAndWalletId(long id, long walletId);
+
+    Task<bool> CheckExistingPendingRequestByWalletId(long walletId);
 }
