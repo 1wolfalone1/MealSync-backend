@@ -303,7 +303,7 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
             if (dpRequest.ShopDeliveryStaffId != null)
             {
                 var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(dpRequest.ShopDeliveryStaffId.Value);
-                shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
+                // shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
                 _shopDeliveryStaffRepository.Update(shopDeliveryStaff);
             }
         }

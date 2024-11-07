@@ -3,6 +3,7 @@ using MealSync.API.Shared;
 using MealSync.Application.UseCases.DeliveryPackages.Commands.UpdateDeliveryPackageGroups;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllDeliveryPackageGroupByTimeFrames;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllDeliveryPackages;
+using MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllOwnDeliveryPackagesForWebs;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageDetailByTimeFrames;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageGroupDetailByTimeFrames;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListDeliveryPackageForShopWebs;
@@ -79,6 +80,13 @@ public class DeliveryPackageController : BaseApiController
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     [HttpGet(Endpoints.GET_DELIVERY_PACKAGE_FOR_WEB)]
     public async Task<IActionResult> GetListDeliveryPackageForShopWebOrder([FromQuery] GetListDeliveryPackageForShopWebQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpGet(Endpoints.GET_SHOP_OWN_DELIVERY_PACKAGE_FOR_WEB)]
+    public async Task<IActionResult> GetListOwnDeliveryPackageForShopWebOrder([FromQuery] GetAllOwnDeliveryPackageForWebQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }

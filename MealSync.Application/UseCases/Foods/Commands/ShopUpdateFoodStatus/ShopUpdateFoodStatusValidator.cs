@@ -22,7 +22,7 @@ public class ShopUpdateFoodStatusValidator : AbstractValidator<ShopUpdateFoodSta
         When(f => f.Status == FoodStatus.UnActive, () =>
         {
             RuleFor(f => f.IsSoldOut)
-                .Must(f => f.Value)
+                .Must(f => !f.Value)
                 .WithMessage("Không tồn tại trường hợp món ăn tạm ẩn và tạm ngưng bán");
         });
     }
