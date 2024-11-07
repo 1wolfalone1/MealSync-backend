@@ -1,6 +1,7 @@
 using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Orders.Commands.CancelOrderCustomer;
+using MealSync.Application.UseCases.Orders.Commands.CompleteOrder;
 using MealSync.Application.UseCases.Orders.Commands.Create;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveringOrders;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
@@ -10,6 +11,7 @@ using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliver
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveryFailOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopPreparingOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRejectOrder;
+using MealSync.Application.UseCases.Orders.Commands.ShowQRConfirm;
 using MealSync.Application.UseCases.Orders.Commands.UpdatePaymentStatusIPN;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailCustomer;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailForShop;
@@ -36,7 +38,7 @@ public class OrderController : BaseApiController
     [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
     public async Task<IActionResult> CancelOrder(long id, string reason)
     {
-        return HandleResult(await Mediator.Send(new CancelOrderCustomerCommand { Id = id, Reason = reason}).ConfigureAwait(false));
+        return HandleResult(await Mediator.Send(new CancelOrderCustomerCommand { Id = id, Reason = reason }).ConfigureAwait(false));
     }
 
     [HttpGet(Endpoints.GET_IPN)]
@@ -107,7 +109,7 @@ public class OrderController : BaseApiController
 
     [HttpPut(Endpoints.SHOP_CANCEL_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopCancelOrder([FromBody]ShopCancelOrderCommand command, long id)
+    public async Task<IActionResult> ShopCancelOrder([FromBody] ShopCancelOrderCommand command, long id)
     {
         command.Id = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
@@ -115,7 +117,7 @@ public class OrderController : BaseApiController
 
     [HttpPut(Endpoints.SHOP_PREPARING_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopChangeToPreparingOrder([FromBody]ShopPreparingOrderCommand command, long id)
+    public async Task<IActionResult> ShopChangeToPreparingOrder([FromBody] ShopPreparingOrderCommand command, long id)
     {
         command.Id = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
@@ -123,7 +125,7 @@ public class OrderController : BaseApiController
 
     [HttpPut(Endpoints.SHOP_ASSIGN_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopAssignOrder([FromBody]ShopAssignOrderCommand command, long id)
+    public async Task<IActionResult> ShopAssignOrder([FromBody] ShopAssignOrderCommand command, long id)
     {
         command.OrderId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
@@ -131,7 +133,7 @@ public class OrderController : BaseApiController
 
     [HttpPut(Endpoints.SHOP_DELIVERED_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody]ShopAndStaffDeliverySuccessCommand command, long id)
+    public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody] ShopAndStaffDeliverySuccessCommand command, long id)
     {
         command.OrderId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
@@ -139,7 +141,7 @@ public class OrderController : BaseApiController
 
     [HttpPut(Endpoints.SHOP_DELIVERED_FAIl_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody]ShopDeliveryFailOrderCommand command, long id)
+    public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody] ShopDeliveryFailOrderCommand command, long id)
     {
         command.OrderId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
@@ -147,7 +149,21 @@ public class OrderController : BaseApiController
 
     [HttpPut(Endpoints.SHOP_DELIVERING_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}, ${IdentityConst.ShopDeliveryClaimName}")]
-    public async Task<IActionResult> ShopChangeToDeliveringOrder([FromBody]ShopAndStaffDeliveringOrderCommand command)
+    public async Task<IActionResult> ShopChangeToDeliveringOrder([FromBody] ShopAndStaffDeliveringOrderCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.SHOW_QR_FOR_CONFIRM)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> ShowQrConfirm(long id)
+    {
+        return HandleResult(await Mediator.Send(new ShowQRConfirmCommand { Id = id }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.COMPLETED_ORDER)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> CompletedOrder([FromBody] CompleteOrderCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }

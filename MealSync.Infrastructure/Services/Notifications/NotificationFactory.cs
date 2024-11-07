@@ -341,4 +341,44 @@ public class NotificationFactory : INotificationFactory
             IsSave = true,
         };
     }
+
+    public Notification CreateCustomerCancelOrderNotification(Order order, Account account)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_CUSTOMER_CANCEL.GetDescription(), order.Id),
+            ImageUrl = account.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateCustomerCompletedOrderNotification(Order order, Account account)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_CUSTOMER_CONFIRM_COMPLETED.GetDescription(), order.Id),
+            ImageUrl = account.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
 }

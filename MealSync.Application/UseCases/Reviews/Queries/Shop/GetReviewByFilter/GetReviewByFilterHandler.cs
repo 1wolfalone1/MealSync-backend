@@ -27,9 +27,13 @@ public class GetReviewByFilterHandler : IQueryHandler<GetReviewByFilterQuery, Re
         var shopId = _currentPrincipalService.CurrentPrincipalId!.Value;
 
         var data = await _reviewRepository.GetShopReview(shopId, request.SearchValue, request.Rating, request.Filter, request.PageIndex, request.PageSize).ConfigureAwait(false);
+        var now = DateTimeOffset.UtcNow;
         foreach (var review in data.Reviews)
         {
-            review.IsAllowShopReply = !review.Reviews.Exists(dto => dto.Reviewer == ReviewEntities.Shop);
+            review.IsAllowShopReply = !review.Reviews.Exists(dto => dto.Reviewer == ReviewEntities.Shop)
+                                      && review.Reviews.Count > 0
+                                      && now >= review.Reviews[0].CreatedDate
+                                      && now <= review.Reviews[0].CreatedDate.AddHours(24);
             review.Description = await _orderDetailRepository.GetOrderDescriptionByOrderId(review.OrderId).ConfigureAwait(false);
         }
 
