@@ -5,4 +5,5 @@ public enum ShopDeliveryStaffStatus
     Free = 1,
     Busy = 2,
     Offline = 3,
+    InActive = 4,
 }
