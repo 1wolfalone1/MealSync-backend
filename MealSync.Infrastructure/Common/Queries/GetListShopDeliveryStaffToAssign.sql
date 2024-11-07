@@ -174,7 +174,7 @@ ShopDeliveryStaffTaskAndInfor AS (
         INNER JOIN account a ON sds.id = a.id
     WHERE
         sds.shop_id = @ShopId
-        AND sds.status != 3
+        AND sds.status = 1
 --         AND (
 --             @SearchText IS NULL
 --             OR a.full_name LIKE CONCAT('%', @SearchText, '%')

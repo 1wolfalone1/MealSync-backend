@@ -164,7 +164,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
             if (request.ShopDeliveryStaffId != null)
             {
                 var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(request.ShopDeliveryStaffId.Value);
-                shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
+                // shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
                 _shopDeliveryStaffRepository.Update(shopDeliveryStaff);
             }
 
@@ -229,7 +229,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
             if (request.ShopDeliveryStaffId != null)
             {
                 var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(request.ShopDeliveryStaffId.Value);
-                shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
+                // shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
                 _shopDeliveryStaffRepository.Update(shopDeliveryStaff);
             }
 

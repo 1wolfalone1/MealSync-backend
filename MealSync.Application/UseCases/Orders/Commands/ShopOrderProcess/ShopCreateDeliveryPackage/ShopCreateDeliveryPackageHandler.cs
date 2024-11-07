@@ -151,7 +151,7 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         if (request.ShopDeliveryStaffId != null)
         {
             var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(request.ShopDeliveryStaffId.Value);
-            shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
+            // shopDeliveryStaff.Status = ShopDeliveryStaffStatus.Busy;
             _shopDeliveryStaffRepository.Update(shopDeliveryStaff);
         }
 
