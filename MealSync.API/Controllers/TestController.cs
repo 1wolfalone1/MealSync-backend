@@ -7,6 +7,7 @@ using MealSync.Application.UseCases.Orders.Queries.ShopGetQrCodeOfOrders;
 using MealSync.Application.UseCases.Roles.Commands.CreateRole;
 using MealSync.Application.UseCases.Roles.Commands.UpdateRole;
 using MealSync.Application.UseCases.Test.Commands.TestModeratorCreateLog;
+using MealSync.Application.UseCases.Test.Commands.TestPushNotiKafkas;
 using MealSync.Application.UseCases.Test.Commands.TestValidateError;
 using MealSync.Application.UseCases.Test.Queries.TestError;
 using Microsoft.AspNetCore.Authorization;
@@ -90,5 +91,11 @@ public class TestController : BaseApiController
         {
             Id = id,
         }));
+    }
+
+    [HttpPost("/api/v1/test/push-noti-kafka")]
+    public async Task<IActionResult> TestPushNotiKafka([FromBody] TestPushNotiKafkaCommand command)
+    {
+        return this.HandleResult(await this.Mediator.Send(command));
     }
 }
