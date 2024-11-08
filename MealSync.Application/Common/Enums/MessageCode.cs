@@ -425,6 +425,12 @@ public enum MessageCode
     [Description("E-DeliveryPackage-DateUpdateNotNew")]
     E_DELIVERY_PACKAGE_DATE_UPDATE_NOT_NEW,
 
+    [Description("E-DeliveryPackage-StaffInOffStatus")]
+    E_DELIVERY_PACKAGE_STAFF_IN_OFFLINE_STATUS,
+
+    [Description("E-DeliveryPackage-StaffInActive")]
+    E_DELIVERY_PACKAGE_STAFF_IN_ACTIVE,
+
     // Delivery package group
     [Description("E-DeliveryPackageGroup-NotFoudAny")]
     E_DELIVERY_PACKAGE_GROUP_NOT_FOUND_ANY,
