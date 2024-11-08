@@ -18,4 +18,6 @@ public interface IDeliveryPackageRepository : IBaseRepository<DeliveryPackage>
     (int Total, List<DeliveryPackage> DeliveryPackages) GetTimeFramesByFrameIntervalAndDatePaging(int pageIndex, int pageSize, DateTime deliveryDate, int startTime, int endTime, long shopId, string? deliveryPackageId, string? fullName);
 
     (int Total, List<DeliveryPackage> DeliveryPackages) GetAllOwnDeliveryPackageFilter(int pageIndex, int pageSize, DateTime deliveryDate, int startTime, int endTime, DeliveryPackageStatus[] status, long shopId);
+
+    Task<bool> CheckHaveInDeliveryPackageNotDone(long shopDeliveryStaffId);
 }
