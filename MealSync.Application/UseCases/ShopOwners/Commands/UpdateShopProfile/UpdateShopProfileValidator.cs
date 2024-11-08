@@ -10,7 +10,7 @@ public class UpdateShopProfileValidator : AbstractValidator<UpdateShopProfileCom
             .NotEmpty()
             .WithMessage("Vui lòng cung cấp tên cửa hàng");
 
-        RuleFor(x => x.ShopOnwerName)
+        RuleFor(x => x.ShopOwnerName)
             .NotEmpty()
             .WithMessage("Vui lòng cung cấp tên chủ cửa hàng");
 
@@ -40,7 +40,7 @@ public class UpdateShopProfileValidator : AbstractValidator<UpdateShopProfileCom
             .NotEmpty()
             .WithMessage("Vui lòng cung cấp vĩ độ của vị trí");
 
-        RuleFor(x => x.Location.Longtiude)
+        RuleFor(x => x.Location.Longitude)
             .NotEmpty()
             .WithMessage("Vui lòng cung cấp kinh độ của vị trí");
     }
