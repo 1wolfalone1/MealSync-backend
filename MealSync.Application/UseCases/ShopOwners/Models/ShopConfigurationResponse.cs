@@ -17,7 +17,9 @@ public class ShopConfigurationResponse
 
     public string PhoneNumber { get; set; }
 
-    public ShopStatus Status { get; set; } = ShopStatus.UnApprove;
+    public ShopStatus Status { get; set; }
+
+    public string Description { get; set; }
 
     public bool IsAcceptingOrderNextDay { get; set; }
 
