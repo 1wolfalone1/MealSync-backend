@@ -329,14 +329,22 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
         var listOrder = new List<Order>();
         foreach (var deliveryPackage in request.DeliveryPackages)
         {
-            // if (deliveryPackage.DeliveryPackageId.HasValue && _deliveryPackageRepository.Get(dp => dp.Id == deliveryPackage.DeliveryPackageId.Value && (
-            //         dp.ShopId != null && dp.ShopId == _currentPrincipalService.CurrentPrincipalId.Value ||
-            //         dp.ShopDeliveryStaffId != null && dp.ShopDeliveryStaff.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)).SingleOrDefault() == default)
-            //     throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_NOT_FOUND.GetDescription(), new object[] { deliveryPackage.DeliveryPackageId.Value }, HttpStatusCode.NotFound);
+            if (deliveryPackage.ShopDeliveryStaffId.HasValue)
+            {
+                var shopDeliveryStaff = _shopDeliveryStaffRepository.Get(sds => sds.Id == deliveryPackage.ShopDeliveryStaffId && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)
+                    .Include(sds => sds.Account).SingleOrDefault();
+                if (shopDeliveryStaff == null || shopDeliveryStaff.ShopId != _currentPrincipalService.CurrentPrincipalId)
+                    throw new InvalidBusinessException(MessageCode.E_ORDER_ASSIGN_NOT_FOUND_SHOP_STAFF.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId.Value });
 
-            if (deliveryPackage.ShopDeliveryStaffId.HasValue
-                && _shopDeliveryStaffRepository.Get(sds => sds.Id == deliveryPackage.ShopDeliveryStaffId && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault() == default)
-                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_NOT_BELONG_TO_SHOP.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId }, HttpStatusCode.NotFound);
+                if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.Offline)
+                    throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_OFFLINE_STATUS.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId });
+
+                if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status == AccountStatus.Deleted)
+                    throw new InvalidBusinessException(MessageCode.E_SHOP_DELIVERY_STAFF_NOT_FOUND.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId });
+
+                if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status != AccountStatus.Deleted)
+                    throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_ACTIVE.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId });
+            }
 
             foreach (var orderId in deliveryPackage.OrderIds)
             {

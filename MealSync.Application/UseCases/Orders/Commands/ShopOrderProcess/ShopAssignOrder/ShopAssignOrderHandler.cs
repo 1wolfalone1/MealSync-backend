@@ -253,9 +253,19 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
 
         if (request.ShopDeliveryStaffId != null)
         {
-            var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(request.ShopDeliveryStaffId.Value);
+            var shopDeliveryStaff = _shopDeliveryStaffRepository.Get(sds => sds.Id == request.ShopDeliveryStaffId && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)
+                .Include(sds => sds.Account).SingleOrDefault();
             if (shopDeliveryStaff == null || shopDeliveryStaff.ShopId != _currentPrincipalService.CurrentPrincipalId)
                 throw new InvalidBusinessException(MessageCode.E_ORDER_ASSIGN_NOT_FOUND_SHOP_STAFF.GetDescription(), new object[] { request.ShopDeliveryStaffId.Value });
+
+            if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.Offline)
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_OFFLINE_STATUS.GetDescription(), new object[] { request.ShopDeliveryStaffId });
+
+            if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status == AccountStatus.Deleted)
+                throw new InvalidBusinessException(MessageCode.E_SHOP_DELIVERY_STAFF_NOT_FOUND.GetDescription(), new object[] { request.ShopDeliveryStaffId });
+
+            if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status != AccountStatus.Deleted)
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_ACTIVE.GetDescription(), new object[] { request.ShopDeliveryStaffId });
         }
     }
 }
