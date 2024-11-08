@@ -90,7 +90,9 @@ public class VerifyCodeHandler : ICommandHandler<VerifyCodeCommand, Result>
 
                     return Result.Success(new
                     {
-                        Code = MessageCode.I_ACCOUNT_SEND_VERIFY_CODE_SUCCESS.GetDescription(),
+                        Code = request.VerifyType != VerifyType.ForgotPassword
+                            ? MessageCode.I_ACCOUNT_VERIFY_SUCCESS.GetDescription()
+                            : MessageCode.I_ACCOUNT_CHANGE_PASSWORD_SUCCESS.GetDescription(),
                         Message = _systemResourceRepository.GetByResourceCode(request.VerifyType != VerifyType.ForgotPassword
                             ? MessageCode.I_ACCOUNT_VERIFY_SUCCESS.GetDescription()
                             : MessageCode.I_ACCOUNT_CHANGE_PASSWORD_SUCCESS.GetDescription()),

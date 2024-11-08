@@ -10,4 +10,8 @@ public enum VerificationCodeTypes
     ForgotPassword = 2,
     [Description("Withdrawal")]
     Withdrawal = 3,
+    [Description("VerifyOldEmail")]
+    VerifyOldEmail = 4,
+    [Description("UpdateEmail")]
+    UpdateEmail = 5,
 }

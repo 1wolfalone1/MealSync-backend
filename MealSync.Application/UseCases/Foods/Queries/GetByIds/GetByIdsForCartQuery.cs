@@ -13,8 +13,6 @@ public class GetByIdsForCartQuery : IQuery<Result>
 
     public class OrderTimeQuery
     {
-        public bool IsOrderNextDay { get; set; }
-
         public int StartTime { get; set; }
 
         public int EndTime { get; set; }

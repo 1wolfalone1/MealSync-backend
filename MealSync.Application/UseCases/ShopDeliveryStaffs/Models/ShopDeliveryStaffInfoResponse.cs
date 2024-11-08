@@ -16,8 +16,6 @@ public class ShopDeliveryStaffInfoResponse
 
     public Genders Genders { get; set; }
 
-    public AccountStatus AccountStatus { get; set; }
-
     public ShopDeliveryStaffStatus ShopDeliveryStaffStatus { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }

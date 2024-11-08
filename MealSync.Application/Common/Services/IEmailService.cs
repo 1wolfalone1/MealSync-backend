@@ -6,6 +6,10 @@ public interface IEmailService
 
     bool SendVerificationCodeForgotPassword(string email, string code);
 
+    bool SendVerificationCodeOldEmail(string email, string code);
+
+    bool SendVerificationCodeUpdateEmail(string email, string code);
+
     bool SendEmailToAnnounceWarningForShop(string email, int numberOfWarning);
 
     bool SendEmailToAnnounceApplyFlagForShop(string email, int flag);

@@ -9,7 +9,7 @@ public interface IShopRepository : IBaseRepository<Shop>
 
     Task<Shop> GetByAccountId(long id);
 
-    Task<Shop?> GetShopInfoById(long id);
+    Task<Shop?> GetShopInfoByIdForCustomer(long id);
 
     Task<(int TotalCount, IEnumerable<Shop> Shops)> GetTopShop(long dormitoryId, int pageIndex, int pageSize);
 
@@ -20,4 +20,6 @@ public interface IShopRepository : IBaseRepository<Shop>
         int? startTime, int? endTime, int foodSize,
         SearchShopQuery.OrderBy? orderBy, SearchShopQuery.Direction direction,
         int pageIndex, int pageSize);
+
+    Task<Shop> GetShopInfoByIdForShop(long id);
 }
