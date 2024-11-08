@@ -50,6 +50,24 @@ public enum MessageCode
     [Description("I-Account-ChangePasswordSuccess")]
     I_ACCOUNT_CHANGE_PASSWORD_SUCCESS,
 
+    [Description("E-Account-InvalidOldPassword")]
+    E_ACCOUNT_INVALID_OLD_PASSWORD,
+
+    [Description("I-Account-UpdatePasswordSuccess")]
+    I_ACCOUNT_UPDATE_PASSWORD_SUCCESS,
+
+    [Description("I-Account-SendVerifyCodeOldEmailSuccess")]
+    I_ACCOUNT_SEND_VERIFY_CODE_OLD_EMAIL_SUCCESS,
+
+    [Description("I-Account-SendVerifyCodeUpdateEmailSuccess")]
+    I_ACCOUNT_SEND_VERIFY_CODE_UPDATE_EMAIL_SUCCESS,
+
+    [Description("I-Account-UpdateEmailSuccess")]
+    I_ACCOUNT_UPDATE_EMAIL_SUCCESS,
+
+    [Description("E-Account-EmailUpdateMustDifferPresent")]
+    E_ACCOUNT_EMAIL_UPDATE_MUST_DIFFER_PRESENT,
+
     // Platform Category
     [Description("E-PlatformCategory-NotFound")]
     E_PLATFORM_CATEGORY_NOT_FOUND,
@@ -243,6 +261,12 @@ public enum MessageCode
 
     [Description("I-Shop-SetAutoConfirmConditionSucess")]
     I_SHOP_SET_AUTO_CONFIRM_CONDITION_SUCCESS,
+
+    [Description("I-Shop-UpdateLogoSuccess")]
+    I_SHOP_UPDATE_LOGO_SUCCESS,
+
+    [Description("I-Shop-UpdateBannerSuccess")]
+    I_SHOP_UPDATE_BANNER_SUCCESS,
 
     // Food option group
     [Description("E-FoodOptionGroup-AlreadyLink")]
@@ -508,4 +532,19 @@ public enum MessageCode
     //Shop Delivery Staff
     [Description("E-ShopDeliveryStaff-Not-Found")]
     E_SHOP_DELIVERY_STAFF_NOT_FOUND,
+
+    [Description("W-ShopDeliveryStaff-Status-To-Online")]
+    W_SHOP_DELIVERY_STAFF_STATUS_TO_ONLINE,
+
+    [Description("W-ShopDeliveryStaff-Status-To-Offline")]
+    W_SHOP_DELIVERY_STAFF_STATUS_TO_OFFLINE,
+
+    [Description("W-ShopDeliveryStaff-Status-To-InActive")]
+    W_SHOP_DELIVERY_STAFF_STATUS_TO_INACTIVE,
+
+    [Description("W-ShopDeliveryStaff-Account-To-Deleted")]
+    W_SHOP_DELIVERY_STAFF_ACCOUNT_TO_DELETED,
+
+    [Description("I-ShopDeliveryStaff-Delete-Success")]
+    I_SHOP_DELIVERY_STAFF_DELETE_SUCCESS,
 }

@@ -13,37 +13,69 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
     private readonly IFoodRepository _foodRepository;
     private readonly IOptionGroupRepository _optionGroupRepository;
     private readonly IOperatingSlotRepository _operatingSlotRepository;
+    private readonly IShopRepository _shopRepository;
 
-    public GetByIdsForCartHandler(IFoodRepository foodRepository, IOptionGroupRepository optionGroupRepository, IOperatingSlotRepository operatingSlotRepository)
+    public GetByIdsForCartHandler(
+        IFoodRepository foodRepository, IOptionGroupRepository optionGroupRepository,
+        IOperatingSlotRepository operatingSlotRepository, IShopRepository shopRepository)
     {
         _foodRepository = foodRepository;
         _optionGroupRepository = optionGroupRepository;
         _operatingSlotRepository = operatingSlotRepository;
+        _shopRepository = shopRepository;
     }
 
     public async Task<Result<Result>> Handle(GetByIdsForCartQuery request, CancellationToken cancellationToken)
     {
         var idsNotFound = new List<string>();
+        var foodCartCheckResponse = new FoodCartCheckResponse();
         var foodsResponses = new List<FoodCartCheckResponse.DetailFoodResponse>();
+        var shop = _shopRepository.GetById(request.ShopId)!;
         var shopOperatingSlot = await _operatingSlotRepository.GetAvailableForTimeRangeOrder(
                 request.ShopId, request.OrderTime.StartTime, request.OrderTime.EndTime)
             .ConfigureAwait(false);
 
+        if (shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned || shop.Status == ShopStatus.Deleted || shop.Status == ShopStatus.UnApprove)
+        {
+            foodCartCheckResponse.IsRemoveAllCart = true;
+            foodCartCheckResponse.IsReceivingOrderPaused = false;
+            foodCartCheckResponse.MessageForAllCart = "Cửa hàng đã không còn hoạt động.";
+            foodCartCheckResponse.IsPresentFoodNeedRemoveToday = false;
+            foodCartCheckResponse.MessageFoodRemoveToday = default;
+            foodCartCheckResponse.IdsNotFoundToday = default;
+            foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
+            foodCartCheckResponse.MessageFoodRemoveTomorrow = default;
+            foodCartCheckResponse.IdsNotFoundTomorrow = default;
+            foodCartCheckResponse.Foods = foodsResponses;
+        }
+        else if (shop.Status == ShopStatus.InActive)
+        {
+            foodCartCheckResponse.IsRemoveAllCart = false;
+            foodCartCheckResponse.IsReceivingOrderPaused = true;
+            foodCartCheckResponse.MessageForAllCart = "Cửa hàng đã đóng cửa, bạn không thể đặt đồ ăn vào bây giờ.";
+        }
+        else if (shop.IsReceivingOrderPaused)
+        {
+            foodCartCheckResponse.IsRemoveAllCart = false;
+            foodCartCheckResponse.IsReceivingOrderPaused = true;
+            foodCartCheckResponse.MessageForAllCart = "Cửa hàng đang tạm ngưng nhận hàng, bạn không thể đặt đồ ăn vào bây giờ.";
+        }
+        else if (shop.IsAcceptingOrderNextDay)
+        {
+
+        }
         if (shopOperatingSlot == default)
         {
             return Result.Success(new FoodCartCheckResponse
             {
                 Foods = foodsResponses,
-                IdNotFounds = request.Foods.Select(f => f.Id).ToList(),
+                IdsNotFoundToday = request.Foods.Select(f => f.Id).ToList(),
+                IdsNotFoundTomorrow = request.Foods.Select(f => f.Id).ToList(),
             });
         }
-        else if (!request.OrderTime.IsOrderNextDay && shopOperatingSlot.IsReceivingOrderPaused)
+        else if (shopOperatingSlot.IsReceivingOrderPaused)
         {
-            return Result.Success(new FoodCartCheckResponse
-            {
-                Foods = foodsResponses,
-                IdNotFounds = request.Foods.Select(f => f.Id).ToList(),
-            });
+            foodCartCheckResponse.IdsNotFoundToday = request.Foods.Select(f => f.Id).ToList();
         }
 
         foreach (var foodRequest in request.Foods)
@@ -169,7 +201,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
         return Result.Success(new FoodCartCheckResponse
         {
             Foods = foodsResponses,
-            IdNotFounds = idsNotFound,
+            IdsNotFoundToday = idsNotFound,
         });
     }
 }

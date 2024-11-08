@@ -1,10 +1,15 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
+using MealSync.Application.UseCases.ShopOwners.Commands.SendVerifyUpdateEmail;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdatePassword;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopBanner;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopLogo;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopProfile;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAcceptOrderNextDays;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAutoConfirmConditions;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAutoConfirms;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopStatus;
+using MealSync.Application.UseCases.ShopOwners.Commands.VerifyUpdateEmail;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatistics;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatisticSummary;
@@ -91,7 +96,7 @@ public class ShopController : BaseApiController
 
     [HttpPut(Endpoints.UPDATE_SHOP_IS_AUTO_CONFIRM)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult>UpdateShopSettingIsAutoConfirmShop([FromBody] UpdateShopSettingAutoConfirmCommand command)
+    public async Task<IActionResult> UpdateShopSettingIsAutoConfirmShop([FromBody] UpdateShopSettingAutoConfirmCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
@@ -99,6 +104,41 @@ public class ShopController : BaseApiController
     [HttpPut(Endpoints.UPDATE_SHOP_IS_AUTO_CONFIRM_CONDITION)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> UpdateShopSettingAutoConfirmConditionShop([FromBody] UpdateShopSettingAutoConfirmConditionCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.SEND_VERIFY_UPDATE_SHOP_EMAIL)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> SendVerifyUpdateEmail([FromBody] SendVerifyUpdateEmailCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.VERIFY_UPDATE_SHOP_EMAIL)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> VerifyUpdateEmail([FromBody] VerifyUpdateEmailCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_SHOP_PASSWORD)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_SHOP_BANNER)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateShopBanner([FromBody] UpdateShopBannerCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_SHOP_LOGO)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateShopLogo([FromBody] UpdateShopLogoCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }

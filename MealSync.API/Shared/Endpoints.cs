@@ -26,6 +26,11 @@ public static class Endpoints
     public const string UPDATE_SHOP_IS_ACCEPT_ORDER_NEXT_DAY = "shop-owner/is-accept-order-next-day";
     public const string UPDATE_SHOP_IS_AUTO_CONFIRM = "shop-owner/is-auto-confirm";
     public const string UPDATE_SHOP_IS_AUTO_CONFIRM_CONDITION = "shop-owner/is-auto-confirm-condition";
+    public const string SEND_VERIFY_UPDATE_SHOP_EMAIL = "shop-owner/update/email/send-verify";
+    public const string VERIFY_UPDATE_SHOP_EMAIL = "shop-owner/update/email/verify";
+    public const string UPDATE_SHOP_PASSWORD = "shop-owner/password/update";
+    public const string UPDATE_SHOP_BANNER = "shop-owner/banner/update";
+    public const string UPDATE_SHOP_LOGO = "shop-owner/logo/update";
 
     // Shop Owner For Web
     public const string GET_FOOD_FOR_WEB = "web/shop-owner/food";
@@ -68,6 +73,9 @@ public static class Endpoints
     public const string CREATE_SHOP_DELIVERY_STAFF = "shop-owner/delivery-staff/create";
     public const string GET_SHOP_DELIVER_STAFF_OF_SHOP = "shop-owner/delivery-staff";
     public const string GET_DETAIL_SHOP_DELIVER_STAFF = "shop-owner/delivery-staff/{id:long}";
+    public const string UPDATE_INFO_SHOP_DELIVERY_STAFF = "shop-owner/delivery-staff/info";
+    public const string UPDATE_STATUS_SHOP_DELIVERY_STAFF = "shop-owner/delivery-staff/status";
+    public const string DELETE_SHOP_DELIVERY_STAFF = "shop-owner/delivery-staff/delete";
 
     // Dormitory
     public const string ALL_DORMITORY = "dormitory/all";

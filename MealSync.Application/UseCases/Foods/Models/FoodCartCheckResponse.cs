@@ -4,9 +4,27 @@ namespace MealSync.Application.UseCases.Foods.Models;
 
 public class FoodCartCheckResponse
 {
-    public List<DetailFoodResponse> Foods { get; set; }
+    public List<string> IdsRequest { get; set; }
 
-    public List<string> IdNotFounds { get; set; }
+    public bool IsRemoveAllCart { get; set; }
+
+    public bool IsReceivingOrderPaused { get; set; }
+
+    public string MessageForAllCart { get; set; }
+
+    public bool IsPresentFoodNeedRemoveToday { get; set; }
+
+    public string? MessageFoodRemoveToday { get; set; }
+
+    public List<string>? IdsNotFoundToday { get; set; }
+
+    public bool IsPresentFoodNeedRemoveTomorrow { get; set; }
+
+    public string? MessageFoodRemoveTomorrow { get; set; }
+
+    public List<string>? IdsNotFoundTomorrow { get; set; }
+
+    public List<DetailFoodResponse> Foods { get; set; }
 
     public class DetailFoodResponse
     {
