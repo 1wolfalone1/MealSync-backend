@@ -62,10 +62,6 @@ public class GetByIdsForCartValidate : AbstractValidator<GetByIdsForCartQuery>
             RuleFor(x => x)
                 .Must(x => x.EndTime > x.StartTime && TimeUtils.IsValidOperatingSlot(x.EndTime) && TimeUtils.IsThirtyMinuteDifference(x.StartTime, x.EndTime))
                 .WithMessage($"Thời gian kết thúc bằng thời gian bắt đầu cộng {FrameConstant.TIME_FRAME_IN_MINUTES} phút.");
-
-            // Future orders validation (if order is for the next day)
-            RuleFor(x => x.IsOrderNextDay)
-                .NotNull().WithMessage("Phải xác định rõ có phải là đơn hàng cho ngày tiếp theo hay không.");
         }
     }
 }

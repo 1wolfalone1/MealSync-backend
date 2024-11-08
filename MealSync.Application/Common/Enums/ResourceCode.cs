@@ -11,11 +11,23 @@ public enum ResourceCode
     [Description("Email-RegisterVerification")]
     EMAIL_REGISTER_VERIFICATION,
 
+    [Description("Email-SubjectForgotPasswordVerification")]
+    EMAIL_SUBJECT_FORGOT_PASSWORD_VERIFICATION,
+
     [Description("Email-ForgotPasswordVerification")]
     EMAIL_FORGOT_PASSWORD_VERIFICATION,
 
-    [Description("Email-SubjectForgotPasswordVerification")]
-    EMAIL_SUBJECT_FORGOT_PASSWORD_VERIFICATION,
+    [Description("Email-SubjectOldEmailVerification")]
+    EMAIL_SUBJECT_OLD_EMAIL_VERIFICATION,
+
+    [Description("Email-OldEmailVerification")]
+    EMAIL_OLD_EMAIL_VERIFICATION,
+
+    [Description("Email-SubjectUpdateEmailVerification")]
+    EMAIL_SUBJECT_UPDATE_EMAIL_VERIFICATION,
+
+    [Description("Email-UpdateEmailVerification")]
+    EMAIL_UPDATE_EMAIL_VERIFICATION,
 
     [Description("Email-Subject-AnnounceWarningForShop")]
     EMAIL_SUBJECT_ANNOUCE_WARNING_FOR_SHOP,

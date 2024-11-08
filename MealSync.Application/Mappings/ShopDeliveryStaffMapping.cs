@@ -9,7 +9,6 @@ public class ShopDeliveryStaffMapping : Profile
     public ShopDeliveryStaffMapping()
     {
         CreateMap<Account, ShopDeliveryStaffInfoResponse>()
-            .ForMember(dest => dest.AccountStatus, opt => opt.MapFrom(src => src.Status))
             .ForMember(dest => dest.ShopDeliveryStaffStatus, opt => opt.MapFrom(src => src.ShopDeliveryStaff!.Status));
 
         CreateMap<ShopDeliveryStaff, ShopDeliveryStaffInfoResponse>()
@@ -19,7 +18,6 @@ public class ShopDeliveryStaffMapping : Profile
             .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(src => src.Account.AvatarUrl))
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Account.FullName))
             .ForMember(dest => dest.Genders, opt => opt.MapFrom(src => src.Account.Genders))
-            .ForMember(dest => dest.AccountStatus, opt => opt.MapFrom(src => src.Account.Status))
             .ForMember(dest => dest.ShopDeliveryStaffStatus, opt => opt.MapFrom(src => src.Status))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
             .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => src.UpdatedDate));

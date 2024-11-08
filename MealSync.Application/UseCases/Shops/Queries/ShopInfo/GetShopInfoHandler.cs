@@ -23,7 +23,7 @@ public class GetShopInfoHandler : IQueryHandler<GetShopInfoQuery, Result>
 
     public async Task<Result<Result>> Handle(GetShopInfoQuery request, CancellationToken cancellationToken)
     {
-        var shop = await _shopRepository.GetShopInfoById(request.ShopId).ConfigureAwait(false);
+        var shop = await _shopRepository.GetShopInfoByIdForCustomer(request.ShopId).ConfigureAwait(false);
 
         if (shop == default)
         {

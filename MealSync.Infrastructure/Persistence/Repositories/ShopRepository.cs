@@ -58,7 +58,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
         return DbSet.Include(s => s.Location).FirstOrDefaultAsync(s => s.Id == id);
     }
 
-    public async Task<Shop?> GetShopInfoById(long id)
+    public async Task<Shop?> GetShopInfoByIdForCustomer(long id)
     {
         return await DbSet
             .Where(s => s.OperatingSlots.Any(os => os.IsActive))
@@ -209,6 +209,16 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             .ConfigureAwait(false);
 
         return (totalCount, shops);
+    }
+
+    public Task<Shop> GetShopInfoByIdForShop(long id)
+    {
+        return DbSet
+            .Include(s => s.OperatingSlots)
+            .Include(s => s.Location)
+            .Include(s => s.ShopDormitories)
+            .ThenInclude(sd => sd.Dormitory)
+            .FirstAsync(s => s.Id == id);
     }
 
     private static string EscapeLikeParameter(string input)

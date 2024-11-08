@@ -58,7 +58,7 @@ public class CreateDeliveryStaffHandler : ICommandHandler<CreateDeliveryStaffCom
             var shopDeliveryStaff = new ShopDeliveryStaff
             {
                 ShopId = shopId,
-                Status = ShopDeliveryStaffStatus.Offline,
+                Status = request.ShopDeliveryStaffStatus,
             };
             var newAccount = new Account
             {

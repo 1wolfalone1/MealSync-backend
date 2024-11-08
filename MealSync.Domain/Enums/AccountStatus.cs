@@ -7,4 +7,3 @@ public enum AccountStatus
     Banned = 3,
     Deleted = 4,
 }
-

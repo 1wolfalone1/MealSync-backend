@@ -44,7 +44,7 @@ public class ShopDeliveryStaffRepository : BaseRepository<ShopDeliveryStaff>, IS
         long shopId, string? searchValue, ShopDeliveryStaffStatus? status, int pageIndex, int pageSize)
     {
         var query = DbSet.Include(sds => sds.Account)
-            .Where(sds => sds.ShopId == shopId).AsQueryable();
+            .Where(sds => sds.ShopId == shopId && sds.Account.Status != AccountStatus.Deleted).AsQueryable();
 
         if (status.HasValue)
         {
@@ -70,7 +70,8 @@ public class ShopDeliveryStaffRepository : BaseRepository<ShopDeliveryStaff>, IS
 
     public Task<ShopDeliveryStaff?> GetByIdAndShopId(long id, long shopId)
     {
-        return DbSet.Include(sds => sds.Account).FirstOrDefaultAsync(sds => sds.Id == id && sds.ShopId == shopId);
+        return DbSet.Include(sds => sds.Account)
+            .FirstOrDefaultAsync(sds => sds.Id == id && sds.ShopId == shopId && sds.Account.Status != AccountStatus.Deleted);
     }
 
     private static string EscapeLikeParameter(string input)
