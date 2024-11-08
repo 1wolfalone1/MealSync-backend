@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Domain.Entities;
@@ -34,5 +35,6 @@ public class Notification : BaseEntity
 
     public bool IsRead { get; set; }
 
+    [JsonIgnore]
     public virtual Account Account { get; set; }
 }

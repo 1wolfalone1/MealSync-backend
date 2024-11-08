@@ -13,14 +13,16 @@ public class NotifierService : INotifierService
     private readonly INotificationProvider _notificationProvider;
     private readonly ILogger<NotifierService> _logger;
     private readonly IMobileNotificationService _mobileNotificationService;
+    private readonly IWebNotificationService _webNotificationService;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public NotifierService(INotificationProvider notificationProvider, ILogger<NotifierService> logger, IMobileNotificationService mobileNotificationService, IServiceScopeFactory serviceScopeFactory)
+    public NotifierService(INotificationProvider notificationProvider, ILogger<NotifierService> logger, IMobileNotificationService mobileNotificationService, IServiceScopeFactory serviceScopeFactory, IWebNotificationService webNotificationService)
     {
         _notificationProvider = notificationProvider;
         _logger = logger;
         _mobileNotificationService = mobileNotificationService;
         _serviceScopeFactory = serviceScopeFactory;
+        _webNotificationService = webNotificationService;
 
         _notificationProvider.Attach(NotificationTypes.SendToCustomer, new List<INotificationService>()
         {
@@ -30,14 +32,17 @@ public class NotifierService : INotifierService
         _notificationProvider.Attach(NotificationTypes.SendToShop, new List<INotificationService>()
         {
             _mobileNotificationService,
+            _webNotificationService,
         });
 
         _notificationProvider.Attach(NotificationTypes.SendToModerator, new List<INotificationService>()
         {
+            _webNotificationService,
         });
 
         _notificationProvider.Attach(NotificationTypes.SendToAdmin, new List<INotificationService>()
         {
+            _webNotificationService,
         });
     }
 
