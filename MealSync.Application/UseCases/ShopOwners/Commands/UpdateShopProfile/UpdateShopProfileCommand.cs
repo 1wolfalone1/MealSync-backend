@@ -7,7 +7,7 @@ public class UpdateShopProfileCommand : ICommand<Result>
 {
     public string ShopName { get; set; }
 
-    public string ShopOnwerName { get; set; }
+    public string ShopOwnerName { get; set; }
 
     public long[] DormitoryIds { get; set; }
 
@@ -29,7 +29,7 @@ public class UpdateShopProfileCommand : ICommand<Result>
 
         public double Latitude { get; set; }
 
-        public double Longtiude { get; set; }
+        public double Longitude { get; set; }
     }
 }
 

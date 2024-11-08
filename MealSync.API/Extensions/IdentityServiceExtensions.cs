@@ -12,6 +12,7 @@ using MealSync.Infrastructure.Persistence.Repositories;
 using MealSync.Infrastructure.Services;
 using MealSync.Infrastructure.Services.Dapper;
 using MealSync.Infrastructure.Services.Notifications;
+using MealSync.Infrastructure.Services.Notifications.Kafka;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MealSync.Infrastructure.Settings;
@@ -161,6 +162,7 @@ public static class IdentityServiceExtensions
 
         // Add notification service
         services.AddSingleton<IMobileNotificationService, FirebaseNotificationService>();
+        services.AddSingleton<IWebNotificationService, KafkaPushNotificationService>();
         services.AddSingleton<INotificationProvider, NotificationProvider>();
         services.AddSingleton<INotifierService, NotifierService>();
         services.AddSingleton<INotificationFactory, NotificationFactory>();
