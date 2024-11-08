@@ -103,7 +103,7 @@ public class UpdateShopProfileHandler : ICommandHandler<UpdateShopProfileCommand
         // Update shop location
         shop.Location.Address = request.Location.Address;
         shop.Location.Latitude = request.Location.Latitude;
-        shop.Location.Longitude = request.Location.Longtiude;
+        shop.Location.Longitude = request.Location.Longitude;
 
         _shopRepository.Update(shop);
     }
@@ -111,7 +111,7 @@ public class UpdateShopProfileHandler : ICommandHandler<UpdateShopProfileCommand
     private Task UpdateShopAccount(UpdateShopProfileCommand request)
     {
         var account = _accountRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
-        account.FullName = request.ShopOnwerName;
+        account.FullName = request.ShopOwnerName;
         _accountRepository.Update(account);
         return Task.CompletedTask;
     }
