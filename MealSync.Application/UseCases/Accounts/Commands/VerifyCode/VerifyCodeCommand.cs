@@ -6,6 +6,8 @@ namespace MealSync.Application.UseCases.Accounts.Commands.VerifyCode;
 
 public class VerifyCodeCommand : ICommand<Result>
 {
+    public bool IsVerify { get; set; }
+
     public string Email { get; set; } = null!;
 
     public int Code { get; set; }

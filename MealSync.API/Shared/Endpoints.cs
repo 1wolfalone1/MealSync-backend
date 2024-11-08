@@ -27,7 +27,8 @@ public static class Endpoints
     public const string UPDATE_SHOP_IS_AUTO_CONFIRM = "shop-owner/is-auto-confirm";
     public const string UPDATE_SHOP_IS_AUTO_CONFIRM_CONDITION = "shop-owner/is-auto-confirm-condition";
     public const string SEND_VERIFY_UPDATE_SHOP_EMAIL = "shop-owner/update/email/send-verify";
-    public const string VERIFY_UPDATE_SHOP_EMAIL = "shop-owner/update/email/verify";
+    public const string VERIFY_OLD_EMAIL = "shop-owner/email/verify";
+    public const string UPDATE_SHOP_EMAIL = "shop-owner/email/update";
     public const string UPDATE_SHOP_PASSWORD = "shop-owner/password/update";
     public const string UPDATE_SHOP_BANNER = "shop-owner/banner/update";
     public const string UPDATE_SHOP_LOGO = "shop-owner/logo/update";

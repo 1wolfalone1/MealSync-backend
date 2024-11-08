@@ -131,4 +131,11 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
 
         return (total, results);
     }
+
+    public Task<bool> CheckHaveInDeliveryPackageNotDone(long shopDeliveryStaffId)
+    {
+        return DbSet
+            .Where(dp => dp.ShopDeliveryStaffId == shopDeliveryStaffId && dp.Status != DeliveryPackageStatus.Done)
+            .AnyAsync(dp => dp.Orders.Any(o => o.Status == OrderStatus.Preparing || o.Status == OrderStatus.Delivering));
+    }
 }

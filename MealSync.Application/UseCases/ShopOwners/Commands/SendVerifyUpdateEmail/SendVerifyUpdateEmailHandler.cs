@@ -69,19 +69,14 @@ public class SendVerifyUpdateEmailHandler : ICommandHandler<SendVerifyUpdateEmai
 
     private void SendVerificationCode(string oldEmail, string newEmail, bool isVerifyOldEmail)
     {
-        var code = new Random().Next(1000, 10000);
-        var verifyUpdateEmailDto = new VerifyUpdateEmailDto
-        {
-            Code = code,
-            Email = isVerifyOldEmail ? oldEmail : newEmail,
-        };
+        var code = new Random().Next(1000, 10000).ToString();
 
         _cacheService.SetCacheResponseAsync(
             GenerateCacheKey(isVerifyOldEmail ? VerificationCodeTypes.VerifyOldEmail : VerificationCodeTypes.UpdateEmail, isVerifyOldEmail ? oldEmail : newEmail),
-            verifyUpdateEmailDto,
+            code,
             TimeSpan.FromSeconds(RedisConstant.TIME_VERIFY_CODE_LIVE * 10));
 
-        var isSendMail = isVerifyOldEmail ? _emailService.SendVerificationCodeUpdateEmail(oldEmail, code.ToString()) : _emailService.SendVerificationCodeOldEmail(newEmail, code.ToString());
+        var isSendMail = isVerifyOldEmail ? _emailService.SendVerificationCodeUpdateEmail(oldEmail, code) : _emailService.SendVerificationCodeOldEmail(newEmail, code);
         if (!isSendMail)
         {
             throw new("Internal Server Error");

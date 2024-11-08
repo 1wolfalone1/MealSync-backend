@@ -15,19 +15,22 @@ public class DeleteDeliveryStaffHandler : ICommandHandler<DeleteDeliveryStaffCom
 {
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
+    private readonly IDeliveryPackageRepository _deliveryPackageRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly ILogger<DeleteDeliveryStaffHandler> _logger;
 
     public DeleteDeliveryStaffHandler(
         IShopDeliveryStaffRepository shopDeliveryStaffRepository, ISystemResourceRepository systemResourceRepository,
-        IUnitOfWork unitOfWork, ICurrentPrincipalService currentPrincipalService, ILogger<DeleteDeliveryStaffHandler> logger)
+        IUnitOfWork unitOfWork, ICurrentPrincipalService currentPrincipalService, ILogger<DeleteDeliveryStaffHandler> logger,
+        IDeliveryPackageRepository deliveryPackageRepository)
     {
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
         _systemResourceRepository = systemResourceRepository;
         _unitOfWork = unitOfWork;
         _currentPrincipalService = currentPrincipalService;
         _logger = logger;
+        _deliveryPackageRepository = deliveryPackageRepository;
     }
 
     public async Task<Result<Result>> Handle(DeleteDeliveryStaffCommand request, CancellationToken cancellationToken)
@@ -51,6 +54,15 @@ public class DeleteDeliveryStaffHandler : ICommandHandler<DeleteDeliveryStaffCom
             }
             else
             {
+                if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.Online)
+                {
+                    var haveNotDone = await _deliveryPackageRepository.CheckHaveInDeliveryPackageNotDone(shopDeliveryStaff.Id).ConfigureAwait(false);
+                    if (haveNotDone)
+                    {
+                        throw new InvalidBusinessException(MessageCode.E_SHOP_DELIVERY_STAFF_IN_DELIVERY_PACKAGE.GetDescription());
+                    }
+                }
+
                 try
                 {
                     await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
