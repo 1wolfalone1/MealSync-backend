@@ -7,7 +7,7 @@ public class VerifyCodeValidate : AbstractValidator<VerifyCodeCommand>
 {
     public VerifyCodeValidate()
     {
-        When(v => v.VerifyType == VerifyType.ForgotPassword, () =>
+        When(v => v.VerifyType == VerifyType.ForgotPassword && !v.IsVerify, () =>
         {
             RuleFor(v => v.Password)
                 .NotEmpty()

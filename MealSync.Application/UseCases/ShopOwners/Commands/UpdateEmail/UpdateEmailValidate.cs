@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace MealSync.Application.UseCases.ShopOwners.Commands.VerifyUpdateEmail;
+namespace MealSync.Application.UseCases.ShopOwners.Commands.UpdateEmail;
 
-public class VerifyUpdateEmailValidate : AbstractValidator<VerifyUpdateEmailCommand>
+public class UpdateEmailValidate : AbstractValidator<UpdateEmailCommand>
 {
-    public VerifyUpdateEmailValidate()
+    public UpdateEmailValidate()
     {
         RuleFor(a => a.NewEmail)
             .NotEmpty()

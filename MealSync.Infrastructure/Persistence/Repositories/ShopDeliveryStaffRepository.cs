@@ -62,7 +62,7 @@ public class ShopDeliveryStaffRepository : BaseRepository<ShopDeliveryStaff>, IS
         }
 
         var totalCount = await query.CountAsync().ConfigureAwait(false);
-        query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+        query = query.OrderByDescending(sds => sds.CreatedDate).Skip((pageIndex - 1) * pageSize).Take(pageSize);
         var shopDeliveryStaffs = await query.ToListAsync().ConfigureAwait(false);
 
         return (totalCount, shopDeliveryStaffs);

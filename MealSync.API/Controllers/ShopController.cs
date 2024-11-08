@@ -1,6 +1,7 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.ShopOwners.Commands.SendVerifyUpdateEmail;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdateEmail;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdatePassword;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopBanner;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopLogo;
@@ -9,7 +10,7 @@ using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAcceptO
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAutoConfirmConditions;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopSettingAutoConfirms;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopStatus;
-using MealSync.Application.UseCases.ShopOwners.Commands.VerifyUpdateEmail;
+using MealSync.Application.UseCases.ShopOwners.Commands.VerifyAccountForUpdate;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatistics;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatisticSummary;
@@ -115,9 +116,16 @@ public class ShopController : BaseApiController
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
-    [HttpPut(Endpoints.VERIFY_UPDATE_SHOP_EMAIL)]
+    [HttpPut(Endpoints.VERIFY_OLD_EMAIL)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> VerifyUpdateEmail([FromBody] VerifyUpdateEmailCommand command)
+    public async Task<IActionResult> VerifyOldEmail([FromBody] VerifyAccountForUpdateCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_SHOP_EMAIL)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateEmail([FromBody] UpdateEmailCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
