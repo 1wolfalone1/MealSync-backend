@@ -2,29 +2,29 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
-using MealSync.Application.UseCases.Accounts.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace MealSync.Application.UseCases.ShopOwners.Commands.VerifyUpdateEmail;
+namespace MealSync.Application.UseCases.ShopOwners.Commands.UpdateEmail;
 
-public class VerifyUpdateEmailHandler : ICommandHandler<VerifyUpdateEmailCommand, Result>
+public class UpdateEmailHandler : ICommandHandler<UpdateEmailCommand, Result>
 {
     private readonly IAccountRepository _accountRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly ICacheService _cacheService;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<VerifyUpdateEmailHandler> _logger;
+    private readonly ILogger<UpdateEmailHandler> _logger;
 
-    public VerifyUpdateEmailHandler(
+    public UpdateEmailHandler(
         IAccountRepository accountRepository, ISystemResourceRepository systemResourceRepository,
         ICacheService cacheService, ICurrentPrincipalService currentPrincipalService,
-        IUnitOfWork unitOfWork, ILogger<VerifyUpdateEmailHandler> logger)
+        IUnitOfWork unitOfWork, ILogger<UpdateEmailHandler> logger)
     {
         _accountRepository = accountRepository;
         _systemResourceRepository = systemResourceRepository;
@@ -34,7 +34,7 @@ public class VerifyUpdateEmailHandler : ICommandHandler<VerifyUpdateEmailCommand
         _logger = logger;
     }
 
-    public async Task<Result<Result>> Handle(VerifyUpdateEmailCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(UpdateEmailCommand request, CancellationToken cancellationToken)
     {
         var shopId = _currentPrincipalService.CurrentPrincipalId!.Value;
         var shopAccount = _accountRepository.GetById(shopId)!;
@@ -63,12 +63,14 @@ public class VerifyUpdateEmailHandler : ICommandHandler<VerifyUpdateEmailCommand
                     throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_VERIFY_CODE.GetDescription());
                 }
 
-                var verifyOldEmailDto = JsonConvert.DeserializeObject<VerifyUpdateEmailDto>(cachedValueOldEmail);
-                var verifyUpdateEmailDto = JsonConvert.DeserializeObject<VerifyUpdateEmailDto>(cachedValueUpdateEmail);
+                var codeOldEmail = JsonConvert.DeserializeObject<string>(cachedValueOldEmail);
+                var codeUpdateEmail = JsonConvert.DeserializeObject<string>(cachedValueUpdateEmail);
 
-                if (
-                    verifyOldEmailDto == default || verifyOldEmailDto.Code != request.CodeVerifyOldEmail || verifyOldEmailDto.Email != shopAccount.Email ||
-                    verifyUpdateEmailDto == default || verifyUpdateEmailDto.Code != request.CodeVerifyNewEmail || verifyUpdateEmailDto.Email != request.NewEmail)
+                if (codeOldEmail == default || !BCrypUnitls.Verify(request.CodeVerifyOldEmail.ToString(), codeOldEmail))
+                {
+                    throw new InvalidBusinessException(MessageCode.E_ACCOUNT_UPDATE_EMAIL_OVERDUE.GetDescription());
+                }
+                else if (codeUpdateEmail == default || codeUpdateEmail != request.CodeVerifyNewEmail.ToString())
                 {
                     throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_VERIFY_CODE.GetDescription());
                 }

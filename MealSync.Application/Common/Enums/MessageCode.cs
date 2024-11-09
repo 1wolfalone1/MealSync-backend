@@ -47,6 +47,15 @@ public enum MessageCode
     [Description("I-Account-VerifySuccess")]
     I_ACCOUNT_VERIFY_SUCCESS,
 
+    [Description("I-Account-VerifyForUpdatePassSuccess")]
+    I_ACCOUNT_VERIFY_FOR_UPDATE_PASS_SUCCESS,
+
+    [Description("I-Account-VerifyOldEmailSuccess")]
+    I_ACCOUNT_VERIFY_OLD_EMAIL_SUCCESS,
+
+    [Description("E-Account-UpdateEmailOverdue")]
+    E_ACCOUNT_UPDATE_EMAIL_OVERDUE,
+
     [Description("I-Account-ChangePasswordSuccess")]
     I_ACCOUNT_CHANGE_PASSWORD_SUCCESS,
 
@@ -553,4 +562,7 @@ public enum MessageCode
 
     [Description("I-ShopDeliveryStaff-Delete-Success")]
     I_SHOP_DELIVERY_STAFF_DELETE_SUCCESS,
+
+    [Description("E-ShopDeliveryStaff-In-Delivery-Package")]
+    E_SHOP_DELIVERY_STAFF_IN_DELIVERY_PACKAGE,
 }

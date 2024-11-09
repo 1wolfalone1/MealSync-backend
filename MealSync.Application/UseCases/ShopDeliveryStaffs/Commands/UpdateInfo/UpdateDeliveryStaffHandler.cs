@@ -15,6 +15,7 @@ public class UpdateDeliveryStaffHandler : ICommandHandler<UpdateDeliveryStaffCom
 {
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly IDeliveryPackageRepository _deliveryPackageRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IMapper _mapper;
@@ -23,7 +24,7 @@ public class UpdateDeliveryStaffHandler : ICommandHandler<UpdateDeliveryStaffCom
     public UpdateDeliveryStaffHandler(
         IShopDeliveryStaffRepository shopDeliveryStaffRepository, IAccountRepository accountRepository,
         IUnitOfWork unitOfWork, ICurrentPrincipalService currentPrincipalService,
-        IMapper mapper, ILogger<UpdateDeliveryStaffHandler> logger)
+        IMapper mapper, ILogger<UpdateDeliveryStaffHandler> logger, IDeliveryPackageRepository deliveryPackageRepository)
     {
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
         _accountRepository = accountRepository;
@@ -31,6 +32,7 @@ public class UpdateDeliveryStaffHandler : ICommandHandler<UpdateDeliveryStaffCom
         _currentPrincipalService = currentPrincipalService;
         _mapper = mapper;
         _logger = logger;
+        _deliveryPackageRepository = deliveryPackageRepository;
     }
 
     public async Task<Result<Result>> Handle(UpdateDeliveryStaffCommand request, CancellationToken cancellationToken)
@@ -66,6 +68,15 @@ public class UpdateDeliveryStaffHandler : ICommandHandler<UpdateDeliveryStaffCom
                 else
                 {
                     shopDeliveryStaff.Account.PhoneNumber = request.PhoneNumber;
+                }
+            }
+
+            if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.Online && request.Status != ShopDeliveryStaffStatus.Online)
+            {
+                var haveNotDone = await _deliveryPackageRepository.CheckHaveInDeliveryPackageNotDone(shopDeliveryStaff.Id).ConfigureAwait(false);
+                if (haveNotDone)
+                {
+                    throw new InvalidBusinessException(MessageCode.E_SHOP_DELIVERY_STAFF_IN_DELIVERY_PACKAGE.GetDescription());
                 }
             }
 
