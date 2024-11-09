@@ -1,10 +1,9 @@
 using MealSync.Application.Common.Abstractions.Messaging;
-using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Foods.Models;
+using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
-using MealSync.Domain.Exceptions.Base;
 
 namespace MealSync.Application.UseCases.Foods.Queries.GetByIds;
 
@@ -27,72 +26,183 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
 
     public async Task<Result<Result>> Handle(GetByIdsForCartQuery request, CancellationToken cancellationToken)
     {
-        var idsNotFound = new List<string>();
         var foodCartCheckResponse = new FoodCartCheckResponse();
-        var foodsResponses = new List<FoodCartCheckResponse.DetailFoodResponse>();
         var shop = _shopRepository.GetById(request.ShopId)!;
         var shopOperatingSlot = await _operatingSlotRepository.GetAvailableForTimeRangeOrder(
                 request.ShopId, request.OrderTime.StartTime, request.OrderTime.EndTime)
             .ConfigureAwait(false);
 
-        if (shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned || shop.Status == ShopStatus.Deleted || shop.Status == ShopStatus.UnApprove)
+        if (
+            shop.Status == ShopStatus.Banning
+            || shop.Status == ShopStatus.Banned
+            || shop.Status == ShopStatus.Deleted
+            || shop.Status == ShopStatus.UnApprove
+        )
         {
+            foodCartCheckResponse.IdsRequest = request.Foods.Select(f => f.Id).ToList();
             foodCartCheckResponse.IsRemoveAllCart = true;
             foodCartCheckResponse.IsReceivingOrderPaused = false;
+            foodCartCheckResponse.IsAcceptingOrderToday = false;
+            foodCartCheckResponse.IsAcceptingOrderTomorrow = false;
             foodCartCheckResponse.MessageForAllCart = "Cửa hàng đã không còn hoạt động.";
             foodCartCheckResponse.IsPresentFoodNeedRemoveToday = false;
-            foodCartCheckResponse.MessageFoodRemoveToday = default;
             foodCartCheckResponse.IdsNotFoundToday = default;
             foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
-            foodCartCheckResponse.MessageFoodRemoveTomorrow = default;
             foodCartCheckResponse.IdsNotFoundTomorrow = default;
-            foodCartCheckResponse.Foods = foodsResponses;
+            foodCartCheckResponse.Foods = default;
+        }
+        else if (shopOperatingSlot == default)
+        {
+            foodCartCheckResponse.IdsRequest = request.Foods.Select(f => f.Id).ToList();
+            foodCartCheckResponse.IsRemoveAllCart = true;
+            foodCartCheckResponse.IsReceivingOrderPaused = false;
+            foodCartCheckResponse.IsAcceptingOrderToday = false;
+            foodCartCheckResponse.IsAcceptingOrderTomorrow = false;
+            foodCartCheckResponse.MessageForAllCart = "Cửa hàng đã không còn bán trong khung giờ này.";
+            foodCartCheckResponse.IsPresentFoodNeedRemoveToday = false;
+            foodCartCheckResponse.IdsNotFoundToday = default;
+            foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
+            foodCartCheckResponse.IdsNotFoundTomorrow = default;
+            foodCartCheckResponse.Foods = default;
         }
         else if (shop.Status == ShopStatus.InActive)
         {
+            foodCartCheckResponse.IdsRequest = request.Foods.Select(f => f.Id).ToList();
             foodCartCheckResponse.IsRemoveAllCart = false;
             foodCartCheckResponse.IsReceivingOrderPaused = true;
+            foodCartCheckResponse.IsAcceptingOrderToday = false;
+            foodCartCheckResponse.IsAcceptingOrderTomorrow = false;
             foodCartCheckResponse.MessageForAllCart = "Cửa hàng đã đóng cửa, bạn không thể đặt đồ ăn vào bây giờ.";
-        }
-        else if (shop.IsReceivingOrderPaused)
-        {
-            foodCartCheckResponse.IsRemoveAllCart = false;
-            foodCartCheckResponse.IsReceivingOrderPaused = true;
-            foodCartCheckResponse.MessageForAllCart = "Cửa hàng đang tạm ngưng nhận hàng, bạn không thể đặt đồ ăn vào bây giờ.";
+            foodCartCheckResponse.IsPresentFoodNeedRemoveToday = false;
+            foodCartCheckResponse.IdsNotFoundToday = default;
+            foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
+            foodCartCheckResponse.IdsNotFoundTomorrow = default;
+            foodCartCheckResponse.Foods = default;
         }
         else if (shop.IsAcceptingOrderNextDay)
         {
+            var (foodsResponses, idsNotFoundList, namesNotFoundList, idsIsSoldOutList, namesIsSoldOutList) =
+                await GetFoodsResponse(request, shopOperatingSlot).ConfigureAwait(false);
+            var foodsNotOrderForTodayList = idsNotFoundList.Concat(idsIsSoldOutList).ToList();
+            var namesNotOrderForTodayList = namesNotFoundList.Concat(namesIsSoldOutList).ToList();
 
-        }
-        if (shopOperatingSlot == default)
-        {
-            return Result.Success(new FoodCartCheckResponse
+            if (!shop.IsReceivingOrderPaused && !shopOperatingSlot.IsReceivingOrderPaused)
             {
-                Foods = foodsResponses,
-                IdsNotFoundToday = request.Foods.Select(f => f.Id).ToList(),
-                IdsNotFoundTomorrow = request.Foods.Select(f => f.Id).ToList(),
-            });
+                // Can order for today and tomorrow
+                foodCartCheckResponse.IdsRequest = request.Foods.Select(f => f.Id).ToList();
+                foodCartCheckResponse.IsRemoveAllCart = false;
+                foodCartCheckResponse.IsReceivingOrderPaused = false;
+                foodCartCheckResponse.IsAcceptingOrderToday = true;
+                foodCartCheckResponse.IsAcceptingOrderTomorrow = true;
+                foodCartCheckResponse.MessageForAllCart = default;
+                foodCartCheckResponse.IsPresentFoodNeedRemoveToday = foodsNotOrderForTodayList.Count > 0;
+                foodCartCheckResponse.IdsNotFoundToday = foodsNotOrderForTodayList;
+                foodCartCheckResponse.MessageFoodNeedRemoveToday =
+                    foodsNotOrderForTodayList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotOrderForTodayList)}" : default;
+                foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = idsNotFoundList.Count > 0;
+                foodCartCheckResponse.IdsNotFoundTomorrow = idsNotFoundList;
+                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow = idsNotFoundList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotFoundList)}" : default;
+                foodCartCheckResponse.Foods = foodsResponses;
+            }
+            else
+            {
+                // Only can order for tomorrow
+                foodCartCheckResponse.IdsRequest = request.Foods.Select(f => f.Id).ToList();
+                foodCartCheckResponse.IsRemoveAllCart = false;
+                foodCartCheckResponse.IsReceivingOrderPaused = false;
+                foodCartCheckResponse.IsAcceptingOrderToday = false;
+                foodCartCheckResponse.IsAcceptingOrderTomorrow = true;
+                foodCartCheckResponse.MessageForAllCart = "Cửa hàng đã ngưng nhận đơn cho ngày hôm nay, bạn chỉ có thể đặt đơn cho ngày mai";
+                foodCartCheckResponse.IsPresentFoodNeedRemoveToday = false;
+                foodCartCheckResponse.IdsNotFoundToday = default;
+                foodCartCheckResponse.MessageFoodNeedRemoveToday = default;
+                foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = idsNotFoundList.Count > 0;
+                foodCartCheckResponse.IdsNotFoundTomorrow = idsNotFoundList;
+                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow = idsNotFoundList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotFoundList)}" : default;
+                foodCartCheckResponse.Foods = foodsResponses;
+            }
         }
-        else if (shopOperatingSlot.IsReceivingOrderPaused)
+        else
         {
-            foodCartCheckResponse.IdsNotFoundToday = request.Foods.Select(f => f.Id).ToList();
+            var (foodsResponses, idsNotFoundList, namesNotFoundList, idsIsSoldOutList, namesIsSoldOutList) =
+                await GetFoodsResponse(request, shopOperatingSlot).ConfigureAwait(false);
+            var foodsNotOrderForTodayList = idsNotFoundList.Concat(idsIsSoldOutList).ToList();
+            var namesNotOrderForTodayList = namesNotFoundList.Concat(namesIsSoldOutList).ToList();
+
+            if (!shop.IsReceivingOrderPaused && !shopOperatingSlot.IsReceivingOrderPaused)
+            {
+                // Only can order for today
+                foodCartCheckResponse.IdsRequest = request.Foods.Select(f => f.Id).ToList();
+                foodCartCheckResponse.IsRemoveAllCart = false;
+                foodCartCheckResponse.IsReceivingOrderPaused = false;
+                foodCartCheckResponse.IsAcceptingOrderToday = true;
+                foodCartCheckResponse.IsAcceptingOrderTomorrow = false;
+                foodCartCheckResponse.MessageForAllCart = "Cửa hàng không nhận đơn cho ngày mai, bạn chỉ có thể đặt đơn trong ngày hôm nay";
+                foodCartCheckResponse.IsPresentFoodNeedRemoveToday = foodsNotOrderForTodayList.Count > 0;
+                foodCartCheckResponse.IdsNotFoundToday = foodsNotOrderForTodayList;
+                foodCartCheckResponse.MessageFoodNeedRemoveToday =
+                    foodsNotOrderForTodayList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotOrderForTodayList)}" : default;
+                foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
+                foodCartCheckResponse.IdsNotFoundTomorrow = default;
+                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow = default;
+                foodCartCheckResponse.Foods = foodsResponses;
+            }
+            else
+            {
+                // Can't order for today or tomorrow
+                foodCartCheckResponse.IdsRequest = request.Foods.Select(f => f.Id).ToList();
+                foodCartCheckResponse.IsRemoveAllCart = false;
+                foodCartCheckResponse.IsReceivingOrderPaused = true;
+                foodCartCheckResponse.IsAcceptingOrderToday = false;
+                foodCartCheckResponse.IsAcceptingOrderTomorrow = false;
+                foodCartCheckResponse.MessageForAllCart = "Cửa hàng đã ngưng nhận đơn ngày hôm nay và không nhận đặt đơn cho ngày mai.";
+                foodCartCheckResponse.IsPresentFoodNeedRemoveToday = false;
+                foodCartCheckResponse.IdsNotFoundToday = default;
+                foodCartCheckResponse.MessageFoodNeedRemoveToday = default;
+                foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
+                foodCartCheckResponse.IdsNotFoundTomorrow = default;
+                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow = default;
+                foodCartCheckResponse.Foods = foodsResponses;
+            }
         }
 
+        return Result.Success(foodCartCheckResponse);
+    }
+
+    private async Task<(
+        List<FoodCartCheckResponse.DetailFoodResponse> FoodsResponses,
+        List<string> IdsNotFoundList,
+        List<string> NamesNotFoundList,
+        List<string> IdsIsSoldOutList,
+        List<string> NamesIsSoldOutList
+        )> GetFoodsResponse(GetByIdsForCartQuery request, OperatingSlot shopOperatingSlot)
+    {
+        var foodsResponses = new List<FoodCartCheckResponse.DetailFoodResponse>();
+        var idsNotFoundList = new List<string>();
+        var namesNotFoundList = new List<string>();
+        var idsIsSoldOutList = new List<string>();
+        var namesIsSoldOutList = new List<string>();
         foreach (var foodRequest in request.Foods)
         {
             var validId = long.TryParse(foodRequest.Id.Split('-')[0], out var id);
 
             if (!validId)
             {
-                idsNotFound.Add(foodRequest.Id);
+                idsNotFoundList.Add(foodRequest.Id);
             }
             else
             {
-                var food = await _foodRepository.GetActiveFood(id, shopOperatingSlot.Id).ConfigureAwait(false);
+                var foodRequestId = id;
+                var food = await _foodRepository.GetActiveFood(foodRequestId, shopOperatingSlot.Id).ConfigureAwait(false);
 
                 if (food == default)
                 {
-                    idsNotFound.Add(foodRequest.Id);
+                    idsNotFoundList.Add(foodRequest.Id);
+                    var foodName = await _foodRepository.GetFoodNameByIdAndShopId(foodRequestId, request.ShopId).ConfigureAwait(false);
+                    if (!string.IsNullOrEmpty(foodName))
+                    {
+                        namesNotFoundList.Add(foodName);
+                    }
                 }
                 else
                 {
@@ -119,7 +229,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
 
                             if (optionGroup == default || !optionGroup.Options.Select(o => o.Id).Contains(optionGroupRequest.OptionId))
                             {
-                                idsNotFound.Add(foodRequest.Id);
+                                idsNotFoundList.Add(foodRequest.Id);
                                 isNotFound = true;
                                 break;
                             }
@@ -158,7 +268,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
 
                             if (optionGroup == default || !optionGroupRequest.OptionIds.All(optionId => availableOptionIds.Contains(optionId)))
                             {
-                                idsNotFound.Add(foodRequest.Id);
+                                idsNotFoundList.Add(foodRequest.Id);
                                 isNotFound = true;
                                 break;
                             }
@@ -190,18 +300,31 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                         foodResponse.OptionGroupCheckbox = optionGroupCheckboxResponses;
                     }
 
-                    if (!isNotFound)
+                    if (isNotFound)
+                    {
+                        var foodName = await _foodRepository.GetFoodNameByIdAndShopId(foodRequestId, request.ShopId).ConfigureAwait(false);
+                        if (!string.IsNullOrEmpty(foodName))
+                        {
+                            namesNotFoundList.Add(foodName);
+                        }
+                    }
+                    else
                     {
                         foodsResponses.Add(foodResponse);
+                        if (food.IsSoldOut)
+                        {
+                            idsIsSoldOutList.Add(foodRequest.Id);
+                            var foodName = await _foodRepository.GetFoodNameByIdAndShopId(foodRequestId, request.ShopId).ConfigureAwait(false);
+                            if (!string.IsNullOrEmpty(foodName))
+                            {
+                                namesIsSoldOutList.Add(foodName);
+                            }
+                        }
                     }
                 }
             }
         }
 
-        return Result.Success(new FoodCartCheckResponse
-        {
-            Foods = foodsResponses,
-            IdsNotFoundToday = idsNotFound,
-        });
+        return (foodsResponses, idsNotFoundList, namesNotFoundList, idsIsSoldOutList, namesIsSoldOutList);
     }
 }

@@ -10,21 +10,25 @@ public class FoodCartCheckResponse
 
     public bool IsReceivingOrderPaused { get; set; }
 
-    public string MessageForAllCart { get; set; }
+    public bool IsAcceptingOrderToday { get; set; }
+
+    public bool IsAcceptingOrderTomorrow { get; set; }
+
+    public string? MessageForAllCart { get; set; }
 
     public bool IsPresentFoodNeedRemoveToday { get; set; }
 
-    public string? MessageFoodRemoveToday { get; set; }
-
     public List<string>? IdsNotFoundToday { get; set; }
+
+    public string? MessageFoodNeedRemoveToday { get; set; }
 
     public bool IsPresentFoodNeedRemoveTomorrow { get; set; }
 
-    public string? MessageFoodRemoveTomorrow { get; set; }
-
     public List<string>? IdsNotFoundTomorrow { get; set; }
 
-    public List<DetailFoodResponse> Foods { get; set; }
+    public string? MessageFoodNeedRemoveTomorrow { get; set; }
+
+    public List<DetailFoodResponse>? Foods { get; set; }
 
     public class DetailFoodResponse
     {

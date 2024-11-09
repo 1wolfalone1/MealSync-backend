@@ -635,6 +635,13 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 new object[] { request.OrderTime.StartTime, request.OrderTime.EndTime }
             );
         }
+        else if (!request.OrderTime.IsOrderNextDay && shopOperatingSlot.IsReceivingOrderPaused)
+        {
+            throw new InvalidBusinessException(
+                MessageCode.E_SHOP_RECEIVING_ORDER_PAUSED_FOR_THIS_SLOT.GetDescription(),
+                new object[] { shopOperatingSlot.StartTime, shopOperatingSlot.EndTime }
+            );
+        }
     }
 
     private async Task ValidateShopRequest(CreateOrderCommand request, Shop? shop, Building? buildingOrder)
@@ -675,11 +682,11 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 else if (!await _shopDormitoryRepository.CheckExistedByShopIdAndDormitoryId(request.ShopId, buildingOrder.DormitoryId).ConfigureAwait(false))
                 {
                     // If the shop is not associated with the building's dormitory, throw an exception
-                    throw new InvalidBusinessException(MessageCode.E_SHOP_DORMITORY_NOT_FOUND.GetDescription(), new object[] { buildingOrder.Name });
+                    throw new InvalidBusinessException(MessageCode.E_SHOP_DORMITORY_NOT_FOUND.GetDescription(), new object[] { buildingOrder.Dormitory.Name });
                 }
-                else if (shop.IsReceivingOrderPaused)
+                else if (!request.OrderTime.IsOrderNextDay && shop.IsReceivingOrderPaused)
                 {
-                    // If the shop has paused order reception, throw an exception
+                    // If the shop has paused order reception and customer order for today, throw an exception
                     throw new InvalidBusinessException(MessageCode.E_SHOP_RECEIVING_ORDER_PAUSED.GetDescription(), new object[] { shop.Name });
                 }
                 else if (request.OrderTime.IsOrderNextDay && !shop.IsAcceptingOrderNextDay)

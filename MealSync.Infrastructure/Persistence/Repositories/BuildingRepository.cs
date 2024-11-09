@@ -20,6 +20,6 @@ public class BuildingRepository : BaseRepository<Building>, IBuildingRepository
 
     public Task<Building?> GetByIdIncludeLocation(long id)
     {
-        return DbSet.Include(b => b.Location).FirstOrDefaultAsync(b => b.Id == id);
+        return DbSet.Include(b => b.Location).Include(b => b.Dormitory).FirstOrDefaultAsync(b => b.Id == id);
     }
 }

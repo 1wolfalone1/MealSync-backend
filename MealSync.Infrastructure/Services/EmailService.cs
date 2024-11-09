@@ -92,12 +92,14 @@ public class EmailService : IEmailService, IBaseService
             var fromMail = _configuration["EMAIL"] ?? "";
             var fromPassword = _configuration["EMAIL_PASSWORD"] ?? "";
 
-            var message = new MailMessage();
-            message.From = new MailAddress(fromMail);
-            message.Subject = subject;
+            var message = new MailMessage
+            {
+                From = new MailAddress(fromMail, "MealSync"),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true,
+            };
             message.To.Add(new MailAddress(toEmail));
-            message.Body = body;
-            message.IsBodyHtml = true;
 
             var smtpClient = new SmtpClient(_configuration["SMTP_CLIENT"] ?? "")
             {

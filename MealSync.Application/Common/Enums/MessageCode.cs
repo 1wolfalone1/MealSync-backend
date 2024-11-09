@@ -176,6 +176,9 @@ public enum MessageCode
     [Description("E-Shop-ReceivingOrderPaused")]
     E_SHOP_RECEIVING_ORDER_PAUSED,
 
+    [Description("E-Shop-ReceivingOrderPausedForThisSlot")]
+    E_SHOP_RECEIVING_ORDER_PAUSED_FOR_THIS_SLOT,
+
     [Description("E-Shop-NotAcceptingOrderNextDay")]
     E_SHOP_NOT_ACCEPTING_ORDER_NEXT_DAY,
 
