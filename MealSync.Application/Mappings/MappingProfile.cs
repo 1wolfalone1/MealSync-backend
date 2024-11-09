@@ -48,7 +48,10 @@ public class MappingProfile : Profile
                     src => src.ShopDormitories))
             .ForMember(dest => dest.ShopOwnerName,
                 opt => opt.MapFrom(
-                    src => src.Account != default ? src.Account.FullName : string.Empty));
+                    src => src.Account != default ? src.Account.FullName : string.Empty))
+            .ForMember(dest => dest.Email,
+                opt => opt.MapFrom(
+                    src => src.Account != default ? src.Account.Email : string.Empty));
         CreateMap<Food, FoodDetailResponse>()
             .ForMember(dest => dest.PlatformCategory, opt => opt.MapFrom(src => src.PlatformCategory))
             .ForMember(dest => dest.ShopCategory, opt => opt.MapFrom(src => src.ShopCategory))
