@@ -17,6 +17,8 @@ public class ShopConfigurationResponse
 
     public string PhoneNumber { get; set; }
 
+    public string Email { get; set; }
+
     public ShopStatus Status { get; set; }
 
     public string Description { get; set; }
