@@ -4,6 +4,7 @@ using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
+using MealSync.Application.UseCases.Accounts.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
@@ -20,11 +21,12 @@ public class UpdateEmailHandler : ICommandHandler<UpdateEmailCommand, Result>
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateEmailHandler> _logger;
+    private readonly IJwtTokenService _jwtTokenService;
 
     public UpdateEmailHandler(
         IAccountRepository accountRepository, ISystemResourceRepository systemResourceRepository,
         ICacheService cacheService, ICurrentPrincipalService currentPrincipalService,
-        IUnitOfWork unitOfWork, ILogger<UpdateEmailHandler> logger)
+        IUnitOfWork unitOfWork, ILogger<UpdateEmailHandler> logger, IJwtTokenService jwtTokenService)
     {
         _accountRepository = accountRepository;
         _systemResourceRepository = systemResourceRepository;
@@ -32,6 +34,7 @@ public class UpdateEmailHandler : ICommandHandler<UpdateEmailCommand, Result>
         _currentPrincipalService = currentPrincipalService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _jwtTokenService = jwtTokenService;
     }
 
     public async Task<Result<Result>> Handle(UpdateEmailCommand request, CancellationToken cancellationToken)
@@ -84,12 +87,6 @@ public class UpdateEmailHandler : ICommandHandler<UpdateEmailCommand, Result>
                         _accountRepository.Update(shopAccount);
                         await _cacheService.RemoveCacheResponseAsync(cacheKeyUpdateEmail).ConfigureAwait(false);
                         await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-
-                        return Result.Success(new
-                        {
-                            Code = MessageCode.I_ACCOUNT_UPDATE_EMAIL_SUCCESS.GetDescription(),
-                            Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ACCOUNT_UPDATE_EMAIL_SUCCESS.GetDescription()),
-                        });
                     }
                     catch (Exception e)
                     {
@@ -97,6 +94,29 @@ public class UpdateEmailHandler : ICommandHandler<UpdateEmailCommand, Result>
                         _logger.LogError(e, e.Message);
                         throw new("Internal Server Error");
                     }
+
+                    var accessToken = _jwtTokenService.GenerateJwtToken(shopAccount);
+                    var refreshToken = _jwtTokenService.GenerateJwtToken(shopAccount);
+                    LoginResponse loginResponse = new LoginResponse();
+                    loginResponse.TokenResponse = new TokenResponse
+                    {
+                        AccessToken = accessToken,
+                        RefreshToken = refreshToken
+                    };
+                    loginResponse.AccountResponse = new AccountResponse
+                    {
+                        Id = shopAccount.Id,
+                        Email = shopAccount.Email,
+                        RoleName = shopAccount.Role.Name,
+                        AvatarUrl = shopAccount.AvatarUrl,
+                        FullName = shopAccount.FullName,
+                    };
+                    return Result.Success(new
+                    {
+                        Code = MessageCode.I_ACCOUNT_UPDATE_EMAIL_SUCCESS.GetDescription(),
+                        Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ACCOUNT_UPDATE_EMAIL_SUCCESS.GetDescription()),
+                        TokenAndInfor = loginResponse,
+                    });
                 }
             }
         }
