@@ -67,6 +67,7 @@ public class DeleteDeliveryStaffHandler : ICommandHandler<DeleteDeliveryStaffCom
                 {
                     await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
                     shopDeliveryStaff.Account.Status = AccountStatus.Deleted;
+                    shopDeliveryStaff.Status = ShopDeliveryStaffStatus.InActive;
                     _shopDeliveryStaffRepository.Update(shopDeliveryStaff);
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
                 }

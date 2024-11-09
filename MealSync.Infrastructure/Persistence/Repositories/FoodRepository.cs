@@ -213,8 +213,16 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
         return DbSet.Include(f => f.FoodOperatingSlots)
             .ThenInclude(fos => fos.OperatingSlot)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(f => f.Id == id && f.Status == FoodStatus.Active
-                                                 && f.Shop.Status == ShopStatus.Active && !f.Shop.IsReceivingOrderPaused
-                                                 && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive && fo.OperatingSlot.Id == operatingSlotId));
+            .FirstOrDefaultAsync(f => f.Id == id
+                                      && f.Status == FoodStatus.Active
+                                      && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.Id == operatingSlotId));
+    }
+
+    public Task<string?> GetFoodNameByIdAndShopId(long id, long shopId)
+    {
+        return DbSet
+            .Where(f => f.Id == id && f.ShopId == shopId)
+            .Select(f => f.Name)
+            .FirstOrDefaultAsync();
     }
 }
