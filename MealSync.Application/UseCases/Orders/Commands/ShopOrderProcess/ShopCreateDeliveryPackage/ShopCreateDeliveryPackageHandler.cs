@@ -163,8 +163,19 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         var listOrder = new List<Order>();
         foreach (var deliveryPackage in request.DeliveryPackages)
         {
-            if (deliveryPackage.ShopDeliveryStaffId.HasValue && _shopDeliveryStaffRepository.Get(sds => sds.Id == deliveryPackage.ShopDeliveryStaffId && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault() == default)
+            var shopDeliveryStaff = _shopDeliveryStaffRepository.Get(sds => sds.Id == deliveryPackage.ShopDeliveryStaffId && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)
+                .Include(sds => sds.Account).SingleOrDefault();
+            if (deliveryPackage.ShopDeliveryStaffId.HasValue && shopDeliveryStaff == default)
                 throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_NOT_BELONG_TO_SHOP.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId }, HttpStatusCode.NotFound);
+
+            if (deliveryPackage.ShopDeliveryStaffId.HasValue && shopDeliveryStaff.Status == ShopDeliveryStaffStatus.Offline)
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_OFFLINE_STATUS.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId });
+
+            if (deliveryPackage.ShopDeliveryStaffId.HasValue && shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status == AccountStatus.Deleted)
+                throw new InvalidBusinessException(MessageCode.E_SHOP_DELIVERY_STAFF_NOT_FOUND.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId });
+
+            if (deliveryPackage.ShopDeliveryStaffId.HasValue && shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status != AccountStatus.Deleted)
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_ACTIVE.GetDescription(), new object[] { deliveryPackage.ShopDeliveryStaffId });
 
             foreach (var orderId in deliveryPackage.OrderIds)
             {
