@@ -3,6 +3,7 @@ using MealSync.API.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Foods.Commands.Create;
 using MealSync.Application.UseCases.Foods.Commands.Delete;
+using MealSync.Application.UseCases.Foods.Commands.LinkWithListOptionGroups;
 using MealSync.Application.UseCases.Foods.Commands.ShopUpdateFoodStatus;
 using MealSync.Application.UseCases.Foods.Commands.Update;
 using MealSync.Application.UseCases.Foods.Queries.FoodDetail;
@@ -132,6 +133,13 @@ public class FoodController : BaseApiController
     [HttpPut(Endpoints.FOOD_LINK_SHOP_CATEGORY)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> LinkFoodToShopCategory ([FromBody] LinkFoodCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.FOOD_LINK_OPTION_GROUPS)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> LinkFoodToOptionGroups ([FromBody] LinkWithListOptionGroupCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }

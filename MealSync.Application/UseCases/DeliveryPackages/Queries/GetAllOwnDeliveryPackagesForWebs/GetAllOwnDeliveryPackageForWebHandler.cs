@@ -30,7 +30,7 @@ public class GetAllOwnDeliveryPackageForWebHandler : IQueryHandler<GetAllOwnDeli
 
     public async Task<Result<Result>> Handle(GetAllOwnDeliveryPackageForWebQuery request, CancellationToken cancellationToken)
     {
-        var deliveryPackages = _deliveryPackageRepository.GetAllOwnDeliveryPackageFilter(request.PageIndex, request.PageSize, request.IntendedReceiveDate, request.StartTime, request.EndTime, request.Status,
+        var deliveryPackages = _deliveryPackageRepository.GetAllOwnDeliveryPackageFilter(request.PageIndex, request.PageSize, request.IntendedReceiveDate, request.StartTime, request.EndTime, request.Status, request.DeliveryPackageId,
             _currentPrincipalService.CurrentPrincipalId.Value);
 
         var deliveryPackageResponse = new List<DeliveryPackageGroupDetailForWebResponse>();

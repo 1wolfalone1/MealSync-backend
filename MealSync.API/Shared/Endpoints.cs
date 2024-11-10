@@ -46,6 +46,7 @@ public static class Endpoints
     public const string GET_DETAIL_OPTION_GROUP = "shop-owner/option-group/{id:long}";
     public const string LINK_FOOD_OPTION_GROUP = "shop-owner/option-group/link-food";
     public const string UNLINK_FOOD_OPTION_GROUP = "shop-owner/option-group/unlink-food";
+    public const string SHOP_OPTION_GROUPS_WITH_LINK_FOOD_STATUS = "shop-owner/option-group/food-link-status";
 
     // Option
     public const string CREATE_OPTION = "shop-owner/option";
@@ -97,6 +98,7 @@ public static class Endpoints
     public const string GET_FOOD_DETAIL = "shop/{shopId}/food/{foodId}";
     public const string GET_FOOD_BY_IDS = "food";
     public const string FOOD_LINK_SHOP_CATEGORY = "shop-owner/food/link-shop-category";
+    public const string FOOD_LINK_OPTION_GROUPS = "shop-owner/food/link-option-group";
 
     // Storage
     public const string UPLOAD_FILE = "storage/file/upload";
