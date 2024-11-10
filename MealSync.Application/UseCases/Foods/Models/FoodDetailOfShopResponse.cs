@@ -41,6 +41,8 @@ public class FoodDetailOfShopResponse
     {
         public long OptionGroupId { get; set; }
 
+        public string Title { get; set; }
+
         public int DisplayOrder { get; set; }
     }
 }

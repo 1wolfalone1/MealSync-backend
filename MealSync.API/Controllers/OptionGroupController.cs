@@ -8,6 +8,7 @@ using MealSync.Application.UseCases.OptionGroups.Commands.UnLinkOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.UpdateOptionGroups;
 using MealSync.Application.UseCases.OptionGroups.Commands.UpdateOptionGroupStatus;
 using MealSync.Application.UseCases.OptionGroups.Queries.GetAllOptionGroupOfShop;
+using MealSync.Application.UseCases.OptionGroups.Queries.GetListOptionGroupWithFoodLinkStatus;
 using MealSync.Application.UseCases.OptionGroups.Queries.GetOptionGroupDetail;
 using Microsoft.AspNetCore.Authorization;
 
@@ -76,5 +77,12 @@ public class OptionGroupController : BaseApiController
     {
         command.Id = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.SHOP_OPTION_GROUPS_WITH_LINK_FOOD_STATUS)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateptionGroupStatus([FromQuery] GetListOptionGroupWithFoodLinkStatusQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }
