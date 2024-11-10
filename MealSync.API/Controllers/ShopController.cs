@@ -1,6 +1,7 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.ShopOwners.Commands.SendVerifyUpdateEmail;
+using MealSync.Application.UseCases.ShopOwners.Commands.UpdateAvatar;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateEmail;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdatePassword;
 using MealSync.Application.UseCases.ShopOwners.Commands.UpdateShopBanner;
@@ -147,6 +148,13 @@ public class ShopController : BaseApiController
     [HttpPut(Endpoints.UPDATE_SHOP_LOGO)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> UpdateShopLogo([FromBody] UpdateShopLogoCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_SHOP_AVATAR)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> UpdateShopAvatar([FromForm] UpdateAvatarCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
