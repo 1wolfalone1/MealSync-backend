@@ -132,6 +132,8 @@ public class OrderDetailForShopResponse
 
         public double BasicPrice { get; set; }
 
+        public string Note { get; set; }
+
         [System.Text.Json.Serialization.JsonIgnore]
         public string OrderDescription { get; set; }
 
