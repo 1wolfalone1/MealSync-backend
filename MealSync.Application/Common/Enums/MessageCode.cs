@@ -280,6 +280,9 @@ public enum MessageCode
     [Description("I-Shop-UpdateBannerSuccess")]
     I_SHOP_UPDATE_BANNER_SUCCESS,
 
+    [Description("I-Shop-UpdateAvatarSuccess")]
+    I_SHOP_UPDATE_AVATAR_SUCCESS,
+
     // Food option group
     [Description("E-FoodOptionGroup-AlreadyLink")]
     E_FOOD_OPTION_GROUP_ALREADY_LINK,
