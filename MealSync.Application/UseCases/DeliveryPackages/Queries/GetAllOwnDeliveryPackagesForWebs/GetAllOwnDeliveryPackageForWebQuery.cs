@@ -14,4 +14,6 @@ public class GetAllOwnDeliveryPackageForWebQuery : PaginationRequest, IQuery<Res
     public int EndTime { get; set; }
 
     public DateTime IntendedReceiveDate { get; set; }
+
+    public string? DeliveryPackageId { get; set; }
 }

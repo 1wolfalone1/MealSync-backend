@@ -13,4 +13,6 @@ public interface IOptionGroupRepository : IBaseRepository<OptionGroup>
     bool CheckExistTitleOptionGroup(string title, long shopId, long? id = null);
 
     Task<OptionGroup?> GetByIdAndOptionIds(long id, long[] optionIds);
+
+    List<OptionGroup> GetOptionGroupsWithFoodLinkStatus(long shopId, long foodId, int filterMode);
 }

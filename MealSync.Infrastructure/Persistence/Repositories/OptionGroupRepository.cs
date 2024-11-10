@@ -68,4 +68,25 @@ public class OptionGroupRepository : BaseRepository<OptionGroup>, IOptionGroupRe
             })
             .FirstOrDefaultAsync();
     }
+
+    public List<OptionGroup> GetOptionGroupsWithFoodLinkStatus(long shopId, long foodId, int filterMode)
+    {
+        var query = DbSet.Include(op => op.FoodOptionGroups.Where(fop => fop.FoodId == foodId))
+            .Include(op => op.Options.Where(o => o.Status != OptionStatus.Delete))
+            .Where(op => op.ShopId == shopId && op.Status != OptionGroupStatus.Delete).AsEnumerable();
+
+        // Get only unlinked with foodId
+        if (filterMode == 1)
+        {
+            query = query.Where(op => op.FoodOptionGroups.All(fog => fog.FoodId != foodId));
+        }
+
+        // Get only linked with foodId
+        if (filterMode == 2)
+        {
+            query = query.Where(op => op.FoodOptionGroups.Any(fog => fog.FoodId == foodId));
+        }
+
+        return query.OrderBy(fog => fog.UpdatedDate).ToList();
+    }
 }

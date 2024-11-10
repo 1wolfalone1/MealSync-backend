@@ -109,7 +109,8 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
         return result;
     }
 
-    public (int Total, List<DeliveryPackage> DeliveryPackages) GetAllOwnDeliveryPackageFilter(int pageIndex, int pageSize, DateTime deliveryDate, int startTime, int endTime, DeliveryPackageStatus[] status, long shopId)
+    public (int Total, List<DeliveryPackage> DeliveryPackages) GetAllOwnDeliveryPackageFilter(int pageIndex, int pageSize, DateTime deliveryDate, int startTime, int endTime, DeliveryPackageStatus[] status,
+        string? requestDeliveryPackageId, long shopId)
     {
         var query = DbSet.Include(dp => dp.Orders)
             .Include(dp => dp.Shop)
@@ -122,7 +123,15 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
                          && dp.Orders.All(o => o.ShopId == shopId)
                          && dp.ShopId == shopId
                          && status.Contains(dp.Status))
+            .OrderBy(dp => dp.StartTime)
+            .ThenBy(dp => dp.EndTime)
+            .ThenBy(dp => dp.DeliveryDate)
             .AsQueryable();
+
+        if (requestDeliveryPackageId != null)
+        {
+            query = query.Where(dp => string.Concat("DP-", dp.Id).Contains(requestDeliveryPackageId));
+        }
 
         var total = query.Count();
         var results = query
