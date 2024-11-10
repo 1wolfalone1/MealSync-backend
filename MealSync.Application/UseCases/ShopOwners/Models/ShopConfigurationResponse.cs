@@ -11,6 +11,8 @@ public class ShopConfigurationResponse
 
     public string ShopOwnerName { get; set; }
 
+    public string ShopOwnerAvatar { get; set; }
+
     public string LogoUrl { get; set; }
 
     public string BannerUrl { get; set; }
