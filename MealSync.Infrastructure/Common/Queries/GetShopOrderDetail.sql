@@ -50,7 +50,8 @@ OrderDetailWithFood AS (
         od.order_id,
         od.total_price,
         od.basic_price,
-        od.description
+        od.description,
+        od.note
     FROM
         order_detail od
         INNER JOIN food f ON od.food_id = f.id
@@ -126,7 +127,8 @@ SELECT
     od.quantity AS Quantity,
     od.total_price AS TotalPrice,
     od.basic_price AS BasicPrice,
-    od.description AS OrderDescription
+    od.description AS OrderDescription,
+    od.note AS Note
 FROM
     OrderInfor o
     INNER JOIN building b ON o.building_id = b.id
