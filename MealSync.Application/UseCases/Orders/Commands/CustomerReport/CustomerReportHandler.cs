@@ -45,7 +45,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
         {
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.OrderId });
         }
-        else if (order.Status != OrderStatus.Delivered)
+        else if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.FailDelivery)
         {
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_STATUS_FOR_CUSTOMER_REPORT.GetDescription());
         }
@@ -100,11 +100,16 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                     ImageUrl = string.Join(",", imageUrls),
                     Status = ReportStatus.Pending,
                 };
+                order.Status = OrderStatus.IssueReported;
+                order.ReasonIdentity = order.Status == OrderStatus.FailDelivery
+                    ? OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription()
+                    : OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription();
                 try
                 {
                     // Begin transaction
                     await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
                     await _reportRepository.AddAsync(report).ConfigureAwait(false);
+                    _orderRepository.Update(order);
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
                     return Result.Create(_mapper.Map<ReportDetailResponse>(report));
                 }

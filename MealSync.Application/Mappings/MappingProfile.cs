@@ -302,7 +302,7 @@ public class MappingProfile : Profile
 
         var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
 
-        return order.Status == OrderStatus.Delivered && order.Reports.Count == 0 && now >= endTime && now <= endTime.AddHours(12);
+        return (order.Status == OrderStatus.FailDelivery || order.Status == OrderStatus.Delivered) && order.Reports.Count == 0 && now >= endTime && now <= endTime.AddHours(12);
     }
 
     private bool IsCancelAllowed(Order order)
