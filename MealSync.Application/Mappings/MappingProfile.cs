@@ -152,6 +152,8 @@ public class MappingProfile : Profile
 
         CreateMap<Order, DetailOrderCustomerResponse>()
             .ForMember(dest => dest.IsReviewAllowed, opt => opt.MapFrom(src => IsReviewAllowed(src)))
+            .ForMember(dest => dest.IsReportAllowed, opt => opt.MapFrom(src => IsReportAllowed(src)))
+            .ForMember(dest => dest.IsAlreadyReport, opt => opt.MapFrom(src => src.Reports.Count > 0))
             .ForMember(dest => dest.IsCancelAllowed, opt => opt.MapFrom(src => IsCancelAllowed(src)))
             .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.ToUnixTimeMilliseconds()))
             .ForMember(
@@ -269,6 +271,38 @@ public class MappingProfile : Profile
                  && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() && order.IsReport)
                 || (order.Status == OrderStatus.Completed && order.ReasonIdentity == default))
                && order.Reviews.Count == 0 && now >= endTime && now <= endTime.AddHours(24);
+    }
+
+    private bool IsReportAllowed(Order order)
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        DateTime receiveDate;
+        if (order.EndTime == 2400)
+        {
+            receiveDate = new DateTime(
+                    order.IntendedReceiveDate.Year,
+                    order.IntendedReceiveDate.Month,
+                    order.IntendedReceiveDate.Day,
+                    0,
+                    0,
+                    0)
+                .AddDays(1);
+        }
+        else
+        {
+            receiveDate = new DateTime(
+                order.IntendedReceiveDate.Year,
+                order.IntendedReceiveDate.Month,
+                order.IntendedReceiveDate.Day,
+                order.EndTime / 100,
+                order.EndTime % 100,
+                0);
+        }
+
+        var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
+
+        return order.Status == OrderStatus.Delivered && order.Reports.Count == 0 && now >= endTime && now <= endTime.AddHours(12);
     }
 
     private bool IsCancelAllowed(Order order)

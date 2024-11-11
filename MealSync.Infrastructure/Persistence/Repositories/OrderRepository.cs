@@ -103,6 +103,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                 {
                     Id = od.Id,
                 }).ToList(),
+                Reports = o.Reports.Select(od => new Report
+                {
+                    Id = od.Id,
+                }).ToList(),
             }).FirstOrDefaultAsync();
     }
 

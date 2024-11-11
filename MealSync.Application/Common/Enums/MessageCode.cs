@@ -421,6 +421,15 @@ public enum MessageCode
     [Description("I-Order-ConfirmOrderCompleted")]
     I_ORDER_CONFIRM_ORDER_COMPLETED,
 
+    [Description("E-Order-NotInStatusForCustomerReport")]
+    E_ORDER_NOT_IN_STATUS_FOR_CUSTOMER_REPORT,
+
+    [Description("E-Order-CustomerReportTimeLimit")]
+    E_ORDER_CUSTOMER_REPORT_TIME_LIMIT,
+
+    [Description("E-Order-CustomerAlreadyReport")]
+    E_ORDER_CUSTOMER_ALREADY_REPORT,
+
     // Delivery package
     [Description("E-DeliveryPackage-StaffAlreadyHaveOtherPackage")]
     E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE,

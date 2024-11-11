@@ -34,6 +34,10 @@ public class DetailOrderCustomerResponse
 
     public bool IsReviewAllowed { get; set; }
 
+    public bool IsReportAllowed { get; set; }
+
+    public bool IsAlreadyReport { get; set; }
+
     public bool IsCancelAllowed { get; set; }
 
     public int StartTime { get; set; }
