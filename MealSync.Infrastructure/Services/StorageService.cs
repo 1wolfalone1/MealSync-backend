@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using QRCoder;
+using SixLabors.ImageSharp;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace MealSync.Infrastructure.Services;
 
@@ -145,17 +147,21 @@ public class StorageService : IStorageService, IBaseService
         // Download the logo from S3
         var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
         var logoKey = _configuration["MEAL_SYNC_LOGO_KEY"] ?? string.Empty;
-        Bitmap logoBitmap = await GetLogoFromS3Async(bucketName, logoKey);
-
-        // Generate QR code
-        using (var qrGenerator = new QRCodeGenerator())
+        using (var imageSharpLogo = await GetLogoFromS3Async(bucketName, logoKey))
         {
-            var qrData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
-            using (var qrCode = new QRCode(qrData))
+            // Convert the ImageSharp logo to a Bitmap
+            Bitmap logoBitmap = imageSharpLogo;
+
+            // Generate QR code
+            using (var qrGenerator = new QRCodeGenerator())
             {
-                // Generate QR code with logo in the center
-                Bitmap qrCodeImage = qrCode.GetGraphic(20, Color.Black, Color.White, logoBitmap, 15, 6, true);
-                return qrCodeImage;
+                var qrData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
+                using (var qrCode = new QRCode(qrData))
+                {
+                    // Generate QR code with logo in the center
+                    Bitmap qrCodeImage = qrCode.GetGraphic(20, System.Drawing.Color.Black, System.Drawing.Color.White, logoBitmap, 15, 6, true);
+                    return qrCodeImage;
+                }
             }
         }
     }
@@ -170,9 +176,22 @@ public class StorageService : IStorageService, IBaseService
                 await response.ResponseStream.CopyToAsync(ms);
                 ms.Position = 0; // Reset stream position
 
-                // Convert MemoryStream to Bitmap
-                return new Bitmap(ms);
+                // Load image using ImageSharp
+                return ConvertImageSharpToBitmap(Image.Load(ms));
             }
+        }
+    }
+
+    public Bitmap ConvertImageSharpToBitmap(Image imageSharpImage)
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            // Save the ImageSharp image to the memory stream in a format compatible with Bitmap
+            imageSharpImage.SaveAsBmp(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            // Convert to Bitmap
+            return new Bitmap(memoryStream);
         }
     }
 }
