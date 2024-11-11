@@ -59,7 +59,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.PlatformCategory, opt => opt.MapFrom(src => src.PlatformCategory))
             .ForMember(dest => dest.ShopCategory, opt => opt.MapFrom(src => src.ShopCategory))
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.FoodOperatingSlots))
-            .ForMember(dest => dest.FoodOptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups));
+            .ForMember(dest => dest.OptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups));
         CreateMap<PlatformCategory, FoodDetailResponse.PlatformCategoryResponse>();
         CreateMap<ShopCategory, FoodDetailResponse.ShopCategoryResponse>();
         CreateMap<OperatingSlot, FoodDetailResponse.OperatingSlotResponse>();
