@@ -26,7 +26,7 @@ public class OptionGroupRepository : BaseRepository<OptionGroup>, IOptionGroupRe
     {
         var query = DbSet
             .Include(op => op.FoodOptionGroups)
-            .Include(op => op.Options)
+            .Include(op => op.Options.Where(o => o.Status != OptionStatus.Delete))
             .Where(op => op.ShopId == currentPrincipalId.Value && op.Status != OptionGroupStatus.Delete);
 
         if (title != default)

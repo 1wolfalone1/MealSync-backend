@@ -33,7 +33,7 @@ public class GetOptionGroupDetailHandler : IQueryHandler<GetOptionGroupDetailQue
         Validate(request);
 
         var optionGroup = _optionGroupRepository.Get(og => og.Id == request.Id)
-            .Include(og => og.Options)
+            .Include(og => og.Options.Where(o => o.Status != OptionStatus.Delete))
             .Include(og => og.FoodOptionGroups)
             .ThenInclude(fog => fog.Food).SingleOrDefault();
         var response = _mapper.Map<OptionGroupDetailResponse>(optionGroup);
