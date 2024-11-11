@@ -25,7 +25,7 @@ public class FoodDetailResponse
 
     public List<OperatingSlotResponse> OperatingSlots { get; set; }
 
-    public List<FoodOptionGroupResponse> FoodOptionGroups { get; set; }
+    public List<FoodOptionGroupResponse> OptionGroups { get; set; }
 
     public class PlatformCategoryResponse
     {
@@ -78,6 +78,8 @@ public class FoodDetailResponse
     public class FoodOptionGroupResponse
     {
         public int DisplayOrder { get; set; }
+
+        public long OptionGroupId { get; set; }
 
         public OptionGroupResponse OptionGroup { get; set; }
     }
