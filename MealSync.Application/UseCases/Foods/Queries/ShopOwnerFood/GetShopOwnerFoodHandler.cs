@@ -65,7 +65,14 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
                     }
                     else
                     {
+
+                        if (child2.Id != 0)
+                        {
+                            child1.OperatingSlots.Add(child2);
+                        }
+
                         category.Foods.Add(child1);
+                        listOperatingDic.Add(child1.Id, child1);
                     }
 
                     listCategoryDic.Remove(category.Id);

@@ -74,7 +74,8 @@ WithFoodAndOperatingSlot AS (
         os.id AS os_id,
         os.title,
         os.start_time,
-        os.end_time
+        os.end_time,
+        fo.created_date
     FROM
         WithFoodCondition f
         INNER JOIN food fo ON f.id = fo.id
@@ -128,4 +129,6 @@ FROM
     ShopCategoryTable AS sc
     LEFT JOIN WithFoodAndOperatingSlot f ON sc.id = f.shop_category_id
 ORDER BY
-    sc.display_order;
+    sc.display_order,
+    sc.id,
+    f.created_date;
