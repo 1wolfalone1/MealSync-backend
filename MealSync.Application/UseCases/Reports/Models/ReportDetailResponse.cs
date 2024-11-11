@@ -1,6 +1,6 @@
 using MealSync.Domain.Enums;
 
-namespace MealSync.Application.UseCases.Orders.Models;
+namespace MealSync.Application.UseCases.Reports.Models;
 
 public class ReportDetailResponse
 {
@@ -15,4 +15,8 @@ public class ReportDetailResponse
     public ReportStatus Status { get; set; }
 
     public string? Reason { get; set; }
+
+    public bool IsReportedByCustomer { get; set; }
+
+    public DateTimeOffset CreatedDate { get; set; }
 }

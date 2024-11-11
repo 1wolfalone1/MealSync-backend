@@ -154,6 +154,17 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
             {
                 OrderId = g.Key,
                 MinCreatedDate = g.Min(r => r.CreatedDate),
+                Description = string.Join(", ", g
+                    .Select(r => r.Order)
+                    .SelectMany(order => order.OrderDetails
+                        .GroupBy(od => new { od.Food.Id, od.Food.Name })
+                        .Select(foodGroup => new
+                        {
+                            Name = foodGroup.Key.Name,
+                            Quantity = foodGroup.Sum(od => od.Quantity),
+                        }))
+                    .Distinct()
+                    .Select(fd => fd.Quantity > 1 ? $"{fd.Name} x{fd.Quantity}" : fd.Name)),
                 Reviews = g.Select(r => new ReviewOfShopOwnerDto.ReviewDetailDto
                 {
                     Id = r.Id,

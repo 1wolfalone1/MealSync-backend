@@ -4,13 +4,13 @@ using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
-using MealSync.Application.UseCases.Orders.Models;
+using MealSync.Application.UseCases.Reports.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
 
-namespace MealSync.Application.UseCases.Orders.Commands.CustomerReport;
+namespace MealSync.Application.UseCases.Reports.Commands.CustomerReport;
 
 public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Result>
 {
@@ -45,13 +45,13 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
         {
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.OrderId });
         }
-        else if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.FailDelivery)
-        {
-            throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_STATUS_FOR_CUSTOMER_REPORT.GetDescription());
-        }
         else if (await _reportRepository.CheckExistedCustomerReport(request.OrderId, customerId).ConfigureAwait(false))
         {
-            throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_ALREADY_REPORT.GetDescription());
+            throw new InvalidBusinessException(MessageCode.E_REPORT_CUSTOMER_ALREADY_REPORT.GetDescription());
+        }
+        else if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.FailDelivery)
+        {
+            throw new InvalidBusinessException(MessageCode.E_REPORT_NOT_IN_STATUS_FOR_CUSTOMER_REPORT.GetDescription());
         }
         else
         {
@@ -123,7 +123,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
             }
             else
             {
-                throw new InvalidBusinessException(MessageCode.E_ORDER_CUSTOMER_REPORT_TIME_LIMIT.GetDescription());
+                throw new InvalidBusinessException(MessageCode.E_REPORT_CUSTOMER_REPORT_TIME_LIMIT.GetDescription());
             }
         }
     }

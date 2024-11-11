@@ -2,11 +2,11 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Shared;
 using Microsoft.AspNetCore.Http;
 
-namespace MealSync.Application.UseCases.Orders.Commands.CustomerReport;
+namespace MealSync.Application.UseCases.Reports.Commands.ShopReplyCustomerReport;
 
-public class CustomerReportCommand : ICommand<Result>
+public class ShopReplyCustomerReportCommand : ICommand<Result>
 {
-    public long OrderId { get; set; }
+    public long ReplyReportId { get; set; }
 
     public string Title { get; set; }
 

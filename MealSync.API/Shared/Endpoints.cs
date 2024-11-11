@@ -136,7 +136,12 @@ public static class Endpoints
     public const string SHOP_DELIVERING_ORDER = "shop-owner/order/delivering";
     public const string SHOW_QR_FOR_CONFIRM = "customer/order/{id:long}/qr/received";
     public const string COMPLETED_ORDER = "customer/order/confirm/complete";
+
+    // Report
     public const string CUSTOMER_REPORT_ORDER = "customer/order/report";
+    public const string GET_CUSTOMER_REPORT_ORDER = "customer/order/report/{id:long}";
+    public const string GET_REPORT_ORDER_OF_SHOP = "shop-owner/order/report";
+    public const string SHOP_REPLY_REPORT_ORDER = "shop-owner/order/report/reply";
 
     // Shop order for web
     public const string GET_ORDER_FOR_SHOP_WEB_BY_STATUS = "web/shop-owner/order";

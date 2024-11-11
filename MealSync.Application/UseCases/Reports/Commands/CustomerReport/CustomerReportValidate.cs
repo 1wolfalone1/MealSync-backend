@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MealSync.Application.UseCases.Orders.Commands.CustomerReport;
+namespace MealSync.Application.UseCases.Reports.Commands.CustomerReport;
 
 public class CustomerReportValidate : AbstractValidator<CustomerReportCommand>
 {
