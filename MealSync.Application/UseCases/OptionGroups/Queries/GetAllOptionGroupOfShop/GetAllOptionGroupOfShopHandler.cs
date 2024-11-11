@@ -25,7 +25,7 @@ public class GetAllOptionGroupOfShopHandler : IQueryHandler<GetAllShopOptionGrou
 
     public async Task<Result<Result>> Handle(GetAllShopOptionGroupQuery request, CancellationToken cancellationToken)
     {
-        var data = _optionGroupRepository.GetAllShopOptonGroup(_currentPrincipalService.CurrentPrincipalId, request.PageIndex, request.PageSize);
+        var data = _optionGroupRepository.GetAllShopOptonGroup(_currentPrincipalService.CurrentPrincipalId, request.PageIndex, request.PageSize, request.Title);
         var response = new PaginationResponse<ShopOptionGroupResponse>(
             _mapper.Map<List<ShopOptionGroupResponse>>(data.OptionGroups),
             data.TotalCount,

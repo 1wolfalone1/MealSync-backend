@@ -8,7 +8,7 @@ public interface IOptionGroupRepository : IBaseRepository<OptionGroup>
 
     OptionGroup GetByIdIncludeOption(long id);
 
-    (int TotalCount, List<OptionGroup> OptionGroups) GetAllShopOptonGroup(long? currentPrincipalId, int requestPageIndex, int requestPageSize);
+    (int TotalCount, List<OptionGroup> OptionGroups) GetAllShopOptonGroup(long? currentPrincipalId, int requestPageIndex, int requestPageSize, string? requestTitle);
 
     bool CheckExistTitleOptionGroup(string title, long shopId, long? id = null);
 

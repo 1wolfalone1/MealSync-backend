@@ -6,4 +6,5 @@ namespace MealSync.Application.UseCases.OptionGroups.Queries.GetAllOptionGroupOf
 
 public class GetAllShopOptionGroupQuery : PaginationRequest, IQuery<Result>
 {
+    public string? Title { get; set; }
 }
