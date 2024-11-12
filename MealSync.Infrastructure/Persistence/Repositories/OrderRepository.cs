@@ -328,4 +328,12 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             TopFoodItems = topFoodItems,
         };
     }
+
+    public List<Order> GetListOrderOnStatusDeliveringButOverTimeFrame(int hoursToMarkDeliveryFail, DateTime currentDate, int currentHours)
+    {
+        var result = DbSet.Where(o => o.Status == OrderStatus.Delivering &&
+                                      o.IntendedReceiveDate.Date == currentDate.Date
+                                      && (o.EndTime + hoursToMarkDeliveryFail) <= currentHours).ToList();
+        return result;
+    }
 }

@@ -95,6 +95,10 @@ public class MealSyncContext : DbContext
 
     public virtual DbSet<Favourite> Favourites { get; set; }
 
+    public virtual DbSet<Batch> Batches { get; set; }
+
+    public virtual DbSet<BatchHistory> BatchHistories { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.AddInterceptors(_customSaveChangesInterceptor);

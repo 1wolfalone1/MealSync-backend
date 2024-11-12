@@ -118,4 +118,7 @@ public enum ResourceCode
 
     [Description("Notification-Order-Customer-Confirm-Completed")]
     NOTIFICATION_ORDER_CUSTOMER_CONFIRM_COMPLETED,
+
+    [Description("Notification-DeliveryFail-AutoByBatch")]
+    NOTIFICATION_DELIVERY_FAIL_AUTO_BY_BATCH,
 }
