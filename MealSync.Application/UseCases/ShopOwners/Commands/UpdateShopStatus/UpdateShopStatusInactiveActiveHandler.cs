@@ -146,7 +146,7 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                         }
                         else
                         {
-                            _emailService.SendEmailToAnnounceApplyFlagForShop(_currentPrincipalService.CurrentPrincipal, account.NumOfFlag);
+                            _emailService.SendEmailToAnnounceApplyFlagForShop(_currentPrincipalService.CurrentPrincipal, account.NumOfFlag, "Cửa hàng bạn đã đủ 5 cảnh cảo từ hệ thống");
                         }
 
                         _accountRepository.Update(account);

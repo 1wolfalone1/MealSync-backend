@@ -39,4 +39,8 @@ public interface INotificationFactory
     Notification CreateCustomerCancelOrderNotification(Order order, Account account);
 
     Notification CreateCustomerCompletedOrderNotification(Order order, Account account);
+
+    Notification CreateOrderDeliveryFailedAutoByBatchToShopNotification(Order order, Shop shop);
+
+    Notification CreateOrderDeliveryFailedAutoByBatchToCustomerNotification(Order order, Shop shop);
 }

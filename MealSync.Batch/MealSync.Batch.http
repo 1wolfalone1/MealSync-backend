@@ -1,0 +1,6 @@
+@MealSync.Batch_HostAddress = http://localhost:5080
+
+GET {{MealSync.Batch_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

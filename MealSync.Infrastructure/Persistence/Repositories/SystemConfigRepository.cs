@@ -8,4 +8,9 @@ public class SystemConfigRepository : BaseRepository<SystemConfig>, ISystemConfi
     public SystemConfigRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
+
+    public SystemConfig GetSystemConfig()
+    {
+        return DbSet.FirstOrDefault();
+    }
 }
