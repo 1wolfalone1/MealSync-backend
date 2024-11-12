@@ -49,6 +49,7 @@ DeliveryPackageInFrame AS (
         dp.delivery_date,
         dp.start_time,
         dp.end_time,
+        dp.status,
         CASE
             WHEN dp.shop_delivery_staff_id IS NOT NULL THEN dp.shop_delivery_staff_id
             ELSE dp.shop_id
@@ -150,6 +151,10 @@ DormitoryStasticAndInfor AS (
 )
 SELECT
     dp.id AS DeliveryPackageId,
+    dp.start_time AS  StartTime,
+    dp.end_time AS EndTime,
+    dp.delivery_date AS DeliveryDate,
+    dp.status AS Status,
     (
         SELECT
             COUNT(*)

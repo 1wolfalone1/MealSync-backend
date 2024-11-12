@@ -147,4 +147,14 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
             .Where(dp => dp.ShopDeliveryStaffId == shopDeliveryStaffId && dp.Status != DeliveryPackageStatus.Done)
             .AnyAsync(dp => dp.Orders.Any(o => o.Status == OrderStatus.Preparing || o.Status == OrderStatus.Delivering));
     }
+
+    public bool CheckIsExistDeliveryPackageBaseOnRole(bool isShopOwner, long deliveryPackageId, long? shipperId)
+    {
+        if (isShopOwner)
+        {
+            return DbSet.Any(dp => dp.Id == deliveryPackageId && (dp.ShopId == shipperId || dp.ShopDeliveryStaff.ShopId == shipperId));
+        }
+
+        return DbSet.Any(dp => dp.Id == deliveryPackageId && dp.ShopDeliveryStaffId == shipperId);
+    }
 }
