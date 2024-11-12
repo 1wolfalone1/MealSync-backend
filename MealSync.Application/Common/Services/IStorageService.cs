@@ -1,5 +1,7 @@
 using System.Drawing;
 using Microsoft.AspNetCore.Http;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace MealSync.Application.Common.Services;
 
@@ -9,7 +11,7 @@ public interface IStorageService
 
     Task<bool> DeleteFileAsync(string url);
 
-    Task<string> UploadFileAsync(Bitmap bitmap, string contentType = "image/png");
+    Task<string> UploadFileAsync(Image<Rgba32> image, string contentType = "image/png");
 
-    Task<Bitmap> GenerateQRCodeWithLogoAsync(string qrText);
+    Task<Image<Rgba32>> GenerateQRCodeWithLogoAsync(string qrText);
 }

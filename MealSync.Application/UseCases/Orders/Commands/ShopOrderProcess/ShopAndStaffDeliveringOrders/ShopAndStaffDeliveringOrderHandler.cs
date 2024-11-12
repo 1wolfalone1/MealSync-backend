@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Net;
+﻿using System.Net;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
@@ -12,9 +11,9 @@ using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using QRCoder;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveringOrders;
 
@@ -69,7 +68,7 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
                 var token = BCrypUnitls.Hash(hashString);
                 var deliveryPackage = _deliveryPackageRepository.GetById(order.DeliveryPackageId);
                 var shipperId = deliveryPackage.ShopId.HasValue ? deliveryPackage.ShopId.Value : deliveryPackage.ShopDeliveryStaffId.Value;
-                Bitmap qrCode = await GenerateOrderQRCodeBitmapAsync(order, token, shipperId).ConfigureAwait(false);
+                var qrCode = await GenerateOrderQRCodeBitmapAsync(order, token, shipperId).ConfigureAwait(false);
                 var imageUrl = await _storageService.UploadFileAsync(qrCode).ConfigureAwait(false);
                 order.QrScanToDeliveried = imageUrl;
                 order.Status = OrderStatus.Delivering;
@@ -123,7 +122,7 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
         }
     }
 
-    public async Task<Bitmap> GenerateOrderQRCodeBitmapAsync(Order orderInfo, string token, long shipperId)
+    public async Task<Image<Rgba32>> GenerateOrderQRCodeBitmapAsync(Order orderInfo, string token, long shipperId)
     {
         string orderDataJson = JsonConvert.SerializeObject(new
         {
