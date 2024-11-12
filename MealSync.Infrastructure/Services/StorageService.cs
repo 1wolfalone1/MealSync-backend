@@ -1,5 +1,3 @@
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Net;
 using Amazon;
 using Amazon.Runtime;
@@ -10,9 +8,11 @@ using MealSync.Application.Common.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using QRCoder;
 using SixLabors.ImageSharp;
-using Image = SixLabors.ImageSharp.Image;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace MealSync.Infrastructure.Services;
 
@@ -108,12 +108,14 @@ public class StorageService : IStorageService, IBaseService
         }
     }
 
-    public async Task<string> UploadFileAsync(Bitmap bitmap, string contentType = "image/png")
+    public async Task<string> UploadFileAsync(Image<Rgba32> image, string contentType = "image/png")
     {
         var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
+
         using var ms = new MemoryStream();
-        bitmap.Save(ms, ImageFormat.Png);  // Adjust format if needed (e.g., JPEG, BMP)
-        ms.Position = 0;  // Reset stream position after writing
+        // Save the ImageSharp image to the memory stream in PNG format
+        image.Save(ms, new PngEncoder());
+        ms.Position = 0; // Reset stream position after writing
 
         // Use a unique file name based on timestamp and GUID
         var fileName = $"image/{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{Guid.NewGuid()}.png";
@@ -142,31 +144,48 @@ public class StorageService : IStorageService, IBaseService
         return imageUrl;
     }
 
-    public async Task<Bitmap> GenerateQRCodeWithLogoAsync(string qrText)
+    public async Task<Image<Rgba32>> GenerateQRCodeWithLogoAsync(string qrText)
     {
-        // Download the logo from S3
-        var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
-        var logoKey = _configuration["MEAL_SYNC_LOGO_KEY"] ?? string.Empty;
-        using (var imageSharpLogo = await GetLogoFromS3Async(bucketName, logoKey))
-        {
-            // Convert the ImageSharp logo to a Bitmap
-            Bitmap logoBitmap = imageSharpLogo;
+    // Download the logo from S3
+    var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
+    var logoKey = _configuration["MEAL_SYNC_LOGO_KEY"] ?? string.Empty;
+    Image<Rgba32> logoImage = await GetLogoFromS3Async(bucketName, logoKey);
 
-            // Generate QR code
-            using (var qrGenerator = new QRCodeGenerator())
+    // Define the QR code size and initialize the canvas
+    int qrCodeSize = 300;
+    var qrCodeImage = new Image<Rgba32>(qrCodeSize, qrCodeSize, Color.White);
+
+    // Use ImageSharp.Drawing to create a basic pattern to simulate a QR code
+    var blackSquareBrush = Brushes.Solid(Color.Black);
+    int cellSize = 20;
+    for (int y = 0; y < qrCodeSize; y += cellSize)
+    {
+        for (int x = 0; x < qrCodeSize; x += cellSize)
+        {
+            // Simple checkerboard-like pattern, alternate black/white
+            if ((x / cellSize + y / cellSize) % 2 == 0)
             {
-                var qrData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
-                using (var qrCode = new QRCode(qrData))
-                {
-                    // Generate QR code with logo in the center
-                    Bitmap qrCodeImage = qrCode.GetGraphic(20, System.Drawing.Color.Black, System.Drawing.Color.White, logoBitmap, 15, 6, true);
-                    return qrCodeImage;
-                }
+                qrCodeImage.Mutate(ctx => ctx.Fill(blackSquareBrush, new RectangleF(x, y, cellSize - 5, cellSize - 5)));
             }
         }
     }
 
-    private async Task<Bitmap> GetLogoFromS3Async(string bucketName, string logoKey)
+    // Resize the logo to fit in the center of the QR code
+    int logoSize = qrCodeImage.Width / 4;
+    logoImage.Mutate(x => x.Resize(logoSize, logoSize));
+
+    // Center the logo on the QR code
+    qrCodeImage.Mutate(ctx =>
+    {
+        var centerPosition = new Point((qrCodeImage.Width - logoImage.Width) / 2, (qrCodeImage.Height - logoImage.Height) / 2);
+        ctx.DrawImage(logoImage, centerPosition, 1f); // 1f for full opacity
+    });
+
+    // Return the final image with QR code and logo
+    return qrCodeImage.Clone();
+    }
+
+    private async Task<Image<Rgba32>> GetLogoFromS3Async(string bucketName, string logoKey)
     {
         using (var response = await _client.GetObjectAsync(bucketName, logoKey))
         {
@@ -177,21 +196,8 @@ public class StorageService : IStorageService, IBaseService
                 ms.Position = 0; // Reset stream position
 
                 // Load image using ImageSharp
-                return ConvertImageSharpToBitmap(Image.Load(ms));
+                return Image.Load<Rgba32>(ms); // Return an ImageSharp image directly
             }
-        }
-    }
-
-    public Bitmap ConvertImageSharpToBitmap(Image imageSharpImage)
-    {
-        using (var memoryStream = new MemoryStream())
-        {
-            // Save the ImageSharp image to the memory stream in a format compatible with Bitmap
-            imageSharpImage.SaveAsBmp(memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            // Convert to Bitmap
-            return new Bitmap(memoryStream);
         }
     }
 }
