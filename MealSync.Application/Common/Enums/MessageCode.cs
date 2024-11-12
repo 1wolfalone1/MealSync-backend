@@ -421,6 +421,25 @@ public enum MessageCode
     [Description("I-Order-ConfirmOrderCompleted")]
     I_ORDER_CONFIRM_ORDER_COMPLETED,
 
+    // Report
+    [Description("E-Report-NotFound")]
+    E_REPORT_NOT_FOUND,
+
+    [Description("E-Report-NotInStatusForCustomerReport")]
+    E_REPORT_NOT_IN_STATUS_FOR_CUSTOMER_REPORT,
+
+    [Description("E-Report-CustomerReportTimeLimit")]
+    E_REPORT_CUSTOMER_REPORT_TIME_LIMIT,
+
+    [Description("E-Report-CustomerAlreadyReport")]
+    E_REPORT_CUSTOMER_ALREADY_REPORT,
+
+    [Description("E-Report-ShopAlreadyReport")]
+    E_REPORT_SHOP_ALREADY_REPORT,
+
+    [Description("E-Report-ShopReportTimeLimit")]
+    E_REPORT_SHOP_REPORT_TIME_LIMIT,
+
     // Delivery package
     [Description("E-DeliveryPackage-StaffAlreadyHaveOtherPackage")]
     E_DELIVERY_PACKAGE_STAFF_ALREADY_HAVE_OTHER_PACKAGE,
