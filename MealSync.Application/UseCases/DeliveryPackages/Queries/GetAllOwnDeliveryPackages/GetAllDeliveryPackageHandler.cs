@@ -34,11 +34,11 @@ public class GetAllDeliveryPackageHandler : IQueryHandler<GetAllDeliveryPackageQ
         return Result.Success(response);
     }
 
-    private async Task<List<DeliveryPackageGroupDetailResponse>> GetDeliveryPackageStatsisticAsync(GetAllDeliveryPackageQuery request, long shopId, long? shopDeliveryStaffId, DeliveryPackageStatus[] status)
+    private async Task<List<DeliveryPackageGroupDetailForMobileResponse>> GetDeliveryPackageStatsisticAsync(GetAllDeliveryPackageQuery request, long shopId, long? shopDeliveryStaffId, DeliveryPackageStatus[] status)
     {
-        var dicDormitoryUniq = new Dictionary<long, DeliveryPackageGroupDetailResponse>();
-        Func<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
-            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse> map =
+        var dicDormitoryUniq = new Dictionary<long, DeliveryPackageGroupDetailForMobileResponse>();
+        Func<DeliveryPackageGroupDetailForMobileResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
+            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailForMobileResponse> map =
             (parent, child1, child2, child3) =>
             {
                 if (!dicDormitoryUniq.TryGetValue(parent.DeliveryPackageId, out var deliveryPackage))
@@ -71,8 +71,8 @@ public class GetAllDeliveryPackageHandler : IQueryHandler<GetAllDeliveryPackageQ
             EndTime = request.EndTime,
         };
 
-        await _dapperService.SelectAsync<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
-            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse>(
+        await _dapperService.SelectAsync<DeliveryPackageGroupDetailForMobileResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
+            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailForMobileResponse>(
             QueryName.GetAllDeliveryPackageStasisticByTimeFrame,
             map,
             parameter,

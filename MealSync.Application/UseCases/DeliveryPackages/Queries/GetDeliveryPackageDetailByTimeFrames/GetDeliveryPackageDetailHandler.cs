@@ -35,7 +35,7 @@ public class GetDeliveryPackageDetailHandler : IQueryHandler<GetDeliveryPackageD
         var account = _currentAccountService.GetCurrentAccount();
         var deliveryPackage = _deliveryPackageRepository.GetById(request.Id);
         long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
-        var response = await GetDeliveryPackageStatsisticAsync(deliveryPackage.StartTime, deliveryPackage.EndTime, deliveryPackage.DeliveryDate, shopId, deliveryPackage.ShopDeliveryStaffId, new DeliveryPackageStatus[]
+        var response = await GetDeliveryPackageStatisticsAsync(deliveryPackage.StartTime, deliveryPackage.EndTime, deliveryPackage.DeliveryDate, shopId, deliveryPackage.ShopDeliveryStaffId, new DeliveryPackageStatus[]
         {
             DeliveryPackageStatus.Created, DeliveryPackageStatus.Done, DeliveryPackageStatus.OnGoing
         }).ConfigureAwait(false);
@@ -43,11 +43,11 @@ public class GetDeliveryPackageDetailHandler : IQueryHandler<GetDeliveryPackageD
         return Result.Success(response);
     }
 
-    private async Task<DeliveryPackageGroupDetailResponse> GetDeliveryPackageStatsisticAsync(int startTime, int endTime, DateTime deliveryDate, long shopId, long? shopDeliveryStaffId, DeliveryPackageStatus[] status)
+    private async Task<DeliveryPackageGroupDetailForMobileResponse> GetDeliveryPackageStatisticsAsync(int startTime, int endTime, DateTime deliveryDate, long shopId, long? shopDeliveryStaffId, DeliveryPackageStatus[] status)
     {
-        var dicDormitoryUniq = new Dictionary<long, DeliveryPackageGroupDetailResponse>();
-        Func<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
-            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse> map =
+        var dicDormitoryUniq = new Dictionary<long, DeliveryPackageGroupDetailForMobileResponse>();
+        Func<DeliveryPackageGroupDetailForMobileResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
+            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailForMobileResponse> map =
             (parent, child1, child2, child3) =>
             {
                 if (!dicDormitoryUniq.TryGetValue(parent.DeliveryPackageId, out var deliveryPackage))
@@ -80,8 +80,8 @@ public class GetDeliveryPackageDetailHandler : IQueryHandler<GetDeliveryPackageD
             EndTime = endTime,
         };
 
-        await _dapperService.SelectAsync<DeliveryPackageGroupDetailResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
-            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse>(
+        await _dapperService.SelectAsync<DeliveryPackageGroupDetailForMobileResponse, DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff,
+            DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage, DeliveryPackageGroupDetailForMobileResponse>(
             QueryName.GetAllDeliveryPackageStasisticByTimeFrame,
             map,
             parameter,
@@ -139,8 +139,7 @@ public class GetDeliveryPackageDetailHandler : IQueryHandler<GetDeliveryPackageD
     private void Validate(GetDeliveryPackageDetailQuery request)
     {
         var isShopOwner = _currentAccountService.GetCurrentAccount().RoleId == (int)Domain.Enums.Roles.ShopOwner;
-        if (_deliveryPackageRepository.Get(dp => dp.Id == request.Id && (isShopOwner && dp.ShopId == _currentAccountService.GetCurrentAccount().Id ||
-                                                                         !isShopOwner && dp.ShopDeliveryStaffId == _currentAccountService.GetCurrentAccount().Id)).SingleOrDefault() == default)
-            throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_NOT_FOUND.GetDescription(), new object[] { request.Id }, HttpStatusCode.NotFound);
+        if (!_deliveryPackageRepository.CheckIsExistDeliveryPackageBaseOnRole(isShopOwner, request.Id, _currentAccountService.GetCurrentAccount().Id))
+            throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_NOT_FOUND.GetDescription(), new object[] { request.Id });
     }
 }

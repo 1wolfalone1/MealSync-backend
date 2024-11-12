@@ -21,4 +21,6 @@ public interface IDeliveryPackageRepository : IBaseRepository<DeliveryPackage>
         string? requestDeliveryPackageId, long shopId);
 
     Task<bool> CheckHaveInDeliveryPackageNotDone(long shopDeliveryStaffId);
+
+    bool CheckIsExistDeliveryPackageBaseOnRole(bool isShopOwner, long deliveryPackageId, long? shipperId);
 }
