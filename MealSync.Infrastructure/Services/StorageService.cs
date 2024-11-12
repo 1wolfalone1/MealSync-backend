@@ -8,6 +8,7 @@ using MealSync.Application.Common.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using QRCoder;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
@@ -149,39 +150,30 @@ public class StorageService : IStorageService, IBaseService
     // Download the logo from S3
     var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
     var logoKey = _configuration["MEAL_SYNC_LOGO_KEY"] ?? string.Empty;
-    Image<Rgba32> logoImage = await GetLogoFromS3Async(bucketName, logoKey);
 
-    // Define the QR code size and initialize the canvas
-    int qrCodeSize = 300;
-    var qrCodeImage = new Image<Rgba32>(qrCodeSize, qrCodeSize, Color.White);
+    // Step 1: Generate the QR code and retrieve it as a byte array
+    using var qrGenerator = new QRCodeGenerator();
+    var qrData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
+    var qrCode = new PngByteQRCode(qrData);
+    byte[] qrCodeBytes = qrCode.GetGraphic(20);
 
-    // Use ImageSharp.Drawing to create a basic pattern to simulate a QR code
-    var blackSquareBrush = Brushes.Solid(Color.Black);
-    int cellSize = 20;
-    for (int y = 0; y < qrCodeSize; y += cellSize)
-    {
-        for (int x = 0; x < qrCodeSize; x += cellSize)
-        {
-            // Simple checkerboard-like pattern, alternate black/white
-            if ((x / cellSize + y / cellSize) % 2 == 0)
-            {
-                qrCodeImage.Mutate(ctx => ctx.Fill(blackSquareBrush, new RectangleF(x, y, cellSize - 5, cellSize - 5)));
-            }
-        }
-    }
+    // Step 2: Load the QR code byte array into an ImageSharp Image<Rgba32>
+    using var qrCodeImage = Image.Load<Rgba32>(qrCodeBytes);
+
+    // Step 3: Retrieve the logo from S3 and load it as an ImageSharp image
+    var logoImage = await GetLogoFromS3Async(bucketName, logoKey);
 
     // Resize the logo to fit in the center of the QR code
-    int logoSize = qrCodeImage.Width / 4;
+    int logoSize = qrCodeImage.Width / 5; // Adjust size as needed
     logoImage.Mutate(x => x.Resize(logoSize, logoSize));
 
     // Center the logo on the QR code
-    qrCodeImage.Mutate(ctx =>
-    {
-        var centerPosition = new Point((qrCodeImage.Width - logoImage.Width) / 2, (qrCodeImage.Height - logoImage.Height) / 2);
-        ctx.DrawImage(logoImage, centerPosition, 1f); // 1f for full opacity
-    });
+    var centerPosition = new Point(
+        (qrCodeImage.Width - logoImage.Width) / 2,
+        (qrCodeImage.Height - logoImage.Height) / 2
+    );
+    qrCodeImage.Mutate(ctx => ctx.DrawImage(logoImage, centerPosition, 1f));
 
-    // Return the final image with QR code and logo
     return qrCodeImage.Clone();
     }
 

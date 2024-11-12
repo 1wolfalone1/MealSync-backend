@@ -185,6 +185,8 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
 
     private void Validate(ShopAndStaffDeliverySuccessCommand request)
     {
+        // Todo: Add check out of frame and in wrong date
+
         var account = _currentAccountService.GetCurrentAccount();
         long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
         var order = _orderRepository
