@@ -12,14 +12,12 @@ public class GetReviewByFilterHandler : IQueryHandler<GetReviewByFilterQuery, Re
 {
     private readonly IReviewRepository _reviewRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
-    private readonly IOrderDetailRepository _orderDetailRepository;
 
     public GetReviewByFilterHandler(
-        IReviewRepository reviewRepository, ICurrentPrincipalService currentPrincipalService, IOrderDetailRepository orderDetailRepository)
+        IReviewRepository reviewRepository, ICurrentPrincipalService currentPrincipalService)
     {
         _reviewRepository = reviewRepository;
         _currentPrincipalService = currentPrincipalService;
-        _orderDetailRepository = orderDetailRepository;
     }
 
     public async Task<Result<Result>> Handle(GetReviewByFilterQuery request, CancellationToken cancellationToken)
@@ -34,7 +32,6 @@ public class GetReviewByFilterHandler : IQueryHandler<GetReviewByFilterQuery, Re
                                       && review.Reviews.Count > 0
                                       && now >= review.Reviews[0].CreatedDate
                                       && now <= review.Reviews[0].CreatedDate.AddHours(24);
-            review.Description = await _orderDetailRepository.GetOrderDescriptionByOrderId(review.OrderId).ConfigureAwait(false);
         }
 
         var reviewOverview = await _reviewRepository.GetReviewOverviewByShopId(shopId).ConfigureAwait(false);
