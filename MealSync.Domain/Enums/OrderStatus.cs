@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace MealSync.Domain.Enums;
+﻿namespace MealSync.Domain.Enums;
 
 public enum OrderStatus
 {
@@ -16,4 +14,5 @@ public enum OrderStatus
     IssueReported = 10,
     UnderReview = 11,
     Resolved = 12,
+    PendingPayment = 13,
 }

@@ -27,6 +27,8 @@ public class ShopFoodWebResponse
 
     public DateTimeOffset CreatedDate { get; set; }
 
+    public int NumberOfOptionGroupLinked { get; set; }
+
     public ShopCategoryForShopFoodWeb ShopCategory { get; set; }
 
     public List<OperatingSlotForShopFoodWeb> OperatingSlots { get; set; }

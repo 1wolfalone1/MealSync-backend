@@ -21,4 +21,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     List<Order> GetByIds(List<long> ids);
 
     Task<ShopStatisticDto> GetShopOrderStatistic(long shopId, DateTime startDate, DateTime endDate);
+
+    List<Order> GetListOrderOnStatusDeliveringButOverTimeFrame(int hoursToMarkDeliveryFail, DateTime currentDate, int currentHours);
 }

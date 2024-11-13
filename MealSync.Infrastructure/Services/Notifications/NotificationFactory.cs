@@ -282,6 +282,46 @@ public class NotificationFactory : INotificationFactory
         };
     }
 
+    public Notification CreateOrderDeliveryFailedAutoByBatchToCustomerNotification(Order order, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_DELIVERY_FAIL_AUTO_BY_BATCH.GetDescription(), order.Id),
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateOrderDeliveryFailedAutoByBatchToShopNotification(Order order, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_DELIVERY_FAIL_AUTO_BY_BATCH.GetDescription(), order.Id),
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
     public Notification CreateOrderDeliveryFailedToModeratorNotification(Order order, Account accMod, Shop shop)
     {
         using var scope = _serviceScopeFactory.CreateScope();

@@ -12,7 +12,7 @@ public interface IEmailService
 
     bool SendEmailToAnnounceWarningForShop(string email, int numberOfWarning);
 
-    bool SendEmailToAnnounceApplyFlagForShop(string email, int flag);
+    bool SendEmailToAnnounceApplyFlagForShop(string email, int flag, string reason);
 
     bool SendEmailToAnnounceModeratorRefundFail(string email, long orderId);
 

@@ -282,6 +282,112 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.ToTable("activity_log", (string)null);
                 });
 
+            modelBuilder.Entity("MealSync.Domain.Entities.Batch", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("BatchCode")
+                        .HasColumnType("int")
+                        .HasColumnName("batch_code");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
+
+                    b.Property<string>("Parameter")
+                        .HasColumnType("longtext")
+                        .HasColumnName("parameter");
+
+                    b.Property<DateTimeOffset>("ScheduledTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("scheduled_time");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTimeOffset>("UpdatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_batch");
+
+                    b.ToTable("batch", (string)null);
+                });
+
+            modelBuilder.Entity("MealSync.Domain.Entities.BatchHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("BatchCode")
+                        .HasColumnType("int")
+                        .HasColumnName("batch_code");
+
+                    b.Property<long>("BatchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("batch_id");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_date");
+
+                    b.Property<DateTimeOffset>("EndDateTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("end_date_time");
+
+                    b.Property<string>("ErrorLog")
+                        .HasColumnType("longtext")
+                        .HasColumnName("error_log");
+
+                    b.Property<string>("Parameter")
+                        .HasColumnType("longtext")
+                        .HasColumnName("parameter");
+
+                    b.Property<DateTimeOffset>("StartDateTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("start_date_time");
+
+                    b.Property<int>("TotalRecord")
+                        .HasColumnType("int")
+                        .HasColumnName("total_record");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTimeOffset>("UpdatedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_batch_history");
+
+                    b.ToTable("batch_history", (string)null);
+                });
+
             modelBuilder.Entity("MealSync.Domain.Entities.Building", b =>
                 {
                     b.Property<long>("Id")
@@ -1143,6 +1249,14 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                     b.Property<int>("EndTime")
                         .HasColumnType("int")
                         .HasColumnName("end_time");
+
+                    b.Property<string>("EvidenceDeliveryFailImageUrls")
+                        .HasColumnType("longtext")
+                        .HasColumnName("evidence_delivery_fail_image_urls");
+
+                    b.Property<DateTimeOffset?>("EvidenceTakePictureDatetime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("evidence_take_picture_datetime");
 
                     b.Property<string>("FullName")
                         .IsRequired()

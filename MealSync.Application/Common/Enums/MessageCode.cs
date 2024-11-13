@@ -421,6 +421,15 @@ public enum MessageCode
     [Description("I-Order-ConfirmOrderCompleted")]
     I_ORDER_CONFIRM_ORDER_COMPLETED,
 
+    [Description("E-Order-DeliveryFail-OverTimeFillReason")]
+    E_ORDER_DELIVERY_FAIL_OVER_TIME_FILL_REASON,
+
+    [Description("E-Order-NotDeliveryByYou")]
+    E_ORDER_NOT_DELIVERY_BY_YOU,
+
+    [Description("E-Order-OverTimeToDeliverd")]
+    E_ORDER_OVER_TIME_TO_DELIVERED,
+
     // Report
     [Description("E-Report-NotFound")]
     E_REPORT_NOT_FOUND,

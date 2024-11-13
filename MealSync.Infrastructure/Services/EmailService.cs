@@ -57,11 +57,11 @@ public class EmailService : IEmailService, IBaseService
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ANNOUCE_WARNING_FOR_SHOP.GetDescription(), numberOfWarning));
     }
 
-    public bool SendEmailToAnnounceApplyFlagForShop(string email, int flag)
+    public bool SendEmailToAnnounceApplyFlagForShop(string email, int flag, string reason)
     {
         return SendEmail(email,
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_ANNOUCE_APPLY_FLAG_FOR_SHOP.GetDescription(), flag),
-            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ANNOUCE_APPLY_FLAG_FOR_SHOP.GetDescription(), flag));
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ANNOUCE_APPLY_FLAG_FOR_SHOP.GetDescription(), new object[] { reason, flag }));
     }
 
     public bool SendEmailToAnnounceModeratorRefundFail(string email, long orderId)
