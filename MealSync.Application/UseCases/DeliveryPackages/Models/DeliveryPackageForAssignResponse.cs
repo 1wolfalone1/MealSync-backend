@@ -25,7 +25,7 @@ public class DeliveryPackageForAssignResponse
 
     public List<DormitoryStasisticForEachStaff> Dormitories { get; set; } = new();
 
-    public List<OrderForShopByStatusResponse> Orders { get; set; } = new();
+    public List<OrderDetailForShopResponse> Orders { get; set; } = new();
 
     public class DormitoryStasisticForEachStaff
     {
