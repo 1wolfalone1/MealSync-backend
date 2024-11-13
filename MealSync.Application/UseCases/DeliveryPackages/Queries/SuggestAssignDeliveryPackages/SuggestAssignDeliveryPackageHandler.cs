@@ -60,15 +60,15 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_TIME_FRAME_CREATED.GetDescription(), new object[] { TimeFrameUtils.GetTimeFrameString(request.StartTime, request.EndTime) });
     }
 
-    private (List<DeliveryPackageForAssignResponse> AssignedStaff, List<OrderForShopByStatusResponse> UnAssignOrder) AssignOrder(List<DeliveryPackageForAssignResponse> listStaff, List<OrderForShopByStatusResponse> orders)
+    private (List<DeliveryPackageForAssignResponse> AssignedStaff, List<OrderDetailForShopResponse> UnAssignOrder) AssignOrder(List<DeliveryPackageForAssignResponse> listStaff, List<OrderDetailForShopResponse> orders)
     {
         var ordersByDormitory = orders.GroupBy(o => o.DormitoryId)
             .ToDictionary(g => g.Key, g => (g.Count(), g.ToList()));
 
         // Calculate the ideal number of orders each staff should handle
-        double equallyOrderForEachStaff = Math.Round((orders.Count / listStaff.Count * 1.0), MidpointRounding.ToEven);
+        var equallyOrderForEachStaff = Math.Round(orders.Count / listStaff.Count * 1.0, MidpointRounding.ToEven);
 
-        int staffIndex = 0;
+        var staffIndex = 0;
         List<(long DormitoryId, long NumberOfOrder)> dormitoryIdsSatisfyCondition = new();
         foreach (var orderDormitory in ordersByDormitory)
         {
@@ -78,7 +78,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             }
         }
 
-        for (int i = 0; i < listStaff.Count(); i++)
+        for (var i = 0; i < listStaff.Count(); i++)
         {
             // Assign for staff until not left
             if (dormitoryIdsSatisfyCondition.Count > 0)
@@ -101,27 +101,28 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             return (result.AssignedStaff, result.UnAssignOrder);
         }
 
-        return (listStaff, new List<OrderForShopByStatusResponse>());
+        return (listStaff, new List<OrderDetailForShopResponse>());
     }
 
-    private (List<DeliveryPackageForAssignResponse> AssignedStaff, List<OrderForShopByStatusResponse> UnAssignOrder) AssignOrderByFormular(List<DeliveryPackageForAssignResponse> listStaff, List<OrderForShopByStatusResponse> orders)
+    private (List<DeliveryPackageForAssignResponse> AssignedStaff, List<OrderDetailForShopResponse> UnAssignOrder) AssignOrderByFormular(List<DeliveryPackageForAssignResponse> listStaff,
+        List<OrderDetailForShopResponse> orders)
     {
-        List<OrderForShopByStatusResponse> unAssignOrder = new();
+        List<OrderDetailForShopResponse> unAssignOrder = new();
         Dictionary<long, DeliveryPackageForAssignResponse> assignedStaffs = new();
         foreach (var order in orders)
         {
             DeliveryPackageForAssignResponse bestStaff = null;
-            double bestScore = double.MaxValue;
+            var bestScore = double.MaxValue;
 
             foreach (var staff in listStaff)
             {
                 // Calculate workload ratio
-                double workloadRatio = staff.ShopDeliveryStaff.CurrentTaskLoad / DevidedOrderConstant.StaffMaxCapacity;
+                var workloadRatio = staff.ShopDeliveryStaff.CurrentTaskLoad / DevidedOrderConstant.StaffMaxCapacity;
 
                 /* If order need to delivery to different dormitory when compare to current dormitory in staff
                     need to check other staff have that dormitory is more than 50% totalOrder. If no let them take
                  */
-                int salt = 0;
+                var salt = 0;
                 if (staff.Dormitories.All(d => d.Id != order.DormitoryId) && staff.Total > 0)
                 {
                     var staffWithMinTotalOrder = listStaff.Where(s => s.Dormitories.Select(d => d.Id).Contains(order.DormitoryId)).OrderBy(d => d.Total).FirstOrDefault();
@@ -140,7 +141,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                 }
 
                 // Calculate the score (lower score is better)
-                double score = DevidedOrderConstant.DistanceAlpha * staff.CurrentDistance + DevidedOrderConstant.WorkloadBeta * workloadRatio + salt;
+                var score = DevidedOrderConstant.DistanceAlpha * staff.CurrentDistance + DevidedOrderConstant.WorkloadBeta * workloadRatio + salt;
 
                 if (score < bestScore)
                 {
@@ -233,7 +234,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         // Refill Staff When Have Not Enough Order
         if (assignedStaffs.Values.Count != listStaff.Count)
         {
-            for (int i = 0; i < listStaff.Count; i++)
+            for (var i = 0; i < listStaff.Count; i++)
             {
                 if (assignedStaffs.TryGetValue(listStaff[i].ShopDeliveryStaff.Id, out var staffAssigned))
                 {
@@ -247,7 +248,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         return (assignedStaffs.Values.ToList(), unAssignOrder);
     }
 
-    private DeliveryPackageForAssignResponse AssignOrderToStaff(DeliveryPackageForAssignResponse staff, List<OrderForShopByStatusResponse> orders)
+    private DeliveryPackageForAssignResponse AssignOrderToStaff(DeliveryPackageForAssignResponse staff, List<OrderDetailForShopResponse> orders)
     {
         foreach (var order in orders)
         {
@@ -316,36 +317,42 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         return response.ToList();
     }
 
-    private async Task<List<OrderForShopByStatusResponse>> GetListOrderUnAssignByTimeFrameAsync(SuggestAssignDeliveryPackageQuery request)
+    private async Task<List<OrderDetailForShopResponse>> GetListOrderUnAssignByTimeFrameAsync(SuggestAssignDeliveryPackageQuery request)
     {
-        var orderUniq = new Dictionary<long, OrderForShopByStatusResponse>();
-        Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
-            OrderForShopByStatusResponse> map = (parent, child1, child2, child3) =>
-        {
-            if (!orderUniq.TryGetValue(parent.Id, out var order))
+        var uniqOrder = new Dictionary<long, OrderDetailForShopResponse>();
+        Func<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail, OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail,
+            OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse> map =
+            (parent, child1, child2, child3, child4) =>
             {
-                parent.Customer = child1;
-                if (child2.DeliveryPackageId != 0 && (child2.Id != 0 || child2.IsShopOwnerShip))
+                if (!uniqOrder.TryGetValue(parent.Id, out var order))
                 {
-                    parent.ShopDeliveryStaff = child2;
+                    parent.Customer = child1;
+                    if (child2.Id != 0)
+                    {
+                        parent.Promotion = child2;
+                    }
+
+                    if (child3.DeliveryPackageId != 0 && (child3.Id != 0 || child3.IsShopOwnerShip))
+                    {
+                        parent.ShopDeliveryStaff = child3;
+                    }
+
+                    parent.OrderDetails.Add(child4);
+                    uniqOrder.Add(parent.Id, parent);
+                }
+                else
+                {
+                    order.OrderDetails.Add(child4);
+                    uniqOrder.Remove(order.Id);
+                    uniqOrder.Add(order.Id, order);
                 }
 
-                parent.Foods.Add(child3);
-                orderUniq.Add(parent.Id, parent);
-            }
-            else
-            {
-                order.Foods.Add(child3);
-                orderUniq.Remove(order.Id);
-                orderUniq.Add(order.Id, order);
-            }
-
-            return parent;
-        };
+                return parent;
+            };
 
         await _dapperService
-            .SelectAsync<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
-                OrderForShopByStatusResponse>(
+            .SelectAsync<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail,
+                OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail, OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse>(
                 QueryName.GetListOrderUnAssignInTimeFrame,
                 map,
                 new
@@ -355,8 +362,8 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                     EndTime = request.EndTime,
                     ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
                 },
-                "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
+                "CustomerSection, PromotionSection, DeliveryPackageSection, OrderDetailSection").ConfigureAwait(false);
 
-        return orderUniq.Values.ToList();
+        return uniqOrder.Values.ToList();
     }
 }

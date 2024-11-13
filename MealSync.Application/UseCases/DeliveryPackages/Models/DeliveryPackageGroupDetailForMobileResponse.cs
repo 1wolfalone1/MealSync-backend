@@ -28,5 +28,5 @@ public class DeliveryPackageGroupDetailForMobileResponse
 
     public List<DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff> Dormitories { get; set; } = new();
 
-    public List<OrderForShopByStatusResponse> Orders { get; set; } = new();
+    public List<OrderDetailForShopResponse> Orders { get; set; } = new();
 }
