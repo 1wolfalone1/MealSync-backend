@@ -18,7 +18,7 @@
 -- SET @EndTime:=2300;
 -- SET @PhoneNumber:=NULL;
 -- SET @OrderId:=NULL;
-WITH OrdersOfShop AS (
+WITH OrderInfor AS (
     SELECT
         id,
         promotion_id,
@@ -42,8 +42,11 @@ WITH OrdersOfShop AS (
         completed_at,
         start_time,
         end_time,
+        delivery_success_image_url,
+        is_refund,
+        is_report,
+        reason,
         intended_receive_date,
-        created_date,
         ROW_NUMBER() OVER (
             ORDER BY
                 o.id
@@ -73,6 +76,23 @@ WITH OrdersOfShop AS (
     ORDER BY
         o.start_time ASC,
         o.order_date ASC
+),
+OrderDetailWithFood AS (
+    SELECT
+        od.id,
+        od.food_id,
+        f.name AS f_name,
+        f.description AS f_desc,
+        f.image_url AS f_image_url,
+        od.quantity,
+        od.order_id,
+        od.total_price,
+        od.basic_price,
+        od.description,
+        od.note
+    FROM
+        order_detail od
+        INNER JOIN food f ON od.food_id = f.id
 )
 SELECT
     -- Order
@@ -80,26 +100,40 @@ SELECT
     o.status AS Status,
     o.building_id AS BuildingId,
     o.building_name AS BuildingName,
-    o.total_price AS TotalPrice,
     o.total_promotion AS TotalPromotion,
+    o.total_price AS TotalPrice,
     o.order_date AS OrderDate,
     o.receive_at AS ReceiveAt,
+    o.note AS Note,
     o.completed_at AS CompletedAt,
+    o.intended_receive_date AS IntendedReceiveDate,
     o.start_time AS StartTime,
     o.end_time AS EndTime,
-    o.intended_receive_date AS IntendedReceiveDate,
-    o.created_date AS CreatedDate,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
-    TotalPages,
     -- Customer
-    o.customer_id AS CustomerSection,
-    o.customer_id AS Id,
+    a.id AS CustomerSection,
+    a.id AS Id,
     o.full_name AS FullName,
     o.phone_number AS PhoneNumber,
-    accCus.avatar_url AS AvatarUrl,
+    a.avatar_url AS AvartarUrl,
+    l.id AS LocationId,
+    l.address AS Address,
+    l.latitude AS Latitude,
+    l.longitude AS Longitude,
+    -- Promotion
+    p.id AS PromotionSection,
+    p.id AS Id,
+    p.title AS Title,
+    p.description AS Description,
+    p.banner_url AS BannerUrl,
+    p.amount_rate AS AmountRate,
+    p.amount_value AS AmountValue,
+    p.min_ordervalue AS MinOrderValue,
+    p.apply_type AS ApplyType,
+    p.maximum_apply_value AS MaximumApplyValue,
     -- Shop Delivery Staff or Shop Owner Information (conditional)
-    dp.id AS ShopDeliverySection,
+    dp.id AS DeliveryPackageSection,
     dp.id AS DeliveryPackageId,
     CASE
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN dp.shop_delivery_staff_id
@@ -114,25 +148,36 @@ SELECT
         ELSE accShop.avatar_url
     END AS AvatarUrl,
     CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.email
+        ELSE accShop.email
+    END AS Email,
+    CASE
         WHEN dp.shop_delivery_staff_id IS NULL THEN TRUE
         ELSE FALSE
     END AS IsShopOwnerShip,
-    -- Food
-    f.id AS FoodSection,
-    f.id AS Id,
-    f.name AS Name,
-    f.image_url AS ImageUrl,
-    od.quantity AS Quantity
+    -- OrderDetail
+    od.id AS OrderDetailSection,
+    od.id AS Id,
+    od.food_id AS FoodId,
+    od.f_name AS Name,
+    od.f_image_url AS ImageUrl,
+    od.f_desc AS Description,
+    od.quantity AS Quantity,
+    od.total_price AS TotalPrice,
+    od.basic_price AS BasicPrice,
+    od.description AS OrderDescription,
+    od.note AS Note
 FROM
-    OrdersOfShop o
+    OrderInfor o
     INNER JOIN building b ON o.building_id = b.id
     INNER JOIN dormitory d ON b.dormitory_id = d.id
-    INNER JOIN account accCus ON o.customer_id = accCus.id
+    INNER JOIN OrderDetailWithFood od ON o.id = od.order_id
+    INNER JOIN location l ON o.customer_location_id = l.id
+    LEFT JOIN promotion p ON o.promotion_id = p.id
+    INNER JOIN account a ON a.id = o.customer_id
     LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
     LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
     LEFT JOIN account accShop ON dp.shop_id = accShop.id
-    INNER JOIN order_detail od ON o.id = od.order_id
-    INNER JOIN food f ON od.food_id = f.id
 WHERE
     RowNum BETWEEN (@PageIndex - 1) * @PageSize + 1
     AND @PageIndex * @PageSize
