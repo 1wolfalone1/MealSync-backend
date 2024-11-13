@@ -202,7 +202,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
         var startEndTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
 
-        if (currentDateTime < startEndTime.StartTime || currentDateTime > startEndTime.EndTime)
+        if (currentDateTime.DateTime < startEndTime.StartTime || currentDateTime.DateTime > startEndTime.EndTime)
             throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME_TO_DELIVERED.GetDescription(), new object[] { request.OrderId, TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime) });
 
         // Check token gen is correct
