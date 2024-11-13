@@ -234,7 +234,25 @@ public class MappingProfile : Profile
                         ? new List<string>()
                         : opt.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList()));
 
-        CreateMap<Promotion, PromotionDetailOfShop>();
+        CreateMap<Promotion, PromotionDetailOfShop>()
+            .ForMember(dest => dest.IsAvailable, src => src.MapFrom(opt => IsAvailablePromotion(opt)));
+    }
+
+    private bool IsAvailablePromotion(Promotion promotion)
+    {
+        var now = DateTimeOffset.UtcNow;
+        if (promotion.NumberOfUsed >= promotion.UsageLimit)
+        {
+            return false;
+        }
+        else if (promotion.EndDate < now)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     private bool IsReviewAllowed(Order order)
