@@ -13,7 +13,7 @@ public class TimeFrameUtils
     {
         var hour = time / 100;
         var minute = time % 100;
-        return string.Format("{0}:{1}", hour.ToString().PadLeft(2,'0'), minute.ToString().PadRight(2, '0'));
+        return string.Format("{0}:{1}", hour.ToString().PadLeft(2, '0'), minute.ToString().PadRight(2, '0'));
     }
 
     public static int GetCurrentHours()
@@ -112,5 +112,25 @@ public class TimeFrameUtils
             0);
 
         return (startDateTime, endDateTime);
+    }
+
+    public static (DateTime IntendedReceiveDate, int StartTime, int EndTime) OrderTimeFrameForBatchProcess(DateTimeOffset currentTime, int hoursBack)
+    {
+        // Round the current time to the nearest 30-minute frame
+        int minutes = currentTime.Minute;
+        int roundedMinutes = (minutes < 30) ? 0 : 30;
+        DateTimeOffset roundedTime = new DateTimeOffset(currentTime.Year, currentTime.Month, currentTime.Day, currentTime.Hour, roundedMinutes, 0, currentTime.Offset);
+
+        // Subtract the specified number of hours and 30 minutes to adjust the frame
+        DateTimeOffset startDateTime = roundedTime.AddHours(-hoursBack).AddMinutes(-30);
+
+        // Calculate startTime in HHMM format
+        int startTime = (startDateTime.Hour * 100) + startDateTime.Minute;
+
+        // Calculate endTime and handle midnight transition (00:00 -> 2400)
+        DateTimeOffset endDateTime = startDateTime.AddMinutes(30);
+        int endTime = (endDateTime.Hour == 0 && endDateTime.Minute == 0) ? 2400 : (endDateTime.Hour * 100) + endDateTime.Minute;
+
+        return (startDateTime.DateTime, startTime, endTime);
     }
 }
