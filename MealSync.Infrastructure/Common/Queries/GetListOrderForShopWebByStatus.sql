@@ -87,53 +87,79 @@ SELECT
     o.status AS Status,
     o.building_id AS BuildingId,
     o.building_name AS BuildingName,
-    o.total_price AS TotalPrice,
     o.total_promotion AS TotalPromotion,
+    o.total_price AS TotalPrice,
     o.order_date AS OrderDate,
     o.receive_at AS ReceiveAt,
+    o.note AS Note,
     o.completed_at AS CompletedAt,
+    o.intended_receive_date AS IntendedReceiveDate,
     o.start_time AS StartTime,
     o.end_time AS EndTime,
-    o.intended_receive_date AS IntendedReceiveDate,
-    o.created_date AS CreatedDate,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
-    TotalPages,
     -- Customer
-    o.customer_id AS CustomerSection,
-    o.customer_id AS Id,
+    accCus.id AS CustomerSection,
+    accCus.id AS Id,
     o.full_name AS FullName,
     o.phone_number AS PhoneNumber,
-    accCus.avatar_url AS AvatarUrl,
+    accCus.avatar_url AS AvartarUrl,
+    l.id AS LocationId,
+    l.address AS Address,
+    l.latitude AS Latitude,
+    l.longitude AS Longitude,
+    -- Promotion
+    p.id AS PromotionSection,
+    p.id AS Id,
+    p.title AS Title,
+    p.description AS Description,
+    p.banner_url AS BannerUrl,
+    p.amount_rate AS AmountRate,
+    p.amount_value AS AmountValue,
+    p.min_ordervalue AS MinOrderValue,
+    p.apply_type AS ApplyType,
+    p.maximum_apply_value AS MaximumApplyValue,
     -- Shop Delivery Staff or Shop Owner Information (conditional)
-    dp.id AS ShopDeliverySection,
+    dp.id AS DeliveryPackageSection,
     dp.id AS DeliveryPackageId,
     CASE
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN dp.shop_delivery_staff_id
         ELSE 0
-    END AS Id,
+        END AS Id,
     CASE
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.full_name
         ELSE accShop.full_name
-    END AS FullName,
+        END AS FullName,
     CASE
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.avatar_url
         ELSE accShop.avatar_url
-    END AS AvatarUrl,
+        END AS AvatarUrl,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.email
+        ELSE accShop.email
+        END AS Email,
     CASE
         WHEN dp.shop_delivery_staff_id IS NULL THEN TRUE
         ELSE FALSE
-    END AS IsShopOwnerShip,
-    -- Food
-    f.id AS FoodSection,
-    f.id AS Id,
+        END AS IsShopOwnerShip,
+    -- OrderDetail
+    od.id AS OrderDetailSection,
+    od.id AS Id,
+    od.food_id AS FoodId,
     f.name AS Name,
     f.image_url AS ImageUrl,
-    od.quantity AS Quantity
+    f.description AS Description,
+    od.quantity AS Quantity,
+    od.total_price AS TotalPrice,
+    od.basic_price AS BasicPrice,
+    od.description AS OrderDescription,
+    od.note AS Note
 FROM
     OrdersOfShop o
     INNER JOIN building b ON o.building_id = b.id
     INNER JOIN dormitory d ON b.dormitory_id = d.id
+    INNER JOIN location l ON o.customer_location_id = l.id
+    LEFT JOIN promotion p ON o.promotion_id = p.id
     INNER JOIN account accCus ON o.customer_id = accCus.id
     LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
     LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id

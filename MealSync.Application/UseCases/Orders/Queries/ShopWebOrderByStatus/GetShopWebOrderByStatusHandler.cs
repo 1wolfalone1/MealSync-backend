@@ -25,32 +25,40 @@ public class GetShopWebOrderByStatusHandler : IQueryHandler<GetShopWebOrderBySta
 
     public async Task<Result<Result>> Handle(GetShopWebOrderByStatusQuery request, CancellationToken cancellationToken)
     {
-        var orderUniq = new Dictionary<long, OrderForShopWebByStatusResponse>();
-        Func<OrderForShopWebByStatusResponse, OrderForShopWebByStatusResponse.CustomerInforInOrderForShop, OrderForShopWebByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopWebByStatusResponse.FoodInOrderForShop, OrderForShopWebByStatusResponse> map = (parent, child1, child2, child3) =>
-        {
-            if (!orderUniq.TryGetValue(parent.Id, out var order))
+        var uniqOrder = new Dictionary<long, OrderDetailForShopResponse>();
+        Func<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail, OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail,
+            OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse> map =
+            (parent, child1, child2, child3, child4) =>
             {
-                parent.Customer = child1;
-                if (child2.DeliveryPackageId != 0 && (child2.Id != 0 || child2.IsShopOwnerShip))
+                if (!uniqOrder.TryGetValue(parent.Id, out var order))
                 {
-                    parent.ShopDeliveryStaff = child2;
+                    parent.Customer = child1;
+                    if (child2.Id != 0)
+                    {
+                        parent.Promotion = child2;
+                    }
+
+                    if (child3.DeliveryPackageId != 0 && (child3.Id != 0 || child3.IsShopOwnerShip))
+                    {
+                        parent.ShopDeliveryStaff = child3;
+                    }
+
+                    parent.OrderDetails.Add(child4);
+                    uniqOrder.Add(parent.Id, parent);
+                }
+                else
+                {
+                    order.OrderDetails.Add(child4);
+                    uniqOrder.Remove(order.Id);
+                    uniqOrder.Add(order.Id, order);
                 }
 
-                parent.Foods.Add(child3);
-                orderUniq.Add(parent.Id, parent);
-            }
-            else
-            {
-                order.Foods.Add(child3);
-                orderUniq.Remove(order.Id);
-                orderUniq.Add(order.Id, order);
-            }
+                return parent;
+            };
 
-            return parent;
-        };
-
-        _logger.LogInformation($"Date filter request: {(request.IntendedReceiveDate != null ? request.IntendedReceiveDate.ToString() : string.Empty)}");
-        await _dapperService.SelectAsync<OrderForShopWebByStatusResponse, OrderForShopWebByStatusResponse.CustomerInforInOrderForShop, OrderForShopWebByStatusResponse.ShopDeliveryStaffInOrderForShop,OrderForShopWebByStatusResponse.FoodInOrderForShop, OrderForShopWebByStatusResponse>(
+        await _dapperService
+            .SelectAsync<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail,
+                OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail, OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse>(
             QueryName.GetListOrderForShopWebByStatus,
             map,
             new
@@ -67,10 +75,10 @@ public class GetShopWebOrderByStatusHandler : IQueryHandler<GetShopWebOrderBySta
                 DateFrom = request.DateFrom.HasValue ? request.DateFrom.Value.ToString("yyyy-MM-dd") : null,
                 DateTo = request.DateTo.HasValue ? request.DateTo.Value.ToString("yyyy-MM-dd") : null,
             },
-            "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
+            "CustomerSection, PromotionSection, DeliveryPackageSection, OrderDetailSection").ConfigureAwait(false);
 
-        var result = new PaginationResponse<OrderForShopWebByStatusResponse>(
-            orderUniq.Values.ToList(), orderUniq.Values.ToList().Count > 0 ? orderUniq.Values.ToList().First().TotalPages : 0, request.PageIndex, request.PageSize
+        var result = new PaginationResponse<OrderDetailForShopResponse>(
+            uniqOrder.Values.ToList(), uniqOrder.Values.ToList().Count > 0 ? uniqOrder.Values.ToList().First().TotalPages : 0, request.PageIndex, request.PageSize
         );
         return Result.Success(result);
     }
