@@ -28,8 +28,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
     {
         var foodCartCheckResponse = new FoodCartCheckResponse();
         var shop = _shopRepository.GetById(request.ShopId)!;
-        var shopOperatingSlot = await _operatingSlotRepository.GetAvailableForTimeRangeOrder(
-                request.ShopId, request.OrderTime.StartTime, request.OrderTime.EndTime)
+        var shopOperatingSlot = await _operatingSlotRepository.GetActiveByIdAndShopId(request.ShopId, request.OperatingSlotId)
             .ConfigureAwait(false);
 
         if (
@@ -101,7 +100,8 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                     foodsNotOrderForTodayList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotOrderForTodayList)}" : default;
                 foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = idsNotFoundList.Count > 0;
                 foodCartCheckResponse.IdsNotFoundTomorrow = idsNotFoundList;
-                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow = idsNotFoundList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotFoundList)}" : default;
+                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow =
+                    idsNotFoundList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotFoundList)}" : default;
                 foodCartCheckResponse.Foods = foodsResponses;
             }
             else
@@ -118,7 +118,8 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                 foodCartCheckResponse.MessageFoodNeedRemoveToday = default;
                 foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = idsNotFoundList.Count > 0;
                 foodCartCheckResponse.IdsNotFoundTomorrow = idsNotFoundList;
-                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow = idsNotFoundList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotFoundList)}" : default;
+                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow =
+                    idsNotFoundList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotFoundList)}" : default;
                 foodCartCheckResponse.Foods = foodsResponses;
             }
         }
