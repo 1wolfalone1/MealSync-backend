@@ -209,7 +209,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                 {
                     var foodResponse = new FoodCartCheckResponse.DetailFoodResponse
                     {
-                        Id = food.Id,
+                        Id = foodRequest.Id,
                         Name = food.Name,
                         Description = food.Description,
                         Price = food.Price,
