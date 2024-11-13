@@ -86,10 +86,10 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
             }
         }
 
+        var deliveryPackages = new List<DeliveryPackage>();
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-            var deliveryPackages = new List<DeliveryPackage>();
             foreach (var deliveryPackageRequest in request.DeliveryPackages)
             {
                 var deliveryPackage = await CreateOrderSaveDeliveryPackageAsync(deliveryPackageRequest).ConfigureAwait(false);
@@ -98,30 +98,6 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
 
             await _deliveryPackageRepository.AddRangeAsync(deliveryPackages).ConfigureAwait(false);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-
-            var listNoti = new List<Notification>();
-            var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
-
-            // Noti to shop staff about delivery package
-            foreach (var dp in deliveryPackages)
-            {
-                if (dp.ShopDeliveryStaffId.HasValue)
-                {
-                    var accShip = _accountRepository.GetById(dp.ShopDeliveryStaffId.Value);
-                    var notiShopStaff = _notificationFactory.CreateOrderAssignedToStaffNotification(dp, accShip, shop);
-                    listNoti.Add(notiShopStaff);
-                }
-            }
-
-            _notifierService.NotifyRangeAsync(listNoti);
-            var deliveryPackageGroup = await GetListDeliveryPackageGroupDetailAsync(order.IntendedReceiveDate, order.StartTime, order.EndTime).ConfigureAwait(false);
-
-            var unAssignOrder = await GetListOrderUnAssignByTimeFrameAsync(order.IntendedReceiveDate, order.StartTime, order.EndTime).ConfigureAwait(false);
-            return Result.Success(new
-            {
-                DeliverPackageGroup = deliveryPackageGroup,
-                UnassignOrder = unAssignOrder,
-            });
         }
         catch (Exception e)
         {
@@ -129,6 +105,29 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
             _logger.LogError(e, e.Message);
             throw;
         }
+
+        var listNoti = new List<Notification>();
+        var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
+
+        // Noti to shop staff about delivery package
+        foreach (var dp in deliveryPackages)
+        {
+            if (dp.ShopDeliveryStaffId.HasValue)
+            {
+                var accShip = _accountRepository.GetById(dp.ShopDeliveryStaffId.Value);
+                var notiShopStaff = _notificationFactory.CreateOrderAssignedToStaffNotification(dp, accShip, shop);
+                listNoti.Add(notiShopStaff);
+            }
+        }
+        _notifierService.NotifyRangeAsync(listNoti);
+        var deliveryPackageGroup = await GetListDeliveryPackageGroupDetailAsync(order.IntendedReceiveDate, order.StartTime, order.EndTime).ConfigureAwait(false);
+
+        var unAssignOrder = await GetListOrderUnAssignByTimeFrameAsync(order.IntendedReceiveDate, order.StartTime, order.EndTime).ConfigureAwait(false);
+        return Result.Success(new
+        {
+            DeliverPackageGroup = deliveryPackageGroup,
+            UnassignOrder = unAssignOrder,
+        });
     }
 
     private async Task<DeliveryPackage> CreateOrderSaveDeliveryPackageAsync(DeliveryPackageRequest request)
@@ -294,36 +293,42 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         return deliveryPackages;
     }
 
-    private async Task<List<OrderForShopByStatusResponse>> GetListOrderByDeliveryPackageIdAsync(long? packageId)
+    private async Task<List<OrderDetailForShopResponse>> GetListOrderByDeliveryPackageIdAsync(long? packageId)
     {
-        var orderUniq = new Dictionary<long, OrderForShopByStatusResponse>();
-        Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
-            OrderForShopByStatusResponse> map = (parent, child1, child2, child3) =>
-        {
-            if (!orderUniq.TryGetValue(parent.Id, out var order))
+        var uniqOrder = new Dictionary<long, OrderDetailForShopResponse>();
+        Func<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail, OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail,
+            OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse> map =
+            (parent, child1, child2, child3, child4) =>
             {
-                parent.Customer = child1;
-                if (child2.DeliveryPackageId != 0 && (child2.Id != 0 || child2.IsShopOwnerShip))
+                if (!uniqOrder.TryGetValue(parent.Id, out var order))
                 {
-                    parent.ShopDeliveryStaff = child2;
+                    parent.Customer = child1;
+                    if (child2.Id != 0)
+                    {
+                        parent.Promotion = child2;
+                    }
+
+                    if (child3.DeliveryPackageId != 0 && (child3.Id != 0 || child3.IsShopOwnerShip))
+                    {
+                        parent.ShopDeliveryStaff = child3;
+                    }
+
+                    parent.OrderDetails.Add(child4);
+                    uniqOrder.Add(parent.Id, parent);
+                }
+                else
+                {
+                    order.OrderDetails.Add(child4);
+                    uniqOrder.Remove(order.Id);
+                    uniqOrder.Add(order.Id, order);
                 }
 
-                parent.Foods.Add(child3);
-                orderUniq.Add(parent.Id, parent);
-            }
-            else
-            {
-                order.Foods.Add(child3);
-                orderUniq.Remove(order.Id);
-                orderUniq.Add(order.Id, order);
-            }
-
-            return parent;
-        };
+                return parent;
+            };
 
         await _dapperService
-            .SelectAsync<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
-                OrderForShopByStatusResponse>(
+            .SelectAsync<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail,
+                OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail, OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse>(
                 QueryName.GetListOrderByPackageId,
                 map,
                 new
@@ -331,41 +336,47 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
                     ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
                     DeliveryPackageId = packageId,
                 },
-                "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
+                "CustomerSection, PromotionSection, DeliveryPackageSection, OrderDetailSection").ConfigureAwait(false);
 
-        return orderUniq.Values.ToList();
+        return uniqOrder.Values.ToList();
     }
 
-    private async Task<List<OrderForShopByStatusResponse>> GetListOrderUnAssignByTimeFrameAsync(DateTime intendedReceiveDate, int startTime, int endTime)
+    private async Task<List<OrderDetailForShopResponse>> GetListOrderUnAssignByTimeFrameAsync(DateTime intendedReceiveDate, int startTime, int endTime)
     {
-        var orderUniq = new Dictionary<long, OrderForShopByStatusResponse>();
-        Func<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
-            OrderForShopByStatusResponse> map = (parent, child1, child2, child3) =>
-        {
-            if (!orderUniq.TryGetValue(parent.Id, out var order))
+        var uniqOrder = new Dictionary<long, OrderDetailForShopResponse>();
+        Func<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail, OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail,
+            OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse> map =
+            (parent, child1, child2, child3, child4) =>
             {
-                parent.Customer = child1;
-                if (child2.DeliveryPackageId != 0 && (child2.Id != 0 || child2.IsShopOwnerShip))
+                if (!uniqOrder.TryGetValue(parent.Id, out var order))
                 {
-                    parent.ShopDeliveryStaff = child2;
+                    parent.Customer = child1;
+                    if (child2.Id != 0)
+                    {
+                        parent.Promotion = child2;
+                    }
+
+                    if (child3.DeliveryPackageId != 0 && (child3.Id != 0 || child3.IsShopOwnerShip))
+                    {
+                        parent.ShopDeliveryStaff = child3;
+                    }
+
+                    parent.OrderDetails.Add(child4);
+                    uniqOrder.Add(parent.Id, parent);
+                }
+                else
+                {
+                    order.OrderDetails.Add(child4);
+                    uniqOrder.Remove(order.Id);
+                    uniqOrder.Add(order.Id, order);
                 }
 
-                parent.Foods.Add(child3);
-                orderUniq.Add(parent.Id, parent);
-            }
-            else
-            {
-                order.Foods.Add(child3);
-                orderUniq.Remove(order.Id);
-                orderUniq.Add(order.Id, order);
-            }
-
-            return parent;
-        };
+                return parent;
+            };
 
         await _dapperService
-            .SelectAsync<OrderForShopByStatusResponse, OrderForShopByStatusResponse.CustomerInforInOrderForShop, OrderForShopByStatusResponse.ShopDeliveryStaffInOrderForShop, OrderForShopByStatusResponse.FoodInOrderForShop,
-                OrderForShopByStatusResponse>(
+            .SelectAsync<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail,
+                OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail, OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse>(
                 QueryName.GetListOrderUnAssignInTimeFrame,
                 map,
                 new
@@ -375,8 +386,8 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
                     EndTime = endTime,
                     ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
                 },
-                "CustomerSection, ShopDeliverySection, FoodSection").ConfigureAwait(false);
+                "CustomerSection, PromotionSection, DeliveryPackageSection, OrderDetailSection").ConfigureAwait(false);
 
-        return orderUniq.Values.ToList();
+        return uniqOrder.Values.ToList();
     }
 }

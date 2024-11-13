@@ -12,5 +12,5 @@ public class DeliveryPackageIntervalResponse
 
     public List<DeliveryPackageGroupDetailResponse> DeliveryPackageGroups { get; set; } = new();
 
-    public List<OrderForShopByStatusResponse> UnassignOrders { get; set; } = new();
+    public List<OrderDetailForShopResponse> UnassignOrders { get; set; } = new();
 }
