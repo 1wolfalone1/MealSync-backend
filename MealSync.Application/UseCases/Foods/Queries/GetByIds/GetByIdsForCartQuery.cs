@@ -9,14 +9,7 @@ public class GetByIdsForCartQuery : IQuery<Result>
 
     public List<DetailFoodQuery> Foods { get; set; }
 
-    public OrderTimeQuery OrderTime { get; set; }
-
-    public class OrderTimeQuery
-    {
-        public int StartTime { get; set; }
-
-        public int EndTime { get; set; }
-    }
+    public long OperatingSlotId { get; set; }
 
     public class DetailFoodQuery
     {

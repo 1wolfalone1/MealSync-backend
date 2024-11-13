@@ -24,4 +24,12 @@ public class OperatingSlotRepository : BaseRepository<OperatingSlot>, IOperating
             slot.StartTime <= orderStartTimeReceiving &&
             slot.EndTime >= orderEndTimeReceiving);
     }
+
+    public Task<OperatingSlot?> GetActiveByIdAndShopId(long operatingSlotId, long shopId)
+    {
+        return DbSet.FirstOrDefaultAsync(slot =>
+            slot.Id == operatingSlotId &&
+            slot.ShopId == shopId &&
+            slot.IsActive);
+    }
 }
