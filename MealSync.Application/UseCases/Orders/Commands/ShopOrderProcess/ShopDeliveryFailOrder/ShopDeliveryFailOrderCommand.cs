@@ -1,5 +1,6 @@
 ﻿using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Shared;
+using MealSync.Domain.Entities;
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveryFailOrder;
 
@@ -11,7 +12,6 @@ public class ShopDeliveryFailOrderCommand : ICommand<Result>
 
     public int ReasonIndentity { get; set; }
 
-    public string[] DeliveryFailImageUrls { get; set; }
-
-    public DateTimeOffset? TakePictureDateTime { get; set; }
+    public List<ShopDeliveyFailEvidence> Evidences { get; set; }
 }
+
