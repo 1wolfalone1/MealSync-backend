@@ -59,7 +59,7 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
         DateTime? startTime, DateTime? endTime, int pageIndex, int pageSize
     )
     {
-        var query = DbSet.Where(p => p.ShopId == shopId && p.Status != PromotionStatus.Delete).AsQueryable();
+        var query = DbSet.Where(p => p.ShopId == shopId && p.Type == PromotionTypes.ShopPromotion && p.Status != PromotionStatus.Delete).AsQueryable();
 
         if (status.HasValue)
         {

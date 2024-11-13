@@ -32,6 +32,8 @@ public class PromotionDetailOfShop
 
     public int NumberOfUsed { get; set; }
 
+    public bool IsAvailable { get; set; }
+
     public PromotionStatus Status { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }
