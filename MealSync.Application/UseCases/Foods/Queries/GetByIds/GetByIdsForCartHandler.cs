@@ -28,7 +28,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
     {
         var foodCartCheckResponse = new FoodCartCheckResponse();
         var shop = _shopRepository.GetById(request.ShopId)!;
-        var shopOperatingSlot = await _operatingSlotRepository.GetActiveByIdAndShopId(request.ShopId, request.OperatingSlotId)
+        var shopOperatingSlot = await _operatingSlotRepository.GetActiveByIdAndShopId(request.OperatingSlotId, request.ShopId)
             .ConfigureAwait(false);
 
         if (
