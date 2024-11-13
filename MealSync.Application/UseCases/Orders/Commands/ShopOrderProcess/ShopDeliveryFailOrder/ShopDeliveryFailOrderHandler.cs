@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
@@ -11,6 +12,7 @@ using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveryFailOrder;
 
@@ -55,6 +57,11 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
             order.Status = OrderStatus.FailDelivery;
             order.Reason = request.Reason;
 
+            if (request.Evidences != null && request.Evidences.Count > 0)
+            {
+                order.EvidenceDeliveryFailJson = JsonConvert.SerializeObject(request.Evidences);
+            }
+
             if (request.ReasonIndentity == 1)
             {
                 order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription();
@@ -67,7 +74,7 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
             // Send notification
-            await SendNotification(order).ConfigureAwait(false);
+            SendNotification(order);
 
             return Result.Success(new
             {
@@ -93,6 +100,13 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
 
         if (order.Status != OrderStatus.Delivering)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.OrderId });
+
+        // Check is > Start time and less than end time + 2 hours
+        var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
+        var startEndDateTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
+        var endDateTime = startEndDateTime.EndTime.AddHours(OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON);
+        if (currentDateTime.DateTime < startEndDateTime.StartTime || currentDateTime.DateTime > endDateTime)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERY_FAIL_OVER_TIME_FILL_REASON.GetDescription(), new object[] { request.OrderId });
     }
 
     private async Task SendNotification(Order order)

@@ -4,6 +4,7 @@ using MealSync.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealSync.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MealSyncContext))]
-    partial class MealSyncContextModelSnapshot : ModelSnapshot
+    [Migration("20241113064346_AddFieldEvidenceToOrer")]
+    partial class AddFieldEvidenceToOrer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1250,9 +1253,13 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasColumnName("end_time");
 
-                    b.Property<string>("EvidenceDeliveryFailJson")
+                    b.Property<string>("EvidenceDeliveryFailImageUrls")
                         .HasColumnType("longtext")
-                        .HasColumnName("evidence_delivery_fail_json");
+                        .HasColumnName("evidence_delivery_fail_image_urls");
+
+                    b.Property<DateTimeOffset?>("EvidenceTakePictureDatetime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("evidence_take_picture_datetime");
 
                     b.Property<string>("FullName")
                         .IsRequired()

@@ -49,6 +49,61 @@ public class OrderDetailForShopResponse
 
     public string DormitoryName { get; set; }
 
+    [System.Text.Json.Serialization.JsonIgnore]
+    public int TotalPages { get; set; }
+
+    public string OrderDetailSummary
+    {
+        get
+        {
+            if (OrderDetails.Count > 0)
+            {
+                var summary = string.Join(", ", OrderDetails
+                    .GroupBy(od => od.FoodId)
+                    .Select(g =>
+                    {
+                        var totalQuantity = g.Sum(od => od.Quantity);
+                        return totalQuantity == 1 ? g.First().Name : $"{g.First().Name} x{totalQuantity}";
+                    }));
+
+                return summary;
+            }
+
+            return string.Empty;
+        }
+    }
+
+    public string OrderDetailSummaryShort
+    {
+        get
+        {
+            if (OrderDetails.Count > 0)
+            {
+                var summaryShort = OrderDetails
+                    .GroupBy(od => od.FoodId)
+                    .Select(g => new
+                    {
+                        Name = g.First().Name,
+                        Quantity = g.Sum(od => od.Quantity)
+                    })
+                    .ToList();
+
+                var totalQuantity = summaryShort.Sum(item => item.Quantity);
+                var firstItem = summaryShort.First();
+                var otherItemCount = summaryShort.Count - 1;
+
+                var summaryShortText = otherItemCount > 0
+                    ? (firstItem.Quantity == 1 ? $"{firstItem.Name}" : $"{firstItem.Name} x{firstItem.Quantity}")
+                      + $" +{totalQuantity - firstItem.Quantity} số lượng khác"
+                    : (firstItem.Quantity == 1 ? $"{firstItem.Name}" : $"{firstItem.Name} x{firstItem.Quantity}");
+
+                return summaryShortText;
+            }
+
+            return string.Empty;
+        }
+    }
+
     public CustomerInforInShoprderDetailForShop Customer { get; set; }
 
     public PromotionInShopOrderDetail Promotion { get; set; }

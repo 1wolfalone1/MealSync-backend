@@ -61,6 +61,8 @@ public class Order : BaseEntity
 
     public string? DeliverySuccessImageUrl { get; set; }
 
+    public string? EvidenceDeliveryFailJson { get; set; }
+
     public bool IsRefund { get; set; } = false;
 
     public bool IsReport { get; set; } = false;
@@ -90,4 +92,11 @@ public class Order : BaseEntity
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
+}
+
+public class ShopDeliveyFailEvidence
+{
+    public string ImageUrl { get; set; }
+
+    public DateTimeOffset TakePictureDateTime { get; set; }
 }

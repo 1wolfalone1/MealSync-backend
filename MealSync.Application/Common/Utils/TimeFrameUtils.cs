@@ -87,4 +87,30 @@ public class TimeFrameUtils
         return (hours * 100) + remainingMinutes;
     }
 
+    public static (DateTime StartTime, DateTime EndTime) GetStartTimeEndTimeToDateTime(DateTime intendedReceiveDate, int startTime, int endTime)
+    {
+        var startDateTime = new DateTime(
+            intendedReceiveDate.Year,
+            intendedReceiveDate.Month,
+            intendedReceiveDate.Day,
+            startTime / 100,
+            startTime % 100,
+            0);
+
+        if (endTime == 2400)
+        {
+            intendedReceiveDate = intendedReceiveDate.AddDays(1);
+            endTime = 0;
+        }
+
+        var endDateTime = new DateTime(
+            intendedReceiveDate.Year,
+            intendedReceiveDate.Month,
+            intendedReceiveDate.Day,
+            endTime / 100,
+            endTime % 100,
+            0);
+
+        return (startDateTime, endDateTime);
+    }
 }

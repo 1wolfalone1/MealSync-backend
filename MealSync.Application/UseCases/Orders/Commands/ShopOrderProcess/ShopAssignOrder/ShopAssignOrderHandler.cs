@@ -87,6 +87,8 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                     Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_IN_OTHER_DELIVERY_PACKAGE.GetDescription(), order.Id),
                 });
             }
+
+            // Todo: Warning order in status delivering do you sure change to other staff
         }
 
         try
