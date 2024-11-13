@@ -105,7 +105,7 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
         var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
         var startEndDateTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
         var endDateTime = startEndDateTime.EndTime.AddHours(OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON);
-        if (currentDateTime < startEndDateTime.StartTime || currentDateTime > endDateTime)
+        if (currentDateTime.DateTime < startEndDateTime.StartTime || currentDateTime.DateTime > endDateTime)
             throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERY_FAIL_OVER_TIME_FILL_REASON.GetDescription(), new object[] { request.OrderId });
     }
 
