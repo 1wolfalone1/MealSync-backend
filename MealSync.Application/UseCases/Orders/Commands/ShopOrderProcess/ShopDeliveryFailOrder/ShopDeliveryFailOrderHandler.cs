@@ -12,6 +12,7 @@ using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveryFailOrder;
 
@@ -56,14 +57,9 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
             order.Status = OrderStatus.FailDelivery;
             order.Reason = request.Reason;
 
-            if (request.DeliveryFailImageUrls != null && request.DeliveryFailImageUrls.Length > 0)
+            if (request.Evidences != null && request.Evidences.Count > 0)
             {
-                order.EvidenceDeliveryFailImageUrls = string.Join(",", request.DeliveryFailImageUrls);
-            }
-
-            if (request.TakePictureDateTime.HasValue)
-            {
-                order.EvidenceTakePictureDatetime = request.TakePictureDateTime;
+                order.EvidenceDeliveryFailJson = JsonConvert.SerializeObject(request.Evidences);
             }
 
             if (request.ReasonIndentity == 1)
