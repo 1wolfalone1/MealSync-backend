@@ -173,6 +173,8 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
             .Include(f => f.ShopCategory)
             .Include(f => f.FoodOperatingSlots)
             .ThenInclude(fog => fog.OperatingSlot)
+            .Include(f => f.FoodOptionGroups
+            .Where(fog => fog.OptionGroup.Status != OptionGroupStatus.Delete))
             .AsQueryable();
 
         if (statusMode == 1)

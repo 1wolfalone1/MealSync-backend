@@ -92,8 +92,8 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
 
             return Result.Success(new
             {
-                Message = MessageCode.I_ORDER_DELIVERING.GetDescription(),
-                Code = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_DELIVERING.GetDescription(),  string.Join(", ", request.Ids)),
+                Code = MessageCode.I_ORDER_DELIVERING.GetDescription(),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_DELIVERING.GetDescription(),  string.Join(", ", request.Ids)),
             });
         }
         catch (Exception e)
