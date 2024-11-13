@@ -61,6 +61,10 @@ public class Order : BaseEntity
 
     public string? DeliverySuccessImageUrl { get; set; }
 
+    public string? EvidenceDeliveryFailImageUrls { get; set; }
+
+    public DateTimeOffset? EvidenceTakePictureDatetime { get; set; }
+
     public bool IsRefund { get; set; } = false;
 
     public bool IsReport { get; set; } = false;

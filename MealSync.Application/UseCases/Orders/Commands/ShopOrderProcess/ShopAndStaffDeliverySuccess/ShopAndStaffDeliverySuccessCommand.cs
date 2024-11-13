@@ -5,6 +5,8 @@ namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAnd
 
 public class ShopAndStaffDeliverySuccessCommand : ICommand<Result>
 {
+    public long OrderRequestId { get; set; }
+
     public long OrderId { get; set; }
 
     public long CustomerId { get; set; }

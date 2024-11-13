@@ -12,6 +12,8 @@ public class ShopFoodForWebMapping : Profile
         CreateMap<ShopCategory, ShopFoodWebResponse.ShopCategoryForShopFoodWeb>();
         CreateMap<Food, ShopFoodWebResponse>()
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(
-                src => src.FoodOperatingSlots.Count > 0 ? src.FoodOperatingSlots.Select(f => f.OperatingSlot).ToList() : new List<OperatingSlot>()));
+                src => src.FoodOperatingSlots.Count > 0 ? src.FoodOperatingSlots.Select(f => f.OperatingSlot).ToList() : new List<OperatingSlot>()))
+            .ForMember(dest => dest.NumberOfOptionGroupLinked, opt => opt.MapFrom(
+                src => src.FoodOptionGroups != null ? src.FoodOptionGroups.Count : 0));
     }
 }

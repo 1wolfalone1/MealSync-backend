@@ -135,7 +135,7 @@ public class OrderController : BaseApiController
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody] ShopAndStaffDeliverySuccessCommand command, long id)
     {
-        command.OrderId = id;
+        command.OrderRequestId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 

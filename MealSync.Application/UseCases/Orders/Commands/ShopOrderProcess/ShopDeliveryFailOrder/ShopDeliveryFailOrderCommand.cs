@@ -10,4 +10,8 @@ public class ShopDeliveryFailOrderCommand : ICommand<Result>
     public string? Reason { get; set; }
 
     public int ReasonIndentity { get; set; }
+
+    public string[] DeliveryFailImageUrls { get; set; }
+
+    public DateTimeOffset? TakePictureDateTime { get; set; }
 }

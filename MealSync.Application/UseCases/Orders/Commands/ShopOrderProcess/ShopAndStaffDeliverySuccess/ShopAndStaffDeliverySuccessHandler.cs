@@ -62,26 +62,13 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         // Validate
         Validate(request);
 
-        // Warning
-        if (!request.IsConfirm)
-        {
-            var order = _orderRepository.GetById(request.OrderId);
-            if (order.DeliveryPackage.ShopDeliveryStaffId.HasValue && order.DeliveryPackage.ShopDeliveryStaffId == request.ShipperId || order.DeliveryPackage.ShopId.HasValue && order.DeliveryPackage.ShopId == request.ShipperId)
-            {
-                return Result.Warning(new
-                {
-                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_NOT_DELIVERY_BY_YOU.GetDescription(), order.Id),
-                    Code = MessageCode.W_ORDER_NOT_DELIVERY_BY_YOU.GetDescription(),
-                });
-            }
-        }
-
+        var order = _orderRepository.Get(o => o.Id == request.OrderId)
+            .Include(o => o.Payments)
+            .Include(o => o.DeliveryPackage).Single();
+        var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-            var order = _orderRepository.Get(o => o.Id == request.OrderId)
-                .Include(o => o.Payments)
-                .Include(o => o.DeliveryPackage).Single();
             order.Status = OrderStatus.Delivered;
 
             // Increase food total order
@@ -93,7 +80,6 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             }
 
             // Increase shop total order
-            var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
             shop.TotalOrder++;
 
             // Increase money shop wallet
@@ -105,29 +91,6 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             _orderRepository.Update(order);
             _shopRepository.Update(shop);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-
-            // Noti to customer
-            var notiCustomer = _notificationFactory.CreateOrderCustomerDeliveredNotification(order, shop);
-            _notifierService.NotifyAsync(notiCustomer);
-
-            // Noti to shop
-            Account accShip;
-            if (order.DeliveryPackage.ShopDeliveryStaffId != null)
-            {
-                accShip = _accountRepository.GetById(order.DeliveryPackage.ShopDeliveryStaffId);
-            }
-            else
-            {
-                accShip = _accountRepository.GetById(order.ShopId);
-            }
-
-            var notiShop = _notificationFactory.CreateOrderShopDeliveredNotification(order, accShip);
-            _notifierService.NotifyAsync(notiShop);
-            return Result.Success(new
-            {
-                Code = MessageCode.I_ORDER_DELIVERD.GetDescription(),
-                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_DELIVERD.GetDescription(), new object[] { request.OrderId }),
-            });
         }
         catch (Exception e)
         {
@@ -135,6 +98,29 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             _logger.LogError(e, e.Message);
             throw;
         }
+
+        // Noti to customer
+        var notiCustomer = _notificationFactory.CreateOrderCustomerDeliveredNotification(order, shop);
+        _notifierService.NotifyAsync(notiCustomer);
+
+        // Noti to shop
+        Account accShip;
+        if (order.DeliveryPackage.ShopDeliveryStaffId != null)
+        {
+            accShip = _accountRepository.GetById(order.DeliveryPackage.ShopDeliveryStaffId);
+        }
+        else
+        {
+            accShip = _accountRepository.GetById(order.ShopId);
+        }
+
+        var notiShop = _notificationFactory.CreateOrderShopDeliveredNotification(order, accShip);
+        _notifierService.NotifyAsync(notiShop);
+        return Result.Success(new
+        {
+            Code = MessageCode.I_ORDER_DELIVERD.GetDescription(),
+            Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_DELIVERD.GetDescription(), new object[] { request.OrderId }),
+        });
     }
 
     private async Task CreateTransactionToShopAsync(long paymentId, long orderId, double amountSendToShop)
@@ -185,7 +171,8 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
 
     private void Validate(ShopAndStaffDeliverySuccessCommand request)
     {
-        // Todo: Add check out of frame and in wrong date
+        if (request.OrderId != request.OrderRequestId)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_QR_SCAN_NOT_CORRECT.GetDescription());
 
         var account = _currentAccountService.GetCurrentAccount();
         long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
@@ -205,7 +192,18 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
                 // Đơn hàng không phải của khách hàng
                 throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_CORRECT_CUSTOMER.GetDescription(), new object[] { request.OrderId, order.FullName });
             }
+
+            if (order.DeliveryPackage.ShopDeliveryStaffId.HasValue && order.DeliveryPackage.ShopDeliveryStaffId != request.ShipperId && order.DeliveryPackage.ShopId.HasValue && order.DeliveryPackage.ShopId != request.ShipperId)
+            {
+                throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERY_BY_YOU.GetDescription(), new object[] { request.OrderId });
+            }
         }
+
+        var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
+        var startEndTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
+
+        if (currentDateTime < startEndTime.StartTime || currentDateTime > startEndTime.EndTime)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME_TO_DELIVERED.GetDescription(), new object[] { request.OrderId, TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime) });
 
         // Check token gen is correct
         var originString = order.Id + order.DeliveryPackageId + order.CustomerId + order.PhoneNumber + order.FullName + _configuration[QR_KEY];
