@@ -1,5 +1,6 @@
 using System.Text;
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Services.Payments.VnPay;
@@ -25,12 +26,14 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
     private readonly IUnitOfWork _unitOfWork;
     private readonly INotificationFactory _notificationFactory;
     private readonly INotifierService _notifierService;
+    private readonly ISystemResourceRepository _systemResourceRepository;
 
     public UpdatePaymentStatusIPNHandler(
         IVnPayPaymentService paymentService, IPaymentRepository paymentRepository,
         ILogger<UpdatePaymentStatusIPNHandler> logger, IUnitOfWork unitOfWork,
         IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository,
-        IShopRepository shopRepository, INotificationFactory notificationFactory, INotifierService notifierService)
+        IShopRepository shopRepository, INotificationFactory notificationFactory,
+        INotifierService notifierService, ISystemResourceRepository systemResourceRepository)
     {
         _paymentService = paymentService;
         _paymentRepository = paymentRepository;
@@ -41,14 +44,15 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
         _shopRepository = shopRepository;
         _notificationFactory = notificationFactory;
         _notifierService = notifierService;
+        _systemResourceRepository = systemResourceRepository;
     }
 
     public async Task<Result<VnPayIPNResponse>> Handle(UpdatePaymentStatusIPNCommand request, CancellationToken cancellationToken)
     {
-        var parseOrderId = Int64.TryParse(request.Query[VnPayRequestParam.VNP_TXN_REF], out var orderId);
-        if (parseOrderId)
+        var parsePaymentId = Int64.TryParse(request.Query[VnPayRequestParam.VNP_TXN_REF], out var paymentId);
+        if (parsePaymentId)
         {
-            var payment = await _paymentRepository.GetOrderPaymentVnPayByOrderId(orderId).ConfigureAwait(false);
+            var payment = await _paymentRepository.GetOrderPaymentVnPayById(paymentId).ConfigureAwait(false);
             var response = await _paymentService.GetIPN(request.Query, payment).ConfigureAwait(false);
             var shop = await _shopRepository.GetByAccountId(payment.Order.ShopId).ConfigureAwait(false);
 
@@ -65,6 +69,7 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                     if (response.Message == "Confirm Success")
                     {
                         payment.Status = PaymentStatus.PaidSuccess;
+                        payment.Order.Status = OrderStatus.Pending;
 
                         if (shop.IsAutoOrderConfirmation && shop.Status == ShopStatus.Active)
                         {
@@ -140,12 +145,12 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                         if (payment.Order.Status == OrderStatus.Pending)
                         {
                             var notification = _notificationFactory.CreateOrderPendingNotification(payment.Order, shop);
-                            await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
+                            _notifierService.NotifyAsync(notification);
                         }
                         else if (payment.Order.Status == OrderStatus.Confirmed)
                         {
                             var notification = _notificationFactory.CreateOrderConfirmedNotification(payment.Order, shop);
-                            await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
+                            _notifierService.NotifyAsync(notification);
                         }
                         else
                         {
@@ -155,7 +160,8 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                     else
                     {
                         payment.Status = PaymentStatus.PaidFail;
-                        payment.Order.Status = OrderStatus.Cancelled;
+                        payment.Order.Status = OrderStatus.PendingPayment;
+                        payment.Order.Reason = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_FAIL.GetDescription());
                         response.Message = "Confirm Success";
                     }
 

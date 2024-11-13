@@ -287,6 +287,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         // Status: Completed, ReasonIdentity: default => Có Revenue
         // Status: Completed, ReasonIdentity: DeliveryFailByCustomer, PaymentType = Payment, PaymentMethod != COD => Có Revenue
         // Status: Resolved, ReasonIdentity: DeliveredReportedByCustomer, IsReport: true => Có Revenue
+        // Status: Resolved, ReasonIdentity: DeliveryFailReportedByCustomer, IsReport: true, IsRefund: false, PaymentMethods == PaymentMethods.VnPay, PaymentType == PaymentTypes.Payment, PaymentStatus == PaymentStatus.PaidSuccess => Có Revenue
         var revenue = await totalOrdersQuery
             .Where(o => (o.Status == OrderStatus.Completed && o.ReasonIdentity == default)
                         || (o.Status == OrderStatus.Completed && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription()
