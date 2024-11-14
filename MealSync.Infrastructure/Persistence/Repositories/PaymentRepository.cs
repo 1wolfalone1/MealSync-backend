@@ -11,13 +11,13 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository
     {
     }
 
-    public Task<Payment> GetOrderPaymentVnPayByOrderId(long orderId)
+    public Task<Payment> GetOrderPaymentVnPayById(long id)
     {
         return DbSet.Include(p => p.Order)
             .ThenInclude(o => o.Shop)
             .OrderBy(p => p.CreatedDate)
             .FirstAsync(p =>
-                p.OrderId == orderId
+                p.Id == id
                 && p.Type == PaymentTypes.Payment
                 && p.PaymentMethods == PaymentMethods.VnPay);
     }
@@ -28,5 +28,35 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository
             p.OrderId == orderId
             && p.Type == PaymentTypes.Payment
             && p.PaymentMethods == PaymentMethods.VnPay);
+    }
+
+    public Task<List<Payment>> GetPendingPaymentOrder(DateTime intendedReceiveDate, int startTime, int endTime)
+    {
+        return DbSet.Include(p => p.Order).Where(p =>
+            p.PaymentMethods == PaymentMethods.VnPay
+            && p.Type == PaymentTypes.Payment
+            && p.Status == PaymentStatus.Pending
+            && p.Order.IntendedReceiveDate == intendedReceiveDate
+            && p.Order.StartTime == startTime
+            && p.Order.EndTime == endTime
+            && p.Order.Status == OrderStatus.PendingPayment
+        ).ToListAsync();
+    }
+
+    public Task<Payment?> GetForRepaymentByOrderId(long orderId)
+    {
+        return DbSet.FirstOrDefaultAsync(p =>
+            p.OrderId == orderId
+            && p.Order.Status == OrderStatus.PendingPayment
+            && p.Type == PaymentTypes.Payment
+            && p.PaymentMethods == PaymentMethods.VnPay
+            && (p.Status == PaymentStatus.PaidFail || p.Status == PaymentStatus.Pending));
+    }
+
+    public Task<Payment> GetPaymentByOrderId(long orderId)
+    {
+        return DbSet.FirstAsync(p =>
+            p.OrderId == orderId
+            && p.Type == PaymentTypes.Payment);
     }
 }

@@ -23,11 +23,7 @@ public class ShopReplyCustomerReportValidate : AbstractValidator<ShopReplyCustom
             .WithMessage("Nội dung báo cáo tối đa 800 kí tự.");
 
         RuleFor(x => x.Images)
-            .Must(images => images != null && (images.Length > 0 && images.Length <= 5))
-            .WithMessage("Ảnh báo cáo bắt buộc và tối đa 5 ảnh")
-            .ForEach(image =>
-                image.Must(file => file.Length <= 5 * 1024 * 1024)
-                    .WithMessage("Ảnh không được vượt quá 5 MB.")
-            );
+            .Must(images => images != default && images.Count > 0 && images.Count <= 5)
+            .WithMessage("Ảnh báo cáo phải có ít nhất 1 và tối đa 5");
     }
 }

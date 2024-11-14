@@ -65,6 +65,14 @@ SELECT
                 WHEN o.status = 12 -- Resolved
                 AND o.is_report = TRUE
                 AND o.reason_identity = @DeliveredReportedByCustomer THEN o.total_price - o.total_promotion - o.charge_fee
+                WHEN o.status = 12 -- Resolved
+                AND o.is_report = TRUE
+                AND o.reason_identity = @DeliveryFailReportedByCustomer
+                AND o.is_refund = FALSE
+                AND p.payment_methods IN @PaymentOnlineList
+                AND p.type = 1 -- Payment
+                AND p.status = 2 -- PaidSuccess
+                THEN o.total_price - o.total_promotion - o.charge_fee
             END
         ),
         0

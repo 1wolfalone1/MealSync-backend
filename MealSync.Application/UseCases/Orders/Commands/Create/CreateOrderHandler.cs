@@ -136,7 +136,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             CustomerLocation = customerLocation,
             BuildingId = request.BuildingId,
             BuildingName = buildingOrder!.Name,
-            Status = OrderStatus.Pending,
+            Status = request.PaymentMethod == PaymentMethods.COD ? OrderStatus.Pending : OrderStatus.PendingPayment,
             Note = request.Note,
             ShippingFee = 0,
             TotalPrice = request.TotalFoodCost,
@@ -239,12 +239,12 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 if (order.Status == OrderStatus.Pending)
                 {
                     var notification = _notificationFactory.CreateOrderPendingNotification(order, shop);
-                    await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
+                    _notifierService.NotifyAsync(notification);
                 }
                 else if (order.Status == OrderStatus.Confirmed)
                 {
                     var notification = _notificationFactory.CreateOrderConfirmedNotification(order, shop);
-                    await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
+                    _notifierService.NotifyAsync(notification);
                 }
                 else
                 {
@@ -269,7 +269,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         var currentTimeMinutes = (now.ToOffset(TimeSpan.FromHours(7)).Hour * 60) + now.ToOffset(TimeSpan.FromHours(7)).Minute;
         if (!request.OrderTime.IsOrderNextDay && request.OrderTime.EndTime != 2400 && currentTimeMinutes >= endTimeInMinutes)
         {
-            throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERY_START_TIME_EXCEEDED.GetDescription());
+            throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERY_END_TIME_EXCEEDED.GetDescription());
         }
         else
         {

@@ -61,10 +61,17 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
                 || (order.Status == OrderStatus.Completed && order.ReasonIdentity == default))
             {
                 var now = DateTimeOffset.UtcNow;
-                DateTime receiveDate;
+                var receiveDateStartTime = new DateTime(
+                    order.IntendedReceiveDate.Year,
+                    order.IntendedReceiveDate.Month,
+                    order.IntendedReceiveDate.Day,
+                    order.StartTime / 100,
+                    order.StartTime % 100,
+                    0);
+                DateTime receiveDateEndTime;
                 if (order.EndTime == 2400)
                 {
-                    receiveDate = new DateTime(
+                    receiveDateEndTime = new DateTime(
                             order.IntendedReceiveDate.Year,
                             order.IntendedReceiveDate.Month,
                             order.IntendedReceiveDate.Day,
@@ -75,7 +82,7 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
                 }
                 else
                 {
-                    receiveDate = new DateTime(
+                    receiveDateEndTime = new DateTime(
                         order.IntendedReceiveDate.Year,
                         order.IntendedReceiveDate.Month,
                         order.IntendedReceiveDate.Day,
@@ -84,10 +91,11 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
                         0);
                 }
 
-                var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
+                var startTime = new DateTimeOffset(receiveDateStartTime, TimeSpan.FromHours(7));
+                var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
 
                 // BR: Review within 24 hours after the 'endTime'
-                if (now >= endTime && now <= endTime.AddHours(24))
+                if (now >= startTime && now <= endTime.AddHours(24))
                 {
                     var imageUrls = new List<string>();
                     if (request.Images != default)

@@ -52,10 +52,17 @@ public class ShopReplyCustomerReportHandler : ICommandHandler<ShopReplyCustomerR
         {
             var now = DateTimeOffset.UtcNow;
             var order = _orderRepository.GetById(orderId)!;
-            DateTime receiveDate;
+            var receiveDateStartTime = new DateTime(
+                order.IntendedReceiveDate.Year,
+                order.IntendedReceiveDate.Month,
+                order.IntendedReceiveDate.Day,
+                order.StartTime / 100,
+                order.StartTime % 100,
+                0);
+            DateTime receiveDateEndTime;
             if (order.EndTime == 2400)
             {
-                receiveDate = new DateTime(
+                receiveDateEndTime = new DateTime(
                         order.IntendedReceiveDate.Year,
                         order.IntendedReceiveDate.Month,
                         order.IntendedReceiveDate.Day,
@@ -66,7 +73,7 @@ public class ShopReplyCustomerReportHandler : ICommandHandler<ShopReplyCustomerR
             }
             else
             {
-                receiveDate = new DateTime(
+                receiveDateEndTime = new DateTime(
                     order.IntendedReceiveDate.Year,
                     order.IntendedReceiveDate.Month,
                     order.IntendedReceiveDate.Day,
@@ -75,25 +82,19 @@ public class ShopReplyCustomerReportHandler : ICommandHandler<ShopReplyCustomerR
                     0);
             }
 
-            var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
+            var startTime = new DateTimeOffset(receiveDateStartTime, TimeSpan.FromHours(7));
+            var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
 
             // BR: Reply report within 20 hours after the 'endTime'
-            if (now >= endTime && now <= endTime.AddHours(20))
+            if (now >= startTime && now <= endTime.AddHours(20))
             {
-                var imageUrls = new List<string>();
-                foreach (var file in request.Images)
-                {
-                    var url = await _storageService.UploadFileAsync(file).ConfigureAwait(false);
-                    imageUrls.Add(url);
-                }
-
                 var report = new Report
                 {
                     OrderId = order.Id,
                     ShopId = shopId,
                     Title = request.Title,
                     Content = request.Content,
-                    ImageUrl = string.Join(",", imageUrls),
+                    ImageUrl = string.Join(",", request.Images),
                     Status = ReportStatus.Pending,
                 };
                 try
