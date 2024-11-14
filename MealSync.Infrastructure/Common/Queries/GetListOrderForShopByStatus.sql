@@ -111,6 +111,7 @@ SELECT
     o.end_time AS EndTime,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
+    o.TotalPages AS TotalPages,
     -- Customer
     a.id AS CustomerSection,
     a.id AS Id,
