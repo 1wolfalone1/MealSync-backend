@@ -1,5 +1,6 @@
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Repositories;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Domain.Entities;
@@ -48,6 +49,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
             foodCartCheckResponse.IdsNotFoundToday = default;
             foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
             foodCartCheckResponse.IdsNotFoundTomorrow = default;
+            foodCartCheckResponse.IdsRemoveAll = default;
             foodCartCheckResponse.Foods = default;
         }
         else if (shopOperatingSlot == default)
@@ -62,6 +64,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
             foodCartCheckResponse.IdsNotFoundToday = default;
             foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
             foodCartCheckResponse.IdsNotFoundTomorrow = default;
+            foodCartCheckResponse.IdsRemoveAll = default;
             foodCartCheckResponse.Foods = default;
         }
         else if (shop.Status == ShopStatus.InActive)
@@ -76,6 +79,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
             foodCartCheckResponse.IdsNotFoundToday = default;
             foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
             foodCartCheckResponse.IdsNotFoundTomorrow = default;
+            foodCartCheckResponse.IdsRemoveAll = default;
             foodCartCheckResponse.Foods = default;
         }
         else if (shop.IsAcceptingOrderNextDay)
@@ -102,6 +106,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                 foodCartCheckResponse.IdsNotFoundTomorrow = idsNotFoundList;
                 foodCartCheckResponse.MessageFoodNeedRemoveTomorrow =
                     idsNotFoundList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotFoundList)}" : default;
+                foodCartCheckResponse.IdsRemoveAll = idsNotFoundList;
                 foodCartCheckResponse.Foods = foodsResponses;
             }
             else
@@ -112,14 +117,15 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                 foodCartCheckResponse.IsReceivingOrderPaused = false;
                 foodCartCheckResponse.IsAcceptingOrderToday = false;
                 foodCartCheckResponse.IsAcceptingOrderTomorrow = true;
-                foodCartCheckResponse.MessageForAllCart = "Cửa hàng đã ngưng nhận đơn cho ngày hôm nay, bạn chỉ có thể đặt đơn cho ngày mai";
+                foodCartCheckResponse.MessageForAllCart = default;
                 foodCartCheckResponse.IsPresentFoodNeedRemoveToday = false;
                 foodCartCheckResponse.IdsNotFoundToday = default;
-                foodCartCheckResponse.MessageFoodNeedRemoveToday = default;
+                foodCartCheckResponse.MessageFoodNeedRemoveToday = "Cửa hàng đã ngưng nhận đơn cho ngày hôm nay, bạn chỉ có thể đặt đơn cho ngày mai";
                 foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = idsNotFoundList.Count > 0;
                 foodCartCheckResponse.IdsNotFoundTomorrow = idsNotFoundList;
                 foodCartCheckResponse.MessageFoodNeedRemoveTomorrow =
                     idsNotFoundList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotFoundList)}" : default;
+                foodCartCheckResponse.IdsRemoveAll = idsNotFoundList;
                 foodCartCheckResponse.Foods = foodsResponses;
             }
         }
@@ -138,14 +144,15 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                 foodCartCheckResponse.IsReceivingOrderPaused = false;
                 foodCartCheckResponse.IsAcceptingOrderToday = true;
                 foodCartCheckResponse.IsAcceptingOrderTomorrow = false;
-                foodCartCheckResponse.MessageForAllCart = "Cửa hàng không nhận đơn cho ngày mai, bạn chỉ có thể đặt đơn trong ngày hôm nay";
+                foodCartCheckResponse.MessageForAllCart = default;
                 foodCartCheckResponse.IsPresentFoodNeedRemoveToday = foodsNotOrderForTodayList.Count > 0;
                 foodCartCheckResponse.IdsNotFoundToday = foodsNotOrderForTodayList;
                 foodCartCheckResponse.MessageFoodNeedRemoveToday =
                     foodsNotOrderForTodayList.Count > 0 ? $"Những món sau đây không còn hoạt động hoặc có lựa chọn hết hàng và đã bị xóa khỏi giỏ: {string.Join(", ", namesNotOrderForTodayList)}" : default;
                 foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
                 foodCartCheckResponse.IdsNotFoundTomorrow = default;
-                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow = default;
+                foodCartCheckResponse.MessageFoodNeedRemoveTomorrow = "Cửa hàng không nhận đơn cho ngày mai, bạn chỉ có thể đặt đơn trong ngày hôm nay";
+                foodCartCheckResponse.IdsRemoveAll = idsNotFoundList;
                 foodCartCheckResponse.Foods = foodsResponses;
             }
             else
@@ -163,8 +170,20 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                 foodCartCheckResponse.IsPresentFoodNeedRemoveTomorrow = false;
                 foodCartCheckResponse.IdsNotFoundTomorrow = default;
                 foodCartCheckResponse.MessageFoodNeedRemoveTomorrow = default;
+                foodCartCheckResponse.IdsRemoveAll = default;
                 foodCartCheckResponse.Foods = foodsResponses;
             }
+        }
+
+        var now = TimeFrameUtils.GetCurrentDateInUTC7();
+        var endTimeInMinutes = TimeUtils.ConvertToMinutes(shopOperatingSlot.EndTime);
+        var currentTimeMinutes = (now.Hour * 60) + now.Minute;
+        if (shopOperatingSlot.EndTime != 2400 && currentTimeMinutes >= endTimeInMinutes)
+        {
+            foodCartCheckResponse.IsAcceptingOrderToday = false;
+            foodCartCheckResponse.IsPresentFoodNeedRemoveToday = false;
+            foodCartCheckResponse.IdsNotFoundToday = default;
+            foodCartCheckResponse.MessageFoodNeedRemoveToday = $"Thời gian hiện tại đã vượt quá khung thời gian bán {TimeFrameUtils.GetTimeFrameString(shopOperatingSlot.StartTime, shopOperatingSlot.EndTime)}.";
         }
 
         return Result.Success(foodCartCheckResponse);
