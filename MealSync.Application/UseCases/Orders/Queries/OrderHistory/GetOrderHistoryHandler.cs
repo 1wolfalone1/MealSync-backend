@@ -1,5 +1,6 @@
 using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Models.Responses;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
@@ -36,6 +37,7 @@ public class GetOrderHistoryHandler : IQueryHandler<GetOrderHistoryQuery, Result
         var orders = await _dapperService.SelectAsync<OrderSummaryDto>(QueryName.GetOrderHistoryOfCustomer, new
         {
             CustomerId = customerId,
+            DeliveredReportedByCustomer = OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription(),
             FilterStatusList = request.StatusList != default && request.StatusList.Length > 0
                 ? request.StatusList
                 : new OrderStatus[]
@@ -54,7 +56,6 @@ public class GetOrderHistoryHandler : IQueryHandler<GetOrderHistoryQuery, Result
                     OrderStatus.Resolved,
                 },
             ReviewMode = request.ReviewMode,
-            ReviewStatusList = new OrderStatus[] { OrderStatus.Delivered, OrderStatus.IssueReported, OrderStatus.UnderReview, OrderStatus.Resolved, OrderStatus.Completed },
             Now = now,
             PageSize = request.PageSize,
             Offset = (request.PageIndex - 1) * request.PageSize,

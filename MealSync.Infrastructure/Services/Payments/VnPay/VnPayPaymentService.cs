@@ -58,7 +58,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
         vnPay.AddRequestData(VnPayRequestParam.VNP_ORDER_TYPE, ORDER_TYPE);
         vnPay.AddRequestData(VnPayRequestParam.VNP_RETURN_URL, _vnPaySetting.ReturnUrl);
         vnPay.AddRequestData(VnPayRequestParam.VNP_EXPIRE_DATE, payment.CreatedDate.ToOffset(TimeSpan.FromHours(7)).AddMinutes(10).ToString(DATE_FORMAT));
-        vnPay.AddRequestData(VnPayRequestParam.VNP_TXN_REF, payment.OrderId.ToString());
+        vnPay.AddRequestData(VnPayRequestParam.VNP_TXN_REF, payment.Id.ToString());
 
         return vnPay.CreateRequestUrl(_vnPaySetting.PaymentUrl, _vnPaySetting.HashSecret);
     }
@@ -79,7 +79,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
         var vnpCommand = REFUND;
         var vnpTransactionType = REFUND_TRANSACTION_TYPE_FULL;
         var vnpAmount = Convert.ToInt64(payment.Amount) * 100;
-        var vnpTxnRef = payment.OrderId;
+        var vnpTxnRef = payment.Id;
         var vnpOrderInfo = "Hoan tien giao dich don hang: " + payment.OrderId;
         var vnPayTransactionNo = Convert.ToInt64(payment.PaymentThirdPartyId);
         var vnpTransactionDate = payment.CreatedDate.ToOffset(TimeSpan.FromHours(7)).ToString(DATE_FORMAT);
@@ -150,7 +150,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
             }
 
             // Extract values from vnPay object
-            long orderId = Convert.ToInt64(vnPay.GetResponseData(VnPayRequestParam.VNP_TXN_REF));
+            long paymentId = Convert.ToInt64(vnPay.GetResponseData(VnPayRequestParam.VNP_TXN_REF));
             long vnpAmount = Convert.ToInt64(vnPay.GetResponseData(VnPayRequestParam.VNP_AMOUNT)) / 100; // Convert to original amount
             long vnpTranId = Convert.ToInt64(vnPay.GetResponseData(VnPayRequestParam.VNP_TRANSACTION_NO));
             string vnpResponseCode = vnPay.GetResponseData(VnPayRequestParam.VNP_RESPONSE_CODE);
@@ -162,11 +162,11 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
 
             if (checkSignature)
             {
-                if (payment.OrderId == orderId)
+                if (payment.Id == paymentId)
                 {
                     if (Convert.ToInt64(payment.Amount) == vnpAmount)
                     {
-                        if (payment.Status == PaymentStatus.Pending)
+                        if (payment.Status == PaymentStatus.Pending || payment.Status == PaymentStatus.PaidFail)
                         {
                             if (vnpResponseCode == ((int)VnPayTransactionStatus.CODE_00).ToString("D2")
                                 && vnpTransactionStatus == ((int)VnPayTransactionStatus.CODE_00).ToString("D2"))
@@ -174,14 +174,14 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
                                 // Payment success
                                 response.RspCode = ((int)VnPayIPNResponseCode.CODE_00).ToString("D2");
                                 response.Message = "Confirm Success";
-                                _logger.LogInformation("VNPAY: Thanh toan thanh cong, OrderId={0}, VnPay TranId={1}", orderId, vnpTranId);
+                                _logger.LogInformation("VNPAY: Thanh toan thanh cong, OrderId={0}, VnPay TranId={1}", payment.OrderId, vnpTranId);
                             }
                             else
                             {
                                 // Payment failed
                                 response.RspCode = ((int)VnPayIPNResponseCode.CODE_00).ToString("D2");
                                 response.Message = "Payment Failed";
-                                _logger.LogWarning("VNPAY: Thanh toan loi, OrderId={0}, VnPay TranId={1}", orderId, vnpTranId);
+                                _logger.LogWarning("VNPAY: Thanh toan loi, OrderId={0}, VnPay TranId={1}", payment.OrderId, vnpTranId);
                             }
                         }
                         else
@@ -189,7 +189,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
                             // Payment already confirmed
                             response.RspCode = ((int)VnPayIPNResponseCode.CODE_02).ToString("D2");
                             response.Message = VnPayIPNResponseCode.CODE_02.GetDescription();
-                            _logger.LogWarning("VNPAY: Payment already confirmed, OrderId={0}, VnPay TranId={1}", orderId, vnpTranId);
+                            _logger.LogWarning("VNPAY: Payment already confirmed, OrderId={0}, VnPay TranId={1}", payment.OrderId, vnpTranId);
                         }
                     }
                     else
@@ -197,7 +197,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
                         // Invalid amount
                         response.RspCode = ((int)VnPayIPNResponseCode.CODE_04).ToString("D2");
                         response.Message = VnPayIPNResponseCode.CODE_04.GetDescription();
-                        _logger.LogWarning("VNPAY: Payment already confirmed, OrderId={0}, VnPay TranId={1}", orderId, vnpTranId);
+                        _logger.LogWarning("VNPAY: Payment already confirmed, OrderId={0}, VnPay TranId={1}", payment.OrderId, vnpTranId);
                     }
                 }
                 else
@@ -205,7 +205,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
                     // Order not found
                     response.RspCode = ((int)VnPayIPNResponseCode.CODE_01).ToString("D2");
                     response.Message = VnPayIPNResponseCode.CODE_01.GetDescription();
-                    _logger.LogWarning("VNPAY: Order not found, OrderId={0}, VnPay TranId={1}", orderId, vnpTranId);
+                    _logger.LogWarning("VNPAY: Order not found, OrderId={0}, VnPay TranId={1}", payment.OrderId, vnpTranId);
                 }
             }
             else
@@ -226,5 +226,4 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
 
         return response;
     }
-
 }

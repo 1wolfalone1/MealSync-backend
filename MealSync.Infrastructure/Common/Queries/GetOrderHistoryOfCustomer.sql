@@ -13,6 +13,8 @@ WITH FilteredOrders AS (
     s.name AS ShopName,
     s.logo_url AS ShopLogoUrl,
     COUNT(r.id) AS ReviewCount,
+    o.reason_identity AS ReasonIdentity,
+    o.is_report AS IsReport,
     o.created_date AS CreatedDate
   FROM
     `order` o
@@ -58,12 +60,23 @@ WHERE
   (
     @ReviewMode = 0
     OR (
-      Status IN @ReviewStatusList
+      (
+        Status = 7 -- Delivered
+        OR (
+          Status IN (10, 11, 12) -- IssueReported, UnderReview, Resolved
+          AND ReasonIdentity = @DeliveredReportedByCustomer
+          AND IsReport = TRUE
+        )
+        OR (
+          Status = 9 -- Completed
+          AND ReasonIdentity IS NULL
+        )
+      )
       AND ReviewCount = 0
       AND @Now BETWEEN DATE_ADD(
         CAST(IntendedReceiveDate AS DATETIME),
-        INTERVAL FLOOR(EndTime / 100) HOUR
-      ) + INTERVAL (EndTime % 100) MINUTE
+        INTERVAL FLOOR(StartTime / 100) HOUR
+      ) + INTERVAL (StartTime % 100) MINUTE
       AND DATE_ADD(
         CAST(IntendedReceiveDate AS DATETIME),
         INTERVAL FLOOR(EndTime / 100) HOUR

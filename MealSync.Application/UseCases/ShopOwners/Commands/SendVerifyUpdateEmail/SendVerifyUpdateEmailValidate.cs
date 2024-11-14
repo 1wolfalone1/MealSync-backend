@@ -6,5 +6,9 @@ public class SendVerifyUpdateEmailValidate : AbstractValidator<SendVerifyUpdateE
 {
     public SendVerifyUpdateEmailValidate()
     {
+        RuleFor(x => x.NewEmail)
+            .NotEmpty()
+            .When(x => !x.IsVerifyOldEmail)
+            .WithMessage("Email mới không được để trống.");
     }
 }

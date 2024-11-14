@@ -307,8 +307,8 @@ public enum MessageCode
     [Description("E-Order-FoodNotSellInOrderTime")]
     E_ORDER_FOOD_NOT_SELL_IN_ORDER_TIME,
 
-    [Description("E-Order-DeliveryStartTimeExceeded")]
-    E_ORDER_DELIVERY_START_TIME_EXCEEDED,
+    [Description("E-Order-DeliveryEndTimeExceeded")]
+    E_ORDER_DELIVERY_END_TIME_EXCEEDED,
 
     [Description("E-Order-IncorrectDiscountAmount")]
     E_ORDER_INCORRECT_DISCOUNT_AMOUNT,
@@ -527,6 +527,9 @@ public enum MessageCode
 
     [Description("I-Payment-Cancel")]
     I_PAYMENT_CANCEL,
+
+    [Description("E-Payment-NotInStatusRePayment")]
+    E_PAYMENT_NOT_IN_STATUS_REPAYMENT,
 
     // Review
     [Description("E-Review-Time-Limit")]
