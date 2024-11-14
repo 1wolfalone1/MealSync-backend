@@ -13,8 +13,7 @@ using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopPrepari
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRejectOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShowQRConfirm;
 using MealSync.Application.UseCases.Orders.Commands.UpdatePaymentStatusIPN;
-using MealSync.Application.UseCases.Orders.Queries.GetEvidenceDeliveryFail;
-using MealSync.Application.UseCases.Orders.Queries.GetEvidenceDeliveryFail;
+using MealSync.Application.UseCases.Orders.Queries.GetDeliveryInfoFail;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailCustomer;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailForShop;
 using MealSync.Application.UseCases.Orders.Queries.OrderHistory;
@@ -170,11 +169,11 @@ public class OrderController : BaseApiController
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
-    [HttpGet(Endpoints.SHOP_DELIVERED_FAIL_EVIDENCE)]
+    [HttpGet(Endpoints.SHOP_DELIVERED_INFOR_EVIDENCE)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> ShopChangeToDeliveredOrder(long id)
     {
-        return HandleResult(await Mediator.Send(new GetEvidenceDeliveryFailQuery()
+        return HandleResult(await Mediator.Send(new GetDeliveryInfoQuery()
         {
             OrderId = id,
         }).ConfigureAwait(false));

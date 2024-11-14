@@ -138,7 +138,7 @@ public static class Endpoints
     public const string SHOW_QR_FOR_CONFIRM = "customer/order/{id:long}/qr/received";
     public const string COMPLETED_ORDER = "customer/order/confirm/complete";
     public const string GET_REPAYMENT_LINK = "customer/order/{id:long}/re-payment";
-    public const string SHOP_DELIVERED_FAIL_EVIDENCE = "shop-owner/order/{id:long}/delivery-fail-evidence";
+    public const string SHOP_DELIVERED_INFOR_EVIDENCE = "shop-owner/order/{id:long}/delivery-infor";
 
     // Report
     public const string CUSTOMER_REPORT_ORDER = "customer/order/report";

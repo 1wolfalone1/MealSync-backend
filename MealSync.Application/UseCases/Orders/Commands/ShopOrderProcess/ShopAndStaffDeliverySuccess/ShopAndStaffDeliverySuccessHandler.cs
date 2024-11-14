@@ -70,6 +70,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             order.Status = OrderStatus.Delivered;
+            order.ReceiveAt = TimeFrameUtils.GetCurrentDate();
 
             // Increase food total order
             var listFoodIds = _orderDetailRepository.GetListFoodIdInOrderDetailGroupBy(request.OrderId);
