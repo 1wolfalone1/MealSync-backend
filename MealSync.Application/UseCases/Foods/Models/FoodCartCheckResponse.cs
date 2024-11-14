@@ -28,6 +28,8 @@ public class FoodCartCheckResponse
 
     public string? MessageFoodNeedRemoveTomorrow { get; set; }
 
+    public List<string>? IdsRemoveAll { get; set; }
+
     public List<DetailFoodResponse>? Foods { get; set; }
 
     public class DetailFoodResponse
