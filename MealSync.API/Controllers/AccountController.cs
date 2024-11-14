@@ -1,10 +1,12 @@
 ﻿using MealSync.API.Shared;
+using MealSync.Application.UseCases.Accounts.Commands.CheckValidTokenJwt;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 using MealSync.Application.UseCases.Accounts.Commands.SendVerifyCode;
 using MealSync.Application.UseCases.Accounts.Commands.ShopRegister;
 using MealSync.Application.UseCases.Accounts.Commands.SignupCustomer;
 using MealSync.Application.UseCases.Accounts.Commands.VerifyCode;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MealSync.API.Controllers;
 
@@ -37,6 +39,13 @@ public class AccountController : BaseApiController
 
     [HttpPost(Endpoints.VERIFY_CODE)]
     public async Task<IActionResult> VerifyCode(VerifyCodeCommand command)
+    {
+        return HandleResult(await Mediator.Send(command));
+    }
+
+    [HttpPost(Endpoints.VALID_TOKEN)]
+    [Authorize]
+    public async Task<IActionResult> VerifyCode([FromBody] CheckValidTokenJwtCommand command)
     {
         return HandleResult(await Mediator.Send(command));
     }

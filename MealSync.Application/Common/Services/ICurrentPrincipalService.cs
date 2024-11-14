@@ -9,4 +9,6 @@ public interface ICurrentPrincipalService
     public long? CurrentPrincipalId { get; }
 
     public ClaimsPrincipal GetCurrentPrincipalFromToken(string token);
+
+    string? CurrentPrincipalRoleName { get; }
 }

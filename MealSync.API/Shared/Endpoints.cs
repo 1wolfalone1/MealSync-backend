@@ -10,6 +10,7 @@ public static class Endpoints
     public const string REGISTER_CUSTOMER = "auth/customer-register";
     public const string SEND_VERIFY_CODE = "auth/send-code";
     public const string VERIFY_CODE = "auth/verify-code";
+    public const string VALID_TOKEN = "auth/valid-token";
 
     // Shop Owner
     public const string GET_FOOD = "shop-owner/food";

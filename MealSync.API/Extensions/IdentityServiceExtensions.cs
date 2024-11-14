@@ -59,7 +59,7 @@ public static class IdentityServiceExtensions
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     context.Response.ContentType = "application/json";
                     var result = JsonSerializer.Serialize(
-                        Result.Failure(new Error("401", "Authentication failed: JWT token không hợp lệ", true)),
+                        Result.Failure(new Error("401", "Authentication failed: JWT token không hợp lệ")),
                         new JsonSerializerOptions()
                         {
                             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -72,7 +72,7 @@ public static class IdentityServiceExtensions
                     context.Response.StatusCode = StatusCodes.Status403Forbidden;
                     context.Response.ContentType = "application/json";
                     var result = JsonSerializer.Serialize(
-                        Result.Failure(new Error("403", "Authorization failed: Bạn không có quyền truy cập", true)),
+                        Result.Failure(new Error("403", "Authorization failed: Bạn không có quyền truy cập")),
                         new JsonSerializerOptions
                         {
                             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
