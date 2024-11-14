@@ -48,9 +48,17 @@ public class Order : BaseEntity
     [Column(TypeName = "date")]
     public DateTime IntendedReceiveDate { get; set; }
 
+    public DateTimeOffset? CancelAt { get; set; }
+
+    public DateTimeOffset? RejectAt { get; set; }
+
     public DateTimeOffset? ReceiveAt { get; set; }
 
+    public DateTimeOffset? LastestDeliveryFailAt { get; set; }
+
     public DateTimeOffset? CompletedAt { get; set; }
+
+    public DateTimeOffset? ResolveAt { get; set; }
 
     public int StartTime { get; set; }
 
