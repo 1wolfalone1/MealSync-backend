@@ -69,7 +69,7 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
             }
             else
             {
-                order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription();
+                order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription();
             }
 
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
