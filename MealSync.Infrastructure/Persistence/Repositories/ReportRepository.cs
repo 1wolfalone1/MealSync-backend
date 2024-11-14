@@ -122,6 +122,62 @@ public class ReportRepository : BaseRepository<Report>, IReportRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<(int TotalCount, List<Report> Reports)> GetReportForShopWebFilter(
+        long shopId, string? searchValue, ReportStatus? status, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize)
+    {
+        var query = DbSet.Where(r => r.Order.ShopId == shopId && r.CustomerId.HasValue);
+
+        if (!string.IsNullOrWhiteSpace(searchValue))
+        {
+            searchValue = EscapeLikeParameter(searchValue);
+            bool isNumeric = double.TryParse(searchValue, out var numericValue);
+            string numericString = numericValue.ToString();
+
+            query = query.Where(r =>
+                EF.Functions.Like(r.Title, $"%{searchValue}%") ||
+                EF.Functions.Like(r.Content, $"%{searchValue}%") ||
+                EF.Functions.Like(r.Reason ?? string.Empty, $"%{searchValue}%") ||
+                (isNumeric && EF.Functions.Like(r.Id.ToString(), $"%{numericString}%")) ||
+                r.Order.OrderDetails.Any(od => EF.Functions.Like(od.Food.Name, $"%{searchValue}%")));
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(r => r.CustomerId == default || r.CustomerId == 0 || r.Status == status.Value);
+        }
+
+        if (dateFrom.HasValue)
+        {
+            query = query.Where(r => r.CreatedDate >= new DateTimeOffset(dateFrom.Value, TimeSpan.Zero));
+        }
+
+        if (dateTo.HasValue)
+        {
+            query = query.Where(r => r.CreatedDate <= new DateTimeOffset(dateTo.Value, TimeSpan.Zero));
+        }
+
+        query = query.Include(r => r.Order)
+            .Include(r => r.Customer)
+            .ThenInclude(r => r.Account)
+            .Include(r => r.Order)
+            .ThenInclude(r => r.DeliveryPackage)
+            .ThenInclude(dp => dp.ShopDeliveryStaff)
+            .ThenInclude(sds => sds.Account)
+            .Include(r => r.Order)
+            .ThenInclude(o => o.DeliveryPackage)
+            .ThenInclude(dp => dp.Shop)
+            .ThenInclude(s => s.Account);
+
+        var reports = await query
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync().ConfigureAwait(false);
+
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+
+        return (totalCount, reports);
+    }
+
     private static string EscapeLikeParameter(string input)
     {
         return input

@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.Reports.Commands.ShopReplyCustomerReport;
 using MealSync.Application.UseCases.Reports.Queries.GetByReportIdOfCustomer;
 using MealSync.Application.UseCases.Reports.Queries.GetCustomerReport;
 using MealSync.Application.UseCases.Reports.Queries.GetReportForShopByFilter;
+using MealSync.Application.UseCases.Reports.Queries.GetReportForShopWebByFilter;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -46,5 +47,12 @@ public class ReportController : BaseApiController
     public async Task<IActionResult> GetReportOrderOfCustomerForShop(long id)
     {
         return HandleResult(await Mediator.Send(new GetByReportIdOfCustomerQuery() { CustomerReportId = id }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_REPORT_OF_CUSTOMER_FOR_SHOP_WEB)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetReportOfCustomerForShopWeb([FromQuery] GetReportForShopWebByFilterQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }
