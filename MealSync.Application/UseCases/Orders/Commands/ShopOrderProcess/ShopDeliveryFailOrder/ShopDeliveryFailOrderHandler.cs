@@ -56,6 +56,7 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
             var order = _orderRepository.GetById(request.OrderId);
             order.Status = OrderStatus.FailDelivery;
             order.Reason = request.Reason;
+            order.LastestDeliveryFailAt = TimeFrameUtils.GetCurrentDate();
 
             if (request.Evidences != null && request.Evidences.Count > 0)
             {
@@ -98,7 +99,7 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
         if (order == default)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.OrderId }, HttpStatusCode.NotFound);
 
-        if (order.Status != OrderStatus.Delivering)
+        if (order.Status != OrderStatus.Delivering && order.Status != OrderStatus.FailDelivery)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.OrderId });
 
         // Check is > Start time and less than end time + 2 hours

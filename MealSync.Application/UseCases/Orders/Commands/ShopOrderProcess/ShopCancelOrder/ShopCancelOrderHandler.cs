@@ -111,6 +111,7 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
             order.Status = OrderStatus.Cancelled;
             order.IsRefund = isRefund;
             order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription());
+            order.CancelAt = TimeFrameUtils.GetCurrentDate();
             _orderRepository.Update(order);
             _shopRepository.Update(shop);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);

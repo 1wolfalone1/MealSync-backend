@@ -7,6 +7,7 @@ using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Services.Payments.VnPay;
 using MealSync.Application.Common.Services.Payments.VnPay.Models;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
@@ -72,6 +73,7 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
             order.Status = OrderStatus.Rejected;
             order.Reason = request.Reason;
             order.IsRefund = isRefund;
+            order.RejectAt = TimeFrameUtils.GetCurrentDate();
             _orderRepository.Update(order);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
