@@ -32,8 +32,10 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
     private readonly IPaymentRepository _paymentRepository;
     private readonly IBuildingRepository _buildingRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly IWalletRepository _walletRepository;
+    private readonly IWalletTransactionRepository _walletTransactionRepository;
 
-    public ShopRejectOrderHandler(INotifierService notifierService, IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopRejectOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository, IEmailService emailService, IVnPayPaymentService paymentService, IPaymentRepository paymentRepository, IBuildingRepository buildingRepository, IAccountRepository accountRepository)
+    public ShopRejectOrderHandler(INotifierService notifierService, IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopRejectOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository, IEmailService emailService, IVnPayPaymentService paymentService, IPaymentRepository paymentRepository, IBuildingRepository buildingRepository, IAccountRepository accountRepository, IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository)
     {
         _notifierService = notifierService;
         _unitOfWork = unitOfWork;
@@ -48,6 +50,8 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
         _paymentRepository = paymentRepository;
         _buildingRepository = buildingRepository;
         _accountRepository = accountRepository;
+        _walletRepository = walletRepository;
+        _walletTransactionRepository = walletTransactionRepository;
     }
 
     public async Task<Result<Result>> Handle(ShopRejectOrderCommand request, CancellationToken cancellationToken)
@@ -127,13 +131,63 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
                 refundPayment.Status = PaymentStatus.PaidSuccess;
                 refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
                 refundPayment.PaymentThirdPartyContent = content;
+
+                 // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
+                var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
+                var systemCommissionWallet = await _walletRepository.GetByType(WalletTypes.SystemCommission).ConfigureAwait(false);
+
+                var listWalletTransaction = new List<WalletTransaction>();
+                WalletTransaction transactionWithdrawalSystemCommissionToSystemTotal = new WalletTransaction
+                {
+                    WalletFromId = systemCommissionWallet.Id,
+                    WalletToId = systemTotalWallet.Id,
+                    AvaiableAmountBefore = systemCommissionWallet.AvailableAmount,
+                    IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
+                    ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
+                    Amount = -order.ChargeFee,
+                    Type = WalletTransactionType.Withdrawal,
+                    Description = $"Rút tiền từ ví hoa hồng {MoneyUtils.FormatMoneyWithDots(order.ChargeFee)} VNĐ về ví tổng hệ thống",
+                };
+                listWalletTransaction.Add(transactionWithdrawalSystemCommissionToSystemTotal);
+                systemCommissionWallet.AvailableAmount -= order.ChargeFee;
+
+                WalletTransaction transactionAddFromSystemCommissionToSystemTotal = new WalletTransaction
+                {
+                    WalletFromId = systemCommissionWallet.Id,
+                    WalletToId = systemTotalWallet.Id,
+                    AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
+                    IncomingAmountBefore = systemTotalWallet.IncomingAmount,
+                    ReportingAmountBefore = systemTotalWallet.ReportingAmount,
+                    Amount = order.ChargeFee,
+                    Type = WalletTransactionType.Transfer,
+                    Description = $"Tiền từ ví hoa hồng chuyển về ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(order.ChargeFee)} VNĐ",
+                };
+                listWalletTransaction.Add(transactionAddFromSystemCommissionToSystemTotal);
+                systemTotalWallet.AvailableAmount += order.ChargeFee;
+
+                WalletTransaction transactionWithdrawalSystemTotalForRefundPaymentOnline = new WalletTransaction
+                {
+                    WalletFromId = systemCommissionWallet.Id,
+                    AvaiableAmountBefore = systemCommissionWallet.AvailableAmount,
+                    IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
+                    ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
+                    Amount = payment.Amount,
+                    Type = WalletTransactionType.Withdrawal,
+                    Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(payment.Amount)} VNĐ để hoàn tiền giao dịch thanh toán online của đơn hàng MS-{payment.OrderId}",
+                };
+                listWalletTransaction.Add(transactionWithdrawalSystemTotalForRefundPaymentOnline);
+                systemTotalWallet.AvailableAmount -= payment.Amount;
+
+                await _walletTransactionRepository.AddRangeAsync(listWalletTransaction).ConfigureAwait(false);
+                _walletRepository.Update(systemTotalWallet);
+                _walletRepository.Update(systemCommissionWallet);
             }
             else
             {
                 refundPayment.Status = PaymentStatus.PaidFail;
 
                 // Get moderator account to send mail
-                SendEmailAnnounceModeratorAsync(order);
+                await SendEmailAnnounceModeratorAsync(order).ConfigureAwait(false);
 
                 // Send notification for moderator
                 NotiAnnounceRefundFailAsync(order);
