@@ -98,6 +98,7 @@ SELECT
     o.end_time AS EndTime,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
+    o.TotalPages AS TotalPages,
     -- Customer
     accCus.id AS CustomerSection,
     accCus.id AS Id,
