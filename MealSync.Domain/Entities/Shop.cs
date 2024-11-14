@@ -51,9 +51,9 @@ public class Shop : BaseEntity
 
     public bool IsAutoOrderConfirmation { get; set; }
 
-    public int MaxOrderHoursInAdvance { get; set; }
+    public double MaxOrderHoursInAdvance { get; set; }
 
-    public int MinOrderHoursInAdvance { get; set; }
+    public double MinOrderHoursInAdvance { get; set; }
 
     public int NumOfWarning { get; set; }
 

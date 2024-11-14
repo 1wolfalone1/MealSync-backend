@@ -133,4 +133,20 @@ public class TimeFrameUtils
 
         return (startDateTime.DateTime, startTime, endTime);
     }
+
+    public static double ConvertToHours(int hhmm)
+    {
+        int hours = hhmm / 100;         // Extract the hours part
+        int minutes = hhmm % 100;       // Extract the minutes part
+
+        return hours + minutes / 60.0;  // Convert minutes to hours as a fraction
+    }
+
+    public static int ConvertToHHMM(double hours)
+    {
+        int hh = (int)hours;                   // Extract the integer part as hours
+        int mm = (int)((hours - hh) * 60);     // Convert fractional part to minutes
+
+        return hh * 100 + mm;                  // Combine hours and minutes in hhmm format
+    }
 }
