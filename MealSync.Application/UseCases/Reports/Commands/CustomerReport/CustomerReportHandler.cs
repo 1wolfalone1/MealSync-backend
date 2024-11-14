@@ -16,6 +16,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IReportRepository _reportRepository;
+    private readonly IPaymentRepository _paymentRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IStorageService _storageService;
     private readonly IUnitOfWork _unitOfWork;
@@ -25,7 +26,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
     public CustomerReportHandler(
         IOrderRepository orderRepository, IReportRepository reportRepository,
         ICurrentPrincipalService currentPrincipalService, IStorageService storageService,
-        IUnitOfWork unitOfWork, ILogger<CustomerReportHandler> logger, IMapper mapper)
+        IUnitOfWork unitOfWork, ILogger<CustomerReportHandler> logger, IMapper mapper, IPaymentRepository paymentRepository)
     {
         _orderRepository = orderRepository;
         _reportRepository = reportRepository;
@@ -34,6 +35,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mapper = mapper;
+        _paymentRepository = paymentRepository;
     }
 
     public async Task<Result<Result>> Handle(CustomerReportCommand request, CancellationToken cancellationToken)
@@ -56,10 +58,17 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
         else
         {
             var now = DateTimeOffset.UtcNow;
-            DateTime receiveDate;
+            var receiveDateStartTime = new DateTime(
+                order.IntendedReceiveDate.Year,
+                order.IntendedReceiveDate.Month,
+                order.IntendedReceiveDate.Day,
+                order.StartTime / 100,
+                order.StartTime % 100,
+                0);
+            DateTime receiveDateEndTime;
             if (order.EndTime == 2400)
             {
-                receiveDate = new DateTime(
+                receiveDateEndTime = new DateTime(
                         order.IntendedReceiveDate.Year,
                         order.IntendedReceiveDate.Month,
                         order.IntendedReceiveDate.Day,
@@ -70,7 +79,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
             }
             else
             {
-                receiveDate = new DateTime(
+                receiveDateEndTime = new DateTime(
                     order.IntendedReceiveDate.Year,
                     order.IntendedReceiveDate.Month,
                     order.IntendedReceiveDate.Day,
@@ -79,10 +88,11 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                     0);
             }
 
-            var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
+            var startTime = new DateTimeOffset(receiveDateStartTime, TimeSpan.FromHours(7));
+            var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
 
             // BR: Report within 12 hours after the 'endTime'
-            if (now >= endTime && now <= endTime.AddHours(12))
+            if (now >= startTime && now <= endTime.AddHours(12))
             {
                 var imageUrls = new List<string>();
                 foreach (var file in request.Images)
@@ -100,10 +110,18 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                     ImageUrl = string.Join(",", imageUrls),
                     Status = ReportStatus.Pending,
                 };
-                order.Status = OrderStatus.IssueReported;
+
+                var payment = await _paymentRepository.GetPaymentByOrderId(order.Id).ConfigureAwait(false);
+                if (payment.PaymentMethods == PaymentMethods.VnPay && payment.Status == PaymentStatus.PaidSuccess)
+                {
+                    // Todo: Question
+                }
+
+                order.IsReport = true;
                 order.ReasonIdentity = order.Status == OrderStatus.FailDelivery
                     ? OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription()
                     : OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription();
+                order.Status = OrderStatus.IssueReported;
                 try
                 {
                     // Begin transaction

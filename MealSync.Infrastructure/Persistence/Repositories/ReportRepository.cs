@@ -117,7 +117,7 @@ public class ReportRepository : BaseRepository<Report>, IReportRepository
     public Task<long?> GetOrderIdByIdAndShopId(long id, long shopId)
     {
         return DbSet
-            .Where(r => r.Id == id && r.Order.ShopId == shopId)
+            .Where(r => r.Id == id && r.Order.ShopId == shopId && r.CustomerId != default)
             .Select(r => (long?)r.OrderId)
             .FirstOrDefaultAsync();
     }

@@ -36,10 +36,17 @@ public class GetReportForShopByHandler : IQueryHandler<GetReportForShopByFilterQ
             }
             else
             {
-                DateTime receiveDate;
+                var receiveDateStartTime = new DateTime(
+                    report.IntendedReceiveDate.Year,
+                    report.IntendedReceiveDate.Month,
+                    report.IntendedReceiveDate.Day,
+                    report.StartTime / 100,
+                    report.StartTime % 100,
+                    0);
+                DateTime receiveDateEndTime;
                 if (report.EndTime == 2400)
                 {
-                    receiveDate = new DateTime(
+                    receiveDateEndTime = new DateTime(
                             report.IntendedReceiveDate.Year,
                             report.IntendedReceiveDate.Month,
                             report.IntendedReceiveDate.Day,
@@ -50,7 +57,7 @@ public class GetReportForShopByHandler : IQueryHandler<GetReportForShopByFilterQ
                 }
                 else
                 {
-                    receiveDate = new DateTime(
+                    receiveDateEndTime = new DateTime(
                         report.IntendedReceiveDate.Year,
                         report.IntendedReceiveDate.Month,
                         report.IntendedReceiveDate.Day,
@@ -59,10 +66,11 @@ public class GetReportForShopByHandler : IQueryHandler<GetReportForShopByFilterQ
                         0);
                 }
 
-                var endTime = new DateTimeOffset(receiveDate, TimeSpan.FromHours(7));
+                var startTime = new DateTimeOffset(receiveDateStartTime, TimeSpan.FromHours(7));
+                var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
 
                 // BR: Reply report within 20 hours after the 'endTime'
-                report.IsAllowShopReply = now >= endTime && now <= endTime.AddHours(20);
+                report.IsAllowShopReply = now >= startTime && now <= endTime.AddHours(20);
             }
         }
 

@@ -29,13 +29,16 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
     private readonly INotifierService _notifierService;
     private readonly IBuildingRepository _buildingRepository;
     private readonly IEmailService _emailService;
+    private readonly IWalletRepository _walletRepository;
+    private readonly IWalletTransactionRepository _walletTransactionRepository;
 
     public CancelOrderCustomerHandler(
         IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService,
         IVnPayPaymentService paymentService, IPaymentRepository paymentRepository, IUnitOfWork unitOfWork,
         ISystemResourceRepository systemResourceRepository, ILogger<CancelOrderCustomerHandler> logger,
         IAccountRepository accountRepository, INotificationFactory notificationFactory, INotifierService notifierService,
-        IBuildingRepository buildingRepository, IEmailService emailService)
+        IBuildingRepository buildingRepository, IEmailService emailService, IWalletRepository walletRepository,
+        IWalletTransactionRepository walletTransactionRepository)
     {
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
@@ -49,6 +52,8 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
         _notifierService = notifierService;
         _buildingRepository = buildingRepository;
         _emailService = emailService;
+        _walletRepository = walletRepository;
+        _walletTransactionRepository = walletTransactionRepository;
     }
 
     public async Task<Result<Result>> Handle(CancelOrderCustomerCommand request, CancellationToken cancellationToken)
@@ -70,7 +75,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             }
             else
             {
-                if (order.Status == OrderStatus.Pending)
+                if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.PendingPayment)
                 {
                     return await CancelOrderAsync(order, payment, request.Reason).ConfigureAwait(false);
                 }
@@ -133,7 +138,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                     Amount = payment.Amount,
                     Status = PaymentStatus.Pending,
                     Type = PaymentTypes.Refund,
-                    PaymentMethods = PaymentMethods.BankTransfer,
+                    PaymentMethods = PaymentMethods.VnPay,
                 };
                 var refundResult = await _paymentService.CreateRefund(payment).ConfigureAwait(false);
                 if (refundResult.VnpResponseCode == ((int)VnPayRefundResponseCode.CODE_00).ToString("D2"))
@@ -145,6 +150,55 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                     refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
                     refundPayment.PaymentThirdPartyContent = content;
                     refundMessage = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_REFUND_SUCCESS.GetDescription());
+
+                    // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
+                    var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
+                    var systemCommissionWallet = await _walletRepository.GetByType(WalletTypes.SystemCommission).ConfigureAwait(false);
+
+                    WalletTransaction transactionWithdrawalSystemCommissionToSystemTotal = new WalletTransaction
+                    {
+                        WalletFromId = systemCommissionWallet.Id,
+                        WalletToId = systemTotalWallet.Id,
+                        AvaiableAmountBefore = systemCommissionWallet.AvailableAmount,
+                        IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
+                        ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
+                        Amount = order.ChargeFee,
+                        Type = WalletTransactionType.Withdrawal,
+                        Description = $"Rút tiền từ ví hoa hồng {order.ChargeFee} VNĐ về ví tổng hệ thống",
+                    };
+
+                    systemCommissionWallet.AvailableAmount -= order.ChargeFee;
+
+                    WalletTransaction transactionAddFromSystemCommissionToSystemTotal = new WalletTransaction
+                    {
+                        WalletFromId = systemCommissionWallet.Id,
+                        WalletToId = systemTotalWallet.Id,
+                        AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
+                        IncomingAmountBefore = systemTotalWallet.IncomingAmount,
+                        ReportingAmountBefore = systemTotalWallet.ReportingAmount,
+                        Amount = order.ChargeFee,
+                        Type = WalletTransactionType.Transfer,
+                        Description = $"Tiền từ ví hoa hồng chuyển về ví tổng hệ thống {order.ChargeFee} VNĐ",
+                    };
+                    systemTotalWallet.AvailableAmount += order.ChargeFee;
+
+                    WalletTransaction transactionWithdrawalSystemTotalForRefundPaymentOnline = new WalletTransaction
+                    {
+                        WalletFromId = systemCommissionWallet.Id,
+                        AvaiableAmountBefore = systemCommissionWallet.AvailableAmount,
+                        IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
+                        ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
+                        Amount = payment.Amount,
+                        Type = WalletTransactionType.Withdrawal,
+                        Description = $"Rút tiền từ ví tổng hệ thống {payment.Amount} VNĐ để hoàn tiền giao dịch thanh toán online của đơn hàng MS-{payment.OrderId}",
+                    };
+                    systemTotalWallet.AvailableAmount -= payment.Amount;
+
+                    await _walletTransactionRepository.AddAsync(transactionWithdrawalSystemCommissionToSystemTotal).ConfigureAwait(false);
+                    await _walletTransactionRepository.AddAsync(transactionAddFromSystemCommissionToSystemTotal).ConfigureAwait(false);
+                    await _walletTransactionRepository.AddAsync(transactionWithdrawalSystemTotalForRefundPaymentOnline).ConfigureAwait(false);
+                    _walletRepository.Update(systemTotalWallet);
+                    _walletRepository.Update(systemCommissionWallet);
                 }
                 else
                 {
@@ -155,7 +209,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                     await SendEmailAnnounceModeratorAsync(order).ConfigureAwait(false);
 
                     // Send notification for moderator
-                    await NotifyAnnounceRefundFailAsync(order).ConfigureAwait(false);
+                    NotifyAnnounceRefundFailAsync(order);
                 }
 
                 await _paymentRepository.AddAsync(refundPayment).ConfigureAwait(false);
@@ -165,7 +219,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             order.Status = OrderStatus.Cancelled;
             order.IsRefund = isRefund;
             order.Reason = reason;
-            order.ReasonIdentity = _systemResourceRepository.GetByResourceCode(OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription());
+            order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription();
             _orderRepository.Update(order);
 
             // Commit transaction
@@ -204,7 +258,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
         }
     }
 
-    private async Task NotifyAnnounceRefundFailAsync(Order order)
+    private void NotifyAnnounceRefundFailAsync(Order order)
     {
         var building = _buildingRepository.GetById(order.BuildingId);
         var moderators = _accountRepository.GetAccountsOfModeratorByDormitoryId(building!.DormitoryId);
@@ -213,7 +267,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             foreach (var moderator in moderators)
             {
                 var notification = _notificationFactory.CreateRefundFaillNotification(order, moderator);
-                await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
+                _notifierService.NotifyAsync(notification);
             }
         }
     }

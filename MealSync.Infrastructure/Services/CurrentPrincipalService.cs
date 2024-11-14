@@ -54,6 +54,22 @@ public class CurrentPrincipalService : ICurrentPrincipalService, IBaseService
         }
     }
 
+    public string? CurrentPrincipalRoleName
+    {
+        get
+        {
+            var identity = _accessor?.HttpContext?.User.Identity as ClaimsIdentity;
+
+            if (identity == null || !identity.IsAuthenticated) return null;
+
+            var claims = identity.Claims;
+
+            var role = claims.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value ?? null;
+
+            return role;
+        }
+    }
+
     public ClaimsPrincipal GetCurrentPrincipalFromToken(string token)
     {
         var tokenValidationParams = new TokenValidationParameters()
