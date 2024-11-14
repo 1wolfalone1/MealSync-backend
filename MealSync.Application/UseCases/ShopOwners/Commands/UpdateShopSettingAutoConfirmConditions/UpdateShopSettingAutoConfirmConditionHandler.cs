@@ -2,6 +2,7 @@
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Domain.Enums;
 using Microsoft.Extensions.Logging;
@@ -31,8 +32,10 @@ public class UpdateShopSettingAutoConfirmConditionHandler : ICommandHandler<Upda
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
-            shop.MaxOrderHoursInAdvance = request.MaxOrderHoursInAdvance;
-            shop.MinOrderHoursInAdvance = request.MinOrderHoursInAdvance;
+
+            // Need convert from int to double
+            shop.MaxOrderHoursInAdvance = TimeFrameUtils.ConvertToHours(request.MaxOrderHoursInAdvance);
+            shop.MinOrderHoursInAdvance = TimeFrameUtils.ConvertToHours(request.MinOrderHoursInAdvance);
             shop.IsAutoOrderConfirmation = request.IsAutoOrderConfirmation.HasValue ? request.IsAutoOrderConfirmation.Value : shop.IsAutoOrderConfirmation;
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 

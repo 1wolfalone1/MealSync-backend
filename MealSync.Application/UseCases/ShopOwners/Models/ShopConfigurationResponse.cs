@@ -1,4 +1,5 @@
-﻿using MealSync.Application.Common.Utils;
+﻿using System.Text.Json.Serialization;
+using MealSync.Application.Common.Utils;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.ShopOwners.Models;
@@ -35,9 +36,27 @@ public class ShopConfigurationResponse
 
     public bool IsAutoOrderConfirmation { get; set; }
 
-    public int MaxOrderHoursInAdvance { get; set; }
+    [JsonIgnore]
+    public double _maxOrderHoursInAdvande { get; set; }
 
-    public int MinOrderHoursInAdvance { get; set; }
+    public int MaxOrderHoursInAdvance
+    {
+        get
+        {
+            return TimeFrameUtils.ConvertToHHMM(_maxOrderHoursInAdvande);
+        }
+    }
+
+    [JsonIgnore]
+    public double _minOrderHoursInAdvande { get; set; }
+
+    public double MinOrderHoursInAdvance
+    {
+        get
+        {
+            return TimeFrameUtils.ConvertToHHMM(_minOrderHoursInAdvande);
+        }
+    }
 
     public LocationResponse Location { get; set; }
 
