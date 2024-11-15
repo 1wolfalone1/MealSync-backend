@@ -14,13 +14,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveryFailOrder;
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveryFailOrder;
 
-public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrderCommand, Result>
+public class ShopAndStaffDeliveryFailOrderHandler : ICommandHandler<ShopAndStaffDeliveryFailOrderCommand, Result>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IOrderRepository _orderRepository;
-    private readonly ILogger<ShopDeliveryFailOrderHandler> _logger;
+    private readonly ILogger<ShopAndStaffDeliveryFailOrderHandler> _logger;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly INotificationFactory _notificationFactory;
     private readonly INotifierService _notifierService;
@@ -29,8 +29,10 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
     private readonly IAccountRepository _accountRepository;
     private readonly IBuildingRepository _buildingRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
+    private readonly ICurrentAccountService _currentAccountService;
+    private readonly IShopDeliveryStaffRepository _deliveryStaffRepository;
 
-    public ShopDeliveryFailOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopDeliveryFailOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository, IDeliveryPackageRepository deliveryPackageRepository, IAccountRepository accountRepository, IBuildingRepository buildingRepository, ISystemResourceRepository systemResourceRepository)
+    public ShopAndStaffDeliveryFailOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopAndStaffDeliveryFailOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository, IDeliveryPackageRepository deliveryPackageRepository, IAccountRepository accountRepository, IBuildingRepository buildingRepository, ISystemResourceRepository systemResourceRepository, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository deliveryStaffRepository)
     {
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
@@ -43,9 +45,11 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
         _accountRepository = accountRepository;
         _buildingRepository = buildingRepository;
         _systemResourceRepository = systemResourceRepository;
+        _currentAccountService = currentAccountService;
+        _deliveryStaffRepository = deliveryStaffRepository;
     }
 
-    public async Task<Result<Result>> Handle(ShopDeliveryFailOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(ShopAndStaffDeliveryFailOrderCommand request, CancellationToken cancellationToken)
     {
         // Validate
         Validate(request);
@@ -91,16 +95,23 @@ public class ShopDeliveryFailOrderHandler : ICommandHandler<ShopDeliveryFailOrde
         }
     }
 
-    private void Validate(ShopDeliveryFailOrderCommand request)
+    private void Validate(ShopAndStaffDeliveryFailOrderCommand request)
     {
+        var account = _currentAccountService.GetCurrentAccount();
+        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _deliveryStaffRepository.GetById(account.Id).ShopId;
         var order = _orderRepository
-            .Get(o => o.Id == request.OrderId && o.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)
+            .Get(o => o.Id == request.OrderId && o.ShopId == shopId)
             .Include(o => o.DeliveryPackage).SingleOrDefault();
         if (order == default)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.OrderId }, HttpStatusCode.NotFound);
 
         if (order.Status != OrderStatus.Delivering && order.Status != OrderStatus.FailDelivery)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.OrderId });
+
+        if (order.DeliveryPackage.ShopDeliveryStaffId.HasValue && order.DeliveryPackage.ShopDeliveryStaffId != _currentPrincipalService.CurrentPrincipalId && order.DeliveryPackage.ShopId.HasValue && order.DeliveryPackage.ShopId != _currentPrincipalService.CurrentPrincipalId)
+        {
+            throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERY_BY_YOU.GetDescription(), new object[] { request.OrderId });
+        }
 
         // Check is > Start time and less than end time + 2 hours
         var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();

@@ -370,5 +370,9 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
 
         if (shop.Status != ShopStatus.Active && shop.Status != ShopStatus.InActive && request.Status == ShopStatus.Active)
             throw new InvalidBusinessException(MessageCode.E_SHOP_NOT_ABLE_TO_ACTIVE.GetDescription());
+
+        var shopWallet = _walletRepository.GetById(shop.WalletId);
+        if (shopWallet.AvailableAmount < MoneyUtils.AVAILABLE_AMOUNT_LIMIT)
+            throw new InvalidBusinessException(MessageCode.E_SHOP_STATUS_OVER_ACCEPT_NEGATIVE_AVAILABLE_AMOUNT.GetDescription(), new object[] { MoneyUtils.FormatMoneyWithDots(Math.Abs(MoneyUtils.AVAILABLE_AMOUNT_LIMIT)) });
     }
 }
