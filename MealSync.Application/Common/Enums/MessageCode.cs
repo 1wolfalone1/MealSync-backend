@@ -185,6 +185,9 @@ public enum MessageCode
     [Description("E-Shop-Dormitory_NotFound")]
     E_SHOP_DORMITORY_NOT_FOUND,
 
+    [Description("E-Shop-Dormitory_NotSellInOldDormitory")]
+    E_SHOP_DORMITORY_NOT_SELL_IN_OLD_DORMITORY,
+
     // Building
     [Description("E-Building-NotSelect")]
     E_BUILDING_NOT_SELECT,
@@ -429,6 +432,9 @@ public enum MessageCode
 
     [Description("E-Order-OverTimeToDeliverd")]
     E_ORDER_OVER_TIME_TO_DELIVERED,
+
+    [Description("E-ReOrder-ShopNotActive")]
+    E_REORDER_SHOP_NOT_ACTIVE,
 
     // Report
     [Description("E-Report-NotFound")]

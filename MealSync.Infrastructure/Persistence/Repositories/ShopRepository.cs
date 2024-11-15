@@ -221,6 +221,15 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             .FirstAsync(s => s.Id == id);
     }
 
+    public Task<Shop> GetShopInfoForReOrderById(long id)
+    {
+        return DbSet
+                    .Include(s => s.OperatingSlots.Where(os => os.IsActive))
+                    .Include(s => s.ShopDormitories).ThenInclude(sd => sd.Dormitory)
+                    .Include(s => s.Location)
+                    .FirstAsync(s => s.Id == id);
+    }
+
     private static string EscapeLikeParameter(string input)
     {
         return input

@@ -53,4 +53,12 @@ public class CustomerBuildingRepository : BaseRepository<CustomerBuilding>, ICus
         return customerBuildingsInSameDormitory;
     }
 
+    public Task<List<CustomerBuilding>> GetByCustomerIdIncludeBuildingAndDormitory(long customerId)
+    {
+        return DbSet
+            .Include(cb => cb.Building)
+            .Where(cb => cb.CustomerId == customerId)
+            .OrderByDescending(cb => cb.IsDefault).ThenByDescending(cb => cb.CreatedDate)
+            .ToListAsync();
+    }
 }

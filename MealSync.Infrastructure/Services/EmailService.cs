@@ -3,6 +3,7 @@ using System.Net;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Utils;
 using MealSync.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -83,6 +84,13 @@ public class EmailService : IEmailService, IBaseService
         return SendEmail(email,
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_WITHDRAWAL_REQUEST.GetDescription()),
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_WITHDRAWAL_REQUEST.GetDescription(), amount, code));
+    }
+
+    public bool SendNotifyLimitAvailableAmountAndInActiveShop(string email, string availableAmount, string limitAmount)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_LIMIT_AVAILABLE_AMOUNT.GetDescription()),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_LIMIT_AVAILABLE_AMOUNT.GetDescription(), availableAmount, limitAmount));
     }
 
     private bool SendEmail(string toEmail, string subject, string body)

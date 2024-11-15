@@ -43,4 +43,6 @@ public interface INotificationFactory
     Notification CreateOrderDeliveryFailedAutoByBatchToShopNotification(Order order, Shop shop);
 
     Notification CreateOrderDeliveryFailedAutoByBatchToCustomerNotification(Order order, Shop shop);
+
+    Notification CreateLimitAvailableAmountAndInActiveShopNotification(Shop shop, Wallet wallet);
 }

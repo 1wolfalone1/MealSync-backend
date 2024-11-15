@@ -4,6 +4,7 @@ using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Services.Notifications.Models;
+using MealSync.Application.Common.Utils;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
@@ -298,6 +299,26 @@ public class NotificationFactory : INotificationFactory
             Data = JsonConvert.SerializeObject(orderNotification),
             Type = NotificationTypes.SendToCustomer,
             EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateLimitAvailableAmountAndInActiveShopNotification(Shop shop, Wallet wallet)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var walletNotification = mapper.Map<WalletNotification>(wallet);
+        return new Notification
+        {
+            AccountId = shop.Id,
+            ReferenceId = wallet.Id,
+            Title = NotificationConstant.WALLET_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_AVAILABLE_AMOUNT_LESS_THAN_LIMIT.GetDescription(), MoneyUtils.FormatMoneyWithDots(wallet.AvailableAmount), MoneyUtils.AVAILABLE_AMOUNT_LIMIT) ?? string.Empty,
+            ImageUrl = shop.LogoUrl, // Todo: Image warning
+            Data = JsonConvert.SerializeObject(walletNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Wallet,
             IsSave = true,
         };
     }

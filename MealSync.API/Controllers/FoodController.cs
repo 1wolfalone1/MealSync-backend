@@ -10,6 +10,7 @@ using MealSync.Application.UseCases.Foods.Queries.FoodDetail;
 using MealSync.Application.UseCases.Foods.Queries.FoodDetailOfShop;
 using MealSync.Application.UseCases.Foods.Queries.GetAll;
 using MealSync.Application.UseCases.Foods.Queries.GetByIds;
+using MealSync.Application.UseCases.Foods.Queries.GetFoodReorder;
 using MealSync.Application.UseCases.Foods.Queries.ShopFood;
 using MealSync.Application.UseCases.Foods.Queries.ShopOwnerFood;
 using MealSync.Application.UseCases.Foods.Queries.TopFood;
@@ -107,7 +108,7 @@ public class FoodController : BaseApiController
 
     [HttpPut(Endpoints.UPDATE_FOOD_STATUS)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopOwnerUpdateFoodStatus([FromBody] ShopUpdateFoodStatusCommand command,long id)
+    public async Task<IActionResult> ShopOwnerUpdateFoodStatus([FromBody] ShopUpdateFoodStatusCommand command, long id)
     {
         command.Id = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
@@ -125,22 +126,29 @@ public class FoodController : BaseApiController
 
     [HttpGet(Endpoints.GET_FOOD_FOR_WEB)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> GetAllShopFoodForWeb ([FromQuery] AllShopFoodQuery query)
+    public async Task<IActionResult> GetAllShopFoodForWeb([FromQuery] AllShopFoodQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 
     [HttpPut(Endpoints.FOOD_LINK_SHOP_CATEGORY)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> LinkFoodToShopCategory ([FromBody] LinkFoodCommand command)
+    public async Task<IActionResult> LinkFoodToShopCategory([FromBody] LinkFoodCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
     [HttpPut(Endpoints.FOOD_LINK_OPTION_GROUPS)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> LinkFoodToOptionGroups ([FromBody] LinkWithListOptionGroupCommand command)
+    public async Task<IActionResult> LinkFoodToOptionGroups([FromBody] LinkWithListOptionGroupCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPost(Endpoints.RE_ORDER)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> ReOrder([FromBody] GetFoodReorderQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }
