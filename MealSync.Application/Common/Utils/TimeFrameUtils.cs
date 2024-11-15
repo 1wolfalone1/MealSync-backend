@@ -70,10 +70,10 @@ public class TimeFrameUtils
 
     public static int ConvertEndTime(int endTime)
     {
-        if (endTime == 2400)
-        {
-            return 0;
-        }
+        // if (endTime == 2400)
+        // {
+        //     return 0;
+        // }
 
         return endTime;
     }
