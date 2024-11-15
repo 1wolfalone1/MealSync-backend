@@ -41,4 +41,11 @@ public class OperatingSlotController : BaseApiController
     {
         return HandleResult(await Mediator.Send(new GetAllShopOperatingSlotQuery()));
     }
+
+    [Authorize(Roles = $"{IdentityConst.ShopDeliveryClaimName}")]
+    [HttpGet(Endpoints.GET_ALL_OPERATING_SLOT_FOR_SHOP_STAFF)]
+    public async Task<IActionResult> GetAllOperatingSlotForShopDeliveryStaff()
+    {
+        return HandleResult(await Mediator.Send(new GetAllShopOperatingSlotQuery()));
+    }
 }
