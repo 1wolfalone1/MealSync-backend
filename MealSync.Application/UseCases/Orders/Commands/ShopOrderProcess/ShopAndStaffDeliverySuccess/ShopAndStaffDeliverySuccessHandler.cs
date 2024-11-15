@@ -33,11 +33,12 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
     private readonly ICurrentAccountService _currentAccountService;
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly IWalletTransactionRepository _walletTransactionRepository;
+    private readonly IEmailService _emailService;
     private const string QR_KEY = "QR_KEY";
 
     public ShopAndStaffDeliverySuccessHandler(IUnitOfWork unitOfWork, ICurrentPrincipalService currentPrincipalService, IOrderRepository orderRepository, ILogger<ShopAndStaffDeliverySuccessHandler> logger,
         ISystemResourceRepository systemResourceRepository, IShopRepository shopRepository, IOrderDetailRepository orderDetailRepository, IFoodRepository foodRepository, INotificationFactory notificationFactory,
-        INotifierService notifierService, IAccountRepository accountRepository, IConfiguration configuration, IWalletRepository walletRepository, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IWalletTransactionRepository walletTransactionRepository)
+        INotifierService notifierService, IAccountRepository accountRepository, IConfiguration configuration, IWalletRepository walletRepository, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IWalletTransactionRepository walletTransactionRepository, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
         _currentPrincipalService = currentPrincipalService;
@@ -55,6 +56,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         _currentAccountService = currentAccountService;
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
         _walletTransactionRepository = walletTransactionRepository;
+        _emailService = emailService;
     }
 
     public async Task<Result<Result>> Handle(ShopAndStaffDeliverySuccessCommand request, CancellationToken cancellationToken)
@@ -86,7 +88,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             // Increase money shop wallet
             var amountIncrease = order.TotalPrice - order.ChargeFee - order.TotalPromotion;
             var payment = order.Payments.Where(p => p.Type == PaymentTypes.Payment).First();
-            await CreateTransactionToShopAsync(payment.Id, order.Id, amountIncrease).ConfigureAwait(false);
+            await CreateTransactionToShopAsync(payment, order.Id, amountIncrease, order.ChargeFee).ConfigureAwait(false);
 
             _foodRepository.UpdateRange(listFood);
             _orderRepository.Update(order);
@@ -124,7 +126,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         });
     }
 
-    private async Task CreateTransactionToShopAsync(long paymentId, long orderId, double amountSendToShop)
+    private async Task CreateTransactionToShopAsync(Payment payment, long orderId, double amountSendToShop, double chargeFee)
     {
         var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
         var account = _currentAccountService.GetCurrentAccount();
@@ -132,42 +134,93 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         var shop = _shopRepository.Get(sh => sh.Id == shopId)
             .Include(sh => sh.Wallet).Single();
 
-        List<WalletTransaction> transactionsAdds = new();
-        WalletTransaction transactionWithdrawalSystemTotalToShopWallet = new WalletTransaction
+        // If customer pay by vnpay will take form system give shop wallet
+        if (payment.PaymentMethods == PaymentMethods.VnPay)
         {
-            WalletFromId = systemTotalWallet.Id,
-            WalletToId = shop.WalletId,
-            AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
-            IncomingAmountBefore = systemTotalWallet.IncomingAmount,
-            ReportingAmountBefore = systemTotalWallet.ReportingAmount,
-            Amount = -amountSendToShop,
-            Type = WalletTransactionType.Withdrawal,
-            Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví shop id {shopId} từ đơn hàng MS-{orderId}",
-        };
-        transactionsAdds.Add(transactionWithdrawalSystemTotalToShopWallet);
+            List<WalletTransaction> transactionsAdds = new();
+            WalletTransaction transactionWithdrawalSystemTotalToShopWallet = new WalletTransaction
+            {
+                WalletFromId = systemTotalWallet.Id,
+                WalletToId = shop.WalletId,
+                AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
+                IncomingAmountBefore = systemTotalWallet.IncomingAmount,
+                ReportingAmountBefore = systemTotalWallet.ReportingAmount,
+                Amount = -amountSendToShop,
+                Type = WalletTransactionType.Withdrawal,
+                Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví shop id {shopId} từ đơn hàng MS-{orderId}",
+            };
+            transactionsAdds.Add(transactionWithdrawalSystemTotalToShopWallet);
 
-        WalletTransaction transactionAddFromSystemTotalToShop = new WalletTransaction
+            WalletTransaction transactionAddFromSystemTotalToShop = new WalletTransaction
+            {
+                WalletFromId = systemTotalWallet.Id,
+                WalletToId = shop.WalletId,
+                AvaiableAmountBefore = shop.Wallet.AvailableAmount,
+                IncomingAmountBefore = shop.Wallet.IncomingAmount,
+                ReportingAmountBefore = shop.Wallet.ReportingAmount,
+                Amount = amountSendToShop,
+                Type = WalletTransactionType.Transfer,
+                PaymentId = payment.Id,
+                Description = $"Tiền thanh toán cho đơn hàng MS-{orderId} {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ",
+            };
+            transactionsAdds.Add(transactionAddFromSystemTotalToShop);
+
+            List<Wallet> wallets = new();
+            systemTotalWallet.AvailableAmount -= amountSendToShop;
+            shop.Wallet.IncomingAmount += amountSendToShop;
+            wallets.Add(systemTotalWallet);
+            wallets.Add(shop.Wallet);
+            _walletRepository.UpdateRange(wallets);
+            await _walletTransactionRepository.AddRangeAsync(transactionsAdds).ConfigureAwait(false);
+        }
+
+        // COD need to take commission fee from available wallet
+        else if (payment.PaymentMethods == PaymentMethods.COD)
         {
-            WalletFromId = systemTotalWallet.Id,
-            WalletToId = shop.WalletId,
-            AvaiableAmountBefore = shop.Wallet.AvailableAmount,
-            IncomingAmountBefore = shop.Wallet.IncomingAmount,
-            ReportingAmountBefore = shop.Wallet.ReportingAmount,
-            Amount = amountSendToShop,
-            Type = WalletTransactionType.Transfer,
-            PaymentId = paymentId,
-            Description = $"Tiền thanh toán cho đơn hàng MS-{orderId} {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ",
-        };
-        transactionsAdds.Add(transactionAddFromSystemTotalToShop);
+            var transactionWithdrawalAvailableAmountOfShop = new WalletTransaction
+            {
+                WalletFromId = shop.WalletId,
+                WalletToId = systemTotalWallet.Id,
+                AvaiableAmountBefore = shop.Wallet.AvailableAmount,
+                IncomingAmountBefore = shop.Wallet.IncomingAmount,
+                ReportingAmountBefore = shop.Wallet.ReportingAmount,
+                Amount = -chargeFee,
+                Type = WalletTransactionType.Withdrawal,
+                Description = $"Rút tiền hoa hồng từ tiền có sẵn {MoneyUtils.FormatMoneyWithDots(chargeFee)} VNĐ về ví hệ thống",
+            };
+            shop.Wallet.AvailableAmount -= chargeFee;
 
-        List<Wallet> wallets = new();
-        systemTotalWallet.AvailableAmount -= amountSendToShop;
-        shop.Wallet.IncomingAmount += amountSendToShop;
-        wallets.Add(systemTotalWallet);
-        wallets.Add(shop.Wallet);
+            var transactionAddFromAvailableShopToSystemTotalWallet = new WalletTransaction
+            {
+                WalletFromId = shop.WalletId,
+                WalletToId = systemTotalWallet.Id,
+                AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
+                IncomingAmountBefore = systemTotalWallet.IncomingAmount,
+                ReportingAmountBefore = systemTotalWallet.ReportingAmount,
+                Amount = chargeFee,
+                Type = WalletTransactionType.Transfer,
+                Description = $"Tiền hoa hồng từ đơn hàng MS-{orderId} {MoneyUtils.FormatMoneyWithDots(chargeFee)} VNĐ về ví tổng hệ thống",
+            };
+            systemTotalWallet.AvailableAmount += chargeFee;
 
-        _walletRepository.UpdateRange(wallets);
-        await _walletTransactionRepository.AddRangeAsync(transactionsAdds).ConfigureAwait(false);
+            _walletRepository.Update(shop.Wallet);
+            _walletRepository.Update(systemTotalWallet);
+            await _walletTransactionRepository.AddAsync(transactionWithdrawalAvailableAmountOfShop).ConfigureAwait(false);
+            await _walletTransactionRepository.AddAsync(transactionAddFromAvailableShopToSystemTotalWallet).ConfigureAwait(false);
+
+            // BR: Tiền có sẵn < -200000 => shop inactive không được bán nữa cho tới khi nạp tiền vào
+            if (shop.Wallet.AvailableAmount < MoneyUtils.AVAILABLE_AMOUNT_LIMIT)
+            {
+                var notification = _notificationFactory.CreateLimitAvailableAmountAndInActiveShopNotification(shop, shop.Wallet);
+                _notifierService.NotifyAsync(notification);
+                _emailService.SendNotifyLimitAvailableAmountAndInActiveShop(
+                    account.Email,
+                    MoneyUtils.FormatMoneyWithDots(shop.Wallet.AvailableAmount),
+                    MoneyUtils.FormatMoneyWithDots(MoneyUtils.AVAILABLE_AMOUNT_LIMIT));
+                shop.Status = ShopStatus.InActive;
+                _shopRepository.Update(shop);
+            }
+        }
     }
 
     private void Validate(ShopAndStaffDeliverySuccessCommand request)
