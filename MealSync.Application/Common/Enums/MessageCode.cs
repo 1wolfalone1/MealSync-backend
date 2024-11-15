@@ -188,6 +188,9 @@ public enum MessageCode
     [Description("E-Shop-Dormitory_NotSellInOldDormitory")]
     E_SHOP_DORMITORY_NOT_SELL_IN_OLD_DORMITORY,
 
+    [Description("E-ShopStatus-OverAcceptNegativeAvailableAmount")]
+    E_SHOP_STATUS_OVER_ACCEPT_NEGATIVE_AVAILABLE_AMOUNT,
+
     // Building
     [Description("E-Building-NotSelect")]
     E_BUILDING_NOT_SELECT,
@@ -384,6 +387,9 @@ public enum MessageCode
 
     [Description("W-Shop-HaveOrderToPausedReceive")]
     W_ORDER_HAVE_ORDER_TO_PAUSED_RECEIVE,
+
+    [Description("W-OrderDelivering-ReAssgign")]
+    W_ORDER_DELIVERING_RE_ASSIGN,
 
     [Description("E-Order-NotCorrectCustomer")]
     E_ORDER_NOT_CORRECT_CUSTOMER,

@@ -4,11 +4,11 @@ using MealSync.Application.UseCases.Orders.Commands.CancelOrderCustomer;
 using MealSync.Application.UseCases.Orders.Commands.CompleteOrder;
 using MealSync.Application.UseCases.Orders.Commands.Create;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveringOrders;
+using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveryFailOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCancelOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopConfirmOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
-using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveryFailOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopPreparingOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRejectOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShowQRConfirm;
@@ -141,15 +141,15 @@ public class OrderController : BaseApiController
     }
 
     [HttpPut(Endpoints.SHOP_DELIVERED_FAIL_ORDER)]
-    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody] ShopDeliveryFailOrderCommand command, long id)
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
+    public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody] ShopAndStaffDeliveryFailOrderCommand command, long id)
     {
         command.OrderId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
     [HttpPut(Endpoints.SHOP_DELIVERING_ORDER)]
-    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, ${IdentityConst.ShopDeliveryClaimName}")]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
     public async Task<IActionResult> ShopChangeToDeliveringOrder([FromBody] ShopAndStaffDeliveringOrderCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
