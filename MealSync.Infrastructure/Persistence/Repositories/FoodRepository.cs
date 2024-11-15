@@ -227,4 +227,13 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
             .Select(f => f.Name)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<bool> CheckActiveFoodByIds(List<long> ids, long operatingSlotId)
+    {
+        var totalActiveFood = await DbSet.CountAsync(f => ids.Contains(f.Id)
+                                                          && f.Status == FoodStatus.Active
+                                                          && f.FoodOperatingSlots.Any(fos => fos.OperatingSlotId == operatingSlotId))
+            .ConfigureAwait(false);
+        return totalActiveFood == ids.Count;
+    }
 }

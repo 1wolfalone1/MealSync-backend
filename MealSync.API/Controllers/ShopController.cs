@@ -17,6 +17,7 @@ using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatistics;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatisticSummary;
 using MealSync.Application.UseCases.Shops.Queries.SearchShop;
 using MealSync.Application.UseCases.Shops.Queries.ShopInfo;
+using MealSync.Application.UseCases.Shops.Queries.ShopInfoForReOrder;
 using MealSync.Application.UseCases.Shops.Queries.TopShop;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -157,5 +158,12 @@ public class ShopController : BaseApiController
     public async Task<IActionResult> UpdateShopAvatar([FromForm] UpdateAvatarCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.SHOP_INFO_REORDER)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> ShopInfoReOrder(long id)
+    {
+        return HandleResult(await Mediator.Send(new ShopInfoForReOrderQuery { OrderId = id }).ConfigureAwait(false));
     }
 }

@@ -162,9 +162,9 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                         AvaiableAmountBefore = systemCommissionWallet.AvailableAmount,
                         IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
                         ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
-                        Amount = order.ChargeFee,
+                        Amount = -order.ChargeFee,
                         Type = WalletTransactionType.Withdrawal,
-                        Description = $"Rút tiền từ ví hoa hồng {order.ChargeFee} VNĐ về ví tổng hệ thống",
+                        Description = $"Rút tiền từ ví hoa hồng {MoneyUtils.FormatMoneyWithDots(order.ChargeFee)} VNĐ về ví tổng hệ thống",
                     };
 
                     systemCommissionWallet.AvailableAmount -= order.ChargeFee;
@@ -178,7 +178,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                         ReportingAmountBefore = systemTotalWallet.ReportingAmount,
                         Amount = order.ChargeFee,
                         Type = WalletTransactionType.Transfer,
-                        Description = $"Tiền từ ví hoa hồng chuyển về ví tổng hệ thống {order.ChargeFee} VNĐ",
+                        Description = $"Tiền từ ví hoa hồng chuyển về ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(order.ChargeFee)} VNĐ",
                     };
                     systemTotalWallet.AvailableAmount += order.ChargeFee;
 
@@ -188,9 +188,9 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                         AvaiableAmountBefore = systemCommissionWallet.AvailableAmount,
                         IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
                         ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
-                        Amount = payment.Amount,
+                        Amount = -payment.Amount,
                         Type = WalletTransactionType.Withdrawal,
-                        Description = $"Rút tiền từ ví tổng hệ thống {payment.Amount} VNĐ để hoàn tiền giao dịch thanh toán online của đơn hàng MS-{payment.OrderId}",
+                        Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(payment.Amount)} VNĐ để hoàn tiền giao dịch thanh toán online của đơn hàng MS-{payment.OrderId}",
                     };
                     systemTotalWallet.AvailableAmount -= payment.Amount;
 
@@ -227,7 +227,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
 
             var account = _accountRepository.GetById(order.CustomerId)!;
             var notification = _notificationFactory.CreateCustomerCancelOrderNotification(order, account);
-            await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
+            _notifierService.NotifyAsync(notification);
 
             return Result.Success(new
             {

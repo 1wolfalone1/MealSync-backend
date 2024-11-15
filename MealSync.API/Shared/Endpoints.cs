@@ -71,6 +71,7 @@ public static class Endpoints
     public const string GET_SHOP_PROMOTION = "shop/{id:long}/promotion";
     public const string GET_SHOP_PROMOTION_BY_CONDITION = "shop/{id:long}/promotion/filter";
     public const string SEARCH_SHOP = "shop/search";
+    public const string SHOP_INFO_REORDER = "shop/info/re-order/{id:long}";
 
     // Shop delivery staff
     public const string GET_SHOP_DELIVER_STAFF_AVAILABLE = "shop/shop-delivery-staff/available";
@@ -139,6 +140,7 @@ public static class Endpoints
     public const string COMPLETED_ORDER = "customer/order/confirm/complete";
     public const string GET_REPAYMENT_LINK = "customer/order/{id:long}/re-payment";
     public const string SHOP_DELIVERED_INFOR_EVIDENCE = "shop-owner/order/{id:long}/delivery-infor";
+    public const string RE_ORDER = "customer/re-order/food";
 
     // Report
     public const string CUSTOMER_REPORT_ORDER = "customer/order/report";

@@ -1,4 +1,5 @@
 using AutoMapper;
+using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Application.UseCases.Wallets.Models;
 using MealSync.Domain.Entities;
 
@@ -10,5 +11,7 @@ public class WalletMapping : Profile
     {
         CreateMap<Wallet, WalletSummaryResponse>()
             .ForMember(dest => dest.IsAllowedRequestWithdrawal, opt => opt.MapFrom(src => src.AvailableAmount > 0));
+
+        CreateMap<Wallet, WalletNotification>();
     }
 }

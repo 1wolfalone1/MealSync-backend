@@ -19,4 +19,6 @@ public interface IEmailService
     bool SendEmailToAnnounceAccountGotBanned(string email, string fullName);
 
     bool SendVerificationCodeWithdrawalRequest(string email, string code, string amount);
+
+     bool SendNotifyLimitAvailableAmountAndInActiveShop(string email, string availableAmount, string limitAmount);
 }

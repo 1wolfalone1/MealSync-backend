@@ -7,4 +7,6 @@ public class CustomerBuildingResponse
     public string BuildingName { get; set; }
 
     public bool IsDefault { get; set; }
+
+    public long DormitoryId { get; set; }
 }

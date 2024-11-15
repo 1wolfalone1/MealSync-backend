@@ -27,7 +27,7 @@ public class GetAllBuildingOfCustomerHandler : IQueryHandler<GetAllBuildingOfCus
     public async Task<Result<Result>> Handle(GetAllBuildingOfCustomerQuery request, CancellationToken cancellationToken)
     {
         var accountId = _currentPrincipalService.CurrentPrincipalId!.Value;
-        var customerBuilding = await _customerBuildingRepository.GetByCustomerIdIncludeBuilding(accountId).ConfigureAwait(false);
+        var customerBuilding = await _customerBuildingRepository.GetByCustomerIdIncludeBuildingAndDormitory(accountId).ConfigureAwait(false);
 
         if (customerBuilding.Count == 0)
         {
