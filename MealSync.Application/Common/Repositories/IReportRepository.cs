@@ -18,4 +18,7 @@ public interface IReportRepository : IBaseRepository<Report>
         long shopId, string? searchValue, ReportStatus? status, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize);
 
     Task<long?> GetOrderIdByIdAndShopId(long id, long shopId);
+
+    Task<(int TotalCount, List<Report> Reports)> GetReportForShopWebFilter(
+        long shopId, string? searchValue, ReportStatus? status, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize);
 }
