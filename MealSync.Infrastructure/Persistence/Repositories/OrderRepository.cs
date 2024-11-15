@@ -337,4 +337,43 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                                       && (o.EndTime + hoursToMarkDeliveryFail) <= currentHours).ToList();
         return result;
     }
+
+    public Task<Order?> GetByIdAndCustomerIdForReorder(long id, long customerId)
+    {
+        return DbSet.Where(o => o.Id == id && o.CustomerId == customerId)
+            .Select(o => new Order
+            {
+                Id = o.Id,
+                FullName = o.FullName,
+                PhoneNumber = o.PhoneNumber,
+                Note = o.Note,
+                BuildingId = o.BuildingId,
+                ShopId = o.ShopId,
+                OrderDetails = o.OrderDetails.Select(od => new OrderDetail
+                {
+                    Id = od.Id,
+                    Quantity = od.Quantity,
+                    Note = od.Note,
+                    FoodId = od.FoodId,
+                    Food = new Food
+                    {
+                        Id = od.Food.Id,
+                        Name = od.Food.Name,
+                        Description = od.Food.Description,
+                        Price = od.Food.Price,
+                        ImageUrl = od.Food.ImageUrl,
+                    },
+                    OrderDetailOptions = od.OrderDetailOptions.Select(odo => new OrderDetailOption
+                    {
+                        OptionId = odo.OptionId,
+                    }).ToList(),
+                }).ToList(),
+                Shop = new Shop
+                {
+                    Id = o.Shop.Id,
+                    Name = o.Shop.Name,
+                    LogoUrl = o.Shop.LogoUrl,
+                },
+            }).FirstOrDefaultAsync();
+    }
 }

@@ -107,7 +107,8 @@ public class MappingProfile : Profile
         CreateMap<CustomerBuilding, CustomerBuildingResponse>()
             .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
             .ForMember(dest => dest.BuildingId, opt => opt.MapFrom(src => src.BuildingId))
-            .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Building.Name));
+            .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Building.Name))
+            .ForMember(dest => dest.DormitoryId, opt => opt.MapFrom(src => src.Building.DormitoryId));
         CreateMap<Food, FoodCartSummaryResponse>();
         CreateMap<Account, CustomerInfoResponse>();
         CreateMap<Food, FoodDetailOfShopResponse>()
@@ -343,7 +344,12 @@ public class MappingProfile : Profile
         var startTime = new DateTimeOffset(receiveDateStartTime, TimeSpan.FromHours(7));
         var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
 
-        return (order.Status == OrderStatus.FailDelivery || order.Status == OrderStatus.Delivered) && order.Reports.Count == 0 && now >= startTime && now <= endTime.AddHours(12);
+        return (
+                   (order.Status == OrderStatus.FailDelivery
+                    && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
+                   || order.Status == OrderStatus.Delivered
+               )
+               && order.Reports.Count == 0 && now >= startTime && now <= endTime.AddHours(12);
     }
 
     private bool IsCancelAllowed(Order order)

@@ -22,4 +22,6 @@ public interface IShopRepository : IBaseRepository<Shop>
         int pageIndex, int pageSize);
 
     Task<Shop> GetShopInfoByIdForShop(long id);
+
+    Task<Shop> GetShopInfoForReOrderById(long id);
 }

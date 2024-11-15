@@ -59,6 +59,12 @@ public enum ResourceCode
     [Description("Email-Body-WithdrawalRequest")]
     EMAIL_BODY_WITHDRAWAL_REQUEST,
 
+    [Description("Email-SubjectLimitAvailableAmount")]
+    EMAIL_SUBJECT_LIMIT_AVAILABLE_AMOUNT,
+
+    [Description("Email-Body-LimitAvailableAmount")]
+    EMAIL_BODY_LIMIT_AVAILABLE_AMOUNT,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,
@@ -121,4 +127,7 @@ public enum ResourceCode
 
     [Description("Notification-DeliveryFail-AutoByBatch")]
     NOTIFICATION_DELIVERY_FAIL_AUTO_BY_BATCH,
+
+    [Description("Notification-AvailableAmountLessThanLimit")]
+    NOTIFICATION_AVAILABLE_AMOUNT_LESS_THAN_LIMIT,
 }

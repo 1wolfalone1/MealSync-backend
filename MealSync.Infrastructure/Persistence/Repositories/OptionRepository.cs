@@ -15,4 +15,18 @@ public class OptionRepository : BaseRepository<Option>, IOptionRepository
     {
         return DbSet.FirstOrDefaultAsync(o => o.Id == id && o.OptionGroupId == optionGroupId && o.Status == OptionStatus.Active);
     }
+
+    public async Task<bool> CheckAllOptionAndOptionGroupActiveByIds(List<long> ids)
+    {
+        var totalActiveOption = await DbSet.CountAsync(
+            o => ids.Contains(o.Id)
+                 && o.Status == OptionStatus.Active
+                 && o.OptionGroup.Status == OptionGroupStatus.Active).ConfigureAwait(false);
+        return totalActiveOption == ids.Count;
+    }
+
+    public Task<Option> GetIncludeOptionGroupById(long id)
+    {
+        return DbSet.Include(o => o.OptionGroup).FirstAsync(o => o.Id == id);
+    }
 }

@@ -7,4 +7,5 @@ public enum NotificationEntityTypes
     DeliveryPackage = 2,
     Report = 3,
     WithdrawalRequest = 4,
+    Wallet = 5,
 }

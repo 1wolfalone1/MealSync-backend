@@ -102,7 +102,7 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                             ReportingAmountBefore = systemTotalWallet.ReportingAmount,
                             Amount = payment.Amount,
                             Type = WalletTransactionType.Transfer,
-                            Description = $"Tiền VNPAY về ví tổng hệ thống {payment.Amount} VNĐ",
+                            Description = $"Tiền VNPAY về ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(payment.Amount)} VNĐ",
                         };
 
                         systemTotalWallet.AvailableAmount += payment.Amount;
@@ -114,9 +114,9 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                             AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
                             IncomingAmountBefore = systemTotalWallet.IncomingAmount,
                             ReportingAmountBefore = systemTotalWallet.ReportingAmount,
-                            Amount = payment.Order.ChargeFee,
+                            Amount = -payment.Order.ChargeFee,
                             Type = WalletTransactionType.Withdrawal,
-                            Description = $"Rút tiền từ ví tổng hệ thống {payment.Order.ChargeFee} VNĐ về ví hoa hồng",
+                            Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(payment.Order.ChargeFee)} VNĐ về ví hoa hồng",
                         };
 
                         systemTotalWallet.AvailableAmount -= payment.Order.ChargeFee;
@@ -130,7 +130,7 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                             ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
                             Amount = payment.Order.ChargeFee,
                             Type = WalletTransactionType.Transfer,
-                            Description = $"Tiền từ ví tổng hệ thống chuyển về ví hoa hồng {payment.Order.ChargeFee} VNĐ",
+                            Description = $"Tiền từ ví tổng hệ thống chuyển về ví hoa hồng {MoneyUtils.FormatMoneyWithDots(payment.Order.ChargeFee)} VNĐ",
                         };
 
                         systemCommissionWallet.AvailableAmount += payment.Order.ChargeFee;
