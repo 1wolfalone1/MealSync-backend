@@ -133,8 +133,16 @@ public class OrderController : BaseApiController
     }
 
     [HttpPut(Endpoints.SHOP_DELIVERED_ORDER)]
-    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
     public async Task<IActionResult> ShopChangeToDeliveredOrder([FromBody] ShopAndStaffDeliverySuccessCommand command, long id)
+    {
+        command.OrderRequestId = id;
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.SHOP_STAFF_DELIVERED_ORDER)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
+    public async Task<IActionResult> ShopAndStaffChangeToDeliveredOrder([FromBody] ShopAndStaffDeliverySuccessCommand command, long id)
     {
         command.OrderRequestId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
@@ -151,6 +159,13 @@ public class OrderController : BaseApiController
     [HttpPut(Endpoints.SHOP_DELIVERING_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
     public async Task<IActionResult> ShopChangeToDeliveringOrder([FromBody] ShopAndStaffDeliveringOrderCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.SHOP_STAFF_DELIVERING_ORDER)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
+    public async Task<IActionResult> ShopAndStaffChangeToDeliveringOrder([FromBody] ShopAndStaffDeliveringOrderCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
