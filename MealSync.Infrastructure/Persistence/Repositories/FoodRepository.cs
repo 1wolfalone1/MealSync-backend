@@ -174,7 +174,7 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
             .Include(f => f.FoodOperatingSlots)
             .ThenInclude(fog => fog.OperatingSlot)
             .Include(f => f.FoodOptionGroups
-            .Where(fog => fog.OptionGroup.Status != OptionGroupStatus.Delete))
+                .Where(fog => fog.OptionGroup.Status != OptionGroupStatus.Delete))
             .AsQueryable();
 
         if (statusMode == 1)
@@ -233,6 +233,14 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
         var totalActiveFood = await DbSet.CountAsync(f => ids.Contains(f.Id)
                                                           && f.Status == FoodStatus.Active
                                                           && f.FoodOperatingSlots.Any(fos => fos.OperatingSlotId == operatingSlotId))
+            .ConfigureAwait(false);
+        return totalActiveFood == ids.Count;
+    }
+
+    public async Task<bool> CheckActiveFoodByIds(List<long> ids)
+    {
+        var totalActiveFood = await DbSet.CountAsync(f => ids.Contains(f.Id)
+                                                          && f.Status == FoodStatus.Active)
             .ConfigureAwait(false);
         return totalActiveFood == ids.Count;
     }

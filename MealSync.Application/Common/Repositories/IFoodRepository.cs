@@ -33,4 +33,6 @@ public interface IFoodRepository : IBaseRepository<Food>
     Task<string?> GetFoodNameByIdAndShopId(long id, long shopId);
 
     Task<bool> CheckActiveFoodByIds(List<long> ids, long operatingSlotId);
+
+    Task<bool> CheckActiveFoodByIds(List<long> ids);
 }
