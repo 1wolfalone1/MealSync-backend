@@ -112,28 +112,28 @@ public class ShopController : BaseApiController
     }
 
     [HttpPut(Endpoints.SEND_VERIFY_UPDATE_SHOP_EMAIL)]
-    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
     public async Task<IActionResult> SendVerifyUpdateEmail([FromBody] SendVerifyUpdateEmailCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
     [HttpPut(Endpoints.VERIFY_OLD_EMAIL)]
-    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
     public async Task<IActionResult> VerifyOldEmail([FromBody] VerifyAccountForUpdateCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
     [HttpPut(Endpoints.UPDATE_SHOP_EMAIL)]
-    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
     public async Task<IActionResult> UpdateEmail([FromBody] UpdateEmailCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
     [HttpPut(Endpoints.UPDATE_SHOP_PASSWORD)]
-    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
     public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
@@ -154,7 +154,7 @@ public class ShopController : BaseApiController
     }
 
     [HttpPut(Endpoints.UPDATE_SHOP_AVATAR)]
-    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
     public async Task<IActionResult> UpdateShopAvatar([FromForm] UpdateAvatarCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
