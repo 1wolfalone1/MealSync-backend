@@ -75,11 +75,11 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 {
                     Code = MessageCode.W_ORDER_ASSIGN_EARLY.GetDescription(),
                     Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_ASSIGN_EARLY.GetDescription(),
-                        new string[] { order.Id.ToString(), TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), $"{diffDate.Hours}:{diffDate.Minutes}" }),
+                        new string[] { order.Id.ToString(), TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime), $"{diffDate.Hours}h{diffDate.Minutes}p" }),
                 });
             }
 
-            if (order.DeliveryPackageId != null)
+            if (order.DeliveryPackageId != null && order.Status == OrderStatus.Preparing)
             {
                 return Result.Warning(new
                 {
@@ -88,7 +88,18 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 });
             }
 
-            // Todo: Warning order in status delivering do you sure change to other staff
+            // Warning order in status delivering do you sure change to other staff
+            var deliveryPackage = _deliveryPackageRepository.GetById(order.DeliveryPackageId);
+            if (order.Status == OrderStatus.Delivering && (request.ShopDeliveryStaffId.HasValue && deliveryPackage.ShopDeliveryStaffId != request.ShopDeliveryStaffId
+                                                           || !request.ShopDeliveryStaffId.HasValue && _currentPrincipalService.CurrentPrincipalId == deliveryPackage.ShopId))
+            {
+                return Result.Warning(new
+                {
+                    Code = MessageCode.W_ORDER_DELIVERING_RE_ASSIGN.GetDescription(),
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_DELIVERING_RE_ASSIGN.GetDescription(),
+                        new string[] { order.Id.ToString() }),
+                });
+            }
         }
 
         try
@@ -247,7 +258,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
         if (order == default)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.OrderId }, HttpStatusCode.NotFound);
 
-        if (order.Status != OrderStatus.Preparing)
+        if (order.Status != OrderStatus.Preparing && order.Status != OrderStatus.Delivering)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.OrderId });
 
         if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)

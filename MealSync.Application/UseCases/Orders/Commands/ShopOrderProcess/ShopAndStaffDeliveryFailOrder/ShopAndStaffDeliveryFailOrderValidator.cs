@@ -2,11 +2,11 @@
 using MealSync.Application.Common.Utils;
 using MealSync.Domain.Entities;
 
-namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveryFailOrder;
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveryFailOrder;
 
-public class ShopDeliveryFailOrderValidator : AbstractValidator<ShopDeliveryFailOrderCommand>
+public class ShopAndStaffDeliveryFailOrderValidator : AbstractValidator<ShopAndStaffDeliveryFailOrderCommand>
 {
-    public ShopDeliveryFailOrderValidator()
+    public ShopAndStaffDeliveryFailOrderValidator()
     {
         RuleFor(x => x.OrderId)
             .NotEmpty()

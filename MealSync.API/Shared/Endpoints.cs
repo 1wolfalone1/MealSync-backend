@@ -135,7 +135,7 @@ public static class Endpoints
     public const string SHOP_PREPARING_ORDER = "shop-owner/order/{id:long}/preparing";
     public const string SHOP_ASSIGN_ORDER = "shop-owner/order/{id:long}/assign";
     public const string SHOP_DELIVERED_ORDER = "shop-owner/order/{id:long}/delivered";
-    public const string SHOP_DELIVERED_FAIL_ORDER = "shop-owner/order/{id:long}/delivery-fail";
+    public const string SHOP_DELIVERED_FAIL_ORDER = "shop-owner-staff/order/{id:long}/delivery-fail";
     public const string SHOP_DELIVERING_ORDER = "shop-owner/order/delivering";
     public const string SHOW_QR_FOR_CONFIRM = "customer/order/{id:long}/qr/received";
     public const string COMPLETED_ORDER = "customer/order/confirm/complete";
