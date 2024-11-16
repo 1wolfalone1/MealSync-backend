@@ -33,7 +33,7 @@ builder.Services.ConfigureInfrastuctureServices(builder.Configuration);
 builder.Services.ConfigureApplicationServices(builder.Configuration);
 builder.Services.ConfigureQuartzServices(builder.Configuration);
 
-
+builder.Configuration.AddEnvironmentVariables();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
