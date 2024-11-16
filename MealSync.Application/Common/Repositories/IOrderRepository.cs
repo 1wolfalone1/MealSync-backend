@@ -22,7 +22,7 @@ public interface IOrderRepository : IBaseRepository<Order>
 
     Task<ShopStatisticDto> GetShopOrderStatistic(long shopId, DateTime startDate, DateTime endDate);
 
-    List<Order> GetListOrderOnStatusDeliveringButOverTimeFrame(int hoursToMarkDeliveryFail, DateTime currentDate, int currentHours);
+    List<Order> GetListOrderOnStatusDeliveringButOverTimeFrame(int hoursToMarkDeliveryFail, DateTime currentDate);
 
     Task<Order?> GetByIdAndCustomerIdForReorder(long id, long customerId);
 }

@@ -117,13 +117,11 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                     if (order.Status == OrderStatus.Pending)
                     {
                         await RejectOrderAsync(order).ConfigureAwait(false);
-                        await RefundOrderAsync(order).ConfigureAwait(false);
                     }
 
                     if (order.Status == OrderStatus.Confirmed)
                     {
                         await CancelOrderConfirmedAsync(order).ConfigureAwait(false);
-                        await RefundOrderAsync(order).ConfigureAwait(false);
 
                         // Check see is shop cancel order late than 1 hour near time frame
                         var currentTime = TimeFrameUtils.GetCurrentDateInUTC7();
@@ -230,6 +228,8 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
     private async Task RejectOrderAsync(Order order)
     {
         order.Status = OrderStatus.Rejected;
+        var isRefund = await RefundOrderAsync(order).ConfigureAwait(false);
+        order.IsRefund = isRefund;
         _orderRepository.Update(order);
 
         // Notification for customer order rejected
@@ -241,6 +241,8 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
     private async Task CancelOrderConfirmedAsync(Order order)
     {
         order.Status = OrderStatus.Cancelled;
+        var isRefund = await RefundOrderAsync(order).ConfigureAwait(false);
+        order.IsRefund = isRefund;
         _orderRepository.Update(order);
 
         // Notification for customer order cancelled

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
@@ -9,6 +10,7 @@ using MealSync.Application.Shared;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -74,6 +76,11 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
                 order.Status = OrderStatus.Delivering;
             }
 
+            // Update delivery package status
+            var dp = _deliveryPackageRepository.GetByOrderId(request.Ids.First());
+            dp.Status = DeliveryPackageStatus.OnGoing;
+
+            _deliveryPackageRepository.Update(dp);
             _orderRepository.UpdateRange(orders);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
@@ -108,6 +115,7 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
     {
         var account = _currentAccountService.GetCurrentAccount();
         long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
+        var listOrder = new List<Order>();
         foreach (var id in request.Ids)
         {
             var order = _orderRepository.Get(o => o.Id == id && o.ShopId == shopId).SingleOrDefault();
@@ -119,6 +127,19 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
 
             if (order.DeliveryPackageId == default)
                 throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_ASSIGN_YET.GetDescription(), new object[] { id });
+
+            listOrder.Add(order);
+        }
+
+        if (listOrder.Count > 0)
+        {
+            var firstOrder = listOrder.First();
+            if (listOrder.Any(o => o.DeliveryPackageId != firstOrder.DeliveryPackageId))
+            {
+                var listOrderDiffIds = listOrder.Where(o => o.DeliveryPackageId != firstOrder.DeliveryPackageId).Select(o => o.Id).ToList();
+                var ids = string.Join(", ", listOrderDiffIds);
+                throw new InvalidBusinessException(MessageCode.E_ORDER_IN_OTHER_PACKAGE.GetDescription(), new object[] { ids });
+            }
         }
     }
 
