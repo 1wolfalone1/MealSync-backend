@@ -18,11 +18,16 @@ public static class ConfigQuartz
                 .AddTrigger(trigger =>
                     trigger.ForJob(jobKey)
                         .WithSimpleSchedule(schedule =>
-                            schedule.WithIntervalInMinutes(1).RepeatForever()));
+                            schedule.WithIntervalInMinutes(10).RepeatForever()));
 
             options.AddJob<HourlyBatchMarkDeliveryFailJob>(JobKey.Create(nameof(HourlyBatchMarkDeliveryFailJob)))
                 .AddTrigger(trigger => trigger.ForJob(JobKey.Create(nameof(HourlyBatchMarkDeliveryFailJob)))
-                    .WithCronSchedule("0 0,30 * * * ?"));
+                    .StartNow()
+                    .WithCronSchedule(
+                        "0 0 0/2 * * ?", // Run at the start of every 2 hours
+                        x => x.InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")) // Set timezone to UTC+7
+                    )
+                );
         });
 
         services.AddQuartzHostedService();

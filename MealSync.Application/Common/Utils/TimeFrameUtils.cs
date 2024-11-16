@@ -114,6 +114,25 @@ public class TimeFrameUtils
         return (startDateTime, endDateTime);
     }
 
+    public static DateTime GetEndTimeToDateTime(DateTime intendedReceiveDate, int endTime)
+    {
+        if (endTime == 2400)
+        {
+            intendedReceiveDate = intendedReceiveDate.AddDays(1);
+            endTime = 0;
+        }
+
+        var endDateTime = new DateTime(
+            intendedReceiveDate.Year,
+            intendedReceiveDate.Month,
+            intendedReceiveDate.Day,
+            endTime / 100,
+            endTime % 100,
+            0);
+
+        return endDateTime;
+    }
+
     public static (DateTime IntendedReceiveDate, int StartTime, int EndTime) OrderTimeFrameForBatchProcess(DateTimeOffset currentTime, int hoursBack)
     {
         // Round the current time to the nearest 30-minute frame

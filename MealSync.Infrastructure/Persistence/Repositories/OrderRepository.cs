@@ -330,11 +330,15 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         };
     }
 
-    public List<Order> GetListOrderOnStatusDeliveringButOverTimeFrame(int hoursToMarkDeliveryFail, DateTime currentDate, int currentHours)
+    public List<Order> GetListOrderOnStatusDeliveringButOverTimeFrame(int hoursToMarkDeliveryFail, DateTime currentDateTime)
     {
         var result = DbSet.Where(o => o.Status == OrderStatus.Delivering &&
-                                      o.IntendedReceiveDate.Date == currentDate.Date
-                                      && (o.EndTime + hoursToMarkDeliveryFail) <= currentHours).ToList();
+                                      (
+                                          (o.EndTime == 2400
+                                              ? o.IntendedReceiveDate.AddDays(1)
+                                              : o.IntendedReceiveDate).AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
+                                      ).AddHours(OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON) <= currentDateTime)
+            .ToList();
         return result;
     }
 

@@ -157,4 +157,9 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
 
         return DbSet.Any(dp => dp.Id == deliveryPackageId && dp.ShopDeliveryStaffId == shipperId);
     }
+
+    public DeliveryPackage GetByOrderId(long id)
+    {
+        return DbSet.Where(dp => dp.Orders.Any(o => o.Id == id)).FirstOrDefault();
+    }
 }
