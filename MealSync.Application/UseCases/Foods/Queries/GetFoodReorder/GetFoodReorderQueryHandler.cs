@@ -6,6 +6,7 @@ using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.Shops.Models;
+using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 
@@ -22,13 +23,15 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
     private readonly IOptionRepository _optionRepository;
     private readonly IOperatingSlotRepository _operatingSlotRepository;
     private readonly IFoodOptionGroupRepository _foodOptionGroupRepository;
+    private readonly IOptionGroupRepository _optionGroupRepository;
     private readonly IMapper _mapper;
 
     public GetFoodReorderQueryHandler(
         ICurrentPrincipalService currentPrincipalService, IOrderRepository orderRepository,
         IShopDormitoryRepository shopDormitoryRepository, IBuildingRepository buildingRepository,
         IShopRepository shopRepository, IFoodRepository foodRepository, IOptionRepository optionRepository,
-        IOperatingSlotRepository operatingSlotRepository, IMapper mapper, IFoodOptionGroupRepository foodOptionGroupRepository)
+        IOperatingSlotRepository operatingSlotRepository, IMapper mapper,
+        IFoodOptionGroupRepository foodOptionGroupRepository, IOptionGroupRepository optionGroupRepository)
     {
         _currentPrincipalService = currentPrincipalService;
         _orderRepository = orderRepository;
@@ -40,13 +43,19 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
         _operatingSlotRepository = operatingSlotRepository;
         _mapper = mapper;
         _foodOptionGroupRepository = foodOptionGroupRepository;
+        _optionGroupRepository = optionGroupRepository;
     }
 
     public async Task<Result<Result>> Handle(GetFoodReorderQuery request, CancellationToken cancellationToken)
     {
         var customerId = _currentPrincipalService.CurrentPrincipalId!.Value;
         var order = await _orderRepository.GetByIdAndCustomerIdForReorder(request.OrderId, customerId).ConfigureAwait(false);
-        var buildingOrder = _buildingRepository.GetById(request.BuildingOrderId);
+        Building? buildingOrder = default;
+        if (!request.IsGetShopInfo && request.BuildingOrderId.HasValue)
+        {
+            buildingOrder = _buildingRepository.GetById(request.BuildingOrderId);
+        }
+
         var foodReOrderResponse = new FoodReOrderResponse();
         if (order == default)
         {
@@ -54,7 +63,12 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
         }
         else
         {
-            var operatingSlot = await _operatingSlotRepository.GetActiveByIdAndShopId(request.OperatingSlotId, order.ShopId).ConfigureAwait(false);
+            OperatingSlot? operatingSlot = default;
+            if (!request.IsGetShopInfo && request.OperatingSlotId.HasValue)
+            {
+                operatingSlot = await _operatingSlotRepository.GetActiveByIdAndShopId(request.OperatingSlotId.Value, order.ShopId).ConfigureAwait(false);
+            }
+
             var shop = await _shopRepository.GetShopInfoForReOrderById(order.ShopId).ConfigureAwait(false)!;
             if (shop.Status != ShopStatus.Active)
             {
@@ -65,7 +79,7 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                 foodReOrderResponse.Foods = default;
                 return Result.Success(foodReOrderResponse);
             }
-            else if (operatingSlot == default)
+            else if (!request.IsGetShopInfo && operatingSlot == default)
             {
                 foodReOrderResponse.IsAllowReOrder = false;
                 foodReOrderResponse.MessageNotAllow = "Cửa hàng đã không còn bán trong khung giờ này.";
@@ -74,7 +88,7 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                 foodReOrderResponse.Foods = default;
                 return Result.Success(foodReOrderResponse);
             }
-            else if (!request.IsOrderForNextDay && (shop.IsReceivingOrderPaused || operatingSlot.IsReceivingOrderPaused))
+            else if (!request.IsGetShopInfo && !request.IsOrderForNextDay!.Value && (shop.IsReceivingOrderPaused || operatingSlot.IsReceivingOrderPaused))
             {
                 foodReOrderResponse.IsAllowReOrder = false;
                 foodReOrderResponse.MessageNotAllow = "Cửa hàng đã ngưng nhận đơn cho ngày hôm nay.";
@@ -83,7 +97,7 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                 foodReOrderResponse.Foods = default;
                 return Result.Success(foodReOrderResponse);
             }
-            else if (request.IsOrderForNextDay && !shop.IsAcceptingOrderNextDay)
+            else if (!request.IsGetShopInfo && request.IsOrderForNextDay!.Value && !shop.IsAcceptingOrderNextDay)
             {
                 foodReOrderResponse.IsAllowReOrder = false;
                 foodReOrderResponse.MessageNotAllow = "Cửa hàng không nhận đặt hàng cho ngày mai.";
@@ -92,7 +106,7 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                 foodReOrderResponse.Foods = default;
                 return Result.Success(foodReOrderResponse);
             }
-            else if (!await _shopDormitoryRepository.CheckExistedByShopIdAndDormitoryId(order.ShopId, buildingOrder.DormitoryId).ConfigureAwait(false))
+            else if (!request.IsGetShopInfo && buildingOrder != default && !await _shopDormitoryRepository.CheckExistedByShopIdAndDormitoryId(order.ShopId, buildingOrder.DormitoryId).ConfigureAwait(false))
             {
                 foodReOrderResponse.IsAllowReOrder = false;
                 foodReOrderResponse.MessageNotAllow = $"Cửa hàng không còn nhận đặt hàng tại {buildingOrder.Name}.";
@@ -104,6 +118,7 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
             else
             {
                 var isNotAllowReorder = false;
+                bool isAllFoodActive;
                 var foodIds = new List<long>();
                 var optionIds = new List<long>();
 
@@ -113,7 +128,15 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                     optionIds.AddRange(orderDetail.OrderDetailOptions.Select(odo => odo.OptionId));
                 }
 
-                var isAllFoodActive = await _foodRepository.CheckActiveFoodByIds(foodIds, operatingSlot.Id).ConfigureAwait(false);
+                if (!request.IsGetShopInfo)
+                {
+                    isAllFoodActive = await _foodRepository.CheckActiveFoodByIds(foodIds, operatingSlot!.Id).ConfigureAwait(false);
+                }
+                else
+                {
+                    isAllFoodActive = await _foodRepository.CheckActiveFoodByIds(foodIds).ConfigureAwait(false);
+                }
+
                 var isAllOptionActive = await _optionRepository.CheckAllOptionAndOptionGroupActiveByIds(optionIds).ConfigureAwait(false);
 
                 if (isAllFoodActive && isAllOptionActive)
@@ -204,6 +227,22 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                             break;
                         }
 
+                        // Check min choice, max choice
+                        foreach (var optionGroup in optionsGroupCheckbox)
+                        {
+                            var isQualifiedMinMaxChoice = await _optionGroupRepository.CheckMinMaxChoice(optionGroup.Id, optionGroup.Options.Count).ConfigureAwait(false);
+                            if (!isQualifiedMinMaxChoice)
+                            {
+                                isNotAllowReorder = true;
+                                break;
+                            }
+                        }
+
+                        if (isNotAllowReorder)
+                        {
+                            break;
+                        }
+
                         food.OptionGroupCheckbox = optionsGroupCheckbox;
                         food.OptionGroupRadio = optionsGroupRadio;
                         foods.Add(food);
@@ -220,7 +259,15 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                     }
                     else
                     {
-                        foodReOrderResponse.Foods = foods;
+                        if (request.IsGetShopInfo)
+                        {
+                            foodReOrderResponse.Note = default;
+                            foodReOrderResponse.Foods = default;
+                        }
+                        else
+                        {
+                            foodReOrderResponse.Foods = foods;
+                        }
 
                         var shopInfoReOrderResponse = new FoodReOrderResponse.ShopInfoReOrderResponse();
                         var operatingSlotReOrderResponses = new List<FoodReOrderResponse.OperatingSlotReOrderResponse>();

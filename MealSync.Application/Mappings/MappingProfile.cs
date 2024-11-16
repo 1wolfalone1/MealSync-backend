@@ -133,7 +133,7 @@ public class MappingProfile : Profile
             .ForMember(
                 dest => dest.IntendedReceiveDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeMilliseconds())
             )
             .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.ToUnixTimeMilliseconds() : default))
@@ -164,7 +164,7 @@ public class MappingProfile : Profile
             .ForMember(
                 dest => dest.IntendedReceiveDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeMilliseconds())
             )
             .ForMember(dest => dest.IsOrderNextDay, opt => opt.MapFrom(src => src.OrderDate.Day != src.IntendedReceiveDate.Day))
             .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.ToUnixTimeMilliseconds() : default))
@@ -209,7 +209,7 @@ public class MappingProfile : Profile
             .ForMember(
                 dest => dest.IntendedReceiveDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeMilliseconds())
             )
             // .ForMember(dest => dest.TotalOrderDetail, opt => opt.MapFrom(src => src.OrderDetails.Count))
             .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
@@ -219,12 +219,12 @@ public class MappingProfile : Profile
             .ForMember(
                 dest => dest.OrderDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.OrderDate, TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.OrderDate, TimeSpan.Zero).ToUnixTimeMilliseconds())
             )
             .ForMember(
                 dest => dest.IntendedReceiveDate,
                 opt => opt.MapFrom(src =>
-                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeSeconds())
+                    new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeMilliseconds())
             );
 
         CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
