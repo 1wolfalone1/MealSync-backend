@@ -74,6 +74,11 @@ public class ShopDeliveryStaffRepository : BaseRepository<ShopDeliveryStaff>, IS
             .FirstOrDefaultAsync(sds => sds.Id == id && sds.ShopId == shopId && sds.Account.Status != AccountStatus.Deleted);
     }
 
+    public Task<ShopDeliveryStaff> GetByIdIncludeAccount(long id)
+    {
+        return DbSet.Include(sds => sds.Account).FirstAsync(sds => sds.Id == id);
+    }
+
     private static string EscapeLikeParameter(string input)
     {
         return input

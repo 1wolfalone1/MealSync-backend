@@ -16,4 +16,6 @@ public interface IOptionGroupRepository : IBaseRepository<OptionGroup>
     Task<OptionGroup?> GetByIdAndOptionIds(long id, long[] optionIds);
 
     List<OptionGroup> GetOptionGroupsWithFoodLinkStatus(long shopId, long foodId, int filterMode);
+
+    Task<bool> CheckMinMaxChoice(long id, int totalOption);
 }

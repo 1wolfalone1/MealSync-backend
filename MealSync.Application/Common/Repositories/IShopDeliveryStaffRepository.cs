@@ -11,4 +11,6 @@ public interface IShopDeliveryStaffRepository : IBaseRepository<ShopDeliveryStaf
         long shopId, string? searchValue, ShopDeliveryStaffStatus? status, int pageIndex, int pageSize);
 
     Task<ShopDeliveryStaff?> GetByIdAndShopId(long id, long shopId);
+
+    Task<ShopDeliveryStaff> GetByIdIncludeAccount(long id);
 }
