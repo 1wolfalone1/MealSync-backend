@@ -91,7 +91,7 @@ public class OrderController : BaseApiController
     }
 
     [HttpGet(Endpoints.GET_ORDER_DETAIL_FOR_SHOP_AND_STAFF)]
-    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
     public async Task<IActionResult> GetOrderDetailForShopAndStaff(long id)
     {
         return HandleResult(await Mediator.Send(new OrderDetailForShopQuery()
