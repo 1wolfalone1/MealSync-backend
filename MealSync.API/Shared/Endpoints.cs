@@ -146,6 +146,7 @@ public static class Endpoints
     public const string COMPLETED_ORDER = "customer/order/confirm/complete";
     public const string GET_REPAYMENT_LINK = "customer/order/{id:long}/re-payment";
     public const string SHOP_DELIVERED_INFOR_EVIDENCE = "shop-owner/order/{id:long}/delivery-infor";
+    public const string SHOP_AND_STAFF_DELIVERED_INFOR_EVIDENCE = "shop-owner-staff/order/{id:long}/delivery-infor";
     public const string RE_ORDER = "customer/re-order/food";
 
     // Report

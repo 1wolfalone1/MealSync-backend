@@ -196,7 +196,17 @@ public class OrderController : BaseApiController
 
     [HttpGet(Endpoints.SHOP_DELIVERED_INFOR_EVIDENCE)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
-    public async Task<IActionResult> ShopChangeToDeliveredOrder(long id)
+    public async Task<IActionResult> ShopChangeGetDeliveryInfor(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetDeliveryInfoQuery()
+        {
+            OrderId = id,
+        }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.SHOP_AND_STAFF_DELIVERED_INFOR_EVIDENCE)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
+    public async Task<IActionResult> ShopAndStaffGetDeliveryInfor(long id)
     {
         return HandleResult(await Mediator.Send(new GetDeliveryInfoQuery()
         {
