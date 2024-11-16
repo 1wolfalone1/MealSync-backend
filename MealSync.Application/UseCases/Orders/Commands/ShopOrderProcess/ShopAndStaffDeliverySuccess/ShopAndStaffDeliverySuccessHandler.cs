@@ -67,7 +67,9 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         var order = _orderRepository.Get(o => o.Id == request.OrderId)
             .Include(o => o.Payments)
             .Include(o => o.DeliveryPackage).Single();
-        var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
+        var account = _currentAccountService.GetCurrentAccount();
+        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
+        var shop = _shopRepository.GetById(shopId);
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
