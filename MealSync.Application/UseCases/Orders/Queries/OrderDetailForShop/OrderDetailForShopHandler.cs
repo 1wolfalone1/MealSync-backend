@@ -16,12 +16,16 @@ public class OrderDetailForShopHandler : IQueryHandler<OrderDetailForShopQuery, 
     private readonly IDapperService _dapperService;
     private readonly IOrderRepository _orderRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
+    private readonly ICurrentAccountService _currentAccountService;
+    private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
 
-    public OrderDetailForShopHandler(IDapperService dapperService, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService)
+    public OrderDetailForShopHandler(IDapperService dapperService, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
     {
         _dapperService = dapperService;
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
+        _currentAccountService = currentAccountService;
+        _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
     }
 
     public async Task<Result<Result>> Handle(OrderDetailForShopQuery request, CancellationToken cancellationToken)
@@ -76,7 +80,11 @@ public class OrderDetailForShopHandler : IQueryHandler<OrderDetailForShopQuery, 
 
     private void Validate(OrderDetailForShopQuery request)
     {
-        if (_orderRepository.Get(o => o.Id == request.Id && o.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault() == default)
+        var account = _currentAccountService.GetCurrentAccount();
+        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
+        var order = _orderRepository
+            .Get(o => o.Id == request.Id && o.ShopId == shopId).SingleOrDefault();
+        if (order == default)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.Id }, HttpStatusCode.NotFound);
     }
 }
