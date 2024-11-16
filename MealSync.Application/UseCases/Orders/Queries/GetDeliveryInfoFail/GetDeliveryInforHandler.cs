@@ -16,12 +16,16 @@ public class GetDeliveryInforHandler : IQueryHandler<GetDeliveryInfoQuery, Resul
     private readonly IMapper _mapper;
     private readonly IOrderRepository _orderRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
+    private readonly ICurrentAccountService _currentAccountService;
+    private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
 
-    public GetDeliveryInforHandler(IMapper mapper, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService)
+    public GetDeliveryInforHandler(IMapper mapper, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
     {
         _mapper = mapper;
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
+        _currentAccountService = currentAccountService;
+        _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
     }
 
     public async Task<Result<Result>> Handle(GetDeliveryInfoQuery request, CancellationToken cancellationToken)
@@ -38,7 +42,9 @@ public class GetDeliveryInforHandler : IQueryHandler<GetDeliveryInfoQuery, Resul
 
     private void Validate(GetDeliveryInfoQuery request)
     {
-        if (_orderRepository.Get(o => o.Id == request.OrderId && o.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault() == default)
+        var account = _currentAccountService.GetCurrentAccount();
+        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
+        if (_orderRepository.Get(o => o.Id == request.OrderId && o.ShopId == shopId).SingleOrDefault() == default)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.OrderId }, HttpStatusCode.NotFound);
     }
 }
