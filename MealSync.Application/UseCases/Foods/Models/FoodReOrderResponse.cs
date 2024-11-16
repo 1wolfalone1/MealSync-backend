@@ -6,7 +6,7 @@ public class FoodReOrderResponse
 
     public string? MessageNotAllow { get; set; }
 
-    public ShopInfoReOrderResponse ShopInfo { get; set; }
+    public ShopInfoReOrderResponse? ShopInfo { get; set; }
 
     public string? Note { get; set; }
 

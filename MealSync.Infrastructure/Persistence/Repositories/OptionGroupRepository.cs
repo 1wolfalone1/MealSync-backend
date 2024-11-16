@@ -99,4 +99,9 @@ public class OptionGroupRepository : BaseRepository<OptionGroup>, IOptionGroupRe
 
         return query.OrderBy(fog => fog.UpdatedDate).ToList();
     }
+
+    public Task<bool> CheckMinMaxChoice(long id, int totalOption)
+    {
+        return DbSet.AnyAsync(og => og.Id == id && totalOption >= og.MinChoices && totalOption <= og.MaxChoices);
+    }
 }

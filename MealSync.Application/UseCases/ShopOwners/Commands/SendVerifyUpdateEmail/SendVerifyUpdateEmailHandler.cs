@@ -74,7 +74,7 @@ public class SendVerifyUpdateEmailHandler : ICommandHandler<SendVerifyUpdateEmai
         _cacheService.SetCacheResponseAsync(
             GenerateCacheKey(isVerifyOldEmail ? VerificationCodeTypes.VerifyOldEmail : VerificationCodeTypes.UpdateEmail, isVerifyOldEmail ? oldEmail : newEmail),
             code,
-            TimeSpan.FromSeconds(RedisConstant.TIME_VERIFY_CODE_LIVE * 10));
+            TimeSpan.FromSeconds(RedisConstant.TIME_VERIFY_CODE_LIVE));
 
         var isSendMail = isVerifyOldEmail ? _emailService.SendVerificationCodeUpdateEmail(oldEmail, code) : _emailService.SendVerificationCodeOldEmail(newEmail, code);
         if (!isSendMail)

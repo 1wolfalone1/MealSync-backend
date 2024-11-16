@@ -3,10 +3,12 @@ using MealSync.API.Shared;
 using MealSync.Application.UseCases.ShopDeliveryStaffs.Commands.Create;
 using MealSync.Application.UseCases.ShopDeliveryStaffs.Commands.Delete;
 using MealSync.Application.UseCases.ShopDeliveryStaffs.Commands.UpdateInfo;
+using MealSync.Application.UseCases.ShopDeliveryStaffs.Commands.UpdateInfoForStaff;
 using MealSync.Application.UseCases.ShopDeliveryStaffs.Commands.UpdateStatus;
 using MealSync.Application.UseCases.ShopDeliveryStaffs.Queries.GetDetailById;
 using MealSync.Application.UseCases.ShopDeliveryStaffs.Queries.GetListShopStaffForShop;
 using MealSync.Application.UseCases.ShopDeliveryStaffs.Queries.GetStaffForManage;
+using MealSync.Application.UseCases.ShopDeliveryStaffs.Queries.GetStaffInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,5 +64,19 @@ public class ShopDeliveryStaffController : BaseApiController
     public async Task<IActionResult> DeleteShopDeliveryStaff(DeleteDeliveryStaffCommand request)
     {
         return HandleResult(await Mediator.Send(request));
+    }
+
+    [HttpGet(Endpoints.GET_SHOP_STAFF_INFO)]
+    [Authorize(Roles = $"{IdentityConst.ShopDeliveryClaimName}")]
+    public async Task<IActionResult> GetStaffInfo()
+    {
+        return HandleResult(await Mediator.Send(new GetStaffInfoQuery()).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_SHOP_STAFF_INFO)]
+    [Authorize(Roles = $"{IdentityConst.ShopDeliveryClaimName}")]
+    public async Task<IActionResult> UpdateStaffInfo(UpdateInfoForStaffCommand request)
+    {
+        return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
     }
 }
