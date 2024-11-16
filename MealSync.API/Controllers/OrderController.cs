@@ -90,6 +90,16 @@ public class OrderController : BaseApiController
         }).ConfigureAwait(false));
     }
 
+    [HttpGet(Endpoints.GET_ORDER_DETAIL_FOR_SHOP_AND_STAFF)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetOrderDetailForShopAndStaff(long id)
+    {
+        return HandleResult(await Mediator.Send(new OrderDetailForShopQuery()
+        {
+            Id = id,
+        }).ConfigureAwait(false));
+    }
+
     [HttpPut(Endpoints.SHOP_REJECT_ORDER)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     public async Task<IActionResult> ShopRejectOrder([FromBody] ShopRejectOrderCommand command, long id)
