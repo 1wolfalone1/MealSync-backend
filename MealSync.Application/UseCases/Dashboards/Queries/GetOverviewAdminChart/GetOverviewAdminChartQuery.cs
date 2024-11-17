@@ -1,9 +1,9 @@
 ﻿using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Shared;
 
-namespace MealSync.Application.UseCases.Orders.Queries.Dashboards.GetOrderChartForAdmin;
+namespace MealSync.Application.UseCases.Dashboards.Queries.GetOverviewAdminChart;
 
-public class GetOrderChartForAdminQuery : IQuery<Result>
+public class GetOverviewAdminChartQuery : IQuery<Result>
 {
     public DateTime DateFrom { get; set; }
 

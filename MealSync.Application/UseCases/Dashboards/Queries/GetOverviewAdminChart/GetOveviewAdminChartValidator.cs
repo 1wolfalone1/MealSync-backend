@@ -1,11 +1,12 @@
 ﻿using FluentValidation;
 using MealSync.Application.Common.Utils;
+using MealSync.Application.Shared;
 
-namespace MealSync.Application.UseCases.Orders.Queries.Dashboards.GetOrderChartForAdmin;
+namespace MealSync.Application.UseCases.Dashboards.Queries.GetOverviewAdminChart;
 
-public class GetOrderChartForAdminValidator : AbstractValidator<GetOrderChartForAdminQuery>
+public class GetOveviewAdminChartValidator : AbstractValidator<GetOverviewAdminChartQuery>
 {
-    public GetOrderChartForAdminValidator()
+    public GetOveviewAdminChartValidator()
     {
         RuleFor(x => x.DateFrom)
             .NotEmpty()
