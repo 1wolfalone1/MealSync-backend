@@ -43,4 +43,5 @@ public enum QueryName
     GetDeliveryPackackageStasisticById,
     GetPointOfOrderAdminChart,
     GetOverviewAdminChart,
+    GetRevenueAdminChart,
 }
