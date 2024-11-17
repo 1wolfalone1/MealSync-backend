@@ -194,4 +194,7 @@ public static class Endpoints
     public const string WITHDRAWAL_REQUEST_DETAIL = "shop-owner/withdrawal/{id:long}";
     public const string WITHDRAWAL_REQUEST_CANCEL = "shop-owner/withdrawal/cancel";
     public const string GET_WALLET_TRANSACTION = "shop-owner/walet-transaction";
+
+    // Dashboard
+    public const string ADMIN_ORDER_CHART = "admin/dashboard/order";
 }

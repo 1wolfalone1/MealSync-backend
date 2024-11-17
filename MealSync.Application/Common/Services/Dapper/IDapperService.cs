@@ -41,4 +41,5 @@ public enum QueryName
     GetOrderStatisticsInTodaySummary,
     GetOrderStatisticsInMonthSummary,
     GetDeliveryPackackageStasisticById,
+    GetPointOfOrderAdminChart,
 }
