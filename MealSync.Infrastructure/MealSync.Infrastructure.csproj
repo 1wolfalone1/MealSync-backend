@@ -88,6 +88,8 @@
         <EmbeddedResource Include="Common\Queries\GetDeliveryPackackageStasisticById.sql" />
         <None Remove="Common\Queries\GetPointOfOrderAdminChart.sql" />
         <EmbeddedResource Include="Common\Queries\GetPointOfOrderAdminChart.sql" />
+        <None Remove="Common\Queries\GetOverviewAdminChart.sql" />
+        <EmbeddedResource Include="Common\Queries\GetOverviewAdminChart.sql" />
     </ItemGroup>
 
 </Project>
