@@ -30,15 +30,13 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository
             && p.PaymentMethods == PaymentMethods.VnPay);
     }
 
-    public Task<List<Payment>> GetPendingPaymentOrder(DateTime intendedReceiveDate, int startTime, int endTime)
+    public Task<List<Payment>> GetPendingPaymentOrder(DateTime intendedReceiveDate, int endTime)
     {
         return DbSet.Include(p => p.Order).Where(p =>
             p.PaymentMethods == PaymentMethods.VnPay
             && p.Type == PaymentTypes.Payment
-            && p.Status == PaymentStatus.Pending
-            && p.Order.IntendedReceiveDate == intendedReceiveDate
-            && p.Order.StartTime == startTime
-            && p.Order.EndTime == endTime
+            && (p.Status == PaymentStatus.Pending || p.Status == PaymentStatus.PaidFail)
+            && ((p.Order.IntendedReceiveDate == intendedReceiveDate && p.Order.EndTime <= endTime) || (p.Order.IntendedReceiveDate < intendedReceiveDate))
             && p.Order.Status == OrderStatus.PendingPayment
         ).ToListAsync();
     }

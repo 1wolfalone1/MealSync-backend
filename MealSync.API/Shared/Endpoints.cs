@@ -197,4 +197,8 @@ public static class Endpoints
 
     // Dashboard
     public const string ADMIN_ORDER_CHART = "admin/dashboard/order";
+
+    // Commission Config
+    public const string GET_COMMISSION_CONFIG = "admin/commission-config";
+    public const string UPDATE_COMMISSION_CONFIG = "admin/commission-config/update";
 }

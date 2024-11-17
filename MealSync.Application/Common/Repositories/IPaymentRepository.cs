@@ -8,7 +8,7 @@ public interface IPaymentRepository : IBaseRepository<Payment>
 
     Task<Payment?> GetPaymentVnPayByOrderId(long orderId);
 
-    Task<List<Payment>> GetPendingPaymentOrder(DateTime intendedReceiveDate, int startTime, int endTime);
+    Task<List<Payment>> GetPendingPaymentOrder(DateTime intendedReceiveDate, int endTime);
 
     Task<Payment?> GetForRepaymentByOrderId(long orderId);
 

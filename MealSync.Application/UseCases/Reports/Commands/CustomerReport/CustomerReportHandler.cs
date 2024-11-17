@@ -233,7 +233,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
             IncomingAmountBefore = shopWallet.IncomingAmount,
             ReportingAmountBefore = shopWallet.ReportingAmount,
             Amount = avaiableAmountOrder,
-            Type = WalletTransactionType.Withdrawal,
+            Type = WalletTransactionType.Transfer,
             Description = $"Tiền từ tiền có sẵn cộng vào {MoneyUtils.FormatMoneyWithDots(avaiableAmountOrder)} VNĐ tiền đang bị báo cáo",
         };
 
@@ -279,7 +279,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
             IncomingAmountBefore = shopWallet.IncomingAmount,
             ReportingAmountBefore = shopWallet.ReportingAmount,
             Amount = incomingAmountOrder,
-            Type = WalletTransactionType.Withdrawal,
+            Type = WalletTransactionType.Transfer,
             Description = $"Tiền từ tiền chờ về cộng vào {MoneyUtils.FormatMoneyWithDots(incomingAmountOrder)} VNĐ tiền đang bị báo cáo",
         };
 
