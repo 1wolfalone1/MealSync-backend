@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MealSync.Application.UseCases.Orders.Models;
+namespace MealSync.Application.UseCases.Dashboards.Models;
 
 public class PointOfOrderChart
 {

@@ -3,10 +3,11 @@ using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Services.Dapper;
 using MealSync.Application.Shared;
+using MealSync.Application.UseCases.Dashboards.Models;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Domain.Enums;
 
-namespace MealSync.Application.UseCases.Orders.Queries.Dashboards.GetOrderChartForAdmin;
+namespace MealSync.Application.UseCases.Dashboards.Queries.GetOrderChartForAdmin;
 
 public class GetOrderChartForAdminHandler : IQueryHandler<GetOrderChartForAdminQuery, Result>
 {
