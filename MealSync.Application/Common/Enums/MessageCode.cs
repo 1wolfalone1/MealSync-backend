@@ -614,4 +614,8 @@ public enum MessageCode
 
     [Description("E-ShopDeliveryStaff-In-Delivery-Package")]
     E_SHOP_DELIVERY_STAFF_IN_DELIVERY_PACKAGE,
+
+    // Commission Config
+    [Description("I-CommissionConfig-UpdateSuccess")]
+    I_COMMISSION_CONFIG_UPDATE_SUCCESS,
 }

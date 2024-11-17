@@ -28,6 +28,11 @@ public static class ConfigQuartz
                         x => x.InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")) // Set timezone to UTC+7
                     )
                 );
+
+            options.AddJob<UpdateStatusPendingPaymentJob>(JobKey.Create(nameof(UpdateStatusPendingPaymentJob)))
+                .AddTrigger(trigger => trigger
+                    .ForJob(JobKey.Create(nameof(UpdateStatusPendingPaymentJob)))
+                    .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
         });
 
         services.AddQuartzHostedService();
