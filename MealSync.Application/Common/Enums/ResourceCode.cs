@@ -65,6 +65,12 @@ public enum ResourceCode
     [Description("Email-Body-LimitAvailableAmount")]
     EMAIL_BODY_LIMIT_AVAILABLE_AMOUNT,
 
+    [Description("Email-SubjectBanCustomerAccount")]
+    EMAIL_SUBJECT_BAN_CUSTOMER_ACCOUNT,
+
+    [Description("Email-Body-BanCustomerAccount")]
+    EMAIL_BODY_BAN_CUSTOMER_ACCOUNT,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,
@@ -130,4 +136,7 @@ public enum ResourceCode
 
     [Description("Notification-AvailableAmountLessThanLimit")]
     NOTIFICATION_AVAILABLE_AMOUNT_LESS_THAN_LIMIT,
+
+    [Description("Notification-WarningFlagCustomer")]
+    NOTIFICATION_WARNING_FLAG_CUSTOMER,
 }

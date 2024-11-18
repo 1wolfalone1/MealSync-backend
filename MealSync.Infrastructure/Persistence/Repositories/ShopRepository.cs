@@ -224,10 +224,15 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
     public Task<Shop> GetShopInfoForReOrderById(long id)
     {
         return DbSet
-                    .Include(s => s.OperatingSlots.Where(os => os.IsActive))
-                    .Include(s => s.ShopDormitories).ThenInclude(sd => sd.Dormitory)
-                    .Include(s => s.Location)
-                    .FirstAsync(s => s.Id == id);
+            .Include(s => s.OperatingSlots.Where(os => os.IsActive))
+            .Include(s => s.ShopDormitories).ThenInclude(sd => sd.Dormitory)
+            .Include(s => s.Location)
+            .FirstAsync(s => s.Id == id);
+    }
+
+    public Task<List<Shop>> GetAllShopReceivingOrderPaused()
+    {
+        return DbSet.Where(s => s.IsReceivingOrderPaused).ToListAsync();
     }
 
     private static string EscapeLikeParameter(string input)

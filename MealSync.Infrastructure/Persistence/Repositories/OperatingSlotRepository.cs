@@ -32,4 +32,9 @@ public class OperatingSlotRepository : BaseRepository<OperatingSlot>, IOperating
             slot.ShopId == shopId &&
             slot.IsActive);
     }
+
+    public Task<List<OperatingSlot>> GetAllSlotReceivingOrderPaused()
+    {
+        return DbSet.Where(o => o.IsReceivingOrderPaused).ToListAsync();
+    }
 }

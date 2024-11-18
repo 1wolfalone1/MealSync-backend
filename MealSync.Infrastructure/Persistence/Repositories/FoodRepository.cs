@@ -244,4 +244,9 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
             .ConfigureAwait(false);
         return totalActiveFood == ids.Count;
     }
+
+    public Task<List<Food>> GetAllFoodIsSoldOut()
+    {
+        return DbSet.Where(f => f.IsSoldOut).ToListAsync();
+    }
 }

@@ -314,11 +314,32 @@ public class NotificationFactory : INotificationFactory
             AccountId = shop.Id,
             ReferenceId = wallet.Id,
             Title = NotificationConstant.WALLET_TITLE,
-            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_AVAILABLE_AMOUNT_LESS_THAN_LIMIT.GetDescription(), MoneyUtils.FormatMoneyWithDots(wallet.AvailableAmount), MoneyUtils.AVAILABLE_AMOUNT_LIMIT) ?? string.Empty,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_AVAILABLE_AMOUNT_LESS_THAN_LIMIT.GetDescription(), MoneyUtils.FormatMoneyWithDots(wallet.AvailableAmount),
+                MoneyUtils.AVAILABLE_AMOUNT_LIMIT) ?? string.Empty,
             ImageUrl = shop.LogoUrl, // Todo: Image warning
             Data = JsonConvert.SerializeObject(walletNotification),
             Type = NotificationTypes.SendToShop,
             EntityType = NotificationEntityTypes.Wallet,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateWarningFlagCustomerNotification(Account account)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var accountNotification = mapper.Map<AccountNotification>(account);
+        return new Notification
+        {
+            AccountId = account.Id,
+            ReferenceId = account.Id,
+            Title = NotificationConstant.ACCOUNT_WARNING_FLAG,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_WARNING_FLAG_CUSTOMER.GetDescription(), account.NumOfFlag) ?? string.Empty,
+            ImageUrl = account.AvatarUrl, // Todo: Image warning
+            Data = JsonConvert.SerializeObject(accountNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Account,
             IsSave = true,
         };
     }

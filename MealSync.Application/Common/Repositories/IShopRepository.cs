@@ -24,4 +24,6 @@ public interface IShopRepository : IBaseRepository<Shop>
     Task<Shop> GetShopInfoByIdForShop(long id);
 
     Task<Shop> GetShopInfoForReOrderById(long id);
+
+    Task<List<Shop>> GetAllShopReceivingOrderPaused();
 }

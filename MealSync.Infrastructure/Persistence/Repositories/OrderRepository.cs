@@ -380,4 +380,19 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                 },
             }).FirstOrDefaultAsync();
     }
+
+    public Task<List<Order>> GetFailDeliveryAndDelivered(DateTime intendedReceiveDate, int endTime)
+    {
+        return DbSet.Where(o => ((
+                                    o.Status == OrderStatus.FailDelivery &&
+                                    (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription()
+                                     || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
+                                ) || o.Status == OrderStatus.Delivered)
+                                && ((o.IntendedReceiveDate == intendedReceiveDate && o.EndTime <= endTime) || (o.IntendedReceiveDate < intendedReceiveDate))).ToListAsync();
+    }
+
+    public Task<Order> GetIncludeDeliveryPackageById(long id)
+    {
+        return DbSet.Include(o => o.DeliveryPackage).FirstAsync(o => o.Id == id);
+    }
 }

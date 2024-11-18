@@ -35,4 +35,6 @@ public interface IFoodRepository : IBaseRepository<Food>
     Task<bool> CheckActiveFoodByIds(List<long> ids, long operatingSlotId);
 
     Task<bool> CheckActiveFoodByIds(List<long> ids);
+
+    Task<List<Food>> GetAllFoodIsSoldOut();
 }
