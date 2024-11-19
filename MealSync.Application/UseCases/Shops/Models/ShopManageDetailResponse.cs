@@ -30,9 +30,13 @@ public class ShopManageDetailResponse
 
     public int TotalRating { get; set; }
 
+    public double TotalRevenue { get; set; }
+
     public ShopStatus Status { get; set; }
 
     public int NumOfWarning { get; set; }
+
+    public DateTimeOffset CreatedDate { get; set; }
 
     public AccountShopResponse AccountShop { get; set; }
 

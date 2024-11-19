@@ -11,7 +11,6 @@ namespace MealSync.Application.UseCases.Shops.Commands.ModeratorManage.UpdateSho
 
 public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, Result>
 {
-
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IModeratorDormitoryRepository _moderatorDormitoryRepository;
     private readonly IShopRepository _shopRepository;
@@ -19,11 +18,12 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger<UpdateShopStatusHandler> _logger;
+    private readonly IOrderRepository _orderRepository;
 
     public UpdateShopStatusHandler(
         ICurrentPrincipalService currentPrincipalService, IModeratorDormitoryRepository moderatorDormitoryRepository,
         IShopRepository shopRepository, IUnitOfWork unitOfWork, ISystemResourceRepository systemResourceRepository,
-        ILogger<UpdateShopStatusHandler> logger, IEmailService emailService)
+        ILogger<UpdateShopStatusHandler> logger, IEmailService emailService, IOrderRepository orderRepository)
     {
         _currentPrincipalService = currentPrincipalService;
         _moderatorDormitoryRepository = moderatorDormitoryRepository;
@@ -32,6 +32,7 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
         _systemResourceRepository = systemResourceRepository;
         _logger = logger;
         _emailService = emailService;
+        _orderRepository = orderRepository;
     }
 
     public async Task<Result<Result>> Handle(UpdateShopStatusCommand request, CancellationToken cancellationToken)
@@ -48,15 +49,62 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
         }
         else
         {
-            if ((shop.Status == ShopStatus.UnApprove && request.Status == ShopStatus.InActive)
-                || ((shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned) && request.Status == ShopStatus.InActive)
-                || (shop.Status != ShopStatus.Banned && request.Status == ShopStatus.Banned))
+            var totalOrderInProcess = await _orderRepository.CountTotalOrderInProcessByShopId(shop.Id).ConfigureAwait(false);
+
+            if (!request.IsConfirm && shop.Status == ShopStatus.UnApprove && request.Status == ShopStatus.InActive)
             {
-                if (shop.Status == ShopStatus.UnApprove && request.Status == ShopStatus.InActive)
+                return Result.Success(new
                 {
-                    isSendMailApprove = true;
+                    Code = MessageCode.W_MODERATOR_UPDATE_STATUS_UN_APPROVE_TO_INACTIVE.GetDescription(),
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_UN_APPROVE_TO_INACTIVE.GetDescription()),
+                });
+            }
+            else if (!request.IsConfirm && (shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned) && request.Status == ShopStatus.InActive)
+            {
+                return Result.Success(new
+                {
+                    Code = MessageCode.W_MODERATOR_UPDATE_STATUS_BANNED_TO_INACTIVE.GetDescription(),
+                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_BANNED_TO_INACTIVE.GetDescription()),
+                });
+            }
+            else if (!request.IsConfirm && shop.Status != ShopStatus.Banned && request.Status == ShopStatus.Banned)
+            {
+                if (totalOrderInProcess > 0)
+                {
+                    return Result.Success(new
+                    {
+                        Code = MessageCode.W_MODERATOR_UPDATE_STATUS_TO_BANNING.GetDescription(),
+                        Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_TO_BANNING.GetDescription()),
+                    });
                 }
+                else
+                {
+                    return Result.Success(new
+                    {
+                        Code = MessageCode.W_MODERATOR_UPDATE_STATUS_TO_BANNED.GetDescription(),
+                        Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_TO_BANNED.GetDescription()),
+                    });
+                }
+            }
+            else if (request.IsConfirm && shop.Status == ShopStatus.UnApprove && request.Status == ShopStatus.InActive)
+            {
+                isSendMailApprove = true;
                 shop.Status = request.Status;
+            }
+            else if (request.IsConfirm && (shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned) && request.Status == ShopStatus.InActive)
+            {
+                shop.Status = request.Status;
+            }
+            else if (request.IsConfirm && shop.Status != ShopStatus.Banned && request.Status == ShopStatus.Banned)
+            {
+                if (totalOrderInProcess > 0)
+                {
+                    shop.Status = ShopStatus.Banning;
+                }
+                else
+                {
+                    shop.Status = ShopStatus.Banned;
+                }
             }
             else
             {
