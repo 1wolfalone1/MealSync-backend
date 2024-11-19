@@ -69,7 +69,11 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
             }
             else if (!request.IsConfirm && shop.Status != ShopStatus.Banned && request.Status == ShopStatus.Banned)
             {
-                if (totalOrderInProcess > 0)
+                if (totalOrderInProcess > 0 && shop.Status == ShopStatus.Banning)
+                {
+                    throw new InvalidBusinessException(MessageCode.E_MODERATOR_CAN_NOT_UPDATE_STATUS_TO_BANNED.GetDescription());
+                }
+                else if (totalOrderInProcess > 0 && shop.Status != ShopStatus.Banning)
                 {
                     return Result.Warning(new
                     {

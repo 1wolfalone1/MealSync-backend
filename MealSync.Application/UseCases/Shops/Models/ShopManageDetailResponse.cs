@@ -30,6 +30,8 @@ public class ShopManageDetailResponse
 
     public int TotalRating { get; set; }
 
+    public double AverageRating { get; set; }
+
     public double TotalRevenue { get; set; }
 
     public ShopStatus Status { get; set; }

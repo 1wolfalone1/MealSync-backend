@@ -637,4 +637,7 @@ public enum MessageCode
 
     [Description("W-Moderator-UpdateStatusToBanned")]
     W_MODERATOR_UPDATE_STATUS_TO_BANNED,
+
+    [Description("E-Moderator-CanNotUpdateStatusToBanned")]
+    E_MODERATOR_CAN_NOT_UPDATE_STATUS_TO_BANNED,
 }
