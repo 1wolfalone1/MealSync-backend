@@ -9,4 +9,6 @@ public class UpdateShopStatusCommand : ICommand<Result>
     public long ShopId { get; set; }
 
     public ShopStatus Status { get; set; }
+
+    public bool IsConfirm { get; set; }
 }

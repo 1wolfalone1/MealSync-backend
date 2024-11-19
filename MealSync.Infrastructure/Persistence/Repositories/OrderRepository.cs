@@ -411,4 +411,9 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
         return DbSet.Include(o => o.DeliveryPackage).FirstAsync(o => o.Id == id);
     }
+
+    public Task<int> CountTotalOrderInProcessByShopId(long shopId)
+    {
+        return DbSet.CountAsync(o => o.ShopId == shopId && (o.Status == OrderStatus.Delivering || o.Status == OrderStatus.Preparing));
+    }
 }

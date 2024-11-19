@@ -383,6 +383,35 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             .FirstOrDefaultAsync();
     }
 
+    public Task<double> GetShopRevenue(long shopId)
+    {
+        return DbSet
+            .Where(s => s.Id == shopId)
+            .SelectMany(s => s.Orders)
+            .Where(o => o.Status == OrderStatus.Completed || o.Status == OrderStatus.Resolved)
+            .SumAsync(o =>
+                o.Status == OrderStatus.Completed && o.ReasonIdentity == null
+                    ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                    : o.Status == OrderStatus.Completed &&
+                      o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription() &&
+                      o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.PaymentMethods == PaymentMethods.VnPay)
+                        ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                        : o.Status == OrderStatus.Resolved &&
+                          o.IsReport &&
+                          o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
+                            ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                            : o.Status == OrderStatus.Resolved &&
+                              o.IsReport &&
+                              o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription() &&
+                              !o.IsRefund &&
+                              o.Payments.Any(p =>
+                                  p.PaymentMethods == PaymentMethods.VnPay &&
+                                  p.Type == PaymentTypes.Payment &&
+                                  p.Status == PaymentStatus.PaidSuccess)
+                                ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                                : 0);
+    }
+
     private static string EscapeLikeParameter(string input)
     {
         return input

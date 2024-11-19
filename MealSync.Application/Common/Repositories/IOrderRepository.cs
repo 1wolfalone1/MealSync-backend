@@ -31,4 +31,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<List<Order>> GetFailDeliveryAndDelivered(DateTime intendedReceiveDate, int endTime);
 
     Task<Order> GetIncludeDeliveryPackageById(long orderId);
+
+    Task<int> CountTotalOrderInProcessByShopId(long shopId);
 }
