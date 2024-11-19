@@ -618,4 +618,11 @@ public enum MessageCode
     // Commission Config
     [Description("I-CommissionConfig-UpdateSuccess")]
     I_COMMISSION_CONFIG_UPDATE_SUCCESS,
+
+    // Moderator
+    [Description("E-Moderator-ActionNotAllow")]
+    E_MODERATOR_ACTION_NOT_ALLOW,
+
+    [Description("I-Moderator-UpdateStatusSuccess")]
+    I_MODERATOR_UPDATE_STATUS_SUCCESS,
 }

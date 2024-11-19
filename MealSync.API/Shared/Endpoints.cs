@@ -203,4 +203,9 @@ public static class Endpoints
     // Commission Config
     public const string GET_COMMISSION_CONFIG = "admin/commission-config";
     public const string UPDATE_COMMISSION_CONFIG = "admin/commission-config/update";
+
+    // Moderator
+    public const string MANAGE_SHOP = "moderator/shop";
+    public const string MANAGE_SHOP_DETAIL = "moderator/shop/{id:long}";
+    public const string MANAGE_SHOP_UPDATE_STATUS = "moderator/shop/status";
 }
