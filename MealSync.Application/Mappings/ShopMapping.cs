@@ -14,6 +14,7 @@ public class ShopMapping : Profile
         CreateMap<Location, FoodReOrderResponse.LocationResponse>();
 
         CreateMap<Shop, ShopManageDetailResponse>()
+            .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0))
             .ForMember(dest => dest.AccountShop, opt => opt.MapFrom(src => src.Account))
             .ForMember(dest => dest.LocationShop, opt => opt.MapFrom(src => src.Location))
             .ForMember(dest => dest.ShopDormitories, opt => opt.MapFrom(src => src.ShopDormitories))
