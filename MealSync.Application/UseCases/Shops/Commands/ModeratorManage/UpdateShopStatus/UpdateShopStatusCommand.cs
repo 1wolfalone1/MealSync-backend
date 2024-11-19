@@ -11,4 +11,6 @@ public class UpdateShopStatusCommand : ICommand<Result>
     public ShopStatus Status { get; set; }
 
     public bool IsConfirm { get; set; }
+
+    public string? Reason { get; set; }
 }
