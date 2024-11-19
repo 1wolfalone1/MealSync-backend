@@ -37,6 +37,16 @@ public static class ConfigQuartz
                 .AddTrigger(trigger => trigger
                     .ForJob(JobKey.Create(nameof(HaftHourlyBatchPlusIncomingShopWallet)))
                     .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
+
+            options.AddJob<UpdateCompletedOrderJob>(JobKey.Create(nameof(UpdateCompletedOrderJob)))
+                .AddTrigger(trigger => trigger
+                    .ForJob(JobKey.Create(nameof(UpdateCompletedOrderJob)))
+                    .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
+
+            options.AddJob<UpdateFlagReceiveOrderPauseAndSoldOutJob>(JobKey.Create(nameof(UpdateFlagReceiveOrderPauseAndSoldOutJob)))
+                .AddTrigger(trigger => trigger
+                    .ForJob(JobKey.Create(nameof(UpdateFlagReceiveOrderPauseAndSoldOutJob)))
+                    .WithCronSchedule("0 0 0 * * ?"));
         });
 
         services.AddQuartzHostedService();

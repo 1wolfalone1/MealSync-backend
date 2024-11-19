@@ -49,4 +49,6 @@ public interface INotificationFactory
     Notification CreateShopWalletReceiveIncommingAmountNotification(Order order, Account account, double amountPlus);
 
     Notification CreateTakeCommissionFromShopWalletNotification(Order order, Account account, double amountTake);
+
+    Notification CreateWarningFlagCustomerNotification(Account account);
 }

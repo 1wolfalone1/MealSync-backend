@@ -14,13 +14,19 @@ public class GetByReportIdOfCustomerHandler : IQueryHandler<GetByReportIdOfCusto
 {
     private readonly IReportRepository _reportRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
+    private readonly IAccountRepository _accountRepository;
+    private readonly IOrderRepository _orderRepository;
     private readonly IMapper _mapper;
 
-    public GetByReportIdOfCustomerHandler(IReportRepository reportRepository, ICurrentPrincipalService currentPrincipalService, IMapper mapper)
+    public GetByReportIdOfCustomerHandler(
+        IReportRepository reportRepository, ICurrentPrincipalService currentPrincipalService,
+        IMapper mapper, IAccountRepository accountRepository, IOrderRepository orderRepository)
     {
         _reportRepository = reportRepository;
         _currentPrincipalService = currentPrincipalService;
         _mapper = mapper;
+        _accountRepository = accountRepository;
+        _orderRepository = orderRepository;
     }
 
     public async Task<Result<Result>> Handle(GetByReportIdOfCustomerQuery request, CancellationToken cancellationToken)
@@ -30,7 +36,34 @@ public class GetByReportIdOfCustomerHandler : IQueryHandler<GetByReportIdOfCusto
         if (orderId.HasValue && orderId.Value > 0)
         {
             var reports = await _reportRepository.GetByOrderId(orderId.Value).ConfigureAwait(false);
-            return Result.Create(_mapper.Map<List<ReportDetailResponse>>(reports));
+            var reportDetailShopWebResponses = _mapper.Map<List<ReportDetailShopWebResponse>>(reports);
+            var order = await _orderRepository.GetIncludeDeliveryPackageById(reportDetailShopWebResponses.Select(r => r.OrderId).First()).ConfigureAwait(false);
+            if (order.DeliveryPackage != default && order.DeliveryPackage.ShopDeliveryStaffId != default && order.DeliveryPackage.ShopDeliveryStaffId > 0)
+            {
+                var staffAccount = _accountRepository.GetById(order.DeliveryPackage.ShopDeliveryStaffId)!;
+                reportDetailShopWebResponses.ForEach(report =>
+                {
+                    report.ShopDeliveryStaffInfo = new ReportDetailShopWebResponse.ShopDeliveryStaffInfoResponse
+                    {
+                        DeliveryPackageId = order.DeliveryPackageId!.Value,
+                        PhoneNumber = staffAccount.PhoneNumber,
+                        Email = staffAccount.Email,
+                        FullName = staffAccount.FullName,
+                        AvatarUrl = staffAccount.AvatarUrl,
+                        Id = staffAccount.Id,
+                        IsShopOwnerShip = false,
+                    };
+                });
+            }
+
+            var customerInfoResponse = _mapper.Map<ReportDetailShopWebResponse.CustomerInfoResponse>(_accountRepository.GetById(order.CustomerId));
+
+            reportDetailShopWebResponses.ForEach(report =>
+            {
+                report.CustomerInfo = customerInfoResponse;
+            });
+
+            return Result.Success(reportDetailShopWebResponses);
         }
         else
         {
