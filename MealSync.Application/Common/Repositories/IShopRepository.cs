@@ -36,4 +36,6 @@ public interface IShopRepository : IBaseRepository<Shop>
     Task<Shop?> GetShopManageDetail(long shopId, List<long> dormitoriesIdMod);
 
     Task<Shop?> GetShopManage(long shopId, List<long> dormitoriesIdMod);
+
+    Task<double> GetShopRevenue(long shopId);
 }

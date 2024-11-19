@@ -40,7 +40,9 @@ public class GetShopDetailHandler : IQueryHandler<GetShopDetailQuery, Result>
         }
         else
         {
-            return Result.Success(_mapper.Map<ShopManageDetailResponse>(shop));
+            var shopManageDetailResponse = _mapper.Map<ShopManageDetailResponse>(shop);
+            shopManageDetailResponse.TotalRevenue = await _shopRepository.GetShopRevenue(shop.Id).ConfigureAwait(false);
+            return Result.Success(shopManageDetailResponse);
         }
     }
 }
