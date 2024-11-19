@@ -130,4 +130,10 @@ public enum ResourceCode
 
     [Description("Notification-AvailableAmountLessThanLimit")]
     NOTIFICATION_AVAILABLE_AMOUNT_LESS_THAN_LIMIT,
+
+    [Description("Notification-Wallet-ShopReceiveIncomingAmount")]
+    NOTIFICATION_WALLET_SHOP_RECEIVE_INCOMMING_AMOUNT,
+
+    [Description("Notification-Wallet-TakeCommissionFeeFromShopWallet")]
+    NOTIFICATION_WALLET_TAKE_COMMISISSION_FEE_FROM_SHOP_WALLET,
 }
