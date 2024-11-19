@@ -14,15 +14,18 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
     private readonly IOptionGroupRepository _optionGroupRepository;
     private readonly IOperatingSlotRepository _operatingSlotRepository;
     private readonly IShopRepository _shopRepository;
+    private readonly IFoodOptionGroupRepository _foodOptionGroupRepository;
 
     public GetByIdsForCartHandler(
         IFoodRepository foodRepository, IOptionGroupRepository optionGroupRepository,
-        IOperatingSlotRepository operatingSlotRepository, IShopRepository shopRepository)
+        IOperatingSlotRepository operatingSlotRepository, IShopRepository shopRepository,
+        IFoodOptionGroupRepository foodOptionGroupRepository)
     {
         _foodRepository = foodRepository;
         _optionGroupRepository = optionGroupRepository;
         _operatingSlotRepository = operatingSlotRepository;
         _shopRepository = shopRepository;
+        _foodOptionGroupRepository = foodOptionGroupRepository;
     }
 
     public async Task<Result<Result>> Handle(GetByIdsForCartQuery request, CancellationToken cancellationToken)
@@ -234,6 +237,8 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                         ShopId = food.ShopId,
                     };
                     bool isNotFound = false;
+                    var idsOptionGroupRequired = await _foodOptionGroupRepository.GetAllIdsRequiredByFoodId(food.Id).ConfigureAwait(false);
+                    var idsOptionGroupCheck = new List<long>();
 
                     if (foodRequest.OptionGroupRadio != default && foodRequest.OptionGroupRadio.Count > 0 && !isNotFound)
                     {
@@ -241,6 +246,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
 
                         foreach (var optionGroupRequest in foodRequest.OptionGroupRadio)
                         {
+                            idsOptionGroupCheck.Add(optionGroupRequest.Id);
                             var optionGroup = await _optionGroupRepository.GetByIdAndOptionIds(
                                 optionGroupRequest.Id, new[] { optionGroupRequest.OptionId }
                             ).ConfigureAwait(false);
@@ -279,12 +285,19 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
 
                         foreach (var optionGroupRequest in foodRequest.OptionGroupCheckbox)
                         {
+                            idsOptionGroupCheck.Add(optionGroupRequest.Id);
                             var optionGroup = await _optionGroupRepository.GetByIdAndOptionIds(
                                 optionGroupRequest.Id, optionGroupRequest.OptionIds
                             ).ConfigureAwait(false);
                             var availableOptionIds = optionGroup?.Options.Select(o => o.Id).ToList() ?? new List<long>();
 
                             if (optionGroup == default || !optionGroupRequest.OptionIds.All(optionId => availableOptionIds.Contains(optionId)))
+                            {
+                                idsNotFoundList.Add(foodRequest.Id);
+                                isNotFound = true;
+                                break;
+                            }
+                            else if (!await _optionGroupRepository.CheckMinMaxChoice(optionGroup.Id, optionGroupRequest.OptionIds.Length).ConfigureAwait(false))
                             {
                                 idsNotFoundList.Add(foodRequest.Id);
                                 isNotFound = true;
@@ -316,6 +329,13 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
                         }
 
                         foodResponse.OptionGroupCheckbox = optionGroupCheckboxResponses;
+                    }
+
+                    bool allIdsContained = idsOptionGroupRequired.All(ogId => idsOptionGroupCheck.Contains(ogId));
+                    if (!allIdsContained)
+                    {
+                        idsNotFoundList.Add(foodRequest.Id);
+                        isNotFound = true;
                     }
 
                     if (isNotFound)
