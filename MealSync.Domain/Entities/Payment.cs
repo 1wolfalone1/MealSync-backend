@@ -28,5 +28,5 @@ public class Payment : BaseEntity
 
     public virtual Order Order { get; set; }
 
-    public virtual WalletTransaction? WalletTransaction { get; set; }
+    public virtual List<WalletTransaction>? WalletTransactions { get; set; }
 }

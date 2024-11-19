@@ -6,6 +6,7 @@ public enum BatchCodes
 {
     [Description("TestBatch")]
     TestBatch = 1,
+
     [Description("BatchCheduleMarkDeliveryFail")]
     BatchCheduleMarkDeliveryFail = 2,
 
@@ -17,4 +18,7 @@ public enum BatchCodes
 
     [Description("BatchUpdateCompletedOrder")]
     BatchUpdateCompletedOrder = 5,
+
+    [Description("BatchCheduleTransferMoneyToShopWallet")]
+    BatchCheduleTransferMoneyToShopWallet = 6,
 }

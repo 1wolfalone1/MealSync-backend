@@ -75,6 +75,8 @@ public class Order : BaseEntity
 
     public bool IsReport { get; set; } = false;
 
+    public bool IsPaidToShop { get; set; }
+
     public string? Reason { get; set; }
 
     public string? ReasonIdentity { get; set; }

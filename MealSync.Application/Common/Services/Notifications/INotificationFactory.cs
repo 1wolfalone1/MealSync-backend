@@ -46,5 +46,9 @@ public interface INotificationFactory
 
     Notification CreateLimitAvailableAmountAndInActiveShopNotification(Shop shop, Wallet wallet);
 
+    Notification CreateShopWalletReceiveIncommingAmountNotification(Order order, Account account, double amountPlus);
+
+    Notification CreateTakeCommissionFromShopWalletNotification(Order order, Account account, double amountTake);
+
     Notification CreateWarningFlagCustomerNotification(Account account);
 }

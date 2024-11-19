@@ -203,8 +203,8 @@ public class MealSyncContext : DbContext
 
         modelBuilder.Entity<WalletTransaction>()
             .HasOne(wt => wt.Payment)
-            .WithOne(p => p.WalletTransaction)
-            .HasForeignKey<WalletTransaction>(wt => wt.PaymentId)
+            .WithMany(p => p.WalletTransactions)
+            .HasForeignKey(wt => wt.PaymentId)
             .HasConstraintName("FK_WalletTransaction_Payment");
 
         modelBuilder.Entity<WithdrawalRequest>()
