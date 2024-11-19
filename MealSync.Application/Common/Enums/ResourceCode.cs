@@ -71,6 +71,12 @@ public enum ResourceCode
     [Description("Email-Body-BanCustomerAccount")]
     EMAIL_BODY_BAN_CUSTOMER_ACCOUNT,
 
+    [Description("Email-SubjectApproveShop")]
+    EMAIL_SUBJECT_APPROVE_SHOP,
+
+    [Description("Email-Body-ApproveShop")]
+    EMAIL_BODY_APPROVE_SHOP,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,

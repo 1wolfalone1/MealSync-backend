@@ -15,6 +15,9 @@ using MealSync.Application.UseCases.ShopOwners.Commands.VerifyAccountForUpdate;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatistics;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatisticSummary;
+using MealSync.Application.UseCases.Shops.Commands.ModeratorManage.UpdateShopStatus;
+using MealSync.Application.UseCases.Shops.Queries.ModeratorManage.GetListShop;
+using MealSync.Application.UseCases.Shops.Queries.ModeratorManage.GetShopDetail;
 using MealSync.Application.UseCases.Shops.Queries.SearchShop;
 using MealSync.Application.UseCases.Shops.Queries.ShopInfo;
 using MealSync.Application.UseCases.Shops.Queries.ShopInfoForReOrder;
@@ -165,5 +168,26 @@ public class ShopController : BaseApiController
     public async Task<IActionResult> ShopInfoReOrder(long id)
     {
         return HandleResult(await Mediator.Send(new ShopInfoForReOrderQuery { OrderId = id }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_SHOP)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> ManageShop([FromQuery] GetListShopQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_SHOP_DETAIL)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> GetShopDetail(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetShopDetailQuery { ShopId = id }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.MANAGE_SHOP_UPDATE_STATUS)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> UpdateShopStatus([FromBody] UpdateShopStatusCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }

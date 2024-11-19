@@ -23,4 +23,6 @@ public interface IEmailService
     bool SendNotifyLimitAvailableAmountAndInActiveShop(string email, string availableAmount, string limitAmount);
 
     bool SendNotifyBannedCustomerAccount(string email, string? fullName, int numberOfFlag);
+
+    bool SendApproveShop(string email, string? fullName, string shopName);
 }
