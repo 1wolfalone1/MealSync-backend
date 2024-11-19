@@ -100,6 +100,13 @@ public class EmailService : IEmailService, IBaseService
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_BAN_CUSTOMER_ACCOUNT.GetDescription(), fullName ?? string.Empty, numberOfFlag));
     }
 
+    public bool SendApproveShop(string email, string? fullName, string shopName)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_APPROVE_SHOP.GetDescription()),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_APPROVE_SHOP.GetDescription(), fullName, shopName));
+    }
+
     private bool SendEmail(string toEmail, string subject, string body)
     {
         try

@@ -71,6 +71,12 @@ public enum ResourceCode
     [Description("Email-Body-BanCustomerAccount")]
     EMAIL_BODY_BAN_CUSTOMER_ACCOUNT,
 
+    [Description("Email-SubjectApproveShop")]
+    EMAIL_SUBJECT_APPROVE_SHOP,
+
+    [Description("Email-Body-ApproveShop")]
+    EMAIL_BODY_APPROVE_SHOP,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,
@@ -139,4 +145,10 @@ public enum ResourceCode
 
     [Description("Notification-WarningFlagCustomer")]
     NOTIFICATION_WARNING_FLAG_CUSTOMER,
+
+    [Description("Notification-Wallet-ShopReceiveIncomingAmount")]
+    NOTIFICATION_WALLET_SHOP_RECEIVE_INCOMMING_AMOUNT,
+
+    [Description("Notification-Wallet-TakeCommissionFeeFromShopWallet")]
+    NOTIFICATION_WALLET_TAKE_COMMISISSION_FEE_FROM_SHOP_WALLET,
 }

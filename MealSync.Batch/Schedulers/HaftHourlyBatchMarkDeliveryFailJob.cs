@@ -7,12 +7,12 @@ using Quartz;
 namespace MealSync.Batch.Schedulers;
 
 [DisallowConcurrentExecution]
-public class HourlyBatchMarkDeliveryFailJob : IJob
+public class HaftHourlyBatchMarkDeliveryFailJob : IJob
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<HourlyBatchMarkDeliveryFailJob> _logger;
+    private readonly ILogger<HaftHourlyBatchMarkDeliveryFailJob> _logger;
 
-    public HourlyBatchMarkDeliveryFailJob(IMediator mediator, ILogger<HourlyBatchMarkDeliveryFailJob> logger)
+    public HaftHourlyBatchMarkDeliveryFailJob(IMediator mediator, ILogger<HaftHourlyBatchMarkDeliveryFailJob> logger)
     {
         _mediator = mediator;
         _logger = logger;

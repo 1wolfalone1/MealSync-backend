@@ -19,19 +19,23 @@ public static class ConfigQuartz
                     trigger.ForJob(jobKey)
                         .WithSimpleSchedule(schedule =>
                             schedule.WithIntervalInMinutes(10).RepeatForever()));
-
-            options.AddJob<HourlyBatchMarkDeliveryFailJob>(JobKey.Create(nameof(HourlyBatchMarkDeliveryFailJob)))
-                .AddTrigger(trigger => trigger.ForJob(JobKey.Create(nameof(HourlyBatchMarkDeliveryFailJob)))
+            
+            options.AddJob<HaftHourlyBatchMarkDeliveryFailJob>(JobKey.Create(nameof(HaftHourlyBatchMarkDeliveryFailJob)))
+                .AddTrigger(trigger => trigger.ForJob(JobKey.Create(nameof(HaftHourlyBatchMarkDeliveryFailJob)))
                     .StartNow()
                     .WithCronSchedule(
-                        "0 0 0/2 * * ?", // Run at the start of every 2 hours
-                        x => x.InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")) // Set timezone to UTC+7
+                        "0 0/30 * * * ?" // Run at the start of every 30 hours
                     )
                 );
-
+            
             options.AddJob<UpdateStatusPendingPaymentJob>(JobKey.Create(nameof(UpdateStatusPendingPaymentJob)))
                 .AddTrigger(trigger => trigger
                     .ForJob(JobKey.Create(nameof(UpdateStatusPendingPaymentJob)))
+                    .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
+
+            options.AddJob<HaftHourlyBatchPlusIncomingShopWallet>(JobKey.Create(nameof(HaftHourlyBatchPlusIncomingShopWallet)))
+                .AddTrigger(trigger => trigger
+                    .ForJob(JobKey.Create(nameof(HaftHourlyBatchPlusIncomingShopWallet)))
                     .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
 
             options.AddJob<UpdateCompletedOrderJob>(JobKey.Create(nameof(UpdateCompletedOrderJob)))

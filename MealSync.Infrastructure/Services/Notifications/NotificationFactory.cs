@@ -463,4 +463,44 @@ public class NotificationFactory : INotificationFactory
             IsSave = true,
         };
     }
+
+    public Notification CreateShopWalletReceiveIncommingAmountNotification(Order order, Account account, double amountPlus)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.WALLET_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_WALLET_SHOP_RECEIVE_INCOMMING_AMOUNT.GetDescription(), new object[] { MoneyUtils.FormatMoneyWithDots(amountPlus), order.Id}),
+            ImageUrl = account.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateTakeCommissionFromShopWalletNotification(Order order, Account account, double amountTake)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.WALLET_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_WALLET_TAKE_COMMISISSION_FEE_FROM_SHOP_WALLET.GetDescription(), new object[] { MoneyUtils.FormatMoneyWithDots(amountTake), order.Id}),
+            ImageUrl = account.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
 }
