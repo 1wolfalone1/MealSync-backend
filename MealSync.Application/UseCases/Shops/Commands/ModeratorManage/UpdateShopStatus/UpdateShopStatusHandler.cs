@@ -77,6 +77,10 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
                         Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_TO_BANNING.GetDescription()),
                     });
                 }
+                else
+                {
+                    shop.Status = ShopStatus.Banned;
+                }
             }
             else if (request.IsConfirm && shop.Status == ShopStatus.UnApprove && request.Status == ShopStatus.InActive)
             {
@@ -87,16 +91,9 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
             {
                 shop.Status = request.Status;
             }
-            else if (request.IsConfirm && shop.Status != ShopStatus.Banned && request.Status == ShopStatus.Banned)
+            else if (request.IsConfirm && totalOrderInProcess > 0 && shop.Status != ShopStatus.Banned && request.Status == ShopStatus.Banned)
             {
-                if (totalOrderInProcess > 0)
-                {
-                    shop.Status = ShopStatus.Banning;
-                }
-                else
-                {
-                    shop.Status = ShopStatus.Banned;
-                }
+                shop.Status = ShopStatus.Banning;
             }
             else
             {
