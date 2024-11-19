@@ -9,4 +9,6 @@ public interface IOperatingSlotRepository : IBaseRepository<OperatingSlot>
     Task<OperatingSlot?> GetAvailableForTimeRangeOrder(long shopId, long orderStartTimeReceiving, long orderEndTimeReceiving);
 
     Task<OperatingSlot?> GetActiveByIdAndShopId(long operatingSlotId, long shopId);
+
+    Task<List<OperatingSlot>> GetAllSlotReceivingOrderPaused();
 }

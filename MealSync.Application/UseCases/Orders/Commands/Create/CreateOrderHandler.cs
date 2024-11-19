@@ -523,9 +523,8 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                             {
                                 var optionList = new List<OrderDetailDescriptionDto.OptionDto>();
 
-                                if (foodOptionGroup.OptionGroup.IsRequire && (
-                                        foodOptionGroup.OptionGroup.MinChoices > optionGroupCheckboxRequest.OptionIds.Count
-                                        || foodOptionGroup.OptionGroup.MaxChoices < optionGroupCheckboxRequest.OptionIds.Count))
+                                if (foodOptionGroup.OptionGroup.MinChoices > optionGroupCheckboxRequest.OptionIds.Count
+                                    || foodOptionGroup.OptionGroup.MaxChoices < optionGroupCheckboxRequest.OptionIds.Count)
                                 {
                                     throw new InvalidBusinessException(
                                         MessageCode.E_ORDER_OPTION_SELECTED_OVER_RANGE_MIN_MAX.GetDescription(),

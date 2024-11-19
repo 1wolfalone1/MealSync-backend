@@ -93,6 +93,13 @@ public class EmailService : IEmailService, IBaseService
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_LIMIT_AVAILABLE_AMOUNT.GetDescription(), availableAmount, limitAmount));
     }
 
+    public bool SendNotifyBannedCustomerAccount(string email, string? fullName, int numberOfFlag)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_BAN_CUSTOMER_ACCOUNT.GetDescription()),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_BAN_CUSTOMER_ACCOUNT.GetDescription(), fullName ?? string.Empty, numberOfFlag));
+    }
+
     private bool SendEmail(string toEmail, string subject, string body)
     {
         try

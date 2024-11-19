@@ -67,7 +67,7 @@ public class UpdateStatusPendingPaymentHandler : ICommandHandler<UpdateStatusPen
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
                 var batchHistory = new BatchHistory
                 {
-                    BatchCode = BatchCodes.BatchCheduleMarkDeliveryFail,
+                    BatchCode = BatchCodes.BatchUpdateStatusPendingPayment,
                     Parameter = string.Empty,
                     TotalRecord = payments.Count,
                     ErrorLog = string.Join(", ", errors),
@@ -77,7 +77,7 @@ public class UpdateStatusPendingPaymentHandler : ICommandHandler<UpdateStatusPen
 
                 await _batchHistoryRepository.AddAsync(batchHistory).ConfigureAwait(false);
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-                _logger.LogInformation($"Update Status Pending Payment Batch End At: {startBatchDateTime}");
+                _logger.LogInformation($"Update Status Pending Payment Batch End At: {endBatchDateTime}");
                 return errors.Count > 0 ? Result.Success("Run batch fail!") : Result.Success("Run batch success!");
             }
             catch (Exception e)
