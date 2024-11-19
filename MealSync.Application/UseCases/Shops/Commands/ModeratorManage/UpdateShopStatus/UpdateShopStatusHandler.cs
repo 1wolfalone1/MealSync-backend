@@ -53,7 +53,7 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
 
             if (!request.IsConfirm && shop.Status == ShopStatus.UnApprove && request.Status == ShopStatus.InActive)
             {
-                return Result.Success(new
+                return Result.Warning(new
                 {
                     Code = MessageCode.W_MODERATOR_UPDATE_STATUS_UN_APPROVE_TO_INACTIVE.GetDescription(),
                     Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_UN_APPROVE_TO_INACTIVE.GetDescription()),
@@ -61,7 +61,7 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
             }
             else if (!request.IsConfirm && (shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned) && request.Status == ShopStatus.InActive)
             {
-                return Result.Success(new
+                return Result.Warning(new
                 {
                     Code = MessageCode.W_MODERATOR_UPDATE_STATUS_BANNED_TO_INACTIVE.GetDescription(),
                     Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_BANNED_TO_INACTIVE.GetDescription()),
@@ -71,7 +71,7 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
             {
                 if (totalOrderInProcess > 0)
                 {
-                    return Result.Success(new
+                    return Result.Warning(new
                     {
                         Code = MessageCode.W_MODERATOR_UPDATE_STATUS_TO_BANNING.GetDescription(),
                         Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_TO_BANNING.GetDescription()),
@@ -79,7 +79,7 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
                 }
                 else
                 {
-                    return Result.Success(new
+                    return Result.Warning(new
                     {
                         Code = MessageCode.W_MODERATOR_UPDATE_STATUS_TO_BANNED.GetDescription(),
                         Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_TO_BANNED.GetDescription()),
