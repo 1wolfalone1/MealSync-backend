@@ -37,6 +37,7 @@
 
     <ItemGroup>
         <Folder Include="UseCases\Buildings\Commands\"/>
+        <Folder Include="UseCases\CommissionConfigs\Models\" />
         <Folder Include="UseCases\CustomerBuildings\Queries\" />
         <Folder Include="UseCases\Dormitories\Commands\"/>
         <Folder Include="UseCases\OperatingSlots\Commands\" />
@@ -44,7 +45,6 @@
         <Folder Include="UseCases\Payments\Models\" />
         <Folder Include="UseCases\PlatformCategory\Commands\" />
         <Folder Include="UseCases\Roles\Queries\"/>
-        <Folder Include="UseCases\Shops\Commands\" />
     </ItemGroup>
 
 </Project>
