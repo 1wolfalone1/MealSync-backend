@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using Confluent.Kafka;
 using MealSync.Application.Common.Services.Notifications;
+using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +33,22 @@ public class KafkaPushNotificationService : BaseService, IWebNotificationService
             BootstrapServers = _configuration["KAFKA_BOOSTRAP_SERVER"]
         };
 
-        var messageValue = JsonSerializer.Serialize(notification);
+        var message = new FirebaseNotification()
+        {
+            Notification = new FirebaseNotificationContent()
+            {
+                Title = notification.Title,
+                Body = notification.Content,
+                ImageUrl = notification.ImageUrl ?? string.Empty,
+            },
+            // Token = account.DeviceToken,
+            Data = new
+            {
+                EntityType = notification.EntityType.ToString(),
+                ReferenceId = notification.ReferenceId,
+            },
+        };
+        var messageValue = JsonSerializer.Serialize(message);
         using (var producer = new ProducerBuilder<string, string>(config).Build())
         {
             try
@@ -49,6 +65,7 @@ public class KafkaPushNotificationService : BaseService, IWebNotificationService
             }
             catch (ProduceException<string, string> e)
             {
+                _logger.LogError($"Error: {e.Error.Reason}");
                 Console.WriteLine($"Error: {e.Error.Reason}");
             }
             catch (Exception e)
