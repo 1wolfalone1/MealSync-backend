@@ -1,27 +1,61 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace MealSync.Application.Common.Services.Notifications.Models;
 
 public class FirebaseNotification
 {
-    [JsonProperty("token")]
+    [JsonPropertyName("message")]
+    public FirebaseNotificationMessage Message { get; set; } = default!;
+
+}
+
+public class FirebaseNotificationMessage
+{
+    [JsonPropertyName("token")]
     public string Token { get; set; } = default!;
 
-    [JsonProperty("notification")]
+    [JsonPropertyName("notification")]
     public FirebaseNotificationContent Notification { get; set; } = default!;
 
-    [JsonProperty("data")]
+    [JsonPropertyName("data")]
     public object? Data { get; set; } = default!;
+
+    [JsonPropertyName("android")]
+    public FirebaseAndroidOptions? Android { get; set; } = default!;
+
+    [JsonPropertyName("apns")]
+    public FirebaseIosOptions? Apns = default!;
 }
 
 public class FirebaseNotificationContent
 {
-    [JsonProperty("title")]
+    [JsonPropertyName("title")]
     public string Title { get; set; } = default!;
 
-    [JsonProperty("body")]
+    [JsonPropertyName("body")]
     public string Body { get; set; } = default!;
 
-    [JsonProperty("body")]
-    public string ImageUrl { get; set; } = default!;
+    [JsonPropertyName("image")]
+    public string Image { get; set; } = default!;
+
+}
+
+public class FirebaseAndroidOptions
+{
+    [JsonPropertyName("ttl")]
+    public string? Ttl { get; set; } = default!;
+
+    [JsonPropertyName("notification")]
+    public FirebaseAndroidNotification? Notification { get; set; } = default!;
+
+    public class FirebaseAndroidNotification
+    {
+        [JsonPropertyName("click_action")]
+        public string? ClickAction { get; set; } = default!;
+    }
+}
+
+public class FirebaseIosOptions
+{
+
 }

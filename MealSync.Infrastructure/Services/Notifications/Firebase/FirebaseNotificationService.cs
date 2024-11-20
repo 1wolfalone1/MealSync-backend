@@ -33,17 +33,20 @@ public class FirebaseNotificationService : BaseService, IMobileNotificationServi
         {
             var message = new FirebaseNotification()
             {
-                Notification = new FirebaseNotificationContent()
+                Message = new FirebaseNotificationMessage()
                 {
-                    Title = notification.Title,
-                    Body = notification.Content,
-                    ImageUrl = notification.ImageUrl ?? string.Empty,
-                },
-                Token = account.DeviceToken,
-                Data = new
-                {
-                    EntityType = notification.EntityType.ToString(),
-                    ReferenceId = notification.ReferenceId,
+                    Token = account.DeviceToken,
+                    Notification = new FirebaseNotificationContent()
+                    {
+                        Title = notification.Title,
+                        Body = notification.Content,
+                        Image = notification.ImageUrl ?? string.Empty,
+                    },
+                    Data = new Dictionary<string, string>
+                    {
+                        { "EntityType", notification.EntityType.ToString() },
+                        { "ReferenceId", notification.ReferenceId.ToString() }, // Ensure it's a string
+                    },
                 },
             };
 

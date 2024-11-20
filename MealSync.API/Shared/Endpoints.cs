@@ -211,4 +211,7 @@ public static class Endpoints
     public const string MANAGE_SHOP_FOOD = "moderator/shop/{id:long}/food";
 
     public const string MANAGE_CUSTOMER = "moderator/customer";
+
+    // Notification
+    public const string ORDER_INFOR_CHAT = "order/{id:long}/chat-info";
 }

@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using Confluent.Kafka;
 using MealSync.Application.Common.Services.Notifications;
+using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,6 +50,7 @@ public class KafkaPushNotificationService : BaseService, IWebNotificationService
             }
             catch (ProduceException<string, string> e)
             {
+                _logger.LogError($"Error: {e.Error.Reason}");
                 Console.WriteLine($"Error: {e.Error.Reason}");
             }
             catch (Exception e)
