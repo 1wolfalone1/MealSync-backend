@@ -354,6 +354,10 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
                     : revenueQuery.OrderByDescending(shop => shop.TotalFood);
             }
         }
+        else
+        {
+            revenueQuery = revenueQuery.OrderByDescending(shop => shop.CreatedDate);
+        }
 
         var shops = revenueQuery
             .Skip((pageIndex - 1) * pageSize)

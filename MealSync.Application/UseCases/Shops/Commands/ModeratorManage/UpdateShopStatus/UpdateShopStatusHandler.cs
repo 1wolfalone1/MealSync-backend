@@ -41,6 +41,7 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
         var dormitories = await _moderatorDormitoryRepository.GetAllDormitoryByModeratorId(moderatorAccountId).ConfigureAwait(false);
         var dormitoryIds = dormitories.Select(d => d.DormitoryId).ToList();
         var isSendMailApprove = false;
+        var isSendMailUnBan = false;
 
         var shop = await _shopRepository.GetShopManage(request.ShopId, dormitoryIds).ConfigureAwait(false);
         if (shop == default)
@@ -93,6 +94,7 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
             }
             else if (request.IsConfirm && (shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned) && request.Status == ShopStatus.InActive)
             {
+                isSendMailUnBan = true;
                 shop.Status = request.Status;
             }
             else if (request.IsConfirm && totalOrderInProcess > 0 && shop.Status != ShopStatus.Banned && request.Status == ShopStatus.Banned)
@@ -112,11 +114,15 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
 
                 if (request.Status == ShopStatus.Banned)
                 {
-                    _emailService.SendEmailToAnnounceAccountGotBanned(shop.Account.Email, shop.Account.FullName);
+                    _emailService.SendBanShopWithReason(shop.Account.Email, shop.Account.FullName, shop.Name, request.Reason, shop.Account.NumOfFlag, shop.Status == ShopStatus.Banned);
                 }
                 else if (isSendMailApprove)
                 {
                     _emailService.SendApproveShop(shop.Account.Email, shop.Account.FullName, shop.Name);
+                }
+                else if (isSendMailUnBan)
+                {
+                    _emailService.SendUnBanShopWithReason(shop.Account.Email, shop.Account.FullName, shop.Name, request.Reason);
                 }
 
                 return Result.Success(new
