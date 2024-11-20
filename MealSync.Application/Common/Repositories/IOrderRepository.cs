@@ -33,4 +33,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<Order> GetIncludeDeliveryPackageById(long orderId);
 
     Task<int> CountTotalOrderInProcessByShopId(long shopId);
+
+    Order GetOrderInforNotification(long orderId);
 }

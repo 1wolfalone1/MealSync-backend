@@ -416,4 +416,16 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
         return DbSet.CountAsync(o => o.ShopId == shopId && (o.Status == OrderStatus.Delivering || o.Status == OrderStatus.Preparing));
     }
+
+    public Order GetOrderInforNotification(long orderId)
+    {
+        return DbSet.Where(o => o.Id == orderId)
+            .Include(o => o.DeliveryPackage)
+            .ThenInclude(dp => dp.ShopDeliveryStaff)
+            .ThenInclude(sds => sds.Account)
+            .Include(o => o.Customer)
+            .ThenInclude(cus => cus.Account)
+            .Include(o => o.Shop)
+            .ThenInclude(sh => sh.Account).SingleOrDefault();
+    }
 }
