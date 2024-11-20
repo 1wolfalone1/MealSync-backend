@@ -107,6 +107,20 @@ public class EmailService : IEmailService, IBaseService
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_APPROVE_SHOP.GetDescription(), fullName, shopName));
     }
 
+    public bool SendBanShopWithReason(string email, string? fullName, string shopName, string reason, int numberOfFlag, bool isBanned)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(isBanned ? ResourceCode.EMAIL_SUBJECT_BANNED_SHOP_WITH_REASON.GetDescription() : ResourceCode.EMAIL_SUBJECT_BANNING_SHOP_WITH_REASON.GetDescription()),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_BAN_SHOP_WITH_REASON.GetDescription(), fullName, shopName, reason, numberOfFlag));
+    }
+
+    public bool SendUnBanShopWithReason(string email, string? fullName, string shopName, string reason)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_UN_BAN_SHOP_WITH_REASON.GetDescription()),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_UN_BAN_SHOP_WITH_REASON.GetDescription(), fullName, shopName, reason));
+    }
+
     private bool SendEmail(string toEmail, string subject, string body)
     {
         try

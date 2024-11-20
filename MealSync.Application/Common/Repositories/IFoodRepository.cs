@@ -37,4 +37,6 @@ public interface IFoodRepository : IBaseRepository<Food>
     Task<bool> CheckActiveFoodByIds(List<long> ids);
 
     Task<List<Food>> GetAllFoodIsSoldOut();
+
+    Task<(List<Food> Foods, int TotalCount)> GetShopFoodForModManage(long shopId, int pageIndex, int pageSize);
 }

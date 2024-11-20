@@ -1,5 +1,6 @@
 using MealSync.Application.Common.Repositories;
 using MealSync.Domain.Entities;
+using MealSync.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
@@ -18,5 +19,10 @@ public class ShopDormitoryRepository : BaseRepository<ShopDormitory>, IShopDormi
     public Task<List<ShopDormitory>> GetByShopId(long shopId)
     {
         return DbSet.Where(sd => sd.ShopId == shopId).ToListAsync();
+    }
+
+    public Task<bool> CheckShopDormitory(long shopId, List<long> dormitoryIds)
+    {
+        return DbSet.AnyAsync(sd => sd.ShopId == shopId && sd.Shop.Status != ShopStatus.Deleted && dormitoryIds.Contains(sd.DormitoryId));
     }
 }
