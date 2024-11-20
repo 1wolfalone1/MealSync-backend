@@ -77,6 +77,21 @@ public enum ResourceCode
     [Description("Email-Body-ApproveShop")]
     EMAIL_BODY_APPROVE_SHOP,
 
+    [Description("Email-SubjectBannedShopWithReason")]
+    EMAIL_SUBJECT_BANNED_SHOP_WITH_REASON,
+
+    [Description("Email-SubjectBanningShopWithReason")]
+    EMAIL_SUBJECT_BANNING_SHOP_WITH_REASON,
+
+    [Description("Email-Body-BanShopWithReason")]
+    EMAIL_BODY_BAN_SHOP_WITH_REASON,
+
+    [Description("Email-SubjectUnShopWithReason")]
+    EMAIL_SUBJECT_UN_BAN_SHOP_WITH_REASON,
+
+    [Description("Email-Body-UnBanShopWithReason")]
+    EMAIL_BODY_UN_BAN_SHOP_WITH_REASON,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,
