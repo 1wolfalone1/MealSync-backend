@@ -33,22 +33,7 @@ public class KafkaPushNotificationService : BaseService, IWebNotificationService
             BootstrapServers = _configuration["KAFKA_BOOSTRAP_SERVER"]
         };
 
-        var message = new FirebaseNotification()
-        {
-            Notification = new FirebaseNotificationContent()
-            {
-                Title = notification.Title,
-                Body = notification.Content,
-                ImageUrl = notification.ImageUrl ?? string.Empty,
-            },
-            // Token = account.DeviceToken,
-            Data = new
-            {
-                EntityType = notification.EntityType.ToString(),
-                ReferenceId = notification.ReferenceId,
-            },
-        };
-        var messageValue = JsonSerializer.Serialize(message);
+        var messageValue = JsonSerializer.Serialize(notification);
         using (var producer = new ProducerBuilder<string, string>(config).Build())
         {
             try
