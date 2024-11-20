@@ -618,4 +618,26 @@ public enum MessageCode
     // Commission Config
     [Description("I-CommissionConfig-UpdateSuccess")]
     I_COMMISSION_CONFIG_UPDATE_SUCCESS,
+
+    // Moderator
+    [Description("E-Moderator-ActionNotAllow")]
+    E_MODERATOR_ACTION_NOT_ALLOW,
+
+    [Description("I-Moderator-UpdateStatusSuccess")]
+    I_MODERATOR_UPDATE_STATUS_SUCCESS,
+
+    [Description("W-Moderator-UpdateStatusUnApproveToInActive")]
+    W_MODERATOR_UPDATE_STATUS_UN_APPROVE_TO_INACTIVE,
+
+    [Description("W-Moderator-UpdateStatusBannedToInActive")]
+    W_MODERATOR_UPDATE_STATUS_BANNED_TO_INACTIVE,
+
+    [Description("W-Moderator-UpdateStatusToBanning")]
+    W_MODERATOR_UPDATE_STATUS_TO_BANNING,
+
+    [Description("W-Moderator-UpdateStatusToBanned")]
+    W_MODERATOR_UPDATE_STATUS_TO_BANNED,
+
+    [Description("E-Moderator-CanNotUpdateStatusToBanned")]
+    E_MODERATOR_CAN_NOT_UPDATE_STATUS_TO_BANNED,
 }

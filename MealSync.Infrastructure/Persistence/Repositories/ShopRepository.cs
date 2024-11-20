@@ -1,4 +1,7 @@
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
+using MealSync.Application.UseCases.Shops.Models;
+using MealSync.Application.UseCases.Shops.Queries.ModeratorManage.GetListShop;
 using MealSync.Application.UseCases.Shops.Queries.SearchShop;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
@@ -233,6 +236,180 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
     public Task<List<Shop>> GetAllShopReceivingOrderPaused()
     {
         return DbSet.Where(s => s.IsReceivingOrderPaused).ToListAsync();
+    }
+
+    public async Task<(List<ShopManageDto> Shops, int TotalCount)> GetAllShopByDormitoryIds(
+        List<long> dormitoryIds, string? searchValue, DateTime? dateFrom, DateTime? dateTo,
+        ShopStatus? status, GetListShopQuery.FilterShopOrderBy? orderBy,
+        GetListShopQuery.FilterShopDirection? direction, int pageIndex, int pageSize)
+    {
+        var query = DbSet
+            .Where(s => s.Status != ShopStatus.Deleted && s.ShopDormitories.Any(sd => dormitoryIds.Contains(sd.DormitoryId)))
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchValue))
+        {
+            searchValue = EscapeLikeParameter(searchValue);
+            bool isNumeric = int.TryParse(searchValue, out var numericValue);
+
+            query = query.Where(shop =>
+                EF.Functions.Like(shop.Name, $"%{searchValue}%") ||
+                EF.Functions.Like(shop.Description ?? string.Empty, $"%{searchValue}%") ||
+                EF.Functions.Like(shop.Account.FullName ?? string.Empty, $"%{searchValue}%") ||
+                (isNumeric && EF.Functions.Like(shop.Id.ToString(), $"%{numericValue.ToString()}%"))
+            );
+        }
+
+        if (status.HasValue && status.Value != ShopStatus.Deleted)
+        {
+            query = query.Where(shop => shop.Status == status.Value);
+        }
+
+        if (dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(shop => shop.CreatedDate >= dateFrom.Value && shop.CreatedDate <= dateTo.Value);
+        }
+        else if (dateFrom.HasValue && !dateTo.HasValue)
+        {
+            query = query.Where(shop => shop.CreatedDate >= dateFrom.Value);
+        }
+        else if (!dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(shop => shop.CreatedDate <= dateTo.Value);
+        }
+
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+
+        var revenueQuery = query.Select(shop => new ShopManageDto
+        {
+            Id = shop.Id,
+            ShopName = shop.Name,
+            ShopOwnerName = shop.Account.FullName ?? string.Empty,
+            LogoUrl = shop.LogoUrl,
+            Status = shop.Status,
+            TotalFood = shop.TotalFood,
+            TotalOrder = shop.TotalOrder,
+            CreatedDate = shop.CreatedDate,
+            TotalRevenue = shop.Orders
+                .Where(o => o.Status == OrderStatus.Completed || o.Status == OrderStatus.Resolved)
+                .Sum(o =>
+                    o.Status == OrderStatus.Completed && o.ReasonIdentity == null
+                        ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                        : o.Status == OrderStatus.Completed &&
+                          o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription() &&
+                          o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.PaymentMethods == PaymentMethods.VnPay)
+                            ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                            : o.Status == OrderStatus.Resolved &&
+                              o.IsReport &&
+                              o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
+                                ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                                : o.Status == OrderStatus.Resolved &&
+                                  o.IsReport &&
+                                  o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription() &&
+                                  !o.IsRefund &&
+                                  o.Payments.Any(p =>
+                                      p.PaymentMethods == PaymentMethods.VnPay &&
+                                      p.Type == PaymentTypes.Payment &&
+                                      p.Status == PaymentStatus.PaidSuccess)
+                                    ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                                    : 0),
+        });
+
+        if (orderBy.HasValue && direction.HasValue)
+        {
+            if (orderBy.Value == GetListShopQuery.FilterShopOrderBy.CreatedDate)
+            {
+                revenueQuery = direction == GetListShopQuery.FilterShopDirection.ASC
+                    ? revenueQuery.OrderBy(shop => shop.CreatedDate)
+                    : revenueQuery.OrderByDescending(shop => shop.CreatedDate);
+            }
+            else if (orderBy.Value == GetListShopQuery.FilterShopOrderBy.ShopName)
+            {
+                revenueQuery = direction == GetListShopQuery.FilterShopDirection.ASC
+                    ? revenueQuery.OrderBy(shop => shop.ShopName)
+                    : revenueQuery.OrderByDescending(shop => shop.ShopName);
+            }
+            else if (orderBy.Value == GetListShopQuery.FilterShopOrderBy.ShopOwnerName)
+            {
+                revenueQuery = direction == GetListShopQuery.FilterShopDirection.ASC
+                    ? revenueQuery.OrderBy(shop => shop.ShopOwnerName)
+                    : revenueQuery.OrderByDescending(shop => shop.ShopOwnerName);
+            }
+            else if (orderBy.Value == GetListShopQuery.FilterShopOrderBy.Revenue)
+            {
+                revenueQuery = direction == GetListShopQuery.FilterShopDirection.ASC
+                    ? revenueQuery.OrderBy(r => r.TotalRevenue)
+                    : revenueQuery.OrderByDescending(r => r.TotalRevenue);
+            }
+            else if (orderBy.Value == GetListShopQuery.FilterShopOrderBy.TotalOrder)
+            {
+                revenueQuery = direction == GetListShopQuery.FilterShopDirection.ASC
+                    ? revenueQuery.OrderBy(shop => shop.TotalOrder)
+                    : revenueQuery.OrderByDescending(shop => shop.TotalOrder);
+            }
+            else if (orderBy.Value == GetListShopQuery.FilterShopOrderBy.TotalFood)
+            {
+                revenueQuery = direction == GetListShopQuery.FilterShopDirection.ASC
+                    ? revenueQuery.OrderBy(shop => shop.TotalFood)
+                    : revenueQuery.OrderByDescending(shop => shop.TotalFood);
+            }
+        }
+
+        var shops = revenueQuery
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (shops, totalCount);
+    }
+
+    public Task<Shop?> GetShopManageDetail(long shopId, List<long> dormitoriesIdMod)
+    {
+        return DbSet
+            .Include(s => s.Account)
+            .Include(s => s.Location)
+            .Include(s => s.ShopDormitories)
+            .ThenInclude(sd => sd.Dormitory)
+            .Include(s => s.OperatingSlots)
+            .Where(s => s.Id == shopId && s.Status != ShopStatus.Deleted && s.ShopDormitories.Any(sd => dormitoriesIdMod.Contains(sd.DormitoryId)))
+            .FirstOrDefaultAsync();
+    }
+
+    public Task<Shop?> GetShopManage(long shopId, List<long> dormitoriesIdMod)
+    {
+        return DbSet
+            .Include(s => s.Account)
+            .Where(s => s.Id == shopId && s.Status != ShopStatus.Deleted && s.ShopDormitories.Any(sd => dormitoriesIdMod.Contains(sd.DormitoryId)))
+            .FirstOrDefaultAsync();
+    }
+
+    public Task<double> GetShopRevenue(long shopId)
+    {
+        return DbSet
+            .Where(s => s.Id == shopId)
+            .SelectMany(s => s.Orders)
+            .Where(o => o.Status == OrderStatus.Completed || o.Status == OrderStatus.Resolved)
+            .SumAsync(o =>
+                o.Status == OrderStatus.Completed && o.ReasonIdentity == null
+                    ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                    : o.Status == OrderStatus.Completed &&
+                      o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription() &&
+                      o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.PaymentMethods == PaymentMethods.VnPay)
+                        ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                        : o.Status == OrderStatus.Resolved &&
+                          o.IsReport &&
+                          o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
+                            ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                            : o.Status == OrderStatus.Resolved &&
+                              o.IsReport &&
+                              o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription() &&
+                              !o.IsRefund &&
+                              o.Payments.Any(p =>
+                                  p.PaymentMethods == PaymentMethods.VnPay &&
+                                  p.Type == PaymentTypes.Payment &&
+                                  p.Status == PaymentStatus.PaidSuccess)
+                                ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                                : 0);
     }
 
     private static string EscapeLikeParameter(string input)

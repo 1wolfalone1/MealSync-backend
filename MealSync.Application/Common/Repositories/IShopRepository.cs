@@ -1,5 +1,8 @@
-﻿using MealSync.Application.UseCases.Shops.Queries.SearchShop;
+﻿using MealSync.Application.UseCases.Shops.Models;
+using MealSync.Application.UseCases.Shops.Queries.ModeratorManage.GetListShop;
+using MealSync.Application.UseCases.Shops.Queries.SearchShop;
 using MealSync.Domain.Entities;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.Common.Repositories;
 
@@ -26,4 +29,13 @@ public interface IShopRepository : IBaseRepository<Shop>
     Task<Shop> GetShopInfoForReOrderById(long id);
 
     Task<List<Shop>> GetAllShopReceivingOrderPaused();
+
+    Task<(List<ShopManageDto> Shops, int TotalCount)> GetAllShopByDormitoryIds(List<long> dormitoryIds, string? searchValue, DateTime? dateFrom, DateTime? dateTo, ShopStatus? status,
+        GetListShopQuery.FilterShopOrderBy? orderBy, GetListShopQuery.FilterShopDirection? direction, int pageIndex, int pageSize);
+
+    Task<Shop?> GetShopManageDetail(long shopId, List<long> dormitoriesIdMod);
+
+    Task<Shop?> GetShopManage(long shopId, List<long> dormitoriesIdMod);
+
+    Task<double> GetShopRevenue(long shopId);
 }
