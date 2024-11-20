@@ -1,11 +1,13 @@
 using MealSync.Application.Common.Repositories;
+using MealSync.Application.UseCases.WithdrawalRequests.Models;
+using MealSync.Application.UseCases.WithdrawalRequests.Queries.GetAllWithdrawalRequestForMod;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
 
-internal class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IWithdrawalRequestRepository
+public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IWithdrawalRequestRepository
 {
     public WithdrawalRequestRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
@@ -90,6 +92,142 @@ internal class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, 
     public Task<bool> CheckExistingPendingRequestByWalletId(long walletId)
     {
         return DbSet.AnyAsync(wr => wr.WalletId == walletId && wr.Status == WithdrawalRequestStatus.Pending);
+    }
+
+    public async Task<(List<WithdrawalRequestManageDto> WithdrawalRequests, int TotalCount)> GetAllWithdrawalRequestForManage(
+        List<long> dormitoryIds, string? searchValue, DateTime? dateFrom, DateTime? dateTo,
+        WithdrawalRequestStatus? status, GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy? orderBy,
+        GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection? direction, int pageIndex, int pageSize)
+    {
+        var query = DbSet
+            .Where(w => w.Wallet.Shop != default
+                        && w.Wallet.Shop.Status != ShopStatus.Deleted
+                        && w.Wallet.Shop.ShopDormitories.Any(sd => dormitoryIds.Contains(sd.DormitoryId))
+            )
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchValue))
+        {
+            searchValue = EscapeLikeParameter(searchValue);
+            bool isNumeric = int.TryParse(searchValue, out var numericValue);
+
+            query = query.Where(w =>
+                EF.Functions.Like(w.Wallet.Shop!.Name, $"%{searchValue}%") ||
+                EF.Functions.Like(w.BankCode, $"%{searchValue}%") ||
+                EF.Functions.Like(w.BankShortName, $"%{searchValue}%") ||
+                EF.Functions.Like(w.BankAccountNumber, $"%{searchValue}%") ||
+                (isNumeric && EF.Functions.Like(w.Id.ToString(), $"%{numericValue.ToString()}%")) ||
+                (isNumeric && EF.Functions.Like(w.Amount.ToString(), $"%{numericValue.ToString()}%")) ||
+                (isNumeric && EF.Functions.Like(w.Wallet.AvailableAmount.ToString(), $"%{numericValue.ToString()}%"))
+            );
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(w => w.Status == status.Value);
+        }
+
+        if (dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(customer => customer.CreatedDate >= dateFrom.Value && customer.CreatedDate <= dateTo.Value);
+        }
+        else if (dateFrom.HasValue && !dateTo.HasValue)
+        {
+            query = query.Where(customer => customer.CreatedDate >= dateFrom.Value);
+        }
+        else if (!dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(customer => customer.CreatedDate <= dateTo.Value);
+        }
+
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+
+        if (orderBy.HasValue && direction.HasValue)
+        {
+            if (orderBy.Value == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy.CreatedDate)
+            {
+                query = direction == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection.ASC
+                    ? query.OrderBy(w => w.CreatedDate)
+                    : query.OrderByDescending(w => w.CreatedDate);
+            }
+            else if (orderBy.Value == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy.ShopName)
+            {
+                query = direction == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection.ASC
+                    ? query.OrderBy(w => w.Wallet.Shop!.Name)
+                    : query.OrderByDescending(w => w.Wallet.Shop!.Name);
+            }
+            else if (orderBy.Value == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy.RequestAmount)
+            {
+                query = direction == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection.ASC
+                    ? query.OrderBy(w => w.Amount)
+                    : query.OrderByDescending(w => w.Amount);
+            }
+            else if (orderBy.Value == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy.AvailableAmount)
+            {
+                query = direction == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection.ASC
+                    ? query.OrderBy(w => w.Wallet.AvailableAmount)
+                    : query.OrderByDescending(w => w.Wallet.AvailableAmount);
+            }
+            else if (orderBy.Value == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy.BankCode)
+            {
+                query = direction == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection.ASC
+                    ? query.OrderBy(w => w.BankCode)
+                    : query.OrderByDescending(w => w.BankCode);
+            }
+            else if (orderBy.Value == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy.BankAccountNumber)
+            {
+                query = direction == GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection.ASC
+                    ? query.OrderBy(w => w.BankAccountNumber)
+                    : query.OrderByDescending(w => w.BankAccountNumber);
+            }
+        }
+        else
+        {
+            query = query.OrderByDescending(w => w.CreatedDate);
+        }
+
+        var withdrawalRequests = query
+            .Select(w => new WithdrawalRequestManageDto
+            {
+                Id = w.Id,
+                ShopName = w.Wallet.Shop!.Name,
+                RequestAmount = w.Amount,
+                AvailableAmount = w.Wallet.AvailableAmount,
+                BankCode = w.BankCode,
+                BankShortName = w.BankShortName,
+                BankAccountNumber = w.BankAccountNumber,
+                Status = w.Status,
+                CreatedDate = w.CreatedDate,
+            })
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (withdrawalRequests, totalCount);
+    }
+
+    public Task<WithdrawalRequestDetailManageDto?> GetDetailForManage(List<long> dormitoryIds, long withdrawalRequestId)
+    {
+        return DbSet
+            .Where(w => w.Id == withdrawalRequestId && w.Wallet.Shop != default
+                                                    && w.Wallet.Shop.Status != ShopStatus.Deleted
+                                                    && w.Wallet.Shop.ShopDormitories.Any(sd => dormitoryIds.Contains(sd.DormitoryId))
+            ).Select(w => new WithdrawalRequestDetailManageDto
+            {
+                Id = w.Id,
+                ShopName = w.Wallet.Shop!.Name,
+                ShopOwnerName = w.Wallet.Shop.Account.FullName ?? string.Empty,
+                Email = w.Wallet.Shop.Account.Email,
+                RequestAmount = w.Amount,
+                AvailableAmount = w.Wallet.AvailableAmount,
+                BankCode = w.BankCode,
+                BankShortName = w.BankShortName,
+                BankAccountNumber = w.BankAccountNumber,
+                Reason = w.Reason,
+                Status = w.Status,
+                CreatedDate = w.CreatedDate,
+                UpdatedDate = w.UpdatedDate,
+            }).FirstOrDefaultAsync();
     }
 
     private static string EscapeLikeParameter(string input)

@@ -1,4 +1,6 @@
-﻿using MealSync.Domain.Entities;
+﻿using MealSync.Application.UseCases.WithdrawalRequests.Models;
+using MealSync.Application.UseCases.WithdrawalRequests.Queries.GetAllWithdrawalRequestForMod;
+using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Application.Common.Repositories;
@@ -13,4 +15,13 @@ public interface IWithdrawalRequestRepository : IBaseRepository<WithdrawalReques
     Task<WithdrawalRequest?> GetByIdAndWalletId(long id, long walletId);
 
     Task<bool> CheckExistingPendingRequestByWalletId(long walletId);
+
+    Task<(List<WithdrawalRequestManageDto> WithdrawalRequests, int TotalCount)> GetAllWithdrawalRequestForManage(
+        List<long> dormitoryIds, string? searchValue,
+        DateTime? dateFrom, DateTime? dateTo, WithdrawalRequestStatus? status,
+        GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy? orderBy,
+        GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection? direction,
+        int pageIndex, int pageSize);
+
+    Task<WithdrawalRequestDetailManageDto?> GetDetailForManage(List<long> dormitoryIds, long withdrawalRequestId);
 }
