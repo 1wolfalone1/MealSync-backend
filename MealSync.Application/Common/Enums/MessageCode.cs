@@ -643,4 +643,8 @@ public enum MessageCode
 
     [Description("E-Moderator-NotHaveManagePermission")]
     E_MODERATOR_NOT_HAVE_MANAGE_PERMISSION,
+
+    // Notifiation
+    [Description("E-Notification-NotFound")]
+    E_NOTIFICATION_NOT_FOUND,
 }
