@@ -210,5 +210,10 @@ public static class Endpoints
     public const string MANAGE_SHOP_UPDATE_STATUS = "moderator/shop/status";
 
     // Notification
+    public const string NOTIFICATION_SHOP_STAFF = "shop-owner-staff/notification";
+    public const string TOTAL_UNREAD_NOTIFICATION_SHOP_STAFF = "shop-owner-staff/notification/total-unread";
+    public const string NOTIFICATION_UPDATE_SHOP_STAFF = "shop-owner-staff/notification";
+
+    // Chat
     public const string ORDER_INFOR_CHAT = "order/{id:long}/chat-info";
 }

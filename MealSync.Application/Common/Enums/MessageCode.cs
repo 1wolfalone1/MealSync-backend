@@ -640,4 +640,8 @@ public enum MessageCode
 
     [Description("E-Moderator-CanNotUpdateStatusToBanned")]
     E_MODERATOR_CAN_NOT_UPDATE_STATUS_TO_BANNED,
+
+    // Notifiation
+    [Description("E-Notification-NotFound")]
+    E_NOTIFICATION_NOT_FOUND,
 }
