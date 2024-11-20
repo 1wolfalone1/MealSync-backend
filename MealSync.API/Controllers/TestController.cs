@@ -6,6 +6,7 @@ using MealSync.Application.UseCases.Accounts.Queries;
 using MealSync.Application.UseCases.Orders.Queries.ShopGetQrCodeOfOrders;
 using MealSync.Application.UseCases.Roles.Commands.CreateRole;
 using MealSync.Application.UseCases.Roles.Commands.UpdateRole;
+using MealSync.Application.UseCases.Test.Commands.TestFirebase;
 using MealSync.Application.UseCases.Test.Commands.TestModeratorCreateLog;
 using MealSync.Application.UseCases.Test.Commands.TestPushNotiKafkas;
 using MealSync.Application.UseCases.Test.Commands.TestValidateError;
@@ -95,6 +96,12 @@ public class TestController : BaseApiController
 
     [HttpPost("/api/v1/test/push-noti-kafka")]
     public async Task<IActionResult> TestPushNotiKafka([FromBody] TestPushNotiKafkaCommand command)
+    {
+        return this.HandleResult(await this.Mediator.Send(command));
+    }
+
+    [HttpPost("/api/v1/test/push-noti-firebase")]
+    public async Task<IActionResult> TestPushNotiKafka([FromBody] TestFirebaseCommand command)
     {
         return this.HandleResult(await this.Mediator.Send(command));
     }
