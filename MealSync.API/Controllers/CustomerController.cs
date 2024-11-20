@@ -1,3 +1,4 @@
+using MealSync.Application.UseCases.Accounts.Queries.ModeratorManage.GetListAccount;
 using MealSync.Application.UseCases.Customers.Commands.UpdateAvatar;
 using MealSync.Application.UseCases.Customers.Commands.UpdateProfile;
 
@@ -34,5 +35,12 @@ public class CustomerController : BaseApiController
     public async Task<IActionResult> UpdateCustomerProfile(UpdateProfileCommand request)
     {
         return this.HandleResult(await this.Mediator.Send(request).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_CUSTOMER)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> GetShopFood([FromQuery] GetListAccountQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }

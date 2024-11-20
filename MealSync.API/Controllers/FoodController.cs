@@ -8,6 +8,7 @@ using MealSync.Application.UseCases.Foods.Commands.ShopUpdateFoodStatus;
 using MealSync.Application.UseCases.Foods.Commands.Update;
 using MealSync.Application.UseCases.Foods.Queries.FoodDetail;
 using MealSync.Application.UseCases.Foods.Queries.FoodDetailOfShop;
+using MealSync.Application.UseCases.Foods.Queries.FoodOfShopForModManage;
 using MealSync.Application.UseCases.Foods.Queries.GetAll;
 using MealSync.Application.UseCases.Foods.Queries.GetByIds;
 using MealSync.Application.UseCases.Foods.Queries.GetFoodReorder;
@@ -150,5 +151,17 @@ public class FoodController : BaseApiController
     public async Task<IActionResult> ReOrder([FromBody] GetFoodReorderQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_SHOP_FOOD)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> GetShopFood(long id, int pageIndex, int pageSize)
+    {
+        return HandleResult(await Mediator.Send(new GetFoodOfShopForModManageQuery
+        {
+            ShopId = id,
+            PageIndex = pageIndex,
+            PageSize = pageSize,
+        }).ConfigureAwait(false));
     }
 }

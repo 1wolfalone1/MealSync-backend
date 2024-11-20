@@ -249,4 +249,15 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
     {
         return DbSet.Where(f => f.IsSoldOut).ToListAsync();
     }
+
+    public async Task<(List<Food> Foods, int TotalCount)> GetShopFoodForModManage(long shopId, int pageIndex, int pageSize)
+    {
+        var query = DbSet.Where(f => f.ShopId == shopId && f.Status != FoodStatus.Delete);
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+        var data = await query.Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync().ConfigureAwait(false);
+
+        return (data, totalCount);
+    }
 }

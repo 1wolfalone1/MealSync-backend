@@ -640,4 +640,7 @@ public enum MessageCode
 
     [Description("E-Moderator-CanNotUpdateStatusToBanned")]
     E_MODERATOR_CAN_NOT_UPDATE_STATUS_TO_BANNED,
+
+    [Description("E-Moderator-NotHaveManagePermission")]
+    E_MODERATOR_NOT_HAVE_MANAGE_PERMISSION,
 }
