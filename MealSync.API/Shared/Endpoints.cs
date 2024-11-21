@@ -213,6 +213,9 @@ public static class Endpoints
 
     public const string MANAGE_CUSTOMER = "moderator/customer";
 
+    public const string MANAGE_WITHDRAWAL_REQUEST = "moderator/withdrawal-request";
+    public const string MANAGE_WITHDRAWAL_REQUEST_DETAIL = "moderator/withdrawal-request/{id:long}";
+
     // Notification
     public const string NOTIFICATION_SHOP_STAFF = "shop-owner-staff/notification";
     public const string TOTAL_UNREAD_NOTIFICATION_SHOP_STAFF = "shop-owner-staff/notification/total-unread";
