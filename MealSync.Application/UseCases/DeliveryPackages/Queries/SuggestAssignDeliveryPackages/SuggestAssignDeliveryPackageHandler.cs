@@ -36,10 +36,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         var shopStaffs = await GetListShopDeliveryStaffAsync(request).ConfigureAwait(false);
 
         // Check if shop not ship remove shop
-        if (!request.IsShopOwnerShip)
-        {
-            shopStaffs = shopStaffs.Where(sf => !sf.ShopDeliveryStaff.IsShopOwner).ToList();
-        }
+        shopStaffs = shopStaffs.Where(sf => request.ShipperIds.Contains(sf.ShopDeliveryStaff.Id)).ToList();
 
         var assignOrder = AssignOrder(shopStaffs, unAssignOrders);
 
