@@ -41,7 +41,7 @@ public class OrderListInforNotificationHandler : IQueryHandler<OrderListInforNot
     private void Validate(OrderListInforNotificationQuery request)
     {
         var account = _currentAccountService.GetCurrentAccount();
-        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
+        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : (account.RoleId == (int) Domain.Enums.Roles.ShopDelivery ? _shopDeliveryStaffRepository.GetById(account.Id).ShopId : 0);
 
         foreach (var id in request.Ids)
         {
