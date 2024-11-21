@@ -9,5 +9,5 @@ public class SuggestAssignDeliveryPackageQuery : IQuery<Result>
 
     public int EndTime { get; set; }
 
-    public bool IsShopOwnerShip { get; set; }
+    public long[] ShipperIds { get; set; }
 }
