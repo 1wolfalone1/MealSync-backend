@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using CorePush.Firebase;
-using FirebaseAdmin.Messaging;
 using MealSync.Application.Common.Repositories;
 using Microsoft.Extensions.Configuration;
 using MealSync.Application.Common.Services.Notifications;

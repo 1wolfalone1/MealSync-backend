@@ -14,6 +14,7 @@ using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopRejectO
 using MealSync.Application.UseCases.Orders.Commands.ShowQRConfirm;
 using MealSync.Application.UseCases.Orders.Commands.UpdatePaymentStatusIPN;
 using MealSync.Application.UseCases.Orders.Queries.GetDeliveryInfoFail;
+using MealSync.Application.UseCases.Orders.Queries.ModeratorManage.GetOrderForModerator;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailCustomer;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailForShop;
 using MealSync.Application.UseCases.Orders.Queries.OrderHistory;
@@ -212,5 +213,12 @@ public class OrderController : BaseApiController
         {
             OrderId = id,
         }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MODERATOR_ORDER)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> ModeratorGetOrder([FromQuery] GetOrderForModeratorQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }

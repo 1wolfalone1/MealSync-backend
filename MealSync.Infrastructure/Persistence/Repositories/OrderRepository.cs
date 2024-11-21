@@ -428,4 +428,80 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             .Include(o => o.Shop)
             .ThenInclude(sh => sh.Account).SingleOrDefault();
     }
+
+    public List<Order> GetOrderListInforNotification(long[] ids)
+    {
+        return DbSet.Where(o => ids.Contains(o.Id))
+            .Include(o => o.DeliveryPackage)
+            .ThenInclude(dp => dp.ShopDeliveryStaff)
+            .ThenInclude(sds => sds.Account)
+            .Include(o => o.Customer)
+            .ThenInclude(cus => cus.Account)
+            .Include(o => o.Shop)
+            .ThenInclude(sh => sh.Account).ToList();
+    }
+
+    public (int TotalCount, List<Order> Orders) GetOrderForModerator(string? searchValue, DateTime? dateFrom, DateTime? dateTo, OrderStatus[] status, long[] dormitoryIds, int pageIndex, int pageSize)
+    {
+        var query = DbSet.Where(o => status.Contains(o.Status) && dormitoryIds.Contains(o.Building.DormitoryId)).AsQueryable();
+
+        if (dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(o => o.IntendedReceiveDate >= dateFrom.Value && o.IntendedReceiveDate <= dateTo.Value);
+        }
+
+        if (searchValue != null)
+        {
+            query = query.Where(o => o.Id.ToString().Contains(searchValue) ||
+                                     o.Shop.Name.Contains(searchValue) ||
+                                     o.FullName.Contains(searchValue) ||
+                                     o.PhoneNumber.Contains(searchValue));
+        }
+
+        var totalCount = query.Count();
+        var resultList = query
+            .Select(o => new Order
+            {
+                Id = o.Id,
+                CustomerId = o.CustomerId,
+                FullName = o.FullName,
+                PhoneNumber = o.PhoneNumber,
+                TotalPrice = o.TotalPrice,
+                TotalPromotion = o.TotalPromotion,
+                ChargeFee = o.ChargeFee,
+                OrderDate = o.OrderDate,
+                ReceiveAt = o.ReceiveAt,
+                CancelAt = o.CancelAt,
+                CompletedAt = o.CompletedAt,
+                ResolveAt = o.ResolveAt,
+                Status = o.Status,
+                Building = new Building
+                {
+                    Id = o.BuildingId,
+                    Name = o.Building.Name,
+                    Dormitory = new Dormitory()
+                    {
+                        Id = o.Building.Dormitory.Id,
+                        Name = o.Building.Dormitory.Name,
+                    }
+                },
+                Shop = new Shop
+                {
+                    Id = o.ShopId,
+                    Name = o.Shop.Name,
+                    LogoUrl = o.Shop.LogoUrl,
+                    BannerUrl = o.Shop.BannerUrl,
+                    Account = new Account()
+                    {
+                        Id = o.Shop.Account.Id,
+                        FullName = o.Shop.Account.FullName,
+                    }
+                },
+            })
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (totalCount, resultList);
+    }
 }
