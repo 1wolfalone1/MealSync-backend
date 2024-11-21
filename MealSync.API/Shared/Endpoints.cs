@@ -212,6 +212,8 @@ public static class Endpoints
     public const string MANAGE_SHOP_FOOD = "moderator/shop/{id:long}/food";
 
     public const string MANAGE_CUSTOMER = "moderator/customer";
+    public const string MANAGE_CUSTOMER_DETAIL = "moderator/customer/{id:long}";
+    public const string MANAGE_CUSTOMER_BAN_UNBAN = "moderator/customer/status";
 
     public const string MANAGE_WITHDRAWAL_REQUEST = "moderator/withdrawal-request";
     public const string MANAGE_WITHDRAWAL_REQUEST_DETAIL = "moderator/withdrawal-request/{id:long}";

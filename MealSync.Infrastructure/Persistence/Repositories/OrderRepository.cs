@@ -414,7 +414,16 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
 
     public Task<int> CountTotalOrderInProcessByShopId(long shopId)
     {
-        return DbSet.CountAsync(o => o.ShopId == shopId && (o.Status == OrderStatus.Delivering || o.Status == OrderStatus.Preparing));
+        return DbSet.CountAsync(o => o.ShopId == shopId && (o.Status == OrderStatus.Preparing || o.Status == OrderStatus.Delivering));
+    }
+
+    public Task<List<Order>> GetForSystemCancelByShopId(long shopId)
+    {
+        return DbSet.Include(o => o.Payments)
+            .Where(o =>
+                o.CustomerId == shopId
+                && (o.Status == OrderStatus.Pending || o.Status == OrderStatus.PendingPayment || o.Status == OrderStatus.Confirmed))
+            .ToListAsync();
     }
 
     public Order GetOrderInforNotification(long orderId)
@@ -483,7 +492,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                     {
                         Id = o.Building.Dormitory.Id,
                         Name = o.Building.Dormitory.Name,
-                    }
+                    },
                 },
                 Shop = new Shop
                 {
@@ -495,7 +504,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                     {
                         Id = o.Shop.Account.Id,
                         FullName = o.Shop.Account.FullName,
-                    }
+                    },
                 },
             })
             .Skip((pageIndex - 1) * pageSize)
@@ -503,5 +512,19 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             .ToList();
 
         return (totalCount, resultList);
+    }
+
+    public Task<int> CountTotalOrderInProcessByCustomerId(long customerId)
+    {
+        return DbSet.CountAsync(o => o.CustomerId == customerId && (o.Status == OrderStatus.Preparing || o.Status == OrderStatus.Delivering));
+    }
+
+    public Task<List<Order>> GetForSystemCancelByCustomerId(long customerId)
+    {
+        return DbSet.Include(o => o.Payments)
+            .Where(o =>
+                o.CustomerId == customerId
+                && (o.Status == OrderStatus.Pending || o.Status == OrderStatus.PendingPayment || o.Status == OrderStatus.Confirmed))
+            .ToListAsync();
     }
 }

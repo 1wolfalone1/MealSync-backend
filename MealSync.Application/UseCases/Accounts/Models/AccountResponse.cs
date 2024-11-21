@@ -10,5 +10,7 @@ public class AccountResponse
 
     public string? AvatarUrl { get; set; }
 
+    public long RoleId { get; set; }
+
     public string RoleName { get; set; } = null!;
 }

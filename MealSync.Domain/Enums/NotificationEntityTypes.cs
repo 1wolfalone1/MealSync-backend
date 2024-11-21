@@ -8,4 +8,5 @@ public enum NotificationEntityTypes
     Report = 3,
     WithdrawalRequest = 4,
     Wallet = 5,
+    Chat = 6,
 }

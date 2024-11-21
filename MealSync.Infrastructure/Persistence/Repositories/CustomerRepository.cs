@@ -1,3 +1,4 @@
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.UseCases.Accounts.Models;
 using MealSync.Application.UseCases.Accounts.Queries.ModeratorManage.GetListAccount;
@@ -13,14 +14,16 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
     {
     }
 
-    public async Task<(List<AccountForModManageDto> Customers, int TotalCount)> GetAllCustomerByDormitoryIds(
+    public async Task<(List<AccountForModManageDto> Customers, int TotalCount)> GetAllCustomer(
         List<long> dormitoryIds, string? searchValue,
         DateTime? dateFrom, DateTime? dateTo, AccountStatus? status,
         GetListAccountQuery.FilterCustomerOrderBy? orderBy, GetListAccountQuery.FilterCustomerDirection? direction, int pageIndex, int pageSize)
     {
         var query = DbSet
-            .Include(c => c.Account)
-            .Where(c => c.Account.Status != AccountStatus.Deleted && c.CustomerBuildings.Any(sd => dormitoryIds.Contains(sd.Building.DormitoryId)))
+            .Where(c => c.Account.Status != AccountStatus.Deleted
+                        && (c.CustomerBuildings.Any(sd => dormitoryIds.Contains(sd.Building.DormitoryId))
+                            || c.Orders.Any(o => dormitoryIds.Contains(o.Building.DormitoryId)))
+            )
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchValue))
@@ -104,6 +107,87 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
             .ToList();
 
         return (customers, totalCount);
+    }
+
+    public Task<AccountDetailForModManageDto?> GetCustomerDetail(List<long> dormitoryIds, long customerId)
+    {
+        return DbSet
+            .Where(c => c.Account.Status != AccountStatus.Deleted
+                        && c.Id == customerId
+                        && (
+                            c.CustomerBuildings.Any(sd => dormitoryIds.Contains(sd.Building.DormitoryId))
+                            || c.Orders.Any(o => dormitoryIds.Contains(o.Building.DormitoryId))
+                        )
+            ).Select(c => new AccountDetailForModManageDto
+            {
+                Id = c.Id,
+                Email = c.Account.Email,
+                PhoneNumber = c.Account.PhoneNumber,
+                FullName = c.Account.FullName,
+                AvatarUrl = c.Account.AvatarUrl,
+                Genders = c.Account.Genders,
+                Status = c.Account.Status,
+                NumOfFlag = c.Account.NumOfFlag,
+                CreatedDate = c.CreatedDate,
+                AccountFlags = c.Account.AccountFlags.Select(af => new AccountDetailForModManageDto.AccountFlagDetailDto
+                {
+                    Id = af.Id,
+                    ActionType = af.ActionType,
+                    TargetType = af.TargetType,
+                    TargetId = af.TargetId,
+                    Description = af.Description,
+                    CreatedDate = af.CreatedDate,
+                }).ToList(),
+                OrderSummary = new AccountDetailForModManageDto.OrderSummaryDto
+                {
+                    TotalOrderInProcess = c.Orders.Sum(o => o.Status != OrderStatus.Rejected
+                                                            && o.Status != OrderStatus.Cancelled
+                                                            && o.Status != OrderStatus.Completed
+                                                            && o.Status != OrderStatus.Resolved
+                        ? 1
+                        : 0),
+                    TotalCancelByCustomer = c.Orders.Sum(o => o.Status == OrderStatus.Cancelled
+                                                              && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription()
+                        ? 1
+                        : 0),
+                    TotalCancelOrRejectByShop = c.Orders.Sum(o => o.Status == OrderStatus.Cancelled
+                                                                  && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription()
+                        ? 1
+                        : o.Status == OrderStatus.Rejected
+                            ? 1
+                            : 0),
+                    TotalDelivered = c.Orders.Sum(o => o.Status == OrderStatus.Completed
+                                                       && o.ReasonIdentity == default
+                        ? 1
+                        : 0),
+                    TotalFailDeliveredByCustomer = c.Orders.Sum(o => o.Status == OrderStatus.Completed
+                                                                     && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription()
+                        ? 1
+                        : 0),
+                    TotalFailDeliveredByShop = c.Orders.Sum(o => o.Status == OrderStatus.Completed
+                                                                 && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription()
+                        ? 1
+                        : 0),
+                    TotalReportResolved = c.Orders.Sum(o => o.Status == OrderStatus.Resolved
+                                                            && o.IsReport
+                                                            && (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
+                                                                || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription())
+                        ? 1
+                        : 0),
+                },
+            }).FirstOrDefaultAsync();
+    }
+
+    public Task<Customer?> GetCustomer(List<long> dormitoryIds, long customerId)
+    {
+        return DbSet.Include(c => c.Account)
+            .Where(c => c.Account.Status != AccountStatus.Deleted
+                        && c.Id == customerId
+                        && (
+                            c.CustomerBuildings.Any(sd => dormitoryIds.Contains(sd.Building.DormitoryId))
+                            || c.Orders.Any(o => dormitoryIds.Contains(o.Building.DormitoryId))
+                        )
+            ).FirstOrDefaultAsync();
     }
 
     private static string EscapeLikeParameter(string input)

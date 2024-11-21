@@ -29,4 +29,8 @@ public interface IEmailService
     bool SendBanShopWithReason(string email, string? fullName, string shopName, string reason, int numberOfFlag, bool isBanned);
 
     bool SendUnBanShopWithReason(string email, string? fullName, string shopName, string reason);
+
+    bool SendBanCustomerWithReason(string email, string? fullName, string reason, int numberOfFlag, bool isBanned);
+
+    bool SendUnBanCustomerWithReason(string email, string? fullName, string reason);
 }
