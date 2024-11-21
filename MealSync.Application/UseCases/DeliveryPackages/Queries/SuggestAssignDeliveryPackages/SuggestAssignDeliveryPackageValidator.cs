@@ -21,5 +21,9 @@ public class SuggestAssignDeliveryPackageValidator : AbstractValidator<SuggestAs
         RuleFor(x => x.EndTime)
             .GreaterThan(TimeFrameUtils.GetCurrentHoursInUTC7())
             .WithMessage("Vui lòng cung cấp khoảng thời gian hiện tại và tương lai");
+
+        RuleFor(x => x.ShipperIds)
+            .NotEmpty()
+            .WithMessage("Vui lòng cung cấp ít nhất 1 nhân viên");
     }
 }
