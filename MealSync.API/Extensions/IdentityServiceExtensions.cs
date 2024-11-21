@@ -13,6 +13,7 @@ using MealSync.Infrastructure.Services;
 using MealSync.Infrastructure.Services.Dapper;
 using MealSync.Infrastructure.Services.Notifications;
 using MealSync.Infrastructure.Services.Notifications.Kafka;
+using MealSync.Infrastructure.Services.Notifications.Kafka.Consumers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MealSync.Infrastructure.Settings;
@@ -166,6 +167,10 @@ public static class IdentityServiceExtensions
         services.AddSingleton<INotificationProvider, NotificationProvider>();
         services.AddSingleton<INotifierService, NotifierService>();
         services.AddSingleton<INotificationFactory, NotificationFactory>();
+
+        // Kafka
+        services.AddHostedService<KafkaConsumerRequestNotiFirebaseService>();
+        services.AddHttpClient();
 
         // Add Error Config
         var resourceRepository = services.BuildServiceProvider().GetService<ISystemResourceRepository>();

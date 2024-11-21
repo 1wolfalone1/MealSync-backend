@@ -12,6 +12,7 @@ using MealSync.Infrastructure.Services;
 using MealSync.Infrastructure.Services.Dapper;
 using MealSync.Infrastructure.Services.Notifications;
 using MealSync.Infrastructure.Services.Notifications.Kafka;
+using MealSync.Infrastructure.Services.Notifications.Kafka.Consumers;
 using MealSync.Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
