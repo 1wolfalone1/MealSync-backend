@@ -310,10 +310,10 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
 
                 WalletTransaction transactionWithdrawalSystemTotalForRefundPaymentOnline = new WalletTransaction
                 {
-                    WalletFromId = systemCommissionWallet.Id,
-                    AvaiableAmountBefore = systemCommissionWallet.AvailableAmount,
-                    IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
-                    ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
+                    WalletFromId = systemTotalWallet.Id,
+                    AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
+                    IncomingAmountBefore = systemTotalWallet.IncomingAmount,
+                    ReportingAmountBefore = systemTotalWallet.ReportingAmount,
                     Amount = -payment.Amount,
                     Type = WalletTransactionType.Withdrawal,
                     Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(payment.Amount)} VNĐ để hoàn tiền giao dịch thanh toán online của đơn hàng MS-{payment.OrderId}",
