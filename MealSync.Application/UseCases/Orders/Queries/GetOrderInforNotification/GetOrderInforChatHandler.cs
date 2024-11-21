@@ -41,7 +41,7 @@ public class GetOrderInforNotificationHandler : IQueryHandler<GetOrderInforChatQ
     private void Validate(GetOrderInforChatQuery request)
     {
         var account = _currentAccountService.GetCurrentAccount();
-        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
+        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : (account.RoleId == (int) Domain.Enums.Roles.ShopDelivery ? _shopDeliveryStaffRepository.GetById(account.Id).ShopId : 0);
         var order = _orderRepository
             .Get(o => o.Id == request.Id && (o.ShopId == shopId || o.CustomerId == _currentPrincipalService.CurrentPrincipalId)).SingleOrDefault();
         if (order == default)
