@@ -2,6 +2,8 @@
 
 public class OrderInforNotificationResponse
 {
+    public long Id { get; set; }
+
     public CustomerInforNotification Customer { get; set; }
 
     public ShopInforNotification Shop { get; set; }
