@@ -1,3 +1,5 @@
+using MealSync.Application.UseCases.Accounts.Commands.BanUnBanCustomerByMod;
+using MealSync.Application.UseCases.Accounts.Queries.ModeratorManage.GetDetailAccount;
 using MealSync.Application.UseCases.Accounts.Queries.ModeratorManage.GetListAccount;
 using MealSync.Application.UseCases.Customers.Commands.UpdateAvatar;
 using MealSync.Application.UseCases.Customers.Commands.UpdateProfile;
@@ -39,8 +41,22 @@ public class CustomerController : BaseApiController
 
     [HttpGet(Endpoints.MANAGE_CUSTOMER)]
     [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
-    public async Task<IActionResult> GetShopFood([FromQuery] GetListAccountQuery query)
+    public async Task<IActionResult> GetListCustomer([FromQuery] GetListAccountQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_CUSTOMER_DETAIL)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> GetCustomerDetail(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetDetailAccountQuery { AccountId = id }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_CUSTOMER_BAN_UNBAN)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> BanOrUnban([FromBody] BanUnBanCustomerByModCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }

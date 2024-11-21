@@ -444,6 +444,46 @@ public class NotificationFactory : INotificationFactory
         };
     }
 
+    public Notification CreateSystemCancelOrderOfCustomerNotification(Order order, Account account)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_OF_CUSTOMER_SYSTEM_CANCEL.GetDescription(), order.Id),
+            ImageUrl = account.AvatarUrl, // Todo: System image
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateSystemCancelOrderOfShopNotification(Order order, Account account)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_OF_SHOP_SYSTEM_CANCEL.GetDescription(), order.Id),
+            ImageUrl = account.AvatarUrl, // Todo: System image
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
     public Notification CreateCustomerCompletedOrderNotification(Order order, Account account)
     {
         using var scope = _serviceScopeFactory.CreateScope();
@@ -475,7 +515,7 @@ public class NotificationFactory : INotificationFactory
             AccountId = order.ShopId,
             ReferenceId = order.Id,
             Title = NotificationConstant.WALLET_TITLE,
-            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_WALLET_SHOP_RECEIVE_INCOMMING_AMOUNT.GetDescription(), new object[] { MoneyUtils.FormatMoneyWithDots(amountPlus), order.Id}),
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_WALLET_SHOP_RECEIVE_INCOMMING_AMOUNT.GetDescription(), new object[] { MoneyUtils.FormatMoneyWithDots(amountPlus), order.Id }),
             ImageUrl = account.AvatarUrl,
             Data = JsonConvert.SerializeObject(orderNotification),
             Type = NotificationTypes.SendToShop,
@@ -495,7 +535,8 @@ public class NotificationFactory : INotificationFactory
             AccountId = order.ShopId,
             ReferenceId = order.Id,
             Title = NotificationConstant.WALLET_TITLE,
-            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_WALLET_TAKE_COMMISISSION_FEE_FROM_SHOP_WALLET.GetDescription(), new object[] { MoneyUtils.FormatMoneyWithDots(amountTake), order.Id}),
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_WALLET_TAKE_COMMISISSION_FEE_FROM_SHOP_WALLET.GetDescription(),
+                new object[] { MoneyUtils.FormatMoneyWithDots(amountTake), order.Id }),
             ImageUrl = account.AvatarUrl,
             Data = JsonConvert.SerializeObject(orderNotification),
             Type = NotificationTypes.SendToShop,

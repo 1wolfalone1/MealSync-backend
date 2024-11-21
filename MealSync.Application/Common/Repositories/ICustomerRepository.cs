@@ -7,8 +7,12 @@ namespace MealSync.Application.Common.Repositories;
 
 public interface ICustomerRepository : IBaseRepository<Customer>
 {
-    Task<(List<AccountForModManageDto> Customers, int TotalCount)> GetAllCustomerByDormitoryIds(
+    Task<(List<AccountForModManageDto> Customers, int TotalCount)> GetAllCustomer(
         List<long> dormitoryIds, string? searchValue, DateTime? dateFrom,
         DateTime? dateTo, AccountStatus? status,
         GetListAccountQuery.FilterCustomerOrderBy? orderBy, GetListAccountQuery.FilterCustomerDirection? direction, int pageIndex, int pageSize);
+
+    Task<AccountDetailForModManageDto?> GetCustomerDetail(List<long> dormitoryIds, long customerId);
+
+    Task<Customer?> GetCustomer(List<long> dormitoryIds, long customerId);
 }

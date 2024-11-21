@@ -51,4 +51,8 @@ public interface INotificationFactory
     Notification CreateTakeCommissionFromShopWalletNotification(Order order, Account account, double amountTake);
 
     Notification CreateWarningFlagCustomerNotification(Account account);
+
+    Notification CreateSystemCancelOrderOfCustomerNotification(Order order, Account account);
+
+    Notification CreateSystemCancelOrderOfShopNotification(Order order, Account account);
 }
