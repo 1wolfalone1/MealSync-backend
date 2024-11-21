@@ -26,6 +26,7 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
     private readonly ISystemConfigRepository _systemConfigRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateCompletedOrderHandler> _logger;
+    private readonly IAccountFlagRepository _accountFlagRepository;
 
     public UpdateCompletedOrderHandler(
         IOrderRepository orderRepository, IPaymentRepository paymentRepository,
@@ -33,7 +34,7 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
         IWalletTransactionRepository walletTransactionRepository, IAccountRepository accountRepository,
         IBatchHistoryRepository batchHistoryRepository, IUnitOfWork unitOfWork, ILogger<UpdateCompletedOrderHandler> logger,
         INotificationFactory notificationFactory, INotifierService notifierService,
-        IEmailService emailService, ISystemConfigRepository systemConfigRepository)
+        IEmailService emailService, ISystemConfigRepository systemConfigRepository, IAccountFlagRepository accountFlagRepository)
     {
         _orderRepository = orderRepository;
         _paymentRepository = paymentRepository;
@@ -48,6 +49,7 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
         _notifierService = notifierService;
         _emailService = emailService;
         _systemConfigRepository = systemConfigRepository;
+        _accountFlagRepository = accountFlagRepository;
     }
 
     public async Task<Result<Result>> Handle(UpdateCompletedOrderCommand request, CancellationToken cancellationToken)
@@ -63,6 +65,7 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
         var accountsUpdateFlag = new List<Account>();
         var shopWalletUpdateAmount = new List<Wallet>();
         var shopWalletTransactionInsert = new List<WalletTransaction>();
+        AccountFlag? accountFlag = default;
 
         foreach (var order in orders)
         {
@@ -86,6 +89,8 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
 
                         // => Flag customer - Todo: Question
                         customerAccount.NumOfFlag += 1;
+                        accountFlag = GetAccountFlagForFailDeliveryByCustomer(customerAccount, order);
+
                         if (customerAccount.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
                         {
                             customerAccount.Status = AccountStatus.Banned;
@@ -100,6 +105,8 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
                     {
                         // => Flag customer - Todo: Question
                         customerAccount.NumOfFlag += 1;
+                        accountFlag = GetAccountFlagForFailDeliveryByCustomer(customerAccount, order);
+
                         if (customerAccount.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
                         {
                             customerAccount.Status = AccountStatus.Banned;
@@ -150,6 +157,10 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
             _walletRepository.UpdateRange(shopWalletUpdateAmount);
             await _walletTransactionRepository.AddRangeAsync(shopWalletTransactionInsert).ConfigureAwait(false);
             _accountRepository.UpdateRange(accountsUpdateFlag);
+            if (accountFlag != default)
+            {
+                await _accountFlagRepository.AddAsync(accountFlag).ConfigureAwait(false);
+            }
 
             endBatchDateTime = TimeFrameUtils.GetCurrentDate();
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
@@ -190,6 +201,18 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
             _logger.LogError(e, e.Message);
             throw;
         }
+    }
+
+    private AccountFlag GetAccountFlagForFailDeliveryByCustomer(Account customerAccount, Order order)
+    {
+        return new AccountFlag
+        {
+            AccountId = customerAccount.Id,
+            ActionType = AccountActionTypes.FailDeliveryByCustomerOrder,
+            TargetType = AccountTargetTypes.Order,
+            TargetId = order.Id.ToString(),
+            Description = $"Khách hàng không nhận hàng giao từ cửa hàng đơn hàng MS-{order.Id}",
+        };
     }
 
     private void NotifyFlagOrBanCustomerAccount(Account customerAccount, SystemConfig systemConfig)

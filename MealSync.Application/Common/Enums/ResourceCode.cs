@@ -92,6 +92,21 @@ public enum ResourceCode
     [Description("Email-Body-UnBanShopWithReason")]
     EMAIL_BODY_UN_BAN_SHOP_WITH_REASON,
 
+    [Description("Email-SubjectBannedCustomerWithReason")]
+    EMAIL_SUBJECT_BANNED_CUSTOMER_WITH_REASON,
+
+    [Description("Email-SubjectBanningCustomerWithReason")]
+    EMAIL_SUBJECT_BANNING_CUSTOMER_WITH_REASON,
+
+    [Description("Email-Body-BanCustomerWithReason")]
+    EMAIL_BODY_BAN_CUSTOMER_WITH_REASON,
+
+    [Description("Email-SubjectUnBanCustomerWithReason")]
+    EMAIL_SUBJECT_UN_BAN_CUSTOMER_WITH_REASON,
+
+    [Description("Email-Body-UnBanCustomerWithReason")]
+    EMAIL_BODY_UN_BAN_CUSTOMER_WITH_REASON,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,
@@ -166,4 +181,10 @@ public enum ResourceCode
 
     [Description("Notification-Wallet-TakeCommissionFeeFromShopWallet")]
     NOTIFICATION_WALLET_TAKE_COMMISISSION_FEE_FROM_SHOP_WALLET,
+
+    [Description("Notification-Order-Of-Customer-System-Cancel")]
+    NOTIFICATION_ORDER_OF_CUSTOMER_SYSTEM_CANCEL,
+
+    [Description("Notification-Order-Of-Shop-System-Cancel")]
+    NOTIFICATION_ORDER_OF_SHOP_SYSTEM_CANCEL,
 }

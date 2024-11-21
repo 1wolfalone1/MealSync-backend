@@ -87,6 +87,7 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
             {
                 Id = account.Id,
                 Email = account.Email,
+                RoleId = account.RoleId,
                 RoleName = account.Role.Name,
                 AvatarUrl = account.AvatarUrl,
                 FullName = account.FullName,
