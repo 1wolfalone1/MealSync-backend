@@ -148,6 +148,7 @@ public static class Endpoints
     public const string SHOP_DELIVERED_INFOR_EVIDENCE = "shop-owner/order/{id:long}/delivery-infor";
     public const string SHOP_AND_STAFF_DELIVERED_INFOR_EVIDENCE = "shop-owner-staff/order/{id:long}/delivery-infor";
     public const string RE_ORDER = "customer/re-order/food";
+    public const string MODERATOR_ORDER = "moderator/order";
 
     // Report
     public const string CUSTOMER_REPORT_ORDER = "customer/order/report";
@@ -222,4 +223,5 @@ public static class Endpoints
 
     // Chat
     public const string ORDER_INFOR_CHAT = "order/{id:long}/chat-info";
+    public const string ORDER_LIST_INFOR_CHAT = "order/chat-info";
 }

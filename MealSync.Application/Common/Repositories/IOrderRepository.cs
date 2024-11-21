@@ -35,4 +35,8 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<int> CountTotalOrderInProcessByShopId(long shopId);
 
     Order GetOrderInforNotification(long orderId);
+
+    (int TotalCount, List<Order> Orders) GetOrderForModerator(string? searchValue, DateTime? dateFrom, DateTime? dateTo, OrderStatus[] status, long[] dormitoryIds, int pageIndex, int pageSize);
+
+    List<Order> GetOrderListInforNotification(long[] ids);
 }

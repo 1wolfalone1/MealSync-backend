@@ -18,8 +18,6 @@ public class OrderInforNotificationResponseMapping : Profile
                 src => src.Name))
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(
                 src => src.Account.FullName))
-            .ForMember(dest => dest.ShopName, opt => opt.MapFrom(
-                src => src.Account.Email))
             .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(
                 src => src.Account.AvatarUrl))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(
@@ -30,6 +28,8 @@ public class OrderInforNotificationResponseMapping : Profile
         CreateMap<Account, OrderInforNotificationResponse.DeliveryStaffNotification>();
 
         CreateMap<Order, OrderInforNotificationResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(
+                src => src.Id))
             .ForMember(dest => dest.Customer, opt => opt.MapFrom(
                 src => src.Customer.Account))
             .ForMember(dest => dest.Shop, opt => opt.MapFrom(

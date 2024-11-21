@@ -27,5 +27,9 @@ public class NotificationResponse
         public NotificationEntityTypes EntityType { get; set; }
 
         public bool IsRead { get; set; }
+
+        public DateTimeOffset CreatedDate { get; set; }
+
+        public DateTimeOffset UpdatedDate { get; set; }
     }
 }
