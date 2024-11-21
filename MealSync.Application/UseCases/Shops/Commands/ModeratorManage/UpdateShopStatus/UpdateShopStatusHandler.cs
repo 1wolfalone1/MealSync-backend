@@ -84,21 +84,27 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
                 }
                 else
                 {
+                    // Ban shop
                     shop.Status = ShopStatus.Banned;
+                    shop.Account.Status = AccountStatus.Banned;
                 }
             }
             else if (request.IsConfirm && shop.Status == ShopStatus.UnApprove && request.Status == ShopStatus.InActive)
             {
+                // Approve shop
                 isSendMailApprove = true;
                 shop.Status = request.Status;
             }
             else if (request.IsConfirm && (shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned) && request.Status == ShopStatus.InActive)
             {
+                // Ban to Active
                 isSendMailUnBan = true;
                 shop.Status = request.Status;
+                shop.Account.Status = AccountStatus.Verify;
             }
             else if (request.IsConfirm && totalOrderInProcess > 0 && shop.Status != ShopStatus.Banned && request.Status == ShopStatus.Banned)
             {
+                // Banning shop
                 shop.Status = ShopStatus.Banning;
             }
             else
