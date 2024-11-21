@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Domain.Entities;
 
@@ -8,6 +9,8 @@ public class Customer : BaseEntity
 {
     [Key]
     public long Id { get; set; }
+
+    public CustomerStatus Status { get; set; } = CustomerStatus.Active;
 
     public virtual Account Account { get; set; }
 
