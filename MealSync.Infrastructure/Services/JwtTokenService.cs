@@ -33,7 +33,8 @@ public class JwtTokenService : IJwtTokenService, IBaseService
             new Claim(ClaimTypes.Sid, account.Id.ToString()),
             new Claim(ClaimTypes.NameIdentifier, account.Email),
             new Claim(ClaimTypes.Name, account.FullName),
-            new Claim(ClaimTypes.Role, role.Name)
+            new Claim(ClaimTypes.Role, role.Name),
+            new Claim("roleid", account.RoleId.ToString()),
         };
 
         var token = new JwtSecurityToken(
