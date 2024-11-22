@@ -174,6 +174,7 @@ public static class Endpoints
     public const string GET_ALL_DELIVERY_PACKAGE_GROUP_BY_INTERVAL = "shop-owner/delivery-package-group/interval";
     public const string GET_DELIVERY_PACKAGE_FOR_WEB = "web/shop-owner/delivery-package";
     public const string GET_SHOP_OWN_DELIVERY_PACKAGE_FOR_WEB = "web/shop-owner/delivery-package/own";
+    public const string SUGGEST_UPDATE_ASSIGN_ORDER = "shop-owner/delivery-package/suggest-update";
 
     // Review
     public const string REVIEW_ORDER = "customer/order/review";

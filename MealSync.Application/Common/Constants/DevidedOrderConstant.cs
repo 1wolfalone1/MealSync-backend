@@ -9,4 +9,10 @@ public static class DevidedOrderConstant
     public static double StaffMaxCapacity = 10;
 
     public static double PercentOverTaskCanAccept = 1.5;
+
+    public static double WaitingTaskWorkLoad = 1;
+
+    public static double DeliveringTaskWorkLoad = 0.5;
+
+    public static double DistanceLoad = 1;
 }

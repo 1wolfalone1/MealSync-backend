@@ -486,6 +486,9 @@ public enum MessageCode
     [Description("E-DeliveryPackage-StaffInActive")]
     E_DELIVERY_PACKAGE_STAFF_IN_ACTIVE,
 
+    [Description("E-DeliveryPackage-NotCreateYetForAutoAssignUpdate")]
+    E_DELIVERY_PACKAGE_NOT_CREATE_YET_FOR_AUTO_ASSIGN_UPDATE,
+
     // Delivery package group
     [Description("E-DeliveryPackageGroup-NotFoudAny")]
     E_DELIVERY_PACKAGE_GROUP_NOT_FOUND_ANY,

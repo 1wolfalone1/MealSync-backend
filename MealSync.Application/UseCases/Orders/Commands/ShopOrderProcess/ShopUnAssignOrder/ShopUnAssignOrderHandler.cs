@@ -19,14 +19,16 @@ public class ShopUnAssignOrderHandler : ICommandHandler<ShopUnAssignOrderCommand
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly ILogger<ShopUnAssignOrderHandler> _logger;
     private readonly ISystemResourceRepository _systemResourceRepository;
+    private readonly IDeliveryPackageRepository _deliveryPackageRepository;
 
-    public ShopUnAssignOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, ILogger<ShopUnAssignOrderHandler> logger, ISystemResourceRepository systemResourceRepository)
+    public ShopUnAssignOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, ILogger<ShopUnAssignOrderHandler> logger, ISystemResourceRepository systemResourceRepository, IDeliveryPackageRepository deliveryPackageRepository)
     {
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
         _logger = logger;
         _systemResourceRepository = systemResourceRepository;
+        _deliveryPackageRepository = deliveryPackageRepository;
     }
 
     public async Task<Result<Result>> Handle(ShopUnAssignOrderCommand request, CancellationToken cancellationToken)
@@ -35,10 +37,32 @@ public class ShopUnAssignOrderHandler : ICommandHandler<ShopUnAssignOrderCommand
         Validate(request);
 
         var order = _orderRepository.GetById(request.OrderId);
+
+        // If already un assign still return good message
+        if (!order.DeliveryPackageId.HasValue)
+        {
+            return Result.Success(new
+            {
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_UN_ASSIGN_SUCCESS.GetDescription(), request.OrderId),
+                Code = MessageCode.I_ORDER_UN_ASSIGN_SUCCESS.GetDescription(),
+            });
+        }
+
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+            var oldDeliveryPackageId = order.DeliveryPackageId;
             order.DeliveryPackageId = null;
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            // Need check if delivery package order size = 0 will delete
+            var deliveryPackage = _deliveryPackageRepository.Get(o => o.Id == oldDeliveryPackageId)
+                .Include(dp => dp.Orders).SingleOrDefault();
+            if (deliveryPackage != default && (deliveryPackage.Orders == null || deliveryPackage.Orders.Count == 0))
+            {
+                _deliveryPackageRepository.Remove(deliveryPackage);
+            }
+
             _orderRepository.Update(order);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
         }

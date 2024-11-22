@@ -1,4 +1,5 @@
-﻿using MealSync.Application.Common.Abstractions.Messaging;
+﻿using System.Net;
+using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
@@ -11,6 +12,7 @@ using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Application.UseCases.ShopDeliveryStaffs.Models;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
+using Microsoft.EntityFrameworkCore;
 
 namespace MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
 
@@ -19,12 +21,14 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
     private readonly IDapperService _dapperService;
     private readonly IDeliveryPackageRepository _deliveryPackageRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
+    private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
 
-    public SuggestAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService)
+    public SuggestAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
     {
         _dapperService = dapperService;
         _deliveryPackageRepository = deliveryPackageRepository;
         _currentPrincipalService = currentPrincipalService;
+        _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
     }
 
     public async Task<Result<Result>> Handle(SuggestAssignDeliveryPackageQuery request, CancellationToken cancellationToken)
@@ -55,6 +59,23 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         var deliveryPackage = _deliveryPackageRepository.GetPackagesByFrameAndDate(TimeFrameUtils.GetCurrentDateInUTC7().Date, request.StartTime, request.EndTime, _currentPrincipalService.CurrentPrincipalId.Value);
         if (deliveryPackage != null && deliveryPackage.Count > 0)
             throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_TIME_FRAME_CREATED.GetDescription(), new object[] { TimeFrameUtils.GetTimeFrameString(request.StartTime, request.EndTime) });
+
+        foreach (var id in request.ShipperIds.Where(s => s != 0).ToList())
+        {
+            var shopDeliveryStaff = _shopDeliveryStaffRepository.Get(sds => sds.Id == id && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)
+                .Include(sds => sds.Account).SingleOrDefault();
+            if (shopDeliveryStaff == default)
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_NOT_BELONG_TO_SHOP.GetDescription(), new object[] { id }, HttpStatusCode.NotFound);
+
+            if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.Offline)
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_OFFLINE_STATUS.GetDescription(), new object[] { id });
+
+            if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status == AccountStatus.Deleted)
+                throw new InvalidBusinessException(MessageCode.E_SHOP_DELIVERY_STAFF_NOT_FOUND.GetDescription(), new object[] { id });
+
+            if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status != AccountStatus.Deleted)
+                throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_ACTIVE.GetDescription(), new object[] { id });
+        }
     }
 
     private (List<DeliveryPackageForAssignResponse> AssignedStaff, List<OrderDetailForShopResponse> UnAssignOrder) AssignOrder(List<DeliveryPackageForAssignResponse> listStaff, List<OrderDetailForShopResponse> orders)

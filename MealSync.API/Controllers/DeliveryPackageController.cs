@@ -9,6 +9,7 @@ using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageG
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListDeliveryPackageForShopWebs;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListTimeFrameUnAssigns;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
+using MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignUpdateDeliveryPackages;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCreateDeliveryPackage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -89,5 +90,12 @@ public class DeliveryPackageController : BaseApiController
     public async Task<IActionResult> GetListOwnDeliveryPackageForShopWebOrder([FromQuery] GetAllOwnDeliveryPackageForWebQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpGet(Endpoints.SUGGEST_UPDATE_ASSIGN_ORDER)]
+    public async Task<IActionResult> GetSuggestAssignUpdateOrder([FromQuery] SuggestAssignUpdateDeliveryPackageQuery query)
+    {
+        return HandleResult(await Mediator.Send(query));
     }
 }
