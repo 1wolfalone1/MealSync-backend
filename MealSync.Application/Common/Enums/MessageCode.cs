@@ -442,6 +442,15 @@ public enum MessageCode
     [Description("E-ReOrder-ShopNotActive")]
     E_REORDER_SHOP_NOT_ACTIVE,
 
+    [Description("E-Order-OverTimeToAction")]
+    E_ORDER_OVER_TIME_TO_ACTION,
+
+    [Description("E-OrderDelivering-NotUnAssign")]
+    E_ORDER_DELIVERING_NOT_UN_ASSIGN,
+
+    [Description("I-Order-UnAssignSuccess")]
+    I_ORDER_UN_ASSIGN_SUCCESS,
+
     // Report
     [Description("E-Report-NotFound")]
     E_REPORT_NOT_FOUND,

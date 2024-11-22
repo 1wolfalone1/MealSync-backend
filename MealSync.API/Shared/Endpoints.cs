@@ -149,6 +149,8 @@ public static class Endpoints
     public const string SHOP_AND_STAFF_DELIVERED_INFOR_EVIDENCE = "shop-owner-staff/order/{id:long}/delivery-infor";
     public const string RE_ORDER = "customer/re-order/food";
     public const string MODERATOR_ORDER = "moderator/order";
+    public const string SHOP_UN_ASSIGN_ORDER = "shop-owner/order/{id:long}/un-assign";
+
 
     // Report
     public const string CUSTOMER_REPORT_ORDER = "customer/order/report";
