@@ -1,6 +1,7 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Favourites.Queries.FavouriteShop;
+using MealSync.Application.UseCases.Notifications.Commands.MarkAllReads;
 using MealSync.Application.UseCases.Notifications.Commands.UpdateReadedNotification;
 using MealSync.Application.UseCases.Notifications.Queries;
 using MealSync.Application.UseCases.Notifications.Queries.GetNotificationForShopAndStaff;
@@ -40,5 +41,12 @@ public class NotificationController : BaseApiController
     public async Task<IActionResult> UpdateReadedShopAndStaff([FromBody] UpdateReadedNotificationCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.NOTIFICATION_MARK_ALL_READ)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}, {IdentityConst.CustomerClaimName}, {IdentityConst.ModeratorClaimName}, {IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> MarkAllRead()
+    {
+        return HandleResult(await Mediator.Send(new MarkAllReadCommand()).ConfigureAwait(false));
     }
 }

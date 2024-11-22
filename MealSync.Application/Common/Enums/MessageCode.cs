@@ -665,4 +665,7 @@ public enum MessageCode
     // Notifiation
     [Description("E-Notification-NotFound")]
     E_NOTIFICATION_NOT_FOUND,
+
+    [Description("I-Notification-MarkAllReadSuccess")]
+    E_NOTIFICATION_MARL_ALL_READ_SUCCESS,
 }
