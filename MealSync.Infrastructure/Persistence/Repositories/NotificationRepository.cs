@@ -26,4 +26,9 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
     {
         return DbSet.Where(n => n.AccountId == accountId && ids.Contains(n.Id)).ToList();
     }
+
+    public List<Notification> GetNotificationUnRead(long accountId)
+    {
+        return DbSet.Where(n =>!n.IsRead).ToList();
+    }
 }
