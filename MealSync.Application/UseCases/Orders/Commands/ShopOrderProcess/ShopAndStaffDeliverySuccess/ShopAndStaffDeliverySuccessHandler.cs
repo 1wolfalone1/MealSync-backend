@@ -192,7 +192,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             var transactionWithdrawalAvailableAmountOfShop = new WalletTransaction
             {
                 WalletFromId = shop.WalletId,
-                WalletToId = systemTotalWallet.Id, // Thống: Nhầm ví
+                WalletToId = systemCommissionWallet.Id,
                 AvaiableAmountBefore = shop.Wallet.AvailableAmount,
                 IncomingAmountBefore = shop.Wallet.IncomingAmount,
                 ReportingAmountBefore = shop.Wallet.ReportingAmount,
@@ -217,7 +217,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             payment.Status = PaymentStatus.PaidSuccess;
 
             _walletRepository.Update(shop.Wallet);
-            _walletRepository.Update(systemTotalWallet); // Thống: Update sai ví :v systemCommissionWallet
+            _walletRepository.Update(systemCommissionWallet);
             _paymentRepository.Update(payment);
 
             await _walletTransactionRepository.AddAsync(transactionWithdrawalAvailableAmountOfShop).ConfigureAwait(false);

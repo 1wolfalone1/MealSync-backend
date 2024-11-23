@@ -204,6 +204,28 @@ public class DapperService : IDapperService
         }
     }
 
+    public async Task<IEnumerable<TReturn>> SelectAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSix, TReturn>(QueryName queryName, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSix, TReturn> map, object queryParams, string splitOn)
+    {
+        string query = await this.GetQueryStringAsync(queryName).ConfigureAwait(false);
+        bool isClosed = this.db.State == ConnectionState.Closed;
+
+        try
+        {
+            if (isClosed)
+            {
+                await ((DbConnection)this.db).OpenAsync().ConfigureAwait(false);
+            }
+
+            return await this.db.QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSix, TReturn>(query, map, queryParams, splitOn: splitOn).ConfigureAwait(false);
+
+        }
+        finally
+        {
+            if (isClosed)
+                await ((DbConnection)this.db).CloseAsync().ConfigureAwait(false);
+        }
+    }
+
     public async Task<T> SingleOrDefaultAsync<T>(QueryName queryName, object queryParams)
     {
         if (this.TryGetCache(queryName, queryParams, out T result, out string cacheKey))
