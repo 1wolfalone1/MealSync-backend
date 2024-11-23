@@ -16,7 +16,8 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
         var totalCount = query.Count();
         var totalUnRead = query.Where(n => !n.IsRead).Count();
         var result = query
-            .OrderByDescending(n => n.CreatedBy).Skip((pageIndex - 1) * pageSize)
+            .OrderByDescending(n => n.CreatedDate)
+            .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
             .ToList();
         return (totalCount, totalUnRead, result);
