@@ -92,6 +92,8 @@
         <EmbeddedResource Include="Common\Queries\GetOverviewAdminChart.sql" />
         <None Remove="Common\Queries\GetRevenueAdminChart.sql" />
         <EmbeddedResource Include="Common\Queries\GetRevenueAdminChart.sql" />
+        <None Remove="Common\Queries\GetOrderDetailForModeratorById.sql" />
+        <EmbeddedResource Include="Common\Queries\GetOrderDetailForModeratorById.sql" />
     </ItemGroup>
 
 </Project>

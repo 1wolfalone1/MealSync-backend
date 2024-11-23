@@ -35,7 +35,7 @@ public class EvidenceOrderResponse
     {
         get
         {
-            if (EvidenceDeliveryFailJson != null)
+            if (!string.IsNullOrEmpty(EvidenceDeliveryFailJson))
             {
                 return JsonConvert.DeserializeObject<List<ShopDeliveyFailEvidence>>(EvidenceDeliveryFailJson);
             }
