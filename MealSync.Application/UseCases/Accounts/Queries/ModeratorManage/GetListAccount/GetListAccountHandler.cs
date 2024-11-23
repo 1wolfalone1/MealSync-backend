@@ -31,7 +31,7 @@ public class GetListAccountHandler : IQueryHandler<GetListAccountQuery, Result>
         var data = await _customerRepository.GetAllCustomer(
             dormitoryIds, request.SearchValue,
             request.DateFrom, request.DateTo,
-            request.Status, request.OrderBy,
+            request.Status, request.DormitoryId, request.OrderBy,
             request.Direction, request.PageIndex,
             request.PageSize).ConfigureAwait(false);
 

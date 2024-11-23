@@ -32,6 +32,7 @@ public class GetListShopHandler : IQueryHandler<GetListShopQuery, Result>
             request.DateFrom,
             request.DateTo,
             request.Status,
+            request.DormitoryId,
             request.OrderBy,
             request.Direction,
             request.PageIndex,

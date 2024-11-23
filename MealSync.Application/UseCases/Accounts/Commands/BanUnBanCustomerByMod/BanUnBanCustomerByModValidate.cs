@@ -7,7 +7,7 @@ public class BanUnBanCustomerByModValidate : AbstractValidator<BanUnBanCustomerB
 {
     public BanUnBanCustomerByModValidate()
     {
-        RuleFor(q => q.CustomerId)
+        RuleFor(q => q.Id)
             .GreaterThan(0)
             .WithMessage("Customer Id phải lớn hơn 0");
 
