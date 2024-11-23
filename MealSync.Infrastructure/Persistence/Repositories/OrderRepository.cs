@@ -496,6 +496,8 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                 CompletedAt = o.CompletedAt,
                 ResolveAt = o.ResolveAt,
                 Status = o.Status,
+                StartTime = o.StartTime,
+                EndTime = o.EndTime,
                 Building = new Building
                 {
                     Id = o.BuildingId,

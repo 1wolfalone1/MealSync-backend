@@ -1,4 +1,5 @@
-﻿using MealSync.Domain.Enums;
+﻿using MealSync.Application.Common.Utils;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Orders.Models;
 
@@ -17,6 +18,18 @@ public class OrderListForModeratorResponse
     public double TotalPromotion { get; set; }
 
     public double ChargeFee { get; set; }
+
+    public int StartTime { get; set; }
+
+    public int EndTime { get; set; }
+
+    public string TimeFrameFormat
+    {
+        get
+        {
+            return TimeFrameUtils.GetTimeFrameString(StartTime, EndTime);
+        }
+    }
 
     public DateTimeOffset OrderDate { get; set; }
 
