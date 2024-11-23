@@ -44,4 +44,5 @@ public enum QueryName
     GetPointOfOrderAdminChart,
     GetOverviewAdminChart,
     GetRevenueAdminChart,
+    GetOrderDetailForModeratorById,
 }

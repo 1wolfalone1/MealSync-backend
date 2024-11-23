@@ -45,4 +45,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<int> CountTotalOrderInProcessByCustomerId(long customerId);
 
     Task<List<Order>> GetForSystemCancelByCustomerId(long customerId);
+
+    Order GetOrderWithDormitoryById(long orderId);
 }
