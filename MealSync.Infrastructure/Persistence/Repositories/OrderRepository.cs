@@ -479,7 +479,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
 
         var totalCount = query.Count();
         var resultList = query
-            .OrderByDescending(o => o.CreatedDate)
+            .OrderByDescending(o => o.IntendedReceiveDate)
             .Select(o => new Order
             {
                 Id = o.Id,
