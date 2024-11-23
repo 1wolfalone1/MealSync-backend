@@ -34,7 +34,10 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
     private readonly IWalletTransactionRepository _walletTransactionRepository;
     private readonly IPaymentRepository _paymentRepository;
 
-    public OrderMarkDeliveryFailSchedualerHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<OrderMarkDeliveryFailSchedualerHandler> logger, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository, IDeliveryPackageRepository deliveryPackageRepository, IAccountRepository accountRepository, IBuildingRepository buildingRepository, IEmailService emailService, ISystemConfigRepository systemConfigRepository, IBatchHistoryRepository batchHistoryRepository, IVnPayPaymentService paymentService, IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository, IPaymentRepository paymentRepository)
+    public OrderMarkDeliveryFailSchedualerHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<OrderMarkDeliveryFailSchedualerHandler> logger, INotificationFactory notificationFactory,
+        INotifierService notifierService, IShopRepository shopRepository, IDeliveryPackageRepository deliveryPackageRepository, IAccountRepository accountRepository, IBuildingRepository buildingRepository,
+        IEmailService emailService, ISystemConfigRepository systemConfigRepository, IBatchHistoryRepository batchHistoryRepository, IVnPayPaymentService paymentService, IWalletRepository walletRepository,
+        IWalletTransactionRepository walletTransactionRepository, IPaymentRepository paymentRepository)
     {
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
@@ -163,14 +166,15 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
                 PaymentMethods = PaymentMethods.BankTransfer,
             };
             var refundResult = await _paymentService.CreateRefund(payment).ConfigureAwait(false);
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+            var content = JsonSerializer.Serialize(refundResult, options);
+
+            refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
+            refundPayment.PaymentThirdPartyContent = content;
+
             if (refundResult.VnpResponseCode == ((int)VnPayRefundResponseCode.CODE_00).ToString("D2"))
             {
-                var options = new JsonSerializerOptions()
-                    { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
-                var content = JsonSerializer.Serialize(refundResult, options);
                 refundPayment.Status = PaymentStatus.PaidSuccess;
-                refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
-                refundPayment.PaymentThirdPartyContent = content;
 
                 // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
                 var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);

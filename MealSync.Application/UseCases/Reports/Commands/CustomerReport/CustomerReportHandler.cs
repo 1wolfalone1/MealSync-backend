@@ -149,7 +149,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                         if (payment.PaymentMethods == PaymentMethods.VnPay && payment.Status == PaymentStatus.PaidSuccess)
                         {
                             // Tiền từ incoming về reporting
-                            await TransactionInComingAmoubtToReportingAmount(payment, order, shop, shopWallet).ConfigureAwait(false);
+                            await TransactionInComingAmountToReportingAmount(payment, order, shop, shopWallet).ConfigureAwait(false);
                         }
                         else
                         {
@@ -161,7 +161,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                         if (payment.PaymentMethods == PaymentMethods.VnPay && payment.Status == PaymentStatus.PaidSuccess)
                         {
                             // Tiền từ incoming về reporting
-                            await TransactionInComingAmoubtToReportingAmount(payment, order, shop, shopWallet).ConfigureAwait(false);
+                            await TransactionInComingAmountToReportingAmount(payment, order, shop, shopWallet).ConfigureAwait(false);
                         }
                         else
                         {
@@ -253,7 +253,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
         return isNotify;
     }
 
-    private async Task TransactionInComingAmoubtToReportingAmount(Payment payment, Order order, Shop shop, Wallet shopWallet)
+    private async Task TransactionInComingAmountToReportingAmount(Payment payment, Order order, Shop shop, Wallet shopWallet)
     {
 
         var incomingAmountOrder = payment.Amount - order.ChargeFee;

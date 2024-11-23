@@ -35,7 +35,9 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
     private readonly IWalletRepository _walletRepository;
     private readonly IWalletTransactionRepository _walletTransactionRepository;
 
-    public ShopRejectOrderHandler(INotifierService notifierService, IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopRejectOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository, IEmailService emailService, IVnPayPaymentService paymentService, IPaymentRepository paymentRepository, IBuildingRepository buildingRepository, IAccountRepository accountRepository, IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository)
+    public ShopRejectOrderHandler(INotifierService notifierService, IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopRejectOrderHandler> logger, ICurrentPrincipalService currentPrincipalService,
+        INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository, IEmailService emailService, IVnPayPaymentService paymentService,
+        IPaymentRepository paymentRepository, IBuildingRepository buildingRepository, IAccountRepository accountRepository, IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository)
     {
         _notifierService = notifierService;
         _unitOfWork = unitOfWork;
@@ -123,19 +125,19 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
                 PaymentMethods = PaymentMethods.BankTransfer,
             };
             var refundResult = await _paymentService.CreateRefund(payment).ConfigureAwait(false);
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+            var content = JsonSerializer.Serialize(refundResult, options);
+
+            refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
+            refundPayment.PaymentThirdPartyContent = content;
+
             if (refundResult.VnpResponseCode == ((int)VnPayRefundResponseCode.CODE_00).ToString("D2"))
             {
-                var options = new JsonSerializerOptions()
-                    { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
-                var content = JsonSerializer.Serialize(refundResult, options);
                 refundPayment.Status = PaymentStatus.PaidSuccess;
-                refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
-                refundPayment.PaymentThirdPartyContent = content;
 
-                 // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
+                // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
                 var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
                 var systemCommissionWallet = await _walletRepository.GetByType(WalletTypes.SystemCommission).ConfigureAwait(false);
-
                 var listWalletTransaction = new List<WalletTransaction>();
                 WalletTransaction transactionWithdrawalSystemCommissionToSystemTotal = new WalletTransaction
                 {

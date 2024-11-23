@@ -421,7 +421,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
         return DbSet.Include(o => o.Payments)
             .Where(o =>
-                o.CustomerId == shopId
+                o.ShopId == shopId
                 && (o.Status == OrderStatus.Pending || o.Status == OrderStatus.PendingPayment || o.Status == OrderStatus.Confirmed))
             .ToListAsync();
     }

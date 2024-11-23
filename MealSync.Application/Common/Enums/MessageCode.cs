@@ -458,6 +458,9 @@ public enum MessageCode
     [Description("E-Report-NotFound")]
     E_REPORT_NOT_FOUND,
 
+    [Description("E-Report-Order-NotFound")]
+    E_REPORT_ORDER_NOT_FOUND,
+
     [Description("E-Report-NotInStatusForCustomerReport")]
     E_REPORT_NOT_IN_STATUS_FOR_CUSTOMER_REPORT,
 
