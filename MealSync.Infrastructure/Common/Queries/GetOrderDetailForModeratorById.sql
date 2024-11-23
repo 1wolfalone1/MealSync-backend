@@ -31,6 +31,7 @@ WITH OrdersOfShop AS (
         end_time,
         intended_receive_date,
         created_date,
+        resolve_at,
         cancel_at,
         reason_identity,
         evidence_delivery_fail_json,
@@ -63,6 +64,7 @@ SELECT
     o.intended_receive_date AS IntendedReceiveDate,
     o.start_time AS StartTime,
     o.end_time AS EndTime,
+    o.resolve_at AS ResolveAt,
     o.cancel_at AS CancelAt,
     o.reason_identity AS ReasonIdentity,
     o.evidence_delivery_fail_json AS EvidenceDeliveryFailJson,
@@ -110,6 +112,10 @@ SELECT
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.avatar_url
         ELSE accShop.avatar_url
     END AS AvatarUrl,
+    CASE
+        WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.phone_number
+        ELSE accShop.phone_number
+    END AS PhoneNumber,
     CASE
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.email
         ELSE accShop.email

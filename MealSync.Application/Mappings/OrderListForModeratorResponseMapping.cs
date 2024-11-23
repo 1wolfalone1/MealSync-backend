@@ -12,7 +12,9 @@ public class OrderListForModeratorResponseMapping : Profile
         CreateMap<Dormitory, OrderListForModeratorResponse.DormitoryOrderList>();
         CreateMap<Shop, OrderListForModeratorResponse.ShopInforOrderList>()
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(
-                src => src.Account != null ? src.Account.FullName : string.Empty));
+                src => src.Account != null ? src.Account.FullName : string.Empty))
+            .ForMember(dest => dest.ShopName, opt => opt.MapFrom(
+                src => src.Name));
         CreateMap<Order, OrderListForModeratorResponse>()
             .ForMember(dest => dest.Buidling, opt => opt.MapFrom(
                 src => src.Building))

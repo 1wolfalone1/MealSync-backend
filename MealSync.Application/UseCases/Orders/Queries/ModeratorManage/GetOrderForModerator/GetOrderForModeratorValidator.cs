@@ -19,5 +19,13 @@ public class GetOrderForModeratorValidator : AbstractValidator<GetOrderForModera
                 .Must(x => x.Value.Date <= TimeFrameUtils.GetCurrentDateInUTC7().Date)
                 .WithMessage("Vui lòng cung cấp ngày kết thúc nhỏ hơn hoặc bẳng ngày hiện tại");
         });
+
+        RuleFor(x => x.StatusMode)
+            .Must(x => x >= 0 && x <= 4)
+            .WithMessage("Vui lòng cung cấp status mode 0 (tất cả) | 1 (Hoàn thành) | 2 (Thực hiện) | 3 (Báo Cáo) | 4 (Đã hủy)");
+
+        RuleFor(x => x.DormitoryMode)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("Vui lòng cung cấp domitory mode 0 (tất cả)");
     }
 }

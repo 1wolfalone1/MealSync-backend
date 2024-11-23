@@ -27,6 +27,10 @@ public class OrderDetailForModeratorResponse
 
     public DateTime RejectAt { get; set; }
 
+    public DateTimeOffset CancelAt { get; set; }
+
+    public DateTimeOffset ResolveAt { get; set; }
+
     public DateTime LatestDeliveryFailAt { get; set; }
 
     public bool IsPaidToShop { get; set; }
@@ -63,15 +67,8 @@ public class OrderDetailForModeratorResponse
 
     public int EndTime
     {
-        get
-        {
-            return TimeFrameUtils.ConvertEndTime(_endTime); // Use the backing field
-        }
-
-        set
-        {
-            _endTime = value; // Set the backing field
-        }
+        get => TimeFrameUtils.ConvertEndTime(_endTime); // Use the backing field
+        set => _endTime = value; // Set the backing field
     }
 
     public string Note { get; set; }
@@ -115,7 +112,7 @@ public class OrderDetailForModeratorResponse
                     .Select(g => new
                     {
                         Name = g.First().Name,
-                        Quantity = g.Sum(od => od.Quantity)
+                        Quantity = g.Sum(od => od.Quantity),
                     })
                     .ToList();
 
@@ -126,7 +123,9 @@ public class OrderDetailForModeratorResponse
                 var summaryShortText = otherItemCount > 0
                     ? (firstItem.Quantity == 1 ? $"{firstItem.Name}" : $"{firstItem.Name} x{firstItem.Quantity}")
                       + $" +{totalQuantity - firstItem.Quantity} số lượng khác"
-                    : (firstItem.Quantity == 1 ? $"{firstItem.Name}" : $"{firstItem.Name} x{firstItem.Quantity}");
+                    : firstItem.Quantity == 1
+                        ? $"{firstItem.Name}"
+                        : $"{firstItem.Name} x{firstItem.Quantity}";
 
                 return summaryShortText;
             }
