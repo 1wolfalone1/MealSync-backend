@@ -39,6 +39,8 @@ public class OrderDetailForModeratorResponse
 
     public bool IsReport { get; set; }
 
+    public long ReportId { get; set; }
+
     public string Reason { get; set; }
 
     public DateTime IntendedReceiveDate { get; set; }
@@ -135,6 +137,8 @@ public class OrderDetailForModeratorResponse
     }
 
     public CustomerInforInShopOrderDetailForModerator Customer { get; set; }
+
+    public ShopInforForOrderDetailMod Shop { get; set; }
 
     public PromotionInModeratorOrderDetail Promotion { get; set; }
 
@@ -234,5 +238,30 @@ public class OrderDetailForModeratorResponse
                 return new List<OrderDetailDescriptionDto>();
             }
         }
+    }
+
+    public class ShopInforForOrderDetailMod
+    {
+        public long Id { get; set; }
+
+        public string ShopName { get; set; }
+
+        public string FullName { get; set; }
+
+        public string BannerUrl { get; set; }
+
+        public string LogoUrl { get; set; }
+
+        public string PhoneNumber { get; set; }
+
+        public string Email { get; set; }
+
+        public long LocationId { get; set; }
+
+        public string Address { get; set; }
+
+        public double Latitude { get; set; }
+
+        public double Longitude { get; set; }
     }
 }

@@ -342,10 +342,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         return result;
     }
 
-    public List<Order> GetListOrderOnStatusFailDeliveredWithoutIncoming(int hoursToMarkDeliveryFail, DateTime currentDateTime)
+    public List<Order> GetListOrderOnStatusFailDeliveredWithoutPayIncomingShop(int hoursToMarkDeliveryFail, DateTime currentDateTime)
     {
         var result = DbSet.Where(o => o.Status == OrderStatus.FailDelivery &&
-                                      o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription()
+                                      (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription() || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription())
                                       && !o.IsRefund && !o.IsReport && !o.IsPaidToShop
                                       && o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess && p.PaymentMethods == PaymentMethods.VnPay)
                                       &&

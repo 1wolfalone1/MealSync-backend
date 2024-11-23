@@ -544,4 +544,25 @@ public class NotificationFactory : INotificationFactory
             IsSave = true,
         };
     }
+
+    public Notification CreateRefundCustomerNotification(Order order, Account account, double amountRefund)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_REFUND_ORDER_FOR_CUSTOMER.GetDescription(),
+                new object[] { order.Id, MoneyUtils.FormatMoneyWithDots(amountRefund)}),
+            ImageUrl = account.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
 }
