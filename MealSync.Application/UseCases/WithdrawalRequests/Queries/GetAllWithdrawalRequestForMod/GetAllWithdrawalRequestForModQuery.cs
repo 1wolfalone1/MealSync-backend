@@ -15,6 +15,8 @@ public class GetAllWithdrawalRequestForModQuery : PaginationRequest, IQuery<Resu
 
     public WithdrawalRequestStatus? Status { get; set; }
 
+    public long? DormitoryId { get; set; }
+
     public FilterWithdrawalRequestOrderBy OrderBy { get; set; } = FilterWithdrawalRequestOrderBy.CreatedDate;
 
     public FilterWithdrawalRequestDirection Direction { get; set; } = FilterWithdrawalRequestDirection.DESC;

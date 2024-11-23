@@ -13,7 +13,9 @@ public class GetListAccountQuery : PaginationRequest, IQuery<Result>
 
     public DateTime? DateTo { get; set; }
 
-    public AccountStatus? Status { get; set; }
+    public CustomerStatus? Status { get; set; }
+
+    public long? DormitoryId { get; set; }
 
     public FilterCustomerOrderBy OrderBy { get; set; } = FilterCustomerOrderBy.CreatedDate;
 

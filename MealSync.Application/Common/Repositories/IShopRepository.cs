@@ -30,7 +30,7 @@ public interface IShopRepository : IBaseRepository<Shop>
 
     Task<List<Shop>> GetAllShopReceivingOrderPaused();
 
-    Task<(List<ShopManageDto> Shops, int TotalCount)> GetAllShopByDormitoryIds(List<long> dormitoryIds, string? searchValue, DateTime? dateFrom, DateTime? dateTo, ShopStatus? status,
+    Task<(List<ShopManageDto> Shops, int TotalCount)> GetAllShopByDormitoryIds(List<long> dormitoryIds, string? searchValue, DateTime? dateFrom, DateTime? dateTo, ShopStatus? status, long? dormitoryId,
         GetListShopQuery.FilterShopOrderBy? orderBy, GetListShopQuery.FilterShopDirection? direction, int pageIndex, int pageSize);
 
     Task<Shop?> GetShopManageDetail(long shopId, List<long> dormitoriesIdMod);

@@ -240,11 +240,13 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
 
     public async Task<(List<ShopManageDto> Shops, int TotalCount)> GetAllShopByDormitoryIds(
         List<long> dormitoryIds, string? searchValue, DateTime? dateFrom, DateTime? dateTo,
-        ShopStatus? status, GetListShopQuery.FilterShopOrderBy? orderBy,
+        ShopStatus? status, long? dormitoryId, GetListShopQuery.FilterShopOrderBy? orderBy,
         GetListShopQuery.FilterShopDirection? direction, int pageIndex, int pageSize)
     {
         var query = DbSet
-            .Where(s => s.Status != ShopStatus.Deleted && s.ShopDormitories.Any(sd => dormitoryIds.Contains(sd.DormitoryId)))
+            .Where(s => s.Account.Status != AccountStatus.UnVerify
+                        && s.Account.Status != AccountStatus.Deleted
+                        && s.Status != ShopStatus.Deleted && s.ShopDormitories.Any(sd => dormitoryIds.Contains(sd.DormitoryId)))
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchValue))
@@ -263,6 +265,11 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
         if (status.HasValue && status.Value != ShopStatus.Deleted)
         {
             query = query.Where(shop => shop.Status == status.Value);
+        }
+
+        if (dormitoryId.HasValue && dormitoryId > 0)
+        {
+            query = query.Where(shop => shop.ShopDormitories.Any(cb => cb.DormitoryId == dormitoryId));
         }
 
         if (dateFrom.HasValue && dateTo.HasValue)
@@ -375,7 +382,11 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             .Include(s => s.ShopDormitories)
             .ThenInclude(sd => sd.Dormitory)
             .Include(s => s.OperatingSlots)
-            .Where(s => s.Id == shopId && s.Status != ShopStatus.Deleted && s.ShopDormitories.Any(sd => dormitoriesIdMod.Contains(sd.DormitoryId)))
+            .Where(s => s.Id == shopId
+                        && s.Account.Status != AccountStatus.UnVerify
+                        && s.Account.Status != AccountStatus.Deleted
+                        && s.Status != ShopStatus.Deleted
+                        && s.ShopDormitories.Any(sd => dormitoriesIdMod.Contains(sd.DormitoryId)))
             .FirstOrDefaultAsync();
     }
 
@@ -383,7 +394,11 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
     {
         return DbSet
             .Include(s => s.Account)
-            .Where(s => s.Id == shopId && s.Status != ShopStatus.Deleted && s.ShopDormitories.Any(sd => dormitoriesIdMod.Contains(sd.DormitoryId)))
+            .Where(s => s.Id == shopId
+                        && s.Account.Status != AccountStatus.UnVerify
+                        && s.Account.Status != AccountStatus.Deleted
+                        && s.Status != ShopStatus.Deleted
+                        && s.ShopDormitories.Any(sd => dormitoriesIdMod.Contains(sd.DormitoryId)))
             .FirstOrDefaultAsync();
     }
 

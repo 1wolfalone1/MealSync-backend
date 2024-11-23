@@ -30,7 +30,7 @@ public class GetAllWithdrawalRequestForModHandler : IQueryHandler<GetAllWithdraw
 
         var data = await _withdrawalRequestRepository.GetAllWithdrawalRequestForManage(
             dormitoryIds, request.SearchValue, request.DateFrom,
-            request.DateTo, request.Status, request.OrderBy,
+            request.DateTo, request.Status, request.DormitoryId, request.OrderBy,
             request.Direction, request.PageIndex, request.PageSize).ConfigureAwait(false);
 
         var result = new PaginationResponse<WithdrawalRequestManageDto>(

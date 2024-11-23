@@ -67,11 +67,11 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
         var dormitoryIds = dormitories.Select(d => d.DormitoryId).ToList();
         var isSendMailApprove = false;
         var isSendMailUnBan = false;
+        var shop = await _shopRepository.GetShopManage(request.Id, dormitoryIds).ConfigureAwait(false);
 
-        var shop = await _shopRepository.GetShopManage(request.ShopId, dormitoryIds).ConfigureAwait(false);
         if (shop == default)
         {
-            throw new InvalidBusinessException(MessageCode.E_SHOP_NOT_FOUND.GetDescription(), new object[] { request.ShopId });
+            throw new InvalidBusinessException(MessageCode.E_SHOP_NOT_FOUND.GetDescription(), new object[] { request.Id });
         }
         else
         {

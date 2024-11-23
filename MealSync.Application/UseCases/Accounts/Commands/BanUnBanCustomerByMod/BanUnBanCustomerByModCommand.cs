@@ -6,7 +6,7 @@ namespace MealSync.Application.UseCases.Accounts.Commands.BanUnBanCustomerByMod;
 
 public class BanUnBanCustomerByModCommand : ICommand<Result>
 {
-    public long CustomerId { get; set; }
+    public long Id { get; set; }
 
     public AccountStatus Status { get; set; }
 

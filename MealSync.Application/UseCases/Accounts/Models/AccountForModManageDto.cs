@@ -14,7 +14,7 @@ public class AccountForModManageDto
 
     public string? FullName { get; set; }
 
-    public AccountStatus Status { get; set; }
+    public CustomerStatus Status { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }
 }

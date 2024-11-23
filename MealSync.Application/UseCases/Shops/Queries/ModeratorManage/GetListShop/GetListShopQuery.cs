@@ -15,6 +15,8 @@ public class GetListShopQuery : PaginationRequest, IQuery<Result>
 
     public ShopStatus? Status { get; set; }
 
+    public long? DormitoryId { get; set; }
+
     public FilterShopOrderBy OrderBy { get; set; } = FilterShopOrderBy.CreatedDate;
 
     public FilterShopDirection Direction { get; set; } = FilterShopDirection.DESC;
