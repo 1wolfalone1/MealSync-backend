@@ -67,7 +67,7 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
         var dormitories = await _moderatorDormitoryRepository.GetAllDormitoryByModeratorId(moderatorAccountId).ConfigureAwait(false);
         var dormitoryIds = dormitories.Select(d => d.DormitoryId).ToList();
 
-        var customer = await _customerRepository.GetCustomer(dormitoryIds, request.CustomerId).ConfigureAwait(false);
+        var customer = await _customerRepository.GetCustomer(dormitoryIds, request.Id).ConfigureAwait(false);
         if (customer == default)
         {
             throw new InvalidBusinessException(MessageCode.E_MODERATOR_ACTION_NOT_ALLOW.GetDescription());

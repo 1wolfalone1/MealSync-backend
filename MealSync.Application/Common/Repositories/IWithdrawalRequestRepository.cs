@@ -18,12 +18,12 @@ public interface IWithdrawalRequestRepository : IBaseRepository<WithdrawalReques
 
     Task<(List<WithdrawalRequestManageDto> WithdrawalRequests, int TotalCount)> GetAllWithdrawalRequestForManage(
         List<long> dormitoryIds, string? searchValue,
-        DateTime? dateFrom, DateTime? dateTo, WithdrawalRequestStatus? status,
+        DateTime? dateFrom, DateTime? dateTo, WithdrawalRequestStatus? status, long? dormitoryId,
         GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy? orderBy,
         GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection? direction,
         int pageIndex, int pageSize);
 
     Task<WithdrawalRequestDetailManageDto?> GetDetailForManage(List<long> dormitoryIds, long withdrawalRequestId);
 
-    Task<WithdrawalRequest?> GetForManage(List<long> dormitoryIds, long withdrawalRequestId);
+    Task<WithdrawalRequest?> GetForManageIncludeWalletAndShop(List<long> dormitoryIds, long withdrawalRequestId);
 }

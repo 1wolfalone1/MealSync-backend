@@ -96,11 +96,12 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
 
     public async Task<(List<WithdrawalRequestManageDto> WithdrawalRequests, int TotalCount)> GetAllWithdrawalRequestForManage(
         List<long> dormitoryIds, string? searchValue, DateTime? dateFrom, DateTime? dateTo,
-        WithdrawalRequestStatus? status, GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy? orderBy,
+        WithdrawalRequestStatus? status, long? dormitoryId, GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestOrderBy? orderBy,
         GetAllWithdrawalRequestForModQuery.FilterWithdrawalRequestDirection? direction, int pageIndex, int pageSize)
     {
         var query = DbSet
             .Where(w => w.Wallet.Shop != default
+                        && w.Status != WithdrawalRequestStatus.Cancelled
                         && w.Wallet.Shop.Status != ShopStatus.Deleted
                         && w.Wallet.Shop.ShopDormitories.Any(sd => dormitoryIds.Contains(sd.DormitoryId))
             )
@@ -122,9 +123,14 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
             );
         }
 
-        if (status.HasValue)
+        if (status.HasValue && status.Value != WithdrawalRequestStatus.Cancelled)
         {
             query = query.Where(w => w.Status == status.Value);
+        }
+
+        if (dormitoryId.HasValue && dormitoryId > 0)
+        {
+            query = query.Where(w => w.Wallet.Shop!.ShopDormitories.Any(sd => sd.DormitoryId == dormitoryId));
         }
 
         if (dateFrom.HasValue && dateTo.HasValue)
@@ -210,6 +216,7 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
     {
         return DbSet
             .Where(w => w.Id == withdrawalRequestId && w.Wallet.Shop != default
+                                                    && w.Status != WithdrawalRequestStatus.Cancelled
                                                     && w.Wallet.Shop.Status != ShopStatus.Deleted
                                                     && w.Wallet.Shop.ShopDormitories.Any(sd => dormitoryIds.Contains(sd.DormitoryId))
             ).Select(w => new WithdrawalRequestDetailManageDto
@@ -230,12 +237,13 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
             }).FirstOrDefaultAsync();
     }
 
-    public Task<WithdrawalRequest?> GetForManage(List<long> dormitoryIds, long withdrawalRequestId)
+    public Task<WithdrawalRequest?> GetForManageIncludeWalletAndShop(List<long> dormitoryIds, long withdrawalRequestId)
     {
         return DbSet
             .Include(wr => wr.Wallet)
             .ThenInclude(w => w.Shop)
             .Where(w => w.Id == withdrawalRequestId && w.Wallet.Shop != default
+                                                    && w.Status != WithdrawalRequestStatus.Cancelled
                                                     && w.Wallet.Shop.Status != ShopStatus.Deleted
                                                     && w.Wallet.Shop.ShopDormitories.Any(sd => dormitoryIds.Contains(sd.DormitoryId)))
             .FirstOrDefaultAsync();

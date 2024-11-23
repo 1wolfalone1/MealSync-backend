@@ -14,4 +14,9 @@ public class ModeratorDormitoryRepository : BaseRepository<ModeratorDormitory>, 
     {
         return DbSet.Where(md => md.ModeratorId == moderatorId).ToListAsync();
     }
+
+    public Task<List<ModeratorDormitory>> GetAllIncludeDormitoryByModeratorId(long moderatorId)
+    {
+        return DbSet.Include(md => md.Dormitory).Where(md => md.ModeratorId == moderatorId).ToListAsync();
+    }
 }

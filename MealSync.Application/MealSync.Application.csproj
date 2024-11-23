@@ -45,7 +45,6 @@
         <Folder Include="UseCases\Payments\Models\" />
         <Folder Include="UseCases\PlatformCategory\Commands\" />
         <Folder Include="UseCases\Roles\Queries\"/>
-        <Folder Include="UseCases\WithdrawalRequests\Commands\" />
     </ItemGroup>
 
 </Project>

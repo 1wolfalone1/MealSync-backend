@@ -7,7 +7,7 @@ public class UpdateShopStatusValidate : AbstractValidator<UpdateShopStatusComman
 {
     public UpdateShopStatusValidate()
     {
-        RuleFor(q => q.ShopId)
+        RuleFor(q => q.Id)
             .GreaterThan(0)
             .WithMessage("Shop Id phải lớn hơn 0");
 

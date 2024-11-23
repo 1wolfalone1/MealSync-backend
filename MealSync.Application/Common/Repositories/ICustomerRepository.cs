@@ -9,7 +9,7 @@ public interface ICustomerRepository : IBaseRepository<Customer>
 {
     Task<(List<AccountForModManageDto> Customers, int TotalCount)> GetAllCustomer(
         List<long> dormitoryIds, string? searchValue, DateTime? dateFrom,
-        DateTime? dateTo, AccountStatus? status,
+        DateTime? dateTo, CustomerStatus? status, long? dormitoryId,
         GetListAccountQuery.FilterCustomerOrderBy? orderBy, GetListAccountQuery.FilterCustomerDirection? direction, int pageIndex, int pageSize);
 
     Task<AccountDetailForModManageDto?> GetCustomerDetail(List<long> dormitoryIds, long customerId);

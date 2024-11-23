@@ -16,13 +16,13 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
 
     public async Task<(List<AccountForModManageDto> Customers, int TotalCount)> GetAllCustomer(
         List<long> dormitoryIds, string? searchValue,
-        DateTime? dateFrom, DateTime? dateTo, AccountStatus? status,
+        DateTime? dateFrom, DateTime? dateTo, CustomerStatus? status, long? dormitoryId,
         GetListAccountQuery.FilterCustomerOrderBy? orderBy, GetListAccountQuery.FilterCustomerDirection? direction, int pageIndex, int pageSize)
     {
         var query = DbSet
-            .Where(c => c.Account.Status != AccountStatus.Deleted
-                        && (c.CustomerBuildings.Any(sd => dormitoryIds.Contains(sd.Building.DormitoryId))
-                            || c.Orders.Any(o => dormitoryIds.Contains(o.Building.DormitoryId)))
+            .Where(c => c.Account.Status != AccountStatus.Deleted && c.Account.Status != AccountStatus.UnVerify
+                                                                  && (c.CustomerBuildings.Any(sd => dormitoryIds.Contains(sd.Building.DormitoryId))
+                                                                      || c.Orders.Any(o => dormitoryIds.Contains(o.Building.DormitoryId)))
             )
             .AsQueryable();
 
@@ -39,9 +39,14 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
             );
         }
 
-        if (status.HasValue && status.Value != AccountStatus.Deleted)
+        if (status.HasValue)
         {
-            query = query.Where(customer => customer.Account.Status == status.Value);
+            query = query.Where(customer => customer.Status == status.Value);
+        }
+
+        if (dormitoryId.HasValue && dormitoryId > 0)
+        {
+            query = query.Where(c => c.CustomerBuildings.Any(cb => cb.Building.DormitoryId == dormitoryId));
         }
 
         if (dateFrom.HasValue && dateTo.HasValue)
@@ -99,7 +104,7 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
                 PhoneNumber = c.Account.PhoneNumber,
                 FullName = c.Account.FullName,
                 AvatarUrl = c.Account.AvatarUrl,
-                Status = c.Account.Status,
+                Status = c.Status,
                 CreatedDate = c.CreatedDate,
             })
             .Skip((pageIndex - 1) * pageSize)
@@ -113,6 +118,7 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
     {
         return DbSet
             .Where(c => c.Account.Status != AccountStatus.Deleted
+                        && c.Account.Status != AccountStatus.UnVerify
                         && c.Id == customerId
                         && (
                             c.CustomerBuildings.Any(sd => dormitoryIds.Contains(sd.Building.DormitoryId))
@@ -182,6 +188,7 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
     {
         return DbSet.Include(c => c.Account)
             .Where(c => c.Account.Status != AccountStatus.Deleted
+                        && c.Account.Status != AccountStatus.UnVerify
                         && c.Id == customerId
                         && (
                             c.CustomerBuildings.Any(sd => dormitoryIds.Contains(sd.Building.DormitoryId))

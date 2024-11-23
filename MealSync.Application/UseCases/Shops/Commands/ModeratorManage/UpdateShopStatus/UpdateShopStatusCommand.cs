@@ -6,7 +6,7 @@ namespace MealSync.Application.UseCases.Shops.Commands.ModeratorManage.UpdateSho
 
 public class UpdateShopStatusCommand : ICommand<Result>
 {
-    public long ShopId { get; set; }
+    public long Id { get; set; }
 
     public ShopStatus Status { get; set; }
 

@@ -224,6 +224,8 @@ public static class Endpoints
     public const string MODERATOR_ORDER = "moderator/order";
     public const string MODERATOR_ORDER_DETAIL = "moderator/order/{id:long}";
 
+    public const string MODERATOR_DORMITORY = "moderator/dormitory";
+
     // Notification
     public const string NOTIFICATION_SHOP_STAFF = "shop-owner-staff/notification";
     public const string TOTAL_UNREAD_NOTIFICATION_SHOP_STAFF = "shop-owner-staff/notification/total-unread";
