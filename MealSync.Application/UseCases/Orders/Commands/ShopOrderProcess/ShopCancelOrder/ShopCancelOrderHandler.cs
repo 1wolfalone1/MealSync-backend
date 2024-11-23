@@ -40,7 +40,11 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
     private readonly IWalletRepository _walletRepository;
     private readonly IWalletTransactionRepository _walletTransactionRepository;
 
-    public ShopCancelOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IPaymentRepository paymentRepository, IVnPayPaymentService paymentService, ISystemResourceRepository systemResourceRepository, ILogger<ShopCancelOrderHandler> logger, IPaymentHistoryRepository paymentHistoryRepository, IShopRepository shopRepository, IAccountFlagRepository accountFlagRepository, IEmailService emailService, ICurrentAccountService currentAccountService, IAccountRepository accountRepository, INotifierService notifierService, INotificationFactory notificationFactory, IBuildingRepository buildingRepository, ISystemConfigRepository systemConfigRepository, IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository)
+    public ShopCancelOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IPaymentRepository paymentRepository, IVnPayPaymentService paymentService,
+        ISystemResourceRepository systemResourceRepository, ILogger<ShopCancelOrderHandler> logger, IPaymentHistoryRepository paymentHistoryRepository, IShopRepository shopRepository,
+        IAccountFlagRepository accountFlagRepository, IEmailService emailService, ICurrentAccountService currentAccountService, IAccountRepository accountRepository, INotifierService notifierService,
+        INotificationFactory notificationFactory, IBuildingRepository buildingRepository, ISystemConfigRepository systemConfigRepository, IWalletRepository walletRepository,
+        IWalletTransactionRepository walletTransactionRepository)
     {
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
@@ -161,14 +165,15 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
                 PaymentMethods = PaymentMethods.BankTransfer,
             };
             var refundResult = await _paymentService.CreateRefund(payment).ConfigureAwait(false);
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+            var content = JsonSerializer.Serialize(refundResult, options);
+
+            refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
+            refundPayment.PaymentThirdPartyContent = content;
+
             if (refundResult.VnpResponseCode == ((int)VnPayRefundResponseCode.CODE_00).ToString("D2"))
             {
-                var options = new JsonSerializerOptions()
-                    { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
-                var content = JsonSerializer.Serialize(refundResult, options);
                 refundPayment.Status = PaymentStatus.PaidSuccess;
-                refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
-                refundPayment.PaymentThirdPartyContent = content;
 
                 // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
                 var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);

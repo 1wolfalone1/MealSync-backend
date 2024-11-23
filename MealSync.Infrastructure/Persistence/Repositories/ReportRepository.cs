@@ -178,6 +178,12 @@ public class ReportRepository : BaseRepository<Report>, IReportRepository
         return (totalCount, reports);
     }
 
+    public Task<bool> CheckExistedByOrderIdAndShopId(long orderId, long shopId)
+    {
+        return DbSet
+            .AnyAsync(r => r.Order.Id == orderId && r.Order.ShopId == shopId && r.CustomerId != default);
+    }
+
     private static string EscapeLikeParameter(string input)
     {
         return input

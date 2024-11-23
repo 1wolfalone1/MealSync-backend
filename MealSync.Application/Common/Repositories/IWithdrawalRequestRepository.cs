@@ -24,4 +24,6 @@ public interface IWithdrawalRequestRepository : IBaseRepository<WithdrawalReques
         int pageIndex, int pageSize);
 
     Task<WithdrawalRequestDetailManageDto?> GetDetailForManage(List<long> dormitoryIds, long withdrawalRequestId);
+
+    Task<WithdrawalRequest?> GetForManage(List<long> dormitoryIds, long withdrawalRequestId);
 }

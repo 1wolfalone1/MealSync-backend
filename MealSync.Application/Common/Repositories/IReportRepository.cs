@@ -21,4 +21,6 @@ public interface IReportRepository : IBaseRepository<Report>
 
     Task<(int TotalCount, List<Report> Reports)> GetReportForShopWebFilter(
         long shopId, string? searchValue, ReportStatus? status, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize);
+
+    Task<bool> CheckExistedByOrderIdAndShopId(long orderId, long shopId);
 }
