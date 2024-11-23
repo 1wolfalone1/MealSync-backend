@@ -450,13 +450,23 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             .ThenInclude(sh => sh.Account).ToList();
     }
 
-    public (int TotalCount, List<Order> Orders) GetOrderForModerator(string? searchValue, DateTime? dateFrom, DateTime? dateTo, OrderStatus[] status, long[] dormitoryIds, int pageIndex, int pageSize)
+    public (int TotalCount, List<Order> Orders) GetOrderForModerator(string? searchValue, DateTime? dateFrom, DateTime? dateTo, List<OrderStatus> status, List<long> dormitoryIds, int pageIndex, int pageSize)
     {
-        var query = DbSet.Where(o => status.Contains(o.Status) && dormitoryIds.Contains(o.Building.DormitoryId)).AsQueryable();
+        var query = DbSet.AsQueryable();
+
+        if (dormitoryIds != null && dormitoryIds.Count > 0)
+        {
+            query = query.Where(o => dormitoryIds.Contains(o.Building.DormitoryId));
+        }
+
+        if (status != null && status.Count > 0)
+        {
+            query = query.Where(o => status.Contains(o.Status));
+        }
 
         if (dateFrom.HasValue && dateTo.HasValue)
         {
-            query = query.Where(o => o.IntendedReceiveDate >= dateFrom.Value && o.IntendedReceiveDate <= dateTo.Value);
+            query = query.Where(o => o.IntendedReceiveDate.Date >= dateFrom.Value.Date && o.IntendedReceiveDate.Date <= dateTo.Value.Date);
         }
 
         if (searchValue != null)
@@ -469,6 +479,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
 
         var totalCount = query.Count();
         var resultList = query
+            .OrderByDescending(o => o.CreatedDate)
             .Select(o => new Order
             {
                 Id = o.Id,
@@ -477,6 +488,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                 PhoneNumber = o.PhoneNumber,
                 TotalPrice = o.TotalPrice,
                 TotalPromotion = o.TotalPromotion,
+                IntendedReceiveDate = o.IntendedReceiveDate,
                 ChargeFee = o.ChargeFee,
                 OrderDate = o.OrderDate,
                 ReceiveAt = o.ReceiveAt,

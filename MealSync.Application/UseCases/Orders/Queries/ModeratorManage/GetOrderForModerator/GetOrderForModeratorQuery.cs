@@ -11,9 +11,9 @@ public class GetOrderForModeratorQuery : PaginationRequest, IQuery<Result>
 
     public DateTime? DateTo { get; set; }
 
-    public OrderStatus[] Status { get; set; }
+    public int StatusMode { get; set; }
 
     public string? SearchValue { get; set; }
 
-    public long[] DormitoryIds { get; set; }
+    public long DormitoryMode { get; set; }
 }

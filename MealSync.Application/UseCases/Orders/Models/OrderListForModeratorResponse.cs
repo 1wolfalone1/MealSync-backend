@@ -20,6 +20,8 @@ public class OrderListForModeratorResponse
 
     public DateTimeOffset OrderDate { get; set; }
 
+    public DateTime IntendedReceiveDate { get; set; }
+
     public DateTimeOffset ReceiveAt { get; set; }
 
     public DateTimeOffset CancelAt { get; set; }

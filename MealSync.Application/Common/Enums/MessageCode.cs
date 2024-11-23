@@ -665,6 +665,9 @@ public enum MessageCode
     [Description("E-Moderator-CanNotUpdateStatusCustomerToBanned")]
     E_MODERATOR_CAN_NOT_UPDATE_STATUS_CUSTOMER_TO_BANNED,
 
+    [Description("E-Moderator-DormitoryNotInDormitoryAccess")]
+    E_MODERATOR_DORMITORY_NOT_IN_DORMITORY_ACCESS,
+
     // Notifiation
     [Description("E-Notification-NotFound")]
     E_NOTIFICATION_NOT_FOUND,
