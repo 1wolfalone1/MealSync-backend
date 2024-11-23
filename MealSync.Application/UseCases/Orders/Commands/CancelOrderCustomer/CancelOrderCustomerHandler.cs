@@ -141,14 +141,15 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                     PaymentMethods = PaymentMethods.VnPay,
                 };
                 var refundResult = await _paymentService.CreateRefund(payment).ConfigureAwait(false);
+                var options = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+                var content = JsonSerializer.Serialize(refundResult, options);
+
+                refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
+                refundPayment.PaymentThirdPartyContent = content;
+
                 if (refundResult.VnpResponseCode == ((int)VnPayRefundResponseCode.CODE_00).ToString("D2"))
                 {
-                    var options = new JsonSerializerOptions
-                        { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
-                    var content = JsonSerializer.Serialize(refundResult, options);
                     refundPayment.Status = PaymentStatus.PaidSuccess;
-                    refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
-                    refundPayment.PaymentThirdPartyContent = content;
                     refundMessage = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_REFUND_SUCCESS.GetDescription());
 
                     // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer

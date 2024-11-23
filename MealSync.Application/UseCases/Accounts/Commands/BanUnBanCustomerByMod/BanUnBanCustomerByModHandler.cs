@@ -140,7 +140,7 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
                     Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_MODERATOR_UPDATE_STATUS_SUCCESS.GetDescription()),
                 });
             }
-            else if (request.Status == AccountStatus.Verify && customer.Account.Status == AccountStatus.Banned)
+            else if (request.Status == AccountStatus.Verify && (customer.Status == CustomerStatus.Banning || customer.Status == CustomerStatus.Banned))
             {
                 // UnBan
                 try
@@ -198,13 +198,15 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
                     PaymentMethods = PaymentMethods.VnPay,
                 };
                 var refundResult = await _vnPayPaymentService.CreateRefund(payment).ConfigureAwait(false);
+                var options = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+                var content = JsonSerializer.Serialize(refundResult, options);
+
+                refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
+                refundPayment.PaymentThirdPartyContent = content;
+
                 if (refundResult.VnpResponseCode == ((int)VnPayRefundResponseCode.CODE_00).ToString("D2"))
                 {
-                    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
-                    var content = JsonSerializer.Serialize(refundResult, options);
                     refundPayment.Status = PaymentStatus.PaidSuccess;
-                    refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
-                    refundPayment.PaymentThirdPartyContent = content;
 
                     // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
                     var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);

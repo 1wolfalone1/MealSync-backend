@@ -37,8 +37,11 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
     private readonly IPaymentRepository _paymentRepository;
     private readonly IBuildingRepository _buildingRepository;
 
-    public UpdateShopStatusInactiveActiveHandler(ILogger<UpdateShopStatusInactiveActiveHandler> logger, IUnitOfWork unitOfWork, IShopRepository shopRepository, ICurrentPrincipalService currentPrincipalService, IOrderRepository orderRepository,
-        ISystemResourceRepository systemResourceRepository, INotifierService notifierService, INotificationFactory notificationFactory, IEmailService emailService, IAccountFlagRepository accountFlagRepository, ICurrentAccountService currentAccountService, IAccountRepository accountRepository, ISystemConfigRepository systemConfigRepository, IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository, IVnPayPaymentService paymentService, IPaymentRepository paymentRepository, IBuildingRepository buildingRepository)
+    public UpdateShopStatusInactiveActiveHandler(ILogger<UpdateShopStatusInactiveActiveHandler> logger, IUnitOfWork unitOfWork, IShopRepository shopRepository, ICurrentPrincipalService currentPrincipalService,
+        IOrderRepository orderRepository,
+        ISystemResourceRepository systemResourceRepository, INotifierService notifierService, INotificationFactory notificationFactory, IEmailService emailService, IAccountFlagRepository accountFlagRepository,
+        ICurrentAccountService currentAccountService, IAccountRepository accountRepository, ISystemConfigRepository systemConfigRepository, IWalletRepository walletRepository,
+        IWalletTransactionRepository walletTransactionRepository, IVnPayPaymentService paymentService, IPaymentRepository paymentRepository, IBuildingRepository buildingRepository)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
@@ -68,36 +71,36 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
         // Warning
         if (!request.IsConfirm)
         {
-                var listOrderProcessing = _orderRepository.Get(o => OrderConstant.LIST_ORDER_STATUS_IN_PROCESSING.Any(x => x == o.Status)).ToList();
-                if (request.Status == ShopStatus.InActive && listOrderProcessing != default && listOrderProcessing.Count > 1)
+            var listOrderProcessing = _orderRepository.Get(o => OrderConstant.LIST_ORDER_STATUS_IN_PROCESSING.Any(x => x == o.Status)).ToList();
+            if (request.Status == ShopStatus.InActive && listOrderProcessing != default && listOrderProcessing.Count > 1)
+            {
+                var numOfPendingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Pending).Count();
+                var numOfConfirmOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Confirmed).Count();
+                var numOfPreparingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Preparing).Count();
+                return Result.Warning(new
                 {
-                    var numOfPendingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Pending).Count();
-                    var numOfConfirmOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Confirmed).Count();
-                    var numOfPreparingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Preparing).Count();
-                    return Result.Warning(new
-                    {
-                        Code = MessageCode.W_SHOP_HAVE_ORDER_TO_INACTIVE.GetDescription(),
-                        Message = string.Format(_systemResourceRepository.GetByResourceCode(MessageCode.W_SHOP_HAVE_ORDER_TO_INACTIVE.GetDescription()),
-                            numOfPendingOrder,
-                            numOfConfirmOrder,
-                            numOfPreparingOrder),
-                    });
-                }
+                    Code = MessageCode.W_SHOP_HAVE_ORDER_TO_INACTIVE.GetDescription(),
+                    Message = string.Format(_systemResourceRepository.GetByResourceCode(MessageCode.W_SHOP_HAVE_ORDER_TO_INACTIVE.GetDescription()),
+                        numOfPendingOrder,
+                        numOfConfirmOrder,
+                        numOfPreparingOrder),
+                });
+            }
 
-                if (request.IsReceivingOrderPaused && listOrderProcessing != default && listOrderProcessing.Count > 1)
+            if (request.IsReceivingOrderPaused && listOrderProcessing != default && listOrderProcessing.Count > 1)
+            {
+                var numOfPendingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Pending).Count();
+                var numOfConfirmOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Confirmed).Count();
+                var numOfPreparingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Preparing).Count();
+                return Result.Warning(new
                 {
-                    var numOfPendingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Pending).Count();
-                    var numOfConfirmOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Confirmed).Count();
-                    var numOfPreparingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Preparing).Count();
-                    return Result.Warning(new
-                    {
-                        Code = MessageCode.W_ORDER_HAVE_ORDER_TO_PAUSED_RECEIVE.GetDescription(),
-                        Message = string.Format(_systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_HAVE_ORDER_TO_PAUSED_RECEIVE.GetDescription()),
-                            numOfPendingOrder,
-                            numOfConfirmOrder,
-                            numOfPreparingOrder),
-                    });
-                }
+                    Code = MessageCode.W_ORDER_HAVE_ORDER_TO_PAUSED_RECEIVE.GetDescription(),
+                    Message = string.Format(_systemResourceRepository.GetByResourceCode(MessageCode.W_ORDER_HAVE_ORDER_TO_PAUSED_RECEIVE.GetDescription()),
+                        numOfPendingOrder,
+                        numOfConfirmOrder,
+                        numOfPreparingOrder),
+                });
+            }
         }
 
         // Change to InActive
@@ -266,16 +269,17 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                 PaymentMethods = PaymentMethods.BankTransfer,
             };
             var refundResult = await _paymentService.CreateRefund(payment).ConfigureAwait(false);
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+            var content = JsonSerializer.Serialize(refundResult, options);
+
+            refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
+            refundPayment.PaymentThirdPartyContent = content;
+
             if (refundResult.VnpResponseCode == ((int)VnPayRefundResponseCode.CODE_00).ToString("D2"))
             {
-                var options = new JsonSerializerOptions()
-                    { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
-                var content = JsonSerializer.Serialize(refundResult, options);
                 refundPayment.Status = PaymentStatus.PaidSuccess;
-                refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
-                refundPayment.PaymentThirdPartyContent = content;
 
-                 // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
+                // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
                 var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
                 var systemCommissionWallet = await _walletRepository.GetByType(WalletTypes.SystemCommission).ConfigureAwait(false);
 

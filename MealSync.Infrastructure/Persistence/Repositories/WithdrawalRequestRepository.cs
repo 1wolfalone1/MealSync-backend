@@ -230,6 +230,17 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
             }).FirstOrDefaultAsync();
     }
 
+    public Task<WithdrawalRequest?> GetForManage(List<long> dormitoryIds, long withdrawalRequestId)
+    {
+        return DbSet
+            .Include(wr => wr.Wallet)
+            .ThenInclude(w => w.Shop)
+            .Where(w => w.Id == withdrawalRequestId && w.Wallet.Shop != default
+                                                    && w.Wallet.Shop.Status != ShopStatus.Deleted
+                                                    && w.Wallet.Shop.ShopDormitories.Any(sd => dormitoryIds.Contains(sd.DormitoryId)))
+            .FirstOrDefaultAsync();
+    }
+
     private static string EscapeLikeParameter(string input)
     {
         return input

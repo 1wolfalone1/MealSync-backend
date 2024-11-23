@@ -53,7 +53,7 @@ public class CustomerController : BaseApiController
         return HandleResult(await Mediator.Send(new GetDetailAccountQuery { AccountId = id }).ConfigureAwait(false));
     }
 
-    [HttpGet(Endpoints.MANAGE_CUSTOMER_BAN_UNBAN)]
+    [HttpPut(Endpoints.MANAGE_CUSTOMER_BAN_UNBAN)]
     [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
     public async Task<IActionResult> BanOrUnban([FromBody] BanUnBanCustomerByModCommand command)
     {
