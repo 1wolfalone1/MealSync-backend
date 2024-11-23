@@ -124,6 +124,7 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
             order.Status = OrderStatus.FailDelivery;
             order.Reason = "Cửa hàng không thực hiện việc giao hàng";
             order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription();
+            order.LastestDeliveryFailAt = TimeFrameUtils.GetCurrentDate();
             numberOrderDeliveryFail++;
             notfications.AddRange(SendNotification(order));
             var isRefund = await RefundOrderAsync(order).ConfigureAwait(false);

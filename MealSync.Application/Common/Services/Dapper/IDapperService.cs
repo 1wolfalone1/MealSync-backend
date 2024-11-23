@@ -21,6 +21,8 @@ public interface IDapperService
     Task<IEnumerable<TReturn>> SelectAsync<TFirst, TSecond, TThird, TFourth, TReturn>(QueryName queryName, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, object queryParams, string splitOn);
 
     Task<IEnumerable<TReturn>> SelectAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(QueryName queryName, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, object queryParams, string splitOn);
+
+    Task<IEnumerable<TReturn>> SelectAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSix, TReturn>(QueryName queryName, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSix, TReturn> map, object queryParams, string splitOn);
 }
 
 public enum QueryName

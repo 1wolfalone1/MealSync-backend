@@ -4,7 +4,7 @@
  
  @OrderId
  */
--- SET @OrderId:=1;
+-- SET @OrderId:=319;
 WITH OrdersOfShop AS (
     SELECT
         id,
@@ -73,6 +73,7 @@ SELECT
     o.is_paid_to_shop AS IsPaidToShop,
     o.is_refund AS IsRefund,
     o.is_report AS IsReport,
+    rp.id AS ReportId,
     o.reason AS Reason,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
@@ -86,6 +87,19 @@ SELECT
     l.address AS Address,
     l.latitude AS Latitude,
     l.longitude AS Longitude,
+    -- Shop Information Section
+    s.id AS ShopSection,
+    s.id AS Id,
+    s.name AS ShopName,
+    accShopInfor.full_name AS FullName,
+    s.banner_url AS BannerUrl,
+    s.logo_url AS LogoUrl,
+    accShopInfor.phone_number AS PhoneNumber,
+    accShopInfor.email AS Email,
+    ls.id AS LocationId,
+    ls.address AS Address,
+    ls.latitude AS Latitude,
+    ls.longitude AS Longitude,
     -- Promotion
     p.id AS PromotionSection,
     p.id AS Id,
@@ -146,6 +160,11 @@ FROM
     LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
     LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
     LEFT JOIN account accShop ON dp.shop_id = accShop.id
+    LEFT JOIN shop s ON o.shop_id = s.id
+    LEFT JOIN location ls ON s.location_id = ls.id
+    LEFT JOIN account accShopInfor ON o.shop_id = accShopInfor.id
+    LEFT JOIN report rp ON rp.order_id = o.id
+    AND rp.customer_id IS NOT NULL
     INNER JOIN order_detail od ON o.id = od.order_id
     INNER JOIN food f ON od.food_id = f.id
 ORDER BY

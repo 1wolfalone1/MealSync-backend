@@ -26,7 +26,7 @@ public interface IOrderRepository : IBaseRepository<Order>
 
     Task<Order?> GetByIdAndCustomerIdForReorder(long id, long customerId);
 
-    List<Order> GetListOrderOnStatusFailDeliveredWithoutIncoming(int hoursToMarkDeliveryFail, DateTime currentDateTime);
+    List<Order> GetListOrderOnStatusFailDeliveredWithoutPayIncomingShop(int hoursToMarkDeliveryFail, DateTime currentDateTime);
 
     Task<List<Order>> GetFailDeliveryAndDelivered(DateTime intendedReceiveDate, int endTime);
 

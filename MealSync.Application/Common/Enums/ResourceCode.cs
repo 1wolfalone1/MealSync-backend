@@ -187,4 +187,7 @@ public enum ResourceCode
 
     [Description("Notification-Order-Of-Shop-System-Cancel")]
     NOTIFICATION_ORDER_OF_SHOP_SYSTEM_CANCEL,
+
+    [Description("Notification-RefundOrderForCustomer")]
+    NOTIFICATION_REFUND_ORDER_FOR_CUSTOMER,
 }

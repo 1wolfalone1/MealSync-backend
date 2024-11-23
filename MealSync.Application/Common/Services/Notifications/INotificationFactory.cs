@@ -55,4 +55,6 @@ public interface INotificationFactory
     Notification CreateSystemCancelOrderOfCustomerNotification(Order order, Account account);
 
     Notification CreateSystemCancelOrderOfShopNotification(Order order, Account account);
+
+    Notification CreateRefundCustomerNotification(Order order, Account account, double amountRefund);
 }
