@@ -148,7 +148,6 @@ public static class Endpoints
     public const string SHOP_DELIVERED_INFOR_EVIDENCE = "shop-owner/order/{id:long}/delivery-infor";
     public const string SHOP_AND_STAFF_DELIVERED_INFOR_EVIDENCE = "shop-owner-staff/order/{id:long}/delivery-infor";
     public const string RE_ORDER = "customer/re-order/food";
-    public const string MODERATOR_ORDER = "moderator/order";
     public const string SHOP_UN_ASSIGN_ORDER = "shop-owner/order/{id:long}/un-assign";
 
 
@@ -220,6 +219,9 @@ public static class Endpoints
 
     public const string MANAGE_WITHDRAWAL_REQUEST = "moderator/withdrawal-request";
     public const string MANAGE_WITHDRAWAL_REQUEST_DETAIL = "moderator/withdrawal-request/{id:long}";
+
+    public const string MODERATOR_ORDER = "moderator/order";
+    public const string MODERATOR_ORDER_DETAIL = "moderator/order/{id:long}";
 
     // Notification
     public const string NOTIFICATION_SHOP_STAFF = "shop-owner-staff/notification";

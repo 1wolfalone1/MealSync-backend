@@ -451,6 +451,9 @@ public enum MessageCode
     [Description("I-Order-UnAssignSuccess")]
     I_ORDER_UN_ASSIGN_SUCCESS,
 
+    [Description("E-Order-ModeratorNotHaveAuthorToAccess")]
+    E_ORDER_MODERATOR_NOT_HAVE_AUTHOR_TO_ACCESS,
+
     // Report
     [Description("E-Report-NotFound")]
     E_REPORT_NOT_FOUND,

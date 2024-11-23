@@ -527,4 +527,11 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                 && (o.Status == OrderStatus.Pending || o.Status == OrderStatus.PendingPayment || o.Status == OrderStatus.Confirmed))
             .ToListAsync();
     }
+
+    public Order GetOrderWithDormitoryById(long orderId)
+    {
+        return DbSet.Where(o => o.Id == orderId)
+            .Include(o => o.Building)
+            .ThenInclude(b => b.Dormitory).SingleOrDefault();
+    }
 }
