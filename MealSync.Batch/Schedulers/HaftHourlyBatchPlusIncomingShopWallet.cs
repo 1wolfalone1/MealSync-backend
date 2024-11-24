@@ -19,8 +19,8 @@ public class HaftHourlyBatchPlusIncomingShopWallet : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        _logger.LogInformation($"[BATCH CODE 3: START AT: {TimeFrameUtils.GetCurrentDate()}]");
+        _logger.LogInformation($"[BATCH CODE 6: START AT: {TimeFrameUtils.GetCurrentDate()}]");
         await _mediator.Send(new TransferIncomingAmountForShopAfterTwoHourCommand()).ConfigureAwait(false);
-        _logger.LogInformation($"[BATCH CODE 3: END AT: {TimeFrameUtils.GetCurrentDate()}]");
+        _logger.LogInformation($"[BATCH CODE 6: END AT: {TimeFrameUtils.GetCurrentDate()}]");
     }
 }

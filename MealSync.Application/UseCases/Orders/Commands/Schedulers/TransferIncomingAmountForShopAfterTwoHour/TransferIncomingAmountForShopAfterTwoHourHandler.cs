@@ -149,8 +149,9 @@ public class TransferIncomingAmountForShopAfterTwoHourHandler : ICommandHandler<
             IncomingAmountBefore = systemTotalWallet.IncomingAmount,
             ReportingAmountBefore = systemTotalWallet.ReportingAmount,
             Amount = -amountSendToShop,
+            PaymentId = payment.Id,
             Type = WalletTransactionType.Withdrawal,
-            Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví chờ của cửa hàng id {order.ShopId} từ đơn hàng MS-{order.Id}",
+            Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví chờ cửa hàng id {order.ShopId} từ đơn hàng MS-{order.Id}",
         };
         transactionsAdds.Add(transactionWithdrawalSystemTotalToShopWallet);
 
@@ -164,7 +165,7 @@ public class TransferIncomingAmountForShopAfterTwoHourHandler : ICommandHandler<
             Amount = amountSendToShop,
             Type = WalletTransactionType.Transfer,
             PaymentId = payment.Id,
-            Description = $"Tiền thanh toán cho đơn hàng MS-{order.Id} {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví chờ của cửa hàng",
+            Description = $"Tiền thanh toán cho đơn hàng MS-{order.Id} {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví chờ",
         };
         transactionsAdds.Add(transactionAddFromSystemTotalToShop);
 
@@ -252,7 +253,8 @@ public class TransferIncomingAmountForShopAfterTwoHourHandler : ICommandHandler<
                 listWalletTransaction.Add(transactionWithdrawalSystemTotalForRefundPaymentOnline);
                 systemTotalWallet.AvailableAmount -= payment.Amount;
 
-                await _walletTransactionRepository.AddRangeAsync(listWalletTransaction).ConfigureAwait(false);
+                // await _walletTransactionRepository.AddRangeAsync(listWalletTransaction).ConfigureAwait(false);
+                refundPayment.WalletTransactions = listWalletTransaction;
                 _walletRepository.Update(systemTotalWallet);
                 _walletRepository.Update(systemCommissionWallet);
                 var shopAccount = _accountRepository.GetById(order.ShopId);

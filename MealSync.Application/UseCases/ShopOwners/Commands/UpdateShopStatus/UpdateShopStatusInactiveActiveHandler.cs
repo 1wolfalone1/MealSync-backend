@@ -282,7 +282,6 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                 // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
                 var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
                 var systemCommissionWallet = await _walletRepository.GetByType(WalletTypes.SystemCommission).ConfigureAwait(false);
-
                 var listWalletTransaction = new List<WalletTransaction>();
                 WalletTransaction transactionWithdrawalSystemCommissionToSystemTotal = new WalletTransaction
                 {
@@ -325,9 +324,14 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                 listWalletTransaction.Add(transactionWithdrawalSystemTotalForRefundPaymentOnline);
                 systemTotalWallet.AvailableAmount -= payment.Amount;
 
-                await _walletTransactionRepository.AddRangeAsync(listWalletTransaction).ConfigureAwait(false);
+                // await _walletTransactionRepository.AddRangeAsync(listWalletTransaction).ConfigureAwait(false);
+                refundPayment.WalletTransactions = listWalletTransaction;
                 _walletRepository.Update(systemTotalWallet);
                 _walletRepository.Update(systemCommissionWallet);
+
+                var shopAccount = _accountRepository.GetById(order.ShopId);
+                var noti = _notificationFactory.CreateRefundCustomerNotification(order, shopAccount, payment.Amount);
+                _notifierService.NotifyAsync(noti);
             }
             else
             {

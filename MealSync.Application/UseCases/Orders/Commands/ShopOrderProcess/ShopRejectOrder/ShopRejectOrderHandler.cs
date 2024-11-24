@@ -180,7 +180,8 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
                 listWalletTransaction.Add(transactionWithdrawalSystemTotalForRefundPaymentOnline);
                 systemTotalWallet.AvailableAmount -= payment.Amount;
 
-                await _walletTransactionRepository.AddRangeAsync(listWalletTransaction).ConfigureAwait(false);
+                // await _walletTransactionRepository.AddRangeAsync(listWalletTransaction).ConfigureAwait(false);
+                refundPayment.WalletTransactions = listWalletTransaction;
                 _walletRepository.Update(systemTotalWallet);
                 _walletRepository.Update(systemCommissionWallet);
 
