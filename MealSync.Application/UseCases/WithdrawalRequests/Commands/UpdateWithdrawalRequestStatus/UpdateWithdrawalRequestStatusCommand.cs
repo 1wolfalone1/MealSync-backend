@@ -11,4 +11,6 @@ public class UpdateWithdrawalRequestStatusCommand : ICommand<Result>
     public WithdrawalRequestStatus Status { get; set; }
 
     public string? Reason { get; set; }
+
+    public bool IsConfirm { get; set; }
 }

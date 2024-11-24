@@ -1,9 +1,12 @@
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Models.Responses;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.WithdrawalRequests.Models;
+using MealSync.Domain.Enums;
+using MealSync.Domain.Exceptions.Base;
 
 namespace MealSync.Application.UseCases.WithdrawalRequests.Queries.GetAllWithdrawalRequestForMod;
 
@@ -27,6 +30,11 @@ public class GetAllWithdrawalRequestForModHandler : IQueryHandler<GetAllWithdraw
         var moderatorAccountId = _currentPrincipalService.CurrentPrincipalId!.Value;
         var dormitories = await _moderatorDormitoryRepository.GetAllDormitoryByModeratorId(moderatorAccountId).ConfigureAwait(false);
         var dormitoryIds = dormitories.Select(d => d.DormitoryId).ToList();
+
+        if (request.DormitoryId != default && !dormitoryIds.Contains(request.DormitoryId.Value))
+        {
+            throw new InvalidBusinessException(MessageCode.E_MODERATOR_ACTION_NOT_ALLOW.GetDescription());
+        }
 
         var data = await _withdrawalRequestRepository.GetAllWithdrawalRequestForManage(
             dormitoryIds, request.SearchValue, request.DateFrom,
