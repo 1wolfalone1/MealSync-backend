@@ -43,7 +43,6 @@
         <Folder Include="UseCases\OperatingSlots\Commands\" />
         <Folder Include="UseCases\Options\Queries\" />
         <Folder Include="UseCases\Payments\Models\" />
-        <Folder Include="UseCases\PlatformCategory\Commands\" />
         <Folder Include="UseCases\Roles\Queries\"/>
     </ItemGroup>
 
