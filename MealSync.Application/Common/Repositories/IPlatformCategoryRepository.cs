@@ -7,4 +7,8 @@ public interface IPlatformCategoryRepository : IBaseRepository<PlatformCategory>
     bool CheckExistedById(long id);
 
     Task<IEnumerable<PlatformCategory>> GetAll();
+
+    bool CheckExsitName(string name);
+
+    int GetMaxDisplayOrder();
 }
