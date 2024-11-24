@@ -155,10 +155,11 @@ public class Utils
         }
         catch (Exception ex)
         {
-            return ex.Message;
+            Console.WriteLine(ex.Message);
+            return "192.168.56.2";
         }
 
-        return "127.0.0.1";
+        return "192.168.56.2";
     }
 }
 

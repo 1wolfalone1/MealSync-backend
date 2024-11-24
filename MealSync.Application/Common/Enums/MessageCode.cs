@@ -81,6 +81,9 @@ public enum MessageCode
     [Description("E-PlatformCategory-NotFound")]
     E_PLATFORM_CATEGORY_NOT_FOUND,
 
+    [Description("E-PlatformCategory-NotFound")]
+    E_PLATFORM_CATEGORY_DOUBLE_NAME,
+
     // Shop Category
     [Description("I-ShopCategory-DeleteSuccess")]
     I_SHOP_CATEGORY_DELETE_SUCCESS,

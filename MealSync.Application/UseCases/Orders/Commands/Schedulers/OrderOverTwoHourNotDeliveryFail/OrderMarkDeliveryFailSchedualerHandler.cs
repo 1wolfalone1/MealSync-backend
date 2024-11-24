@@ -124,6 +124,7 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
             order.Status = OrderStatus.FailDelivery;
             order.Reason = "Cửa hàng không thực hiện việc giao hàng";
             order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription();
+            order.LastestDeliveryFailAt = TimeFrameUtils.GetCurrentDate();
             numberOrderDeliveryFail++;
             notfications.AddRange(SendNotification(order));
             var isRefund = await RefundOrderAsync(order).ConfigureAwait(false);
@@ -221,9 +222,14 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
                 listWalletTransaction.Add(transactionWithdrawalSystemTotalForRefundPaymentOnline);
                 systemTotalWallet.AvailableAmount -= payment.Amount;
 
-                await _walletTransactionRepository.AddRangeAsync(listWalletTransaction).ConfigureAwait(false);
+                // await _walletTransactionRepository.AddRangeAsync(listWalletTransaction).ConfigureAwait(false);
+                refundPayment.WalletTransactions = listWalletTransaction;
                 _walletRepository.Update(systemTotalWallet);
                 _walletRepository.Update(systemCommissionWallet);
+
+                var shopAccount = _accountRepository.GetById(order.ShopId);
+                var noti = _notificationFactory.CreateRefundCustomerNotification(order, shopAccount, payment.Amount);
+                _notifierService.NotifyAsync(noti);
             }
             else
             {

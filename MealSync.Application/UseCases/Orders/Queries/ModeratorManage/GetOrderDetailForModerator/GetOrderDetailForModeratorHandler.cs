@@ -32,29 +32,30 @@ public class GetOrderDetailForModeratorHandler : IQueryHandler<GetOrderDetailFor
         Validate(request);
 
         var uniqOrder = new Dictionary<long, OrderDetailForModeratorResponse>();
-        Func<OrderDetailForModeratorResponse, OrderDetailForModeratorResponse.CustomerInforInShopOrderDetailForModerator, OrderDetailForModeratorResponse.PromotionInModeratorOrderDetail, OrderDetailForModeratorResponse.ShopDeliveryStaffInModeratorOrderDetail,
+        Func<OrderDetailForModeratorResponse, OrderDetailForModeratorResponse.CustomerInforInShopOrderDetailForModerator, OrderDetailForModeratorResponse.ShopInforForOrderDetailMod, OrderDetailForModeratorResponse.PromotionInModeratorOrderDetail, OrderDetailForModeratorResponse.ShopDeliveryStaffInModeratorOrderDetail,
             OrderDetailForModeratorResponse.FoodInModeratorOrderDetail, OrderDetailForModeratorResponse> map =
-            (parent, child1, child2, child3, child4) =>
+            (parent, child1, child2, child3, child4, child5) =>
             {
                 if (!uniqOrder.TryGetValue(parent.Id, out var order))
                 {
                     parent.Customer = child1;
-                    if (child2.Id != 0)
+                    parent.Shop = child2;
+                    if (child3.Id != 0)
                     {
-                        parent.Promotion = child2;
+                        parent.Promotion = child3;
                     }
 
-                    if (child3.DeliveryPackageId != 0 && (child3.Id != 0 || child3.IsShopOwnerShip))
+                    if (child4.DeliveryPackageId != 0 && (child4.Id != 0 || child4.IsShopOwnerShip))
                     {
-                        parent.ShopDeliveryStaff = child3;
+                        parent.ShopDeliveryStaff = child4;
                     }
 
-                    parent.OrderDetails.Add(child4);
+                    parent.OrderDetails.Add(child5);
                     uniqOrder.Add(parent.Id, parent);
                 }
                 else
                 {
-                    order.OrderDetails.Add(child4);
+                    order.OrderDetails.Add(child5);
                     uniqOrder.Remove(order.Id);
                     uniqOrder.Add(order.Id, order);
                 }
@@ -63,7 +64,7 @@ public class GetOrderDetailForModeratorHandler : IQueryHandler<GetOrderDetailFor
             };
 
         await _dapperService
-            .SelectAsync<OrderDetailForModeratorResponse, OrderDetailForModeratorResponse.CustomerInforInShopOrderDetailForModerator, OrderDetailForModeratorResponse.PromotionInModeratorOrderDetail, OrderDetailForModeratorResponse.ShopDeliveryStaffInModeratorOrderDetail,
+            .SelectAsync<OrderDetailForModeratorResponse, OrderDetailForModeratorResponse.CustomerInforInShopOrderDetailForModerator, OrderDetailForModeratorResponse.ShopInforForOrderDetailMod, OrderDetailForModeratorResponse.PromotionInModeratorOrderDetail, OrderDetailForModeratorResponse.ShopDeliveryStaffInModeratorOrderDetail,
                 OrderDetailForModeratorResponse.FoodInModeratorOrderDetail, OrderDetailForModeratorResponse>(
                 QueryName.GetOrderDetailForModeratorById,
                 map,
@@ -71,7 +72,7 @@ public class GetOrderDetailForModeratorHandler : IQueryHandler<GetOrderDetailFor
                 {
                     OrderId = request.OrderId,
                 },
-                "CustomerSection, PromotionSection, DeliveryPackageSection, OrderDetailSection").ConfigureAwait(false);
+                "CustomerSection, ShopSection, PromotionSection, DeliveryPackageSection, OrderDetailSection").ConfigureAwait(false);
 
         return Result.Success(uniqOrder.Values.FirstOrDefault());
     }

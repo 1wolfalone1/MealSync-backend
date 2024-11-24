@@ -111,6 +111,7 @@ public static class Endpoints
 
     // Platform category
     public const string GET_ALL_PLATFORM_CATEGORY = "platform-category";
+    public const string CREATE_PLATFORM_CATEGORY = "admin/platform-category";
 
     // Customer Building
     public const string UPDATE_CUSTOMER_BUILDING = "customer/building/update";

@@ -153,7 +153,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
                 Amount = -amountSendToShop,
                 PaymentId = payment.Id,
                 Type = WalletTransactionType.Withdrawal,
-                Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví cửa hàng id {shopId} từ đơn hàng MS-{orderId}",
+                Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví chờ cửa hàng id {shopId} từ đơn hàng MS-{orderId}",
             };
             transactionsAdds.Add(transactionWithdrawalSystemTotalToShopWallet);
 
@@ -167,7 +167,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
                 Amount = amountSendToShop,
                 Type = WalletTransactionType.Transfer,
                 PaymentId = payment.Id,
-                Description = $"Tiền thanh toán cho đơn hàng MS-{orderId} {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ",
+                Description = $"Tiền thanh toán cho đơn hàng MS-{orderId} {MoneyUtils.FormatMoneyWithDots(amountSendToShop)} VNĐ về ví chờ",
             };
             transactionsAdds.Add(transactionAddFromSystemTotalToShop);
 
@@ -192,11 +192,12 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             var transactionWithdrawalAvailableAmountOfShop = new WalletTransaction
             {
                 WalletFromId = shop.WalletId,
-                WalletToId = systemTotalWallet.Id, // Thống: Nhầm ví
+                WalletToId = systemCommissionWallet.Id,
                 AvaiableAmountBefore = shop.Wallet.AvailableAmount,
                 IncomingAmountBefore = shop.Wallet.IncomingAmount,
                 ReportingAmountBefore = shop.Wallet.ReportingAmount,
                 Amount = -chargeFee,
+                PaymentId = payment.Id,
                 Type = WalletTransactionType.Withdrawal,
                 Description = $"Rút tiền hoa hồng từ tiền có sẵn {MoneyUtils.FormatMoneyWithDots(chargeFee)} VNĐ của đơn hàng MS-{orderId} về ví hoa hồng",
             };
@@ -210,6 +211,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
                 IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
                 ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
                 Amount = chargeFee,
+                PaymentId = payment.Id,
                 Type = WalletTransactionType.Transfer,
                 Description = $"Tiền hoa hồng từ đơn hàng MS-{orderId} {MoneyUtils.FormatMoneyWithDots(chargeFee)} VNĐ về ví hoa hồng",
             };
@@ -217,7 +219,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             payment.Status = PaymentStatus.PaidSuccess;
 
             _walletRepository.Update(shop.Wallet);
-            _walletRepository.Update(systemTotalWallet); // Thống: Update sai ví :v systemCommissionWallet
+            _walletRepository.Update(systemCommissionWallet);
             _paymentRepository.Update(payment);
 
             await _walletTransactionRepository.AddAsync(transactionWithdrawalAvailableAmountOfShop).ConfigureAwait(false);
