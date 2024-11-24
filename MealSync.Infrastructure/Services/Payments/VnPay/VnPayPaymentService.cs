@@ -38,10 +38,10 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
     {
         HttpContext? context = _contextAccessor.HttpContext;
 
-        if (context == null)
-        {
-            throw new Exception("Http Context not found");
-        }
+        // if (context == null)
+        // {
+        //     throw new Exception("Http Context not found");
+        // }
 
         var vnPay = new VnPayLibrary();
 
@@ -67,10 +67,10 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
     {
         HttpContext? context = _contextAccessor.HttpContext;
 
-        if (context == null)
-        {
-            throw new Exception("Http Context not found");
-        }
+        // if (context == null)
+        // {
+        //     throw new Exception("Http Context not found");
+        // }
 
         var vnpHashSecret = _vnPaySetting.HashSecret;
         var vnpTmnCode = _vnPaySetting.TmpCode;
