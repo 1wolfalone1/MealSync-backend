@@ -1,5 +1,6 @@
 using MealSync.API.Identites;
 using MealSync.API.Shared;
+using MealSync.Application.UseCases.WithdrawalRequests.Commands.UpdateWithdrawalRequestStatus;
 using MealSync.Application.UseCases.WithdrawalRequests.Queries.GetAllWithdrawalRequestForMod;
 using MealSync.Application.UseCases.WithdrawalRequests.Queries.GetDetailForMod;
 using Microsoft.AspNetCore.Mvc;
@@ -22,5 +23,12 @@ public class WithdrawalRequestController : BaseApiController
     public async Task<IActionResult> WithdrawalRequestDetailForModManage(long id)
     {
         return HandleResult(await Mediator.Send(new GetDetailForModQuery { WithdrawalRequestId = id }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.MANAGE_WITHDRAWAL_UPDATE_STATUS)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> UpdateWithdrawalRequestStatus([FromBody] UpdateWithdrawalRequestStatusCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }

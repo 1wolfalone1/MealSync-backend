@@ -21,7 +21,7 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
     {
         var query = DbSet
             .Where(c => c.Account.Status != AccountStatus.Deleted && c.Account.Status != AccountStatus.UnVerify
-                                                                  && (c.CustomerBuildings.Any(sd => dormitoryIds.Contains(sd.Building.DormitoryId))
+                                                                  && (c.CustomerBuildings.Any(cb => dormitoryIds.Contains(cb.Building.DormitoryId))
                                                                       || c.Orders.Any(o => dormitoryIds.Contains(o.Building.DormitoryId)))
             )
             .AsQueryable();

@@ -674,6 +674,9 @@ public enum MessageCode
     [Description("E-Moderator-DormitoryNotInDormitoryAccess")]
     E_MODERATOR_DORMITORY_NOT_IN_DORMITORY_ACCESS,
 
+    [Description("W-Moderator-ShopBanStillWithdrawal")]
+    W_MODERATOR_SHOP_BAN_STILL_WITHDRAWAL,
+
     // Notifiation
     [Description("E-Notification-NotFound")]
     E_NOTIFICATION_NOT_FOUND,
