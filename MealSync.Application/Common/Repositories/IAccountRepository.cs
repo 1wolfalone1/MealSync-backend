@@ -13,4 +13,6 @@ public interface IAccountRepository : IBaseRepository<Account>
     Account? GetCustomerById(long id);
 
     List<Account>? GetAccountsOfModeratorByDormitoryId(long dormitoryId);
+
+    Account GetIncludeCustomerById(long id);
 }

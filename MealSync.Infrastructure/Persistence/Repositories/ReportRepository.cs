@@ -298,6 +298,12 @@ public class ReportRepository : BaseRepository<Report>, IReportRepository
         return (reports, totalCount);
     }
 
+    public Task<long?> GetOrderIdByReportIdAndDormitoryIds(long reportId, List<long> dormitoryIds)
+    {
+        return DbSet.Where(r => dormitoryIds.Contains(r.Order.Building.DormitoryId) && r.Id == reportId)
+            .Select(r => (long?)r.OrderId).FirstOrDefaultAsync();
+    }
+
     private static string EscapeLikeParameter(string input)
     {
         return input
