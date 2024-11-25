@@ -77,15 +77,17 @@ public class KafkaConsumerRequestNotiFirebaseService : BackgroundService
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
+            var shopRepository = scope.ServiceProvider.GetRequiredService<IShopRepository>();
             var accountFrom = accountRepository.GetById(request.FromAccountId);
             var accountTo = accountRepository.GetById(request.ToAccountId);
-            var identityRoleName = accountFrom.RoleId == (int)Roles.ShopDelivery ? "nhân viên giao hàng" : (accountFrom.RoleId == (int)Roles.ShopOwner ? "cửa hàng" : "khách hàng");
+            var identityRoleName = accountFrom.RoleId == (int)Roles.ShopDelivery ? "Shipper" : (accountFrom.RoleId == (int)Roles.ShopOwner ? "Cửa Hàng" : "Khách Hàng");
             var typeNotification = accountFrom.RoleId == (int)Roles.ShopDelivery ? NotificationTypes.SendToShopDeliveryStaff : (accountFrom.RoleId == (int)Roles.ShopOwner ? NotificationTypes.SendToShop : NotificationTypes.SendToCustomer);
+            var nameMessageFrom = accountFrom.RoleId == (int)Roles.ShopOwner ? shopRepository.GetById(request.FromAccountId).Name : accountFrom.FullName;
             var notification = new Notification()
             {
                 AccountId = accountTo.Id,
-                Title = "Tin Nhắn",
-                Content = $"Bạn vừa có một tin nhắn mới từ {identityRoleName}: {accountFrom.FullName}",
+                Title = $"Tin Nhắn Từ {identityRoleName}: {nameMessageFrom}",
+                Content = request.Message ?? string.Empty,
                 EntityType = NotificationEntityTypes.Chat,
                 ImageUrl = accountFrom.AvatarUrl,
                 Type = typeNotification,
