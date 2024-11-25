@@ -60,6 +60,7 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
             BankCode = wr.BankCode,
             BankShortName = wr.BankShortName,
             BankAccountNumber = wr.BankAccountNumber,
+            BankAccountName = wr.BankAccountName,
             Reason = wr.Reason,
             CreatedDate = wr.CreatedDate,
             WalletId = wr.WalletId,
@@ -202,6 +203,7 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
                 BankCode = w.BankCode,
                 BankShortName = w.BankShortName,
                 BankAccountNumber = w.BankAccountNumber,
+                BankAccountName = w.BankAccountName,
                 Status = w.Status,
                 CreatedDate = w.CreatedDate,
             })
@@ -230,6 +232,7 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
                 BankCode = w.BankCode,
                 BankShortName = w.BankShortName,
                 BankAccountNumber = w.BankAccountNumber,
+                BankAccountName = w.BankAccountName,
                 Reason = w.Reason,
                 Status = w.Status,
                 CreatedDate = w.CreatedDate,

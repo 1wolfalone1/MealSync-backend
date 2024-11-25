@@ -16,6 +16,8 @@ public class WithdrawalRequestHistoryResponse
 
     public string BankAccountNumber { get; set; }
 
+    public string BankAccountName { get; set; }
+
     public string? Reason { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }
