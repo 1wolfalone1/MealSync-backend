@@ -6,8 +6,5 @@ public class UpdateDeviceTokenValidator : AbstractValidator<UpdateDeviceTokenCom
 {
     public UpdateDeviceTokenValidator()
     {
-        RuleFor(x => x.DeviceToken)
-            .NotEmpty()
-            .WithMessage("Vui lòng cung cấp device token");
     }
 }
