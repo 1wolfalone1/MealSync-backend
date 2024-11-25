@@ -39,4 +39,9 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
             .Where(a => a.RoleId == (int)Roles.Moderator &&
                         a.Moderator.ModeratorDormitories.Any(md => md.DormitoryId == dormitoryId)).ToList();
     }
+
+    public Account GetIncludeCustomerById(long id)
+    {
+        return DbSet.Include(a => a.Customer).First(a => a.Id == id);
+    }
 }

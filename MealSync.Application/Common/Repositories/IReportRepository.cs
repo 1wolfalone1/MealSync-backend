@@ -27,4 +27,6 @@ public interface IReportRepository : IBaseRepository<Report>
 
     Task<(List<ReportManageDto> Reports, int TotalCount)> GetAllReportByDormitoryIds(List<long> dormitoryIds, bool? isAllowAction, string? searchValue, DateTime? dateFrom, DateTime? dateTo, ReportStatus? status, long? dormitoryId,
         GetAllReportForModQuery.FilterReportOrderBy? orderBy, GetAllReportForModQuery.FilterReportDirection? direction, int pageIndex, int pageSize);
+
+    Task<long?> GetOrderIdByReportIdAndDormitoryIds(long reportId, List<long> dormitoryIds);
 }
