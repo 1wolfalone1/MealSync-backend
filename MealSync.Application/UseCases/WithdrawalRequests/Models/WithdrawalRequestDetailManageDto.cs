@@ -22,6 +22,8 @@ public class WithdrawalRequestDetailManageDto
 
     public string BankAccountNumber { get; set; }
 
+    public string BankAccountName { get; set; }
+
     public WithdrawalRequestStatus Status { get; set; }
 
     public string? Reason { get; set; }
