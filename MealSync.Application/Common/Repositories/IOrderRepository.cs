@@ -47,4 +47,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<List<Order>> GetForSystemCancelByCustomerId(long customerId);
 
     Order GetOrderWithDormitoryById(long orderId);
+
+    Task<Order> GetOrderIncludePaymentById(long id);
 }

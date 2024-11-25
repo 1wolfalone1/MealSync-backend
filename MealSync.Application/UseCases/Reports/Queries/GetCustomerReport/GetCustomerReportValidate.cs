@@ -6,7 +6,7 @@ public class GetCustomerReportValidate : AbstractValidator<GetCustomerReportQuer
 {
     public GetCustomerReportValidate()
     {
-        RuleFor(q => q.ReportId)
+        RuleFor(q => q.OrderId)
             .GreaterThan(0)
             .WithMessage("Id phải lớn hơn 0");
     }

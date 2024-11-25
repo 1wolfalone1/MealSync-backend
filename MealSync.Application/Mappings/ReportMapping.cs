@@ -29,7 +29,7 @@ public class ReportMapping : Profile
 
         CreateMap<Account, ReportDetailShopWebResponse.CustomerInfoResponse>();
 
-        CreateMap<Report, ReportDetailForModResponse>()
+        CreateMap<Report, ReportDetailForModResponse.ReportResponse>()
             .ForMember(dest => dest.OrderId, src => src.MapFrom(opt => opt.OrderId))
             .ForMember(dest => dest.IsReportedByCustomer, src => src.MapFrom(opt => opt.CustomerId != default && opt.CustomerId > 0))
             .ForMember(

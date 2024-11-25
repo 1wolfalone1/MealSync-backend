@@ -23,10 +23,10 @@ public class ReportRepository : BaseRepository<Report>, IReportRepository
         return DbSet.AnyAsync(r => r.OrderId == orderId && r.ShopId == shopId);
     }
 
-    public Task<long?> GetOrderIdByIdAndCustomerId(long id, long customerId)
+    public Task<long?> GetOrderIdByOrderIdAndCustomerId(long orderId, long customerId)
     {
         return DbSet
-            .Where(r => r.Id == id && r.CustomerId == customerId)
+            .Where(r => r.OrderId == orderId && r.CustomerId == customerId)
             .Select(r => (long?)r.OrderId)
             .FirstOrDefaultAsync();
     }
@@ -298,9 +298,9 @@ public class ReportRepository : BaseRepository<Report>, IReportRepository
         return (reports, totalCount);
     }
 
-    public Task<long?> GetOrderIdByReportIdAndDormitoryIds(long reportId, List<long> dormitoryIds)
+    public Task<long?> GetOrderIdByCustomerReportIdAndDormitoryIds(long reportId, List<long> dormitoryIds)
     {
-        return DbSet.Where(r => dormitoryIds.Contains(r.Order.Building.DormitoryId) && r.Id == reportId)
+        return DbSet.Where(r => dormitoryIds.Contains(r.Order.Building.DormitoryId) && r.Id == reportId && r.CustomerId != default)
             .Select(r => (long?)r.OrderId).FirstOrDefaultAsync();
     }
 
