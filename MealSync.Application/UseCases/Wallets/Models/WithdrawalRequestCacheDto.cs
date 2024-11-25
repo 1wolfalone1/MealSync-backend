@@ -15,5 +15,7 @@ public class WithdrawalRequestCacheDto
         public string BankShortName { get; set; }
 
         public string BankAccountNumber { get; set; }
+
+        public string BankAccountName { get; set; }
     }
 }

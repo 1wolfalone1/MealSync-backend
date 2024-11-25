@@ -44,4 +44,9 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
     {
         return DbSet.Include(a => a.Customer).First(a => a.Id == id);
     }
+
+    public bool CheckExistPhoneNumberInOtherEmailAccount(string email, string phoneNumber)
+    {
+        return DbSet.Any(a => a.PhoneNumber == phoneNumber && a.Email != email);
+    }
 }

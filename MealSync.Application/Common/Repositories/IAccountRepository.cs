@@ -15,4 +15,6 @@ public interface IAccountRepository : IBaseRepository<Account>
     List<Account>? GetAccountsOfModeratorByDormitoryId(long dormitoryId);
 
     Account GetIncludeCustomerById(long id);
+
+    bool CheckExistPhoneNumberInOtherEmailAccount(string email, string phoneNumber);
 }

@@ -13,5 +13,7 @@ public class WithdrawalRequestCommand : ICommand<Result>
 
     public string BankAccountNumber { get; set; }
 
+    public string BankAccountName { get; set; }
+
     public int VerifyCode { get; set; }
 }

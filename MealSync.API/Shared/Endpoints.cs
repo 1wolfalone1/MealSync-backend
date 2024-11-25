@@ -12,6 +12,8 @@ public static class Endpoints
     public const string VERIFY_CODE = "auth/verify-code";
     public const string VALID_TOKEN = "auth/valid-token";
     public const string UPDATE_DEVICE_TOKEN = "auth/device-token";
+    public const string LOGIN_GOOGLE = "auth/login-google";
+    public const string REGISTER_GOOGLE = "auth/register-google";
 
     // Shop Owner
     public const string GET_FOOD = "shop-owner/food";

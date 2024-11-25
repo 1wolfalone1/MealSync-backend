@@ -68,6 +68,7 @@ public class SendCodeWithdrawalRequestHandler : ICommandHandler<SendCodeWithdraw
                     BankAccountNumber = request.BankAccountNumber,
                     BankCode = request.BankCode,
                     BankShortName = request.BankShortName,
+                    BankAccountName = request.BankAccountName,
                 },
             };
 

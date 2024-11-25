@@ -23,5 +23,9 @@ public class SendCodeWithdrawalRequestValidate : AbstractValidator<SendCodeWithd
             .WithMessage("Số tài khoản ngân hàng không được để trống.")
             .Matches(@"^\d{6,20}$")
             .WithMessage("Số tài khoản phải chứa từ 6 đến 20 chữ số.");
+
+        RuleFor(p => p.BankAccountName)
+            .NotEmpty()
+            .WithMessage("Tên chủ tài khoản không thể trống");
     }
 }
