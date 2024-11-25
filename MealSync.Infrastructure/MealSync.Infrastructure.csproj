@@ -50,6 +50,7 @@
     <ItemGroup>
         <Folder Include="Common\Exceptions\"/>
         <Folder Include="Persistence\Migrations\"/>
+        <Folder Include="Services\LoginWithGoogle\" />
         <Folder Include="Services\Notifications\SignalR\" />
     </ItemGroup>
 
