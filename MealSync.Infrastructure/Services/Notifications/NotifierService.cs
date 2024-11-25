@@ -27,6 +27,7 @@ public class NotifierService : INotifierService
         _notificationProvider.Attach(NotificationTypes.SendToCustomer, new List<INotificationService>()
         {
             _mobileNotificationService,
+            _webNotificationService,
         });
 
         _notificationProvider.Attach(NotificationTypes.SendToShop, new List<INotificationService>()
