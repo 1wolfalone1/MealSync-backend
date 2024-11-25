@@ -1,4 +1,5 @@
 ﻿using MealSync.Application.UseCases.Reports.Models;
+using MealSync.Application.UseCases.Reports.Queries.GetAllReportForMod;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 
@@ -23,4 +24,9 @@ public interface IReportRepository : IBaseRepository<Report>
         long shopId, string? searchValue, ReportStatus? status, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize);
 
     Task<bool> CheckExistedByOrderIdAndShopId(long orderId, long shopId);
+
+    Task<(List<ReportManageDto> Reports, int TotalCount)> GetAllReportByDormitoryIds(List<long> dormitoryIds, bool? isAllowAction, string? searchValue, DateTime? dateFrom, DateTime? dateTo, ReportStatus? status, long? dormitoryId,
+        GetAllReportForModQuery.FilterReportOrderBy? orderBy, GetAllReportForModQuery.FilterReportDirection? direction, int pageIndex, int pageSize);
+
+    Task<long?> GetOrderIdByReportIdAndDormitoryIds(long reportId, List<long> dormitoryIds);
 }

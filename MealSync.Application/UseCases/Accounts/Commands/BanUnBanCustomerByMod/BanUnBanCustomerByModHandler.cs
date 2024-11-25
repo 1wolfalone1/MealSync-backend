@@ -79,17 +79,18 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
                 // Ban
                 var totalOrderInProcess = await _orderRepository.CountTotalOrderInProcessByCustomerId(customer.Id).ConfigureAwait(false);
                 var ordersCancelBeforeBan = await _orderRepository.GetForSystemCancelByCustomerId(customer.Id).ConfigureAwait(false);
-                if (!request.IsConfirm && totalOrderInProcess > 0)
+
+                if (totalOrderInProcess > 0 && customer.Status == CustomerStatus.Banning && request.Status == AccountStatus.Banned)
+                {
+                    throw new InvalidBusinessException(MessageCode.E_MODERATOR_CAN_NOT_UPDATE_STATUS_CUSTOMER_TO_BANNED.GetDescription());
+                }
+                else if (!request.IsConfirm && totalOrderInProcess > 0)
                 {
                     return Result.Warning(new
                     {
                         Code = MessageCode.W_MODERATOR_UPDATE_STATUS_CUSTOMER_TO_BANNING.GetDescription(),
                         Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_CUSTOMER_TO_BANNING.GetDescription()),
                     });
-                }
-                else if (!request.IsConfirm && totalOrderInProcess > 0 && customer.Status == CustomerStatus.Banning && request.Status == AccountStatus.Banned)
-                {
-                    throw new InvalidBusinessException(MessageCode.E_MODERATOR_CAN_NOT_UPDATE_STATUS_CUSTOMER_TO_BANNED.GetDescription());
                 }
                 else
                 {

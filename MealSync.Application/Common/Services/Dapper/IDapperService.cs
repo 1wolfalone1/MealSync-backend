@@ -47,4 +47,5 @@ public enum QueryName
     GetOverviewAdminChart,
     GetRevenueAdminChart,
     GetOrderDetailForModeratorById,
+    GetListReportForMod,
 }

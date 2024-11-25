@@ -29,7 +29,7 @@ public class GetListShopHandler : IQueryHandler<GetListShopQuery, Result>
         var dormitories = await _moderatorDormitoryRepository.GetAllDormitoryByModeratorId(moderatorAccountId).ConfigureAwait(false);
         var dormitoryIds = dormitories.Select(d => d.DormitoryId).ToList();
 
-        if (request.DormitoryId != default && !dormitoryIds.Contains(request.DormitoryId.Value))
+        if (request.DormitoryId != default && request.DormitoryId > 0 && !dormitoryIds.Contains(request.DormitoryId.Value))
         {
             throw new InvalidBusinessException(MessageCode.E_MODERATOR_ACTION_NOT_ALLOW.GetDescription());
         }

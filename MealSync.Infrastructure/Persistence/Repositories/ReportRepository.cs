@@ -1,5 +1,6 @@
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.UseCases.Reports.Models;
+using MealSync.Application.UseCases.Reports.Queries.GetAllReportForMod;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -182,6 +183,125 @@ public class ReportRepository : BaseRepository<Report>, IReportRepository
     {
         return DbSet
             .AnyAsync(r => r.Order.Id == orderId && r.Order.ShopId == shopId && r.CustomerId != default);
+    }
+
+    public async Task<(List<ReportManageDto> Reports, int TotalCount)> GetAllReportByDormitoryIds(
+        List<long> dormitoryIds, bool? isAllowAction, string? searchValue, DateTime? dateFrom, DateTime? dateTo,
+        ReportStatus? status, long? dormitoryId, GetAllReportForModQuery.FilterReportOrderBy? orderBy,
+        GetAllReportForModQuery.FilterReportDirection? direction, int pageIndex, int pageSize)
+    {
+        var query = DbSet.Where(r => dormitoryIds.Contains(r.Order.Building.DormitoryId));
+
+        if (!string.IsNullOrWhiteSpace(searchValue))
+        {
+            searchValue = EscapeLikeParameter(searchValue);
+            bool isNumeric = int.TryParse(searchValue, out var numericValue);
+
+            query = query.Where(report =>
+                EF.Functions.Like(report.Order.Shop.Name, $"%{searchValue}%") ||
+                (report.Customer != default && EF.Functions.Like(report.Customer.Account.FullName, $"%{searchValue}%")) ||
+                EF.Functions.Like(report.Title, $"%{searchValue}%") ||
+                EF.Functions.Like(report.Content, $"%{searchValue}%") ||
+                (isNumeric &&
+                 (
+                     EF.Functions.Like(report.Id.ToString(), $"%{numericValue.ToString()}%") ||
+                     EF.Functions.Like(report.OrderId.ToString(), $"%{numericValue.ToString()}%")
+                 ))
+            );
+        }
+
+        if (isAllowAction != default && isAllowAction.Value)
+        {
+
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(shop => shop.Status == status.Value);
+        }
+
+        if (dormitoryId.HasValue && dormitoryId > 0)
+        {
+            query = query.Where(report => report.Order.Building.DormitoryId == dormitoryId);
+        }
+
+        if (dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(shop => shop.CreatedDate >= dateFrom.Value && shop.CreatedDate <= dateTo.Value);
+        }
+        else if (dateFrom.HasValue && !dateTo.HasValue)
+        {
+            query = query.Where(shop => shop.CreatedDate >= dateFrom.Value);
+        }
+        else if (!dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(shop => shop.CreatedDate <= dateTo.Value);
+        }
+
+        var totalCount = await query.CountAsync().ConfigureAwait(false);
+
+        if (orderBy.HasValue && direction.HasValue)
+        {
+            if (orderBy.Value == GetAllReportForModQuery.FilterReportOrderBy.CreatedDate)
+            {
+                query = direction == GetAllReportForModQuery.FilterReportDirection.ASC
+                    ? query.OrderBy(report => report.CreatedDate)
+                    : query.OrderByDescending(report => report.CreatedDate);
+            }
+            else if (orderBy.Value == GetAllReportForModQuery.FilterReportOrderBy.ShopName)
+            {
+                query = direction == GetAllReportForModQuery.FilterReportDirection.ASC
+                    ? query.OrderBy(report => report.Order.Shop.Name)
+                    : query.OrderByDescending(report => report.Order.Shop.Name);
+            }
+            else if (orderBy.Value == GetAllReportForModQuery.FilterReportOrderBy.CustomerName)
+            {
+                query = direction == GetAllReportForModQuery.FilterReportDirection.ASC
+                    ? query.OrderBy(report => report.Customer != null ? report.Customer.Account.FullName : string.Empty)
+                    : query.OrderByDescending(report => report.Customer != null ? report.Customer.Account.FullName : string.Empty);
+            }
+            else if (orderBy.Value == GetAllReportForModQuery.FilterReportOrderBy.Title)
+            {
+                query = direction == GetAllReportForModQuery.FilterReportDirection.ASC
+                    ? query.OrderBy(report => report.Title)
+                    : query.OrderByDescending(report => report.Title);
+            }
+            else if (orderBy.Value == GetAllReportForModQuery.FilterReportOrderBy.Content)
+            {
+                query = direction == GetAllReportForModQuery.FilterReportDirection.ASC
+                    ? query.OrderBy(report => report.Content)
+                    : query.OrderByDescending(report => report.Content);
+            }
+        }
+        else
+        {
+            query = query.OrderByDescending(shop => shop.CreatedDate);
+        }
+
+        var reports = query
+            .Select(report => new ReportManageDto
+            {
+                Id = report.Id,
+                IsAllowAction = false,
+                ShopName = report.Order.Shop.Name,
+                CustomerName = report.Customer!.Account.FullName,
+                OrderId = report.OrderId,
+                Title = report.Title,
+                Content = report.Content,
+                Status = report.Status,
+                CreatedDate = report.CreatedDate,
+            })
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (reports, totalCount);
+    }
+
+    public Task<long?> GetOrderIdByReportIdAndDormitoryIds(long reportId, List<long> dormitoryIds)
+    {
+        return DbSet.Where(r => dormitoryIds.Contains(r.Order.Building.DormitoryId) && r.Id == reportId)
+            .Select(r => (long?)r.OrderId).FirstOrDefaultAsync();
     }
 
     private static string EscapeLikeParameter(string input)

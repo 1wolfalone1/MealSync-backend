@@ -2,9 +2,11 @@ using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Reports.Commands.CustomerReport;
 using MealSync.Application.UseCases.Reports.Commands.ShopReplyCustomerReport;
+using MealSync.Application.UseCases.Reports.Queries.GetAllReportForMod;
 using MealSync.Application.UseCases.Reports.Queries.GetByOrderId;
 using MealSync.Application.UseCases.Reports.Queries.GetByReportIdOfCustomer;
 using MealSync.Application.UseCases.Reports.Queries.GetCustomerReport;
+using MealSync.Application.UseCases.Reports.Queries.GetReportDetailForMod;
 using MealSync.Application.UseCases.Reports.Queries.GetReportForShopByFilter;
 using MealSync.Application.UseCases.Reports.Queries.GetReportForShopWebByFilter;
 using Microsoft.AspNetCore.Mvc;
@@ -62,5 +64,19 @@ public class ReportController : BaseApiController
     public async Task<IActionResult> GetReportOfCustomerForShopWeb([FromQuery] GetReportForShopWebByFilterQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_REPORT)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> ReportForModManage([FromQuery] GetAllReportForModQuery request)
+    {
+        return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_REPORT_DETAIL)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> ReportDetailForModManage(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetReportDetailForModQuery { ReportId = id }).ConfigureAwait(false));
     }
 }
