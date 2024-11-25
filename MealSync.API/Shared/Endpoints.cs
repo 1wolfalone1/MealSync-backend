@@ -155,7 +155,7 @@ public static class Endpoints
 
     // Report
     public const string CUSTOMER_REPORT_ORDER = "customer/order/report";
-    public const string GET_CUSTOMER_REPORT_ORDER = "customer/order/report/{id:long}";
+    public const string GET_CUSTOMER_REPORT_ORDER = "customer/order/{id:long}/report";
     public const string GET_REPORT_ORDER_OF_SHOP = "shop-owner/order/report";
     public const string SHOP_REPLY_REPORT_ORDER = "shop-owner/order/report/reply";
     public const string GET_CUSTOMER_REPORT_ORDER_FOR_SHOP = "shop-owner/order/report/{id:long}";

@@ -28,7 +28,7 @@ public class ReportController : BaseApiController
     [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
     public async Task<IActionResult> GetReportOrderOfCustomer(long id)
     {
-        return HandleResult(await Mediator.Send(new GetCustomerReportQuery { ReportId = id }).ConfigureAwait(false));
+        return HandleResult(await Mediator.Send(new GetCustomerReportQuery { OrderId = id }).ConfigureAwait(false));
     }
 
     [HttpGet(Endpoints.GET_REPORT_ORDER_OF_SHOP)]

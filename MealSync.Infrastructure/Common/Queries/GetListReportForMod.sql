@@ -9,18 +9,21 @@
         r.status AS Status,
         r.created_date AS CreatedDate,
         CASE
-            WHEN @Now > DATE_ADD(
-                CAST(o.intended_receive_date AS DATETIME),
-                INTERVAL FLOOR(o.end_time / 100) HOUR
-            ) + INTERVAL (o.end_time % 100) MINUTE + INTERVAL 20 HOUR
-            OR EXISTS (
-                SELECT
-                    1
-                FROM
-                    report r2
-                WHERE
-                    r2.order_id = o.id
-                    AND r2.shop_id IS NOT NULL
+            WHEN r.status NOT IN (2, 3) -- Approved, Rejected
+            AND (
+                @Now > DATE_ADD(
+                    CAST(o.intended_receive_date AS DATETIME),
+                    INTERVAL FLOOR(o.end_time / 100) HOUR
+                ) + INTERVAL (o.end_time % 100) MINUTE + INTERVAL 20 HOUR
+                OR EXISTS (
+                    SELECT
+                        1
+                    FROM
+                        report r2
+                    WHERE
+                        r2.order_id = o.id
+                        AND r2.shop_id IS NOT NULL
+                )
             ) THEN 1
             ELSE 0
         END AS IsAllowAction
@@ -45,10 +48,7 @@
                 OR CAST(r.order_id AS CHAR) LIKE CONCAT('%', @SearchValue, '%')
             )
         )
-        AND (
-            @Status IS NULL
-            OR r.status = @Status
-        )
+        AND r.status IN @StatusList
         AND (
             @DormitoryId IS NULL
             OR @DormitoryId = 0
@@ -76,6 +76,20 @@ SELECT
     IsAllowAction
 FROM
     FilteredReports
+WHERE
+    (
+        (
+            @IsAllStatus = 1
+            AND (
+                Status IN (2, 3)
+                OR IsAllowAction = 1
+            )
+        )
+        OR (
+            @IsAllStatus = 0
+            AND IsAllowAction = @IsAllowAction
+        )
+    )
 ORDER BY
     IF(
         @OrderBy = 1

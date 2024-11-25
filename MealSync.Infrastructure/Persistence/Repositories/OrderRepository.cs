@@ -345,7 +345,8 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     public List<Order> GetListOrderOnStatusFailDeliveredWithoutPayIncomingShop(int hoursToMarkDeliveryFail, DateTime currentDateTime)
     {
         var result = DbSet.Where(o => o.Status == OrderStatus.FailDelivery &&
-                                      (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription() || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription())
+                                      (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription()
+                                       || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription())
                                       && !o.IsRefund && !o.IsReport && !o.IsPaidToShop
                                       && o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess && p.PaymentMethods == PaymentMethods.VnPay)
                                       &&
@@ -547,5 +548,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         return DbSet.Where(o => o.Id == orderId)
             .Include(o => o.Building)
             .ThenInclude(b => b.Dormitory).SingleOrDefault();
+    }
+
+    public Task<Order> GetOrderIncludePaymentById(long id)
+    {
+        return DbSet.Include(o => o.Payments).FirstAsync(o => o.Id == id);
     }
 }
