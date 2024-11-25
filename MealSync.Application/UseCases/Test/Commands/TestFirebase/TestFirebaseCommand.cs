@@ -6,4 +6,6 @@ namespace MealSync.Application.UseCases.Test.Commands.TestFirebase;
 public class TestFirebaseCommand : ICommand<Result>
 {
     public string Message { get; set; }
+
+    public long AccountId { get; set; }
 }
