@@ -8,7 +8,7 @@ public enum ModeratorTargetTypes
     Order = 1,
     [Description("customer")]
     Customer = 2,
-    [Description("withdrawal")]
+    [Description("withdrawal-request")]
     Withdrawal = 3,
     [Description("report")]
     Report = 4,

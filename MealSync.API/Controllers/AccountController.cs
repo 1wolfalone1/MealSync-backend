@@ -1,6 +1,8 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Accounts.Commands.CheckValidTokenJwt;
+using MealSync.Application.UseCases.Accounts.Commands.CustomerLoginWithGoogle.CustomerRegisterWithGoogle;
+using MealSync.Application.UseCases.Accounts.Commands.CustomerLoginWithGoogle.ValidIdTokenFromFirebase;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 using MealSync.Application.UseCases.Accounts.Commands.SendVerifyCode;
@@ -55,6 +57,18 @@ public class AccountController : BaseApiController
     [HttpPut(Endpoints.UPDATE_DEVICE_TOKEN)]
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}, {IdentityConst.CustomerClaimName}")]
     public async Task<IActionResult> UpdateDeviceToken([FromBody] UpdateDeviceTokenCommand command)
+    {
+        return HandleResult(await Mediator.Send(command));
+    }
+
+    [HttpPost(Endpoints.LOGIN_GOOGLE)]
+    public async Task<IActionResult> LoginWithGoogle([FromBody] ValidIdTokenFromFirebaseCommand command)
+    {
+        return HandleResult(await Mediator.Send(command));
+    }
+
+    [HttpPost(Endpoints.REGISTER_GOOGLE)]
+    public async Task<IActionResult> UpdateDeviceToken([FromBody] CustomerRegisterWithGoogleCommand command)
     {
         return HandleResult(await Mediator.Send(command));
     }
