@@ -189,4 +189,44 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
 
         return (totalCount, reviews);
     }
+
+    public List<ReviewOfShopOwnerDto> GetReviewByOrderId(long orderId)
+    {
+        var query = DbSet.Where(r => r.OrderId == orderId).AsQueryable();
+
+        var groupedQuery = query
+            .GroupBy(r => r.OrderId)
+            .Where(g => g.Any(r => r.Entity == ReviewEntities.Customer))
+            .Select(g => new ReviewOfShopOwnerDto
+            {
+                OrderId = g.Key,
+                MinCreatedDate = g.Min(r => r.CreatedDate),
+                Description = string.Join(", ", g
+                    .Select(r => r.Order)
+                    .SelectMany(order => order.OrderDetails
+                        .GroupBy(od => new { od.Food.Id, od.Food.Name })
+                        .Select(foodGroup => new
+                        {
+                            Name = foodGroup.Key.Name,
+                            Quantity = foodGroup.Sum(od => od.Quantity),
+                        }))
+                    .Distinct()
+                    .Select(fd => fd.Quantity > 1 ? $"{fd.Name} x{fd.Quantity}" : fd.Name)),
+                Reviews = g.Select(r => new ReviewOfShopOwnerDto.ReviewDetailDto
+                {
+                    Id = r.Id,
+                    Name = r.Entity == ReviewEntities.Customer ? r.Customer!.Account.FullName : r.Shop!.Name,
+                    Avatar = r.Entity == ReviewEntities.Customer ? r.Customer!.Account.AvatarUrl : r.Shop!.LogoUrl,
+                    Reviewer = r.Entity,
+                    Rating = r.Rating,
+                    Comment = r.Comment ?? string.Empty,
+                    ImageUrls = string.IsNullOrEmpty(r.ImageUrl)
+                        ? new List<string>()
+                        : r.ImageUrl.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList(),
+                    CreatedDate = r.CreatedDate.DateTime,
+                }).ToList(),
+            }).OrderByDescending(g => g.MinCreatedDate);
+
+        return groupedQuery.ToList();
+    }
 }

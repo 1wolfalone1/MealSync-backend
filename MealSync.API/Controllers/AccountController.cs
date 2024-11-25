@@ -1,10 +1,12 @@
-﻿using MealSync.API.Shared;
+﻿using MealSync.API.Identites;
+using MealSync.API.Shared;
 using MealSync.Application.UseCases.Accounts.Commands.CheckValidTokenJwt;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.Accounts.Commands.LoginPassword;
 using MealSync.Application.UseCases.Accounts.Commands.SendVerifyCode;
 using MealSync.Application.UseCases.Accounts.Commands.ShopRegister;
 using MealSync.Application.UseCases.Accounts.Commands.SignupCustomer;
+using MealSync.Application.UseCases.Accounts.Commands.UpdateDeviceToken;
 using MealSync.Application.UseCases.Accounts.Commands.VerifyCode;
 using Microsoft.AspNetCore.Authorization;
 
@@ -46,6 +48,13 @@ public class AccountController : BaseApiController
     [HttpPost(Endpoints.VALID_TOKEN)]
     [Authorize]
     public async Task<IActionResult> VerifyCode([FromBody] CheckValidTokenJwtCommand command)
+    {
+        return HandleResult(await Mediator.Send(command));
+    }
+
+    [HttpPut(Endpoints.UPDATE_DEVICE_TOKEN)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}, {IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> UpdateDeviceToken([FromBody] UpdateDeviceTokenCommand command)
     {
         return HandleResult(await Mediator.Send(command));
     }
