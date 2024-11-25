@@ -87,7 +87,7 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
                         Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_UPDATE_STATUS_CUSTOMER_TO_BANNING.GetDescription()),
                     });
                 }
-                else if (request.IsConfirm && totalOrderInProcess > 0 && customer.Status == CustomerStatus.Banning && request.Status == AccountStatus.Banned)
+                else if (!request.IsConfirm && totalOrderInProcess > 0 && customer.Status == CustomerStatus.Banning && request.Status == AccountStatus.Banned)
                 {
                     throw new InvalidBusinessException(MessageCode.E_MODERATOR_CAN_NOT_UPDATE_STATUS_CUSTOMER_TO_BANNED.GetDescription());
                 }

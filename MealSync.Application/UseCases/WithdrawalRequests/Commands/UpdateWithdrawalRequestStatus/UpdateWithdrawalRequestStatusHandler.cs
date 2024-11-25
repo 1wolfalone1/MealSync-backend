@@ -50,74 +50,80 @@ public class UpdateWithdrawalRequestStatusHandler : ICommandHandler<UpdateWithdr
         {
             throw new InvalidBusinessException(MessageCode.E_MODERATOR_ACTION_NOT_ALLOW.GetDescription());
         }
-        else if (withdrawalRequest.Wallet.Shop!.Status == ShopStatus.Banning || withdrawalRequest.Wallet.Shop.Status == ShopStatus.Banned)
+        else if (!request.IsConfirm && request.Status == WithdrawalRequestStatus.Approved && (withdrawalRequest.Wallet.Shop!.Status == ShopStatus.Banning || withdrawalRequest.Wallet.Shop.Status == ShopStatus.Banned))
         {
-            throw new InvalidBusinessException(MessageCode.E_MODERATOR_ACTION_NOT_ALLOW.GetDescription());
+            return Result.Warning(new
+            {
+                Code = MessageCode.W_MODERATOR_SHOP_BAN_STILL_WITHDRAWAL.GetDescription(),
+                Message = _systemResourceRepository.GetByResourceCode(MessageCode.W_MODERATOR_SHOP_BAN_STILL_WITHDRAWAL.GetDescription()),
+            });
         }
         else
         {
-            try
+            if (!(withdrawalRequest.Status == WithdrawalRequestStatus.Pending && request.Status == WithdrawalRequestStatus.UnderReview)
+                && !(withdrawalRequest.Status == WithdrawalRequestStatus.UnderReview && (request.Status == WithdrawalRequestStatus.Approved || request.Status == WithdrawalRequestStatus.Rejected)))
             {
-                // Begin transaction
-                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-
-                if (withdrawalRequest.Status == WithdrawalRequestStatus.Pending && request.Status == WithdrawalRequestStatus.UnderReview)
-                {
-                    withdrawalRequest.Status = WithdrawalRequestStatus.UnderReview;
-
-                    _withdrawalRequestRepository.Update(withdrawalRequest);
-                }
-                else if (withdrawalRequest.Status == WithdrawalRequestStatus.UnderReview && (request.Status == WithdrawalRequestStatus.Approved || request.Status == WithdrawalRequestStatus.Rejected))
-                {
-                    if (request.Status == WithdrawalRequestStatus.Approved)
-                    {
-                        var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
-                        var transactionWithdrawalAvailableAmountOfShop = new WalletTransaction()
-                        {
-                            WalletFromId = withdrawalRequest.WalletId,
-                            WalletToId = systemTotalWallet.Id,
-                            AvaiableAmountBefore = withdrawalRequest.Wallet.AvailableAmount,
-                            IncomingAmountBefore = withdrawalRequest.Wallet.IncomingAmount,
-                            ReportingAmountBefore = withdrawalRequest.Wallet.ReportingAmount,
-                            Amount = -withdrawalRequest.Amount,
-                            Type = WalletTransactionType.Withdrawal,
-                            Description = $"Rút tiền từ tiền có sẵn {MoneyUtils.FormatMoneyWithDots(withdrawalRequest.Amount)} VNĐ về ví tổng hệ thống",
-                        };
-
-                        withdrawalRequest.Wallet.AvailableAmount -= withdrawalRequest.Amount;
-                        withdrawalRequest.Status = WithdrawalRequestStatus.Approved;
-
-                        _withdrawalRequestRepository.Update(withdrawalRequest);
-                        await _walletTransactionRepository.AddAsync(transactionWithdrawalAvailableAmountOfShop).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        withdrawalRequest.Status = WithdrawalRequestStatus.Rejected;
-                        withdrawalRequest.Reason = request.Reason;
-
-                        _withdrawalRequestRepository.Update(withdrawalRequest);
-                    }
-                }
-                else
-                {
-                    throw new InvalidBusinessException(MessageCode.E_MODERATOR_ACTION_NOT_ALLOW.GetDescription());
-                }
-
-                // Commit transaction
-                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-
-                return Result.Success(new
-                {
-                    Code = MessageCode.I_MODERATOR_UPDATE_STATUS_SUCCESS.GetDescription(),
-                    Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_MODERATOR_UPDATE_STATUS_SUCCESS.GetDescription()),
-                });
+                throw new InvalidBusinessException(MessageCode.E_MODERATOR_ACTION_NOT_ALLOW.GetDescription());
             }
-            catch (Exception e)
+            else
             {
-                // Rollback when exception
-                _unitOfWork.RollbackTransaction();
-                _logger.LogError(e, e.Message);
-                throw new("Internal Server Error");
+                try
+                {
+                    // Begin transaction
+                    await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+
+                    if (withdrawalRequest.Status == WithdrawalRequestStatus.Pending && request.Status == WithdrawalRequestStatus.UnderReview)
+                    {
+                        withdrawalRequest.Status = WithdrawalRequestStatus.UnderReview;
+
+                        _withdrawalRequestRepository.Update(withdrawalRequest);
+                    }
+                    else if (withdrawalRequest.Status == WithdrawalRequestStatus.UnderReview && (request.Status == WithdrawalRequestStatus.Approved || request.Status == WithdrawalRequestStatus.Rejected))
+                    {
+                        if (request.Status == WithdrawalRequestStatus.Approved)
+                        {
+                            var transactionWithdrawalAvailableAmountOfShop = new WalletTransaction()
+                            {
+                                WalletFromId = withdrawalRequest.WalletId,
+                                AvaiableAmountBefore = withdrawalRequest.Wallet.AvailableAmount,
+                                IncomingAmountBefore = withdrawalRequest.Wallet.IncomingAmount,
+                                ReportingAmountBefore = withdrawalRequest.Wallet.ReportingAmount,
+                                Amount = -withdrawalRequest.Amount,
+                                Type = WalletTransactionType.Withdrawal,
+                                Description = $"Rút tiền từ tiền có sẵn {MoneyUtils.FormatMoneyWithDots(withdrawalRequest.Amount)} VNĐ để chuyển tiền cho cửa hàng",
+                            };
+
+                            withdrawalRequest.Wallet.AvailableAmount -= withdrawalRequest.Amount;
+                            withdrawalRequest.Status = WithdrawalRequestStatus.Approved;
+
+                            _withdrawalRequestRepository.Update(withdrawalRequest);
+                            await _walletTransactionRepository.AddAsync(transactionWithdrawalAvailableAmountOfShop).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            withdrawalRequest.Status = WithdrawalRequestStatus.Rejected;
+                            withdrawalRequest.Reason = request.Reason;
+
+                            _withdrawalRequestRepository.Update(withdrawalRequest);
+                        }
+                    }
+
+                    // Commit transaction
+                    await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+
+                    return Result.Success(new
+                    {
+                        Code = MessageCode.I_MODERATOR_UPDATE_STATUS_SUCCESS.GetDescription(),
+                        Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_MODERATOR_UPDATE_STATUS_SUCCESS.GetDescription()),
+                    });
+                }
+                catch (Exception e)
+                {
+                    // Rollback when exception
+                    _unitOfWork.RollbackTransaction();
+                    _logger.LogError(e, e.Message);
+                    throw new("Internal Server Error");
+                }
             }
         }
     }
