@@ -77,6 +77,15 @@ public enum MessageCode
     [Description("E-Account-EmailUpdateMustDifferPresent")]
     E_ACCOUNT_EMAIL_UPDATE_MUST_DIFFER_PRESENT,
 
+    [Description("E-Account-IdTokenNotValid")]
+    E_ACCOUNT_ID_TOKEN_NOT_VALID,
+
+    [Description("E-Account-CodeNotFoudOrOverTime")]
+    E_ACCOUNT_CODE_NOT_FOUND_OR_OVER_TIME,
+
+    [Description("E-Account-EmailHaveRegisterAccountButGotIssue")]
+    E_ACCOUNT_EMAIL_HAVE_REGISTER_ACCOUNT_BUT_GOT_ISSUE,
+
     // Platform Category
     [Description("E-PlatformCategory-NotFound")]
     E_PLATFORM_CATEGORY_NOT_FOUND,

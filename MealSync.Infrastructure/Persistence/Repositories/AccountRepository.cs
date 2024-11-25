@@ -39,4 +39,9 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
             .Where(a => a.RoleId == (int)Roles.Moderator &&
                         a.Moderator.ModeratorDormitories.Any(md => md.DormitoryId == dormitoryId)).ToList();
     }
+
+    public bool CheckExistPhoneNumberInOtherEmailAccount(string email, string phoneNumber)
+    {
+        return DbSet.Any(a => a.PhoneNumber == phoneNumber && a.Email != email);
+    }
 }
