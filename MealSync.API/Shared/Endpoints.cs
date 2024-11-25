@@ -223,6 +223,8 @@ public static class Endpoints
     public const string MANAGE_WITHDRAWAL_REQUEST_DETAIL = "moderator/withdrawal-request/{id:long}";
     public const string MANAGE_WITHDRAWAL_UPDATE_STATUS = "moderator/withdrawal-request/status";
 
+    public const string MANAGE_REPORT = "moderator/report";
+
     public const string MODERATOR_ORDER = "moderator/order";
     public const string MODERATOR_ORDER_DETAIL = "moderator/order/{id:long}";
 

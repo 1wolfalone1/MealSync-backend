@@ -59,6 +59,7 @@
 
     <ItemGroup>
         <EmbeddedResource Include="Common\Queries\GetListOrderForShopWebByStatus.sql" />
+        <EmbeddedResource Include="Common\Queries\GetListReportForMod.sql" />
         <EmbeddedResource Include="Common\Queries\GetOrderHistoryOfCustomer.sql" />
         <EmbeddedResource Include="Common\Queries\GetOrderStatistics.sql" />
         <EmbeddedResource Include="Common\Queries\GetOrderStatisticsInMonthSummary.sql" />

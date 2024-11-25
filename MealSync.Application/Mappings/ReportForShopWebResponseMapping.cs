@@ -37,6 +37,8 @@ public class ReportForShopWebResponseMapping : Profile
                 src => src.Customer.Account.AvatarUrl));
 
         CreateMap<Report, ReportForShopWebResponse>()
+            .ForMember(dest => dest.ShopName, opt => opt.MapFrom(
+                src => src.Order.Shop.Name))
             .ForMember(dest => dest.Customer, opt => opt.MapFrom(
                 src => src.Order))
             .ForMember(dest => dest.ShopDeliveryStaff, opt => opt.MapFrom(
