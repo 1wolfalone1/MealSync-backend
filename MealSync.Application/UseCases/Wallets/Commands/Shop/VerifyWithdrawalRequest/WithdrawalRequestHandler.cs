@@ -97,7 +97,8 @@ public class WithdrawalRequestHandler : ICommandHandler<WithdrawalRequestCommand
             else if (withdrawalRequestCacheDto.Data.Amount != request.Amount
                      || withdrawalRequestCacheDto.Data.BankCode != request.BankCode
                      || withdrawalRequestCacheDto.Data.BankAccountNumber != request.BankAccountNumber
-                     || withdrawalRequestCacheDto.Data.BankShortName != request.BankShortName)
+                     || withdrawalRequestCacheDto.Data.BankShortName != request.BankShortName
+                     || withdrawalRequestCacheDto.Data.BankAccountName != request.BankAccountName)
             {
                 throw new InvalidBusinessException(MessageCode.E_WITHDRAWAL_INVALID_CODE.GetDescription());
             }
@@ -122,6 +123,7 @@ public class WithdrawalRequestHandler : ICommandHandler<WithdrawalRequestCommand
             BankShortName = request.BankShortName,
             BankCode = request.BankCode,
             BankAccountNumber = request.BankAccountNumber,
+            BankAccountName = request.BankAccountName,
         };
 
         try
@@ -149,7 +151,7 @@ public class WithdrawalRequestHandler : ICommandHandler<WithdrawalRequestCommand
             foreach (var moderator in moderators)
             {
                 var notifyToModerator = _notificationFactory.CreateWithdrawalRequestToModeratorNotification(withdrawalRequest, moderator, shop, description);
-                await _notifierService.NotifyAsync(notifyToModerator).ConfigureAwait(false);
+                _notifierService.NotifyAsync(notifyToModerator);
             }
         }
 

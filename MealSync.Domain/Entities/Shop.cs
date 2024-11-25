@@ -31,6 +31,8 @@ public class Shop : BaseEntity
 
     public string? BankAccountNumber { get; set; }
 
+    public string? BankAccountName { get; set; }
+
     public int TotalOrder { get; set; }
 
     public int TotalFood { get; set; }

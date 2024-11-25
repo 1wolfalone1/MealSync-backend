@@ -23,6 +23,8 @@ public class WithdrawalRequest : BaseEntity
 
     public string BankAccountNumber { get; set; }
 
+    public string BankAccountName { get; set; }
+
     public string? Reason { get; set; }
 
     public virtual Wallet Wallet { get; set; }

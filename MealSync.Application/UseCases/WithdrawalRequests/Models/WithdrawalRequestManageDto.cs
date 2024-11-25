@@ -18,6 +18,8 @@ public class WithdrawalRequestManageDto
 
     public string BankAccountNumber { get; set; }
 
+    public string BankAccountName { get; set; }
+
     public WithdrawalRequestStatus Status { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }
