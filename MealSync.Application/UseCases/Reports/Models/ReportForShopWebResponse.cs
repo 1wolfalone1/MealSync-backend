@@ -8,6 +8,8 @@ public class ReportForShopWebResponse
 
     public long? ShopId { get; set; }
 
+    public string? ShopName { get; set; }
+
     public long? CustomerId { get; set; }
 
     public long OrderId { get; set; }

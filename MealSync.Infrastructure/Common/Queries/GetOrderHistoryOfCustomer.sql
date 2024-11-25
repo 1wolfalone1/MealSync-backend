@@ -23,7 +23,7 @@ WITH FilteredOrders AS (
   WHERE
     o.customer_id = @CustomerId
     AND (
-      @ReviewMode = 0
+      @ReviewMode = 1
       OR o.status IN @FilterStatusList
     )
   GROUP BY
