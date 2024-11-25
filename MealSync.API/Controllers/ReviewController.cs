@@ -4,6 +4,7 @@ using MealSync.Application.UseCases.Reviews.Commands.ReviewOrderOfCustomer;
 using MealSync.Application.UseCases.Reviews.Commands.ShopReplyReviewOfCustomers;
 using MealSync.Application.UseCases.Reviews.Queries.GetOverviewOfShop;
 using MealSync.Application.UseCases.Reviews.Queries.GetReviewOfShop;
+using MealSync.Application.UseCases.Reviews.Queries.GetShopReviewByOrderId;
 using MealSync.Application.UseCases.Reviews.Queries.Shop.GetReviewByFilter;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -55,5 +56,15 @@ public class ReviewController : BaseApiController
     public async Task<IActionResult> GetReviewOfShopOwner([FromQuery] GetReviewByFilterQuery query)
     {
         return this.HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_REVIEW_BASE_ON_ORDER_ID)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
+    public async Task<IActionResult> GetReviewOfOrderId(int id)
+    {
+        return this.HandleResult(await Mediator.Send(new GetShopReviewByOrderIdQuery()
+        {
+            OrderId = id,
+        }).ConfigureAwait(false));
     }
 }
