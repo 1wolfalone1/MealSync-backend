@@ -19,7 +19,7 @@ public class TestPushNotiKafkaHandler : ICommandHandler<TestPushNotiKafkaCommand
     {
         var noti = new Notification()
         {
-            AccountId = 3,
+            AccountId = request.AccountId,
             ReferenceId = 1,
             Content = request.Message,
             Data = string.Empty,

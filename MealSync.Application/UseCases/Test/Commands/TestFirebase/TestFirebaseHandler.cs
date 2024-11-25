@@ -18,7 +18,7 @@ public class TestFirebaseHandler : ICommandHandler<TestFirebaseCommand, Result>
     {
         await _mobileNotificationService.NotifyAsync(new Notification()
         {
-            AccountId = 3,
+            AccountId = request.AccountId,
             Title = "test",
             Content = request.Message,
             ReferenceId = 1,
