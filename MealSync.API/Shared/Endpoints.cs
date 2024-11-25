@@ -11,6 +11,7 @@ public static class Endpoints
     public const string SEND_VERIFY_CODE = "auth/send-code";
     public const string VERIFY_CODE = "auth/verify-code";
     public const string VALID_TOKEN = "auth/valid-token";
+    public const string UPDATE_DEVICE_TOKEN = "auth/device-token";
 
     // Shop Owner
     public const string GET_FOOD = "shop-owner/food";
@@ -183,6 +184,7 @@ public static class Endpoints
     public const string REVIEW_SUMMARY_OF_SHOP = "shop/{shopId:long}/review/overview";
     public const string GET_REVIEW_OF_SHOP_OWNER = "shop-onwer/review";
     public const string CREATE_REVIEW_OF_SHOP_OWNER = "shop-onwer/review";
+    public const string GET_REVIEW_BASE_ON_ORDER_ID = "shop-onwer/review/order/{id:long}";
 
     // Promotion
     public const string CREATE_PROMOTION = "shop-owner/promotion/create";

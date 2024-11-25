@@ -1,7 +1,9 @@
-﻿using MealSync.API.Shared;
+﻿using MealSync.API.Identites;
+using MealSync.API.Shared;
 using MealSync.Application.UseCases.PlatformCategory.Commands.CreatePlatformCategory;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.PlatformCategory.Queries.GetAll;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MealSync.API.Controllers;
 
@@ -15,6 +17,7 @@ public class PlatformCategoryController : BaseApiController
     }
 
     [HttpPost(Endpoints.CREATE_PLATFORM_CATEGORY)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
     public async Task<IActionResult> CreatePlatform([FromBody] CreatePlatformCategoryCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
