@@ -7,21 +7,28 @@ namespace MealSync.Application.UseCases.Reports.Queries.GetAllReportForMod;
 
 public class GetAllReportForModQuery : PaginationRequest, IQuery<Result>
 {
-    public bool? IsAllowAction { get; set; }
-
     public string? SearchValue { get; set; }
 
     public DateTime? DateFrom { get; set; }
 
     public DateTime? DateTo { get; set; }
 
-    public ReportStatus? Status { get; set; }
+    public FilterReportStatus Status { get; set; } = FilterReportStatus.All;
 
     public long? DormitoryId { get; set; }
 
     public FilterReportOrderBy OrderBy { get; set; } = FilterReportOrderBy.CreatedDate;
 
     public FilterReportDirection Direction { get; set; } = FilterReportDirection.DESC;
+
+    public enum FilterReportStatus
+    {
+        All = 0,
+        PendingNotAllowAction = 1,
+        PendingAllowAction = 2,
+        Approved = 3,
+        Rejected = 4,
+    }
 
     public enum FilterReportOrderBy
     {

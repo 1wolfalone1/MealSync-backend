@@ -5,5 +5,5 @@ namespace MealSync.Application.UseCases.Reports.Queries.GetCustomerReport;
 
 public class GetCustomerReportQuery : IQuery<Result>
 {
-    public long ReportId { get; set; }
+    public long OrderId { get; set; }
 }
