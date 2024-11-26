@@ -375,6 +375,11 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
                                                                                                         && order.DeliveryPackage.ShopId != _currentPrincipalService.CurrentPrincipalId.Value))
                     throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_DATE_UPDATE_NOT_NEW.GetDescription());
 
+                var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
+                var startEndTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
+                if (currentDateTime.DateTime > startEndTime.EndTime)
+                    throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME.GetDescription(), new object[] { orderId });
+
                 listOrder.Add(order);
             }
 

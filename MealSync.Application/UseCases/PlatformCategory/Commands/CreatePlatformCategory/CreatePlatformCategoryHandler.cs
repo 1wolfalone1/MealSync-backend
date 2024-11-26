@@ -40,7 +40,7 @@ public class CreatePlatformCategoryHandler : ICommandHandler<CreatePlatformCateg
                 Name = request.Name,
                 ImageUrl = request.ImageUrl,
                 Description = request.Description,
-                DisplayOrder = maxDisplayOrder,
+                DisplayOrder = ++maxDisplayOrder,
             };
 
             await _platformCategoryRepository.AddAsync(platform).ConfigureAwait(false);

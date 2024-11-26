@@ -30,4 +30,20 @@ public class PlatformCategoryRepository : BaseRepository<PlatformCategory>, IPla
     {
         return DbSet.Max(pl => pl.DisplayOrder);
     }
+
+    public bool CheckExsitUpdateName(string requestName, long requestId)
+    {
+        return DbSet.Any(pl => pl.Name.ToLower() == requestName.ToLower() && pl.Id != requestId);
+    }
+
+    public List<PlatformCategory> GetByIds(long[] ids)
+    {
+        var platform = new List<PlatformCategory>();
+        foreach (var id in ids)
+        {
+            platform.Add(DbSet.Where(pl => pl.Id == id).Single());
+        }
+
+        return platform;
+    }
 }

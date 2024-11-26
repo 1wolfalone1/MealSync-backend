@@ -11,4 +11,8 @@ public interface IPlatformCategoryRepository : IBaseRepository<PlatformCategory>
     bool CheckExsitName(string name);
 
     int GetMaxDisplayOrder();
+
+    bool CheckExsitUpdateName(string requestName, long requestId);
+
+    List<PlatformCategory> GetByIds(long[] ids);
 }
