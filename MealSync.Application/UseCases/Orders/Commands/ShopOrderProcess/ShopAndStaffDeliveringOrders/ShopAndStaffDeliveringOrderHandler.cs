@@ -128,6 +128,14 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
             if (order.DeliveryPackageId == default)
                 throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_ASSIGN_YET.GetDescription(), new object[] { id });
 
+            var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
+            var startEndTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
+            if (currentDateTime.DateTime > startEndTime.EndTime)
+                throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME.GetDescription(), new object[] { id });
+
+            if (currentDateTime.DateTime < startEndTime.StartTime.AddMinutes(-15))
+                throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERING_EARLY_OVER_15P.GetDescription(), new object[] { id, TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime) });
+
             listOrder.Add(order);
         }
 

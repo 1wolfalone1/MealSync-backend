@@ -191,6 +191,11 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
                 if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
                     throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERING_IN_WRONG_DATE.GetDescription(), new object[] { order.Id, order.IntendedReceiveDate.Date.ToString("dd-MM-yyyy") });
 
+                var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
+                var startEndTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
+                if (currentDateTime.DateTime > startEndTime.EndTime)
+                    throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME.GetDescription(), new object[] { order.Id });
+
                 if (order.DeliveryPackageId != null)
                     throw new InvalidBusinessException(MessageCode.E_ORDER_IN_OTHER_PACKAGE.GetDescription(), new object[] { orderId });
 
