@@ -74,10 +74,10 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
         {
             throw new InvalidBusinessException(MessageCode.E_REPORT_NOT_IN_STATUS_FOR_CUSTOMER_REPORT.GetDescription());
         }
-        else if (order.Status == OrderStatus.FailDelivery && order.ReasonIdentity != OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
-        {
-            throw new InvalidBusinessException(MessageCode.E_REPORT_NOT_IN_STATUS_FOR_CUSTOMER_REPORT.GetDescription());
-        }
+        // else if (order.Status == OrderStatus.FailDelivery && order.ReasonIdentity != OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
+        // {
+        //     throw new InvalidBusinessException(MessageCode.E_REPORT_NOT_IN_STATUS_FOR_CUSTOMER_REPORT.GetDescription());
+        // }
         else
         {
             var now = DateTimeOffset.UtcNow;
