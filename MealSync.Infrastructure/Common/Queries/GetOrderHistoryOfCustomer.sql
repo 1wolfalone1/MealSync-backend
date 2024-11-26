@@ -61,16 +61,8 @@ WHERE
     @ReviewMode = 0
     OR (
       (
-        Status = 7 -- Delivered
-        OR (
-          Status IN (10, 11, 12) -- IssueReported, UnderReview, Resolved
-          AND ReasonIdentity = @DeliveredReportedByCustomer
-          AND IsReport = TRUE
-        )
-        OR (
           Status = 9 -- Completed
           AND ReasonIdentity IS NULL
-        )
       )
       AND ReviewCount = 0
       AND @Now BETWEEN DATE_ADD(
