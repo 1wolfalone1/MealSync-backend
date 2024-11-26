@@ -71,7 +71,7 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
         // Warning
         if (!request.IsConfirm)
         {
-            var listOrderProcessing = _orderRepository.Get(o => OrderConstant.LIST_ORDER_STATUS_IN_PROCESSING.Any(x => x == o.Status)).ToList();
+            var listOrderProcessing = _orderRepository.Get(o => OrderConstant.LIST_ORDER_STATUS_IN_PROCESSING.Any(x => x == o.Status) && o.ShopId == _currentPrincipalService.CurrentPrincipalId).ToList();
             if (request.Status == ShopStatus.InActive && listOrderProcessing != default && listOrderProcessing.Count > 1)
             {
                 var numOfPendingOrder = listOrderProcessing.Where(o => o.Status == OrderStatus.Pending).Count();
@@ -159,8 +159,16 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                         if (account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
                         {
                             _emailService.SendEmailToAnnounceAccountGotBanned(_currentPrincipalService.CurrentPrincipal, account.FullName);
-                            account.Status = AccountStatus.Banned;
-                            _accountRepository.Update(account);
+                            var orderProcessing = _orderRepository.CheckOrderOfShopInDeliveringAndPeparing(account.Id);
+                            if (orderProcessing.Count > 0)
+                            {
+                                shop.Status = ShopStatus.Banning;
+                            }
+                            else
+                            {
+                                account.Status = AccountStatus.Banned;
+                                _accountRepository.Update(account);
+                            }
                         }
                         else
                         {
@@ -177,7 +185,11 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                 }
 
                 // Update shop status
-                shop.Status = ShopStatus.InActive;
+                if (shop.Status != ShopStatus.Banning)
+                {
+                    shop.Status = ShopStatus.InActive;
+                }
+
                 _shopRepository.Update(shop);
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 

@@ -3,6 +3,7 @@
 using Microsoft.OpenApi.Models;
 using MealSync.API.Extensions;
 using MealSync.API.Middleware;
+using MealSync.API.Shared;
 using MealSync.Application.Common.Exceptions;
 
 DotNetEnv.Env.Load();
@@ -58,14 +59,17 @@ app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
-// Add auto save activity log
-app.UseMiddleware<ActivityLoggingMiddleware>();
-
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+// Add auto save activity log
+app.UseMiddleware<ActivityLoggingMiddleware>();
+
+// Add middleware validate banning
+app.UseMiddleware<CheckBanningMiddleware>();
 
 app.MapControllers();
 

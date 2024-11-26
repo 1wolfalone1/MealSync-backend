@@ -39,6 +39,15 @@ public class AccountFlag : BaseEntity
             {
                 TargetId = string.Empty;
                 Description = "Bạn bị đánh cờ vì đạt 5 lần cảnh báo từ sàn";
+                TargetType = AccountTargetTypes.Order;
+                break;
+            }
+
+            case AccountActionTypes.DeliveryFailByShopNotDelivery:
+            {
+                TargetId = string.Empty;
+                Description = $"Bạn bị đánh cờ vì không thực hiện việc giao các đơn hàng {data}";
+                TargetType = AccountTargetTypes.Order;
                 break;
             }
 

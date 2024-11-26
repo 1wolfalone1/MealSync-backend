@@ -283,8 +283,16 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
                 if (account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
                 {
                     _emailService.SendEmailToAnnounceAccountGotBanned(_currentPrincipalService.CurrentPrincipal, account.FullName);
-                    account.Status = AccountStatus.Banned;
-                    _accountRepository.Update(account);
+                    var orderProcessing = _orderRepository.CheckOrderOfShopInDeliveringAndPeparing(account.Id);
+                    if (orderProcessing.Count > 0)
+                    {
+                        shop.Status = ShopStatus.Banning;
+                    }
+                    else
+                    {
+                        account.Status = AccountStatus.Banned;
+                        _accountRepository.Update(account);
+                    }
                 }
                 else
                 {
@@ -299,6 +307,8 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
                 shop.NumOfWarning = 0;
             }
         }
+
+        _shopRepository.Update(shop);
     }
 
     private async Task SendEmailAnnounceModeratorAsync(Order order)

@@ -86,6 +86,9 @@ public enum MessageCode
     [Description("E-Account-EmailHaveRegisterAccountButGotIssue")]
     E_ACCOUNT_EMAIL_HAVE_REGISTER_ACCOUNT_BUT_GOT_ISSUE,
 
+    [Description("E-Account-InBanning")]
+    E_ACCOUNT_IN_BANNING,
+
     // Platform Category
     [Description("E-PlatformCategory-NotFound")]
     E_PLATFORM_CATEGORY_NOT_FOUND,
