@@ -264,6 +264,11 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
         if (order.IntendedReceiveDate.Date != TimeFrameUtils.GetCurrentDateInUTC7().Date)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_DELIVERING_IN_WRONG_DATE.GetDescription(), new object[] { order.Id, order.IntendedReceiveDate.Date.ToString("dd-MM-yyyy") });
 
+        var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
+        var startEndTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
+        if (currentDateTime.DateTime > startEndTime.EndTime)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME.GetDescription(), new object[] { request.OrderId });
+
         if (request.ShopDeliveryStaffId != null)
         {
             var shopDeliveryStaff = _shopDeliveryStaffRepository.Get(sds => sds.Id == request.ShopDeliveryStaffId && sds.ShopId == _currentPrincipalService.CurrentPrincipalId.Value)

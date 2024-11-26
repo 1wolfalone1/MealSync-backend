@@ -109,6 +109,11 @@ public class ShopRejectOrderHandler : ICommandHandler<ShopRejectOrderCommand, Re
 
         if (order.Status != OrderStatus.Pending)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.Id });
+
+        var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
+        var startEndTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
+        if (currentDateTime.DateTime > startEndTime.EndTime)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME.GetDescription(), new object[] { request.Id });
     }
 
     private async Task<bool> RefundOrderAsync(Order order, Payment payment)

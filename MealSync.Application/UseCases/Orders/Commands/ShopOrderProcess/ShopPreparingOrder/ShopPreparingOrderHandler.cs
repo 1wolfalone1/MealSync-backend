@@ -114,6 +114,11 @@ public class ShopPreparingOrderHandler : ICommandHandler<ShopPreparingOrderComma
 
         if (order.Status != OrderStatus.Confirmed)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.Id });
+
+        var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
+        var startEndTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
+        if (currentDateTime.DateTime > startEndTime.EndTime)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME.GetDescription(), new object[] { request.Id });
     }
 
 }
