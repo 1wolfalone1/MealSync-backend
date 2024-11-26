@@ -18,14 +18,16 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<LoginHandler> _logger;
+    private readonly ICustomerBuildingRepository _customerBuildingRepository;
 
     public LoginHandler(IAccountRepository accountRepository, IJwtTokenService jwtTokenService,
-        IUnitOfWork unitOfWork, ILogger<LoginHandler> logger)
+        IUnitOfWork unitOfWork, ILogger<LoginHandler> logger, ICustomerBuildingRepository customerBuildingRepository)
     {
         _accountRepository = accountRepository;
         _jwtTokenService = jwtTokenService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _customerBuildingRepository = customerBuildingRepository;
     }
 
     public async Task<Result<Result>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -92,6 +94,12 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
                 AvatarUrl = account.AvatarUrl,
                 FullName = account.FullName,
             };
+            if (account.RoleId == (int)Domain.Enums.Roles.Customer)
+            {
+                var customerBuilding = _customerBuildingRepository.GetDefaultByCustomerId(account.Id);
+                loginResponse.AccountResponse.IsSelectedBuilding = customerBuilding != default;
+            }
+
             return Result.Success(loginResponse);
         }
     }

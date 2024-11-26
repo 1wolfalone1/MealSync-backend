@@ -14,6 +14,8 @@ public class ShopManageDto
 
     public int TotalOrder { get; set; }
 
+    public int TotalOrderInProcess { get; set; }
+
     public int TotalFood { get; set; }
 
     public double TotalRevenue { get; set; }

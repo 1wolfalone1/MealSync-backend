@@ -26,8 +26,9 @@ public class GetAllReportForModQuery : PaginationRequest, IQuery<Result>
         All = 0,
         PendingNotAllowAction = 1,
         PendingAllowAction = 2,
-        Approved = 3,
-        Rejected = 4,
+        UnderReview = 3,
+        Approved = 4,
+        Rejected = 5,
     }
 
     public enum FilterReportOrderBy

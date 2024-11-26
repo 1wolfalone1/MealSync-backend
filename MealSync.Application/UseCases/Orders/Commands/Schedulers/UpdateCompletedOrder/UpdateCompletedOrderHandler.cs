@@ -1,8 +1,11 @@
+using System.Text.Json;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Notifications;
+using MealSync.Application.Common.Services.Payments.VnPay;
+using MealSync.Application.Common.Services.Payments.VnPay.Models;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Domain.Entities;
@@ -27,6 +30,9 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateCompletedOrderHandler> _logger;
     private readonly IAccountFlagRepository _accountFlagRepository;
+    private readonly ICustomerRepository _customerRepository;
+    private readonly IBuildingRepository _buildingRepository;
+    private readonly IVnPayPaymentService _vnPayPaymentService;
 
     public UpdateCompletedOrderHandler(
         IOrderRepository orderRepository, IPaymentRepository paymentRepository,
@@ -34,7 +40,8 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
         IWalletTransactionRepository walletTransactionRepository, IAccountRepository accountRepository,
         IBatchHistoryRepository batchHistoryRepository, IUnitOfWork unitOfWork, ILogger<UpdateCompletedOrderHandler> logger,
         INotificationFactory notificationFactory, INotifierService notifierService,
-        IEmailService emailService, ISystemConfigRepository systemConfigRepository, IAccountFlagRepository accountFlagRepository)
+        IEmailService emailService, ISystemConfigRepository systemConfigRepository, IAccountFlagRepository accountFlagRepository,
+        ICustomerRepository customerRepository, IBuildingRepository buildingRepository, IVnPayPaymentService vnPayPaymentService)
     {
         _orderRepository = orderRepository;
         _paymentRepository = paymentRepository;
@@ -50,6 +57,9 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
         _emailService = emailService;
         _systemConfigRepository = systemConfigRepository;
         _accountFlagRepository = accountFlagRepository;
+        _customerRepository = customerRepository;
+        _buildingRepository = buildingRepository;
+        _vnPayPaymentService = vnPayPaymentService;
     }
 
     public async Task<Result<Result>> Handle(UpdateCompletedOrderCommand request, CancellationToken cancellationToken)
@@ -62,24 +72,106 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
 
         var orders = await _orderRepository.GetFailDeliveryAndDelivered(intendedReceiveDate, endTime).ConfigureAwait(false);
         var systemConfig = _systemConfigRepository.Get().First();
-        var accountsUpdateFlag = new List<Account>();
         var shopWalletUpdateAmount = new List<Wallet>();
         var shopWalletTransactionInsert = new List<WalletTransaction>();
-        AccountFlag? accountFlag = default;
+        var accountFlags = new List<AccountFlag>();
+        var accountsBanNotify = new List<Account>();
 
-        foreach (var order in orders)
+        try
         {
-            var payment = await _paymentRepository.GetPaymentByOrderId(order.Id).ConfigureAwait(false);
-            var shop = _shopRepository.GetById(order.ShopId)!;
-            var shopWallet = _walletRepository.GetById(shop.WalletId)!;
-            var customerAccount = _accountRepository.GetById(order.CustomerId)!;
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
-            if (order.Status == OrderStatus.FailDelivery)
+            foreach (var order in orders)
             {
-                if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
+                var payment = await _paymentRepository.GetPaymentByOrderId(order.Id).ConfigureAwait(false);
+                var shop = _shopRepository.GetById(order.ShopId)!;
+                var shopWallet = _walletRepository.GetById(shop.WalletId)!;
+                var account = _accountRepository.GetById(order.CustomerId)!;
+                var customer = _customerRepository.GetById(order.CustomerId)!;
+
+                if (order.Status == OrderStatus.FailDelivery)
                 {
-                    // Customer payment online => Con batch check order sau 2 giờ giao bên Thống đã chuyển tiền vô incoming và charge fee vô ví hoa hồng => Incoming to available, Flag customer => Update to completed
-                    // Customer payment COD => Flag customer => Update to completed
+                    if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
+                    {
+                        // Customer payment online => Con batch check order sau 2 giờ giao bên Thống đã chuyển tiền vô incoming và charge fee vô ví hoa hồng => Incoming to available, Flag customer => Update to completed
+                        // Customer payment COD => Flag customer => Update to completed
+                        if (payment.PaymentMethods != PaymentMethods.COD)
+                        {
+                            // => Incoming to available
+                            var (wallet, walletTransactions) = await TransactionIncomingToAvailableAndUpdateOrderStatus(payment, order, shop, shopWallet).ConfigureAwait(false);
+                            shopWalletUpdateAmount.Add(wallet);
+                            shopWalletTransactionInsert.AddRange(walletTransactions);
+
+                            // => Flag customer - Todo: Question
+                            account.NumOfFlag += 1;
+                            accountFlags.Add(GetAccountFlagForFailDeliveryByCustomer(account, order));
+
+                            if (account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
+                            {
+                                var totalOrderInProcess = await _orderRepository.CountTotalOrderInProcessByCustomerId(account.Id).ConfigureAwait(false);
+                                var ordersCancelBeforeBan = await _orderRepository.GetForSystemCancelByCustomerId(account.Id).ConfigureAwait(false);
+                                if (totalOrderInProcess > 0)
+                                {
+                                    customer.Status = CustomerStatus.Banning;
+                                }
+                                else
+                                {
+                                    customer.Status = CustomerStatus.Banned;
+                                    account.Status = AccountStatus.Banned;
+                                }
+
+                                accountsBanNotify.Add(account);
+                                _customerRepository.Update(customer);
+                                await CancelOrderPendingOrConfirmedForBanCustomer(ordersCancelBeforeBan).ConfigureAwait(false);
+                            }
+
+                            // => Update status to completed
+                            order.Status = OrderStatus.Completed;
+                        }
+                        else
+                        {
+                            // => Flag customer - Todo: Question
+                            account.NumOfFlag += 1;
+                            accountFlags.Add(GetAccountFlagForFailDeliveryByCustomer(account, order));
+
+                            if (account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
+                            {
+                                var totalOrderInProcess = await _orderRepository.CountTotalOrderInProcessByCustomerId(account.Id).ConfigureAwait(false);
+                                var ordersCancelBeforeBan = await _orderRepository.GetForSystemCancelByCustomerId(account.Id).ConfigureAwait(false);
+                                if (totalOrderInProcess > 0)
+                                {
+                                    customer.Status = CustomerStatus.Banning;
+                                }
+                                else
+                                {
+                                    customer.Status = CustomerStatus.Banned;
+                                    account.Status = AccountStatus.Banned;
+                                }
+
+                                accountsBanNotify.Add(account);
+                                _customerRepository.Update(customer);
+                                await CancelOrderPendingOrConfirmedForBanCustomer(ordersCancelBeforeBan).ConfigureAwait(false);
+                            }
+
+                            // => Update status to completed
+                            order.Status = OrderStatus.Completed;
+                        }
+
+                        _accountRepository.Update(account);
+
+                    }
+                    else
+                    {
+                        // Delivery fail by shop - Do nothing => Con batch check order sau 2 giờ giao bên Thống
+                        // đã đánh cờ shop và refund nếu khách hàng thanh toán online
+                        // => Only update to completed
+                        order.Status = OrderStatus.Completed;
+                    }
+                }
+                else
+                {
+                    // Customer payment online => Incoming to available => Update to completed
+                    // Customer payment COD => Giao hàng thành công Thống đã rút lấy tiền hoa hồng từ ví available của shop về ví tổng rồi về ví hoa hồng => Only update to completed
                     if (payment.PaymentMethods != PaymentMethods.COD)
                     {
                         // => Incoming to available
@@ -87,79 +179,23 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
                         shopWalletUpdateAmount.Add(wallet);
                         shopWalletTransactionInsert.AddRange(walletTransactions);
 
-                        // => Flag customer - Todo: Question
-                        customerAccount.NumOfFlag += 1;
-                        accountFlag = GetAccountFlagForFailDeliveryByCustomer(customerAccount, order);
-
-                        if (customerAccount.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
-                        {
-                            customerAccount.Status = AccountStatus.Banned;
-                        }
-
-                        accountsUpdateFlag.Add(customerAccount);
-
                         // => Update status to completed
                         order.Status = OrderStatus.Completed;
                     }
                     else
                     {
-                        // => Flag customer - Todo: Question
-                        customerAccount.NumOfFlag += 1;
-                        accountFlag = GetAccountFlagForFailDeliveryByCustomer(customerAccount, order);
-
-                        if (customerAccount.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
-                        {
-                            customerAccount.Status = AccountStatus.Banned;
-                        }
-
-                        accountsUpdateFlag.Add(customerAccount);
-
-                        // => Update status to completed
+                        // Only update to completed
                         order.Status = OrderStatus.Completed;
                     }
-
-                }
-                else
-                {
-                    // Delivery fail by shop - Do nothing => Con batch check order sau 2 giờ giao bên Thống
-                    // đã đánh cờ shop và refund nếu khách hàng thanh toán online
-                    // => Only update to completed
-                    order.Status = OrderStatus.Completed;
                 }
             }
-            else
-            {
-                // Customer payment online => Incoming to available => Update to completed
-                // Customer payment COD => Giao hàng thành công Thống đã rút lấy tiền hoa hồng từ ví available của shop về ví tổng rồi về ví hoa hồng => Only update to completed
-                if (payment.PaymentMethods != PaymentMethods.COD)
-                {
-                    // => Incoming to available
-                    var (wallet, walletTransactions) = await TransactionIncomingToAvailableAndUpdateOrderStatus(payment, order, shop, shopWallet).ConfigureAwait(false);
-                    shopWalletUpdateAmount.Add(wallet);
-                    shopWalletTransactionInsert.AddRange(walletTransactions);
-
-                    // => Update status to completed
-                    order.Status = OrderStatus.Completed;
-                }
-                else
-                {
-                    // Only update to completed
-                    order.Status = OrderStatus.Completed;
-                }
-            }
-        }
-
-        try
-        {
-            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
             _orderRepository.UpdateRange(orders);
             _walletRepository.UpdateRange(shopWalletUpdateAmount);
             await _walletTransactionRepository.AddRangeAsync(shopWalletTransactionInsert).ConfigureAwait(false);
-            _accountRepository.UpdateRange(accountsUpdateFlag);
-            if (accountFlag != default)
+            if (accountFlags.Count > 0)
             {
-                await _accountFlagRepository.AddAsync(accountFlag).ConfigureAwait(false);
+                await _accountFlagRepository.AddRangeAsync(accountFlags).ConfigureAwait(false);
             }
 
             endBatchDateTime = TimeFrameUtils.GetCurrentDate();
@@ -172,7 +208,7 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
             errors.Add(e.Message);
         }
 
-        foreach (var account in accountsUpdateFlag)
+        foreach (var account in accountsBanNotify)
         {
             NotifyFlagOrBanCustomerAccount(account, systemConfig);
         }
@@ -200,6 +236,141 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
             _unitOfWork.RollbackTransaction();
             _logger.LogError(e, e.Message);
             throw;
+        }
+    }
+
+    private async Task CancelOrderPendingOrConfirmedForBanCustomer(List<Order> ordersCancelBeforeBan)
+    {
+        foreach (var order in ordersCancelBeforeBan)
+        {
+            order.Status = OrderStatus.Cancelled;
+            order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription();
+            _orderRepository.Update(order);
+            var payment = order.Payments.FirstOrDefault(p => p.PaymentMethods == PaymentMethods.VnPay && p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess);
+            if (payment != default)
+            {
+                await RefundOrderAsync(order, payment).ConfigureAwait(false);
+            }
+        }
+    }
+
+    private async Task<bool> RefundOrderAsync(Order order, Payment payment)
+    {
+        if (payment.PaymentMethods == PaymentMethods.VnPay && payment.Status == PaymentStatus.PaidSuccess)
+        {
+            // Refund + update status order to cancel
+            var refundPayment = new Payment
+            {
+                OrderId = payment.OrderId,
+                Amount = payment.Amount,
+                Status = PaymentStatus.Pending,
+                Type = PaymentTypes.Refund,
+                PaymentMethods = PaymentMethods.VnPay,
+            };
+            var refundResult = await _vnPayPaymentService.CreateRefund(payment).ConfigureAwait(false);
+            var options = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
+            var content = JsonSerializer.Serialize(refundResult, options);
+
+            refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
+            refundPayment.PaymentThirdPartyContent = content;
+
+            if (refundResult.VnpResponseCode == ((int)VnPayRefundResponseCode.CODE_00).ToString("D2"))
+            {
+                refundPayment.Status = PaymentStatus.PaidSuccess;
+
+                // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
+                var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
+                var systemCommissionWallet = await _walletRepository.GetByType(WalletTypes.SystemCommission).ConfigureAwait(false);
+                var listWalletTransaction = new List<WalletTransaction>();
+
+                WalletTransaction transactionWithdrawalSystemCommissionToSystemTotal = new WalletTransaction
+                {
+                    WalletFromId = systemCommissionWallet.Id,
+                    WalletToId = systemTotalWallet.Id,
+                    AvaiableAmountBefore = systemCommissionWallet.AvailableAmount,
+                    IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
+                    ReportingAmountBefore = systemCommissionWallet.ReportingAmount,
+                    Amount = -order.ChargeFee,
+                    Type = WalletTransactionType.Withdrawal,
+                    Description = $"Rút tiền từ ví hoa hồng {MoneyUtils.FormatMoneyWithDots(order.ChargeFee)} VNĐ về ví tổng hệ thống",
+                };
+
+                systemCommissionWallet.AvailableAmount -= order.ChargeFee;
+                listWalletTransaction.Add(transactionWithdrawalSystemCommissionToSystemTotal);
+
+                WalletTransaction transactionAddFromSystemCommissionToSystemTotal = new WalletTransaction
+                {
+                    WalletFromId = systemCommissionWallet.Id,
+                    WalletToId = systemTotalWallet.Id,
+                    AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
+                    IncomingAmountBefore = systemTotalWallet.IncomingAmount,
+                    ReportingAmountBefore = systemTotalWallet.ReportingAmount,
+                    Amount = order.ChargeFee,
+                    Type = WalletTransactionType.Transfer,
+                    Description = $"Tiền từ ví hoa hồng chuyển về ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(order.ChargeFee)} VNĐ",
+                };
+                systemTotalWallet.AvailableAmount += order.ChargeFee;
+                listWalletTransaction.Add(transactionAddFromSystemCommissionToSystemTotal);
+
+                WalletTransaction transactionWithdrawalSystemTotalForRefundPaymentOnline = new WalletTransaction
+                {
+                    WalletFromId = systemTotalWallet.Id,
+                    AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
+                    IncomingAmountBefore = systemTotalWallet.IncomingAmount,
+                    ReportingAmountBefore = systemTotalWallet.ReportingAmount,
+                    Amount = -payment.Amount,
+                    Type = WalletTransactionType.Withdrawal,
+                    Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(payment.Amount)} VNĐ để hoàn tiền giao dịch thanh toán online của đơn hàng MS-{payment.OrderId}",
+                };
+                systemTotalWallet.AvailableAmount -= payment.Amount;
+                listWalletTransaction.Add(transactionWithdrawalSystemTotalForRefundPaymentOnline);
+
+                refundPayment.WalletTransactions = listWalletTransaction;
+                _walletRepository.Update(systemTotalWallet);
+                _walletRepository.Update(systemCommissionWallet);
+            }
+            else
+            {
+                refundPayment.Status = PaymentStatus.PaidFail;
+
+                // Get moderator account to send mail
+                await SendEmailAnnounceModeratorAsync(order).ConfigureAwait(false);
+
+                // Send notification for moderator
+                NotifyAnnounceRefundFailAsync(order);
+            }
+
+            await _paymentRepository.AddAsync(refundPayment).ConfigureAwait(false);
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task SendEmailAnnounceModeratorAsync(Order order)
+    {
+        var building = _buildingRepository.GetById(order.BuildingId);
+        var moderators = _accountRepository.GetAccountsOfModeratorByDormitoryId(building!.DormitoryId);
+        if (moderators != default && moderators.Count > 0)
+        {
+            foreach (var moderator in moderators)
+            {
+                _emailService.SendEmailToAnnounceModeratorRefundFail(moderator.Email, order.Id);
+            }
+        }
+    }
+
+    private void NotifyAnnounceRefundFailAsync(Order order)
+    {
+        var building = _buildingRepository.GetById(order.BuildingId);
+        var moderators = _accountRepository.GetAccountsOfModeratorByDormitoryId(building!.DormitoryId);
+        if (moderators != default && moderators.Count > 0)
+        {
+            foreach (var moderator in moderators)
+            {
+                var notification = _notificationFactory.CreateRefundFaillNotification(order, moderator);
+                _notifierService.NotifyAsync(notification);
+            }
         }
     }
 

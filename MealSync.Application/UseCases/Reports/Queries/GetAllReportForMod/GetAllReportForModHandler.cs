@@ -33,6 +33,7 @@ public class GetAllReportForModHandler : IQueryHandler<GetAllReportForModQuery, 
         var dormitoryIds = dormitories.Select(d => d.DormitoryId).ToList();
         var isAllowAction = false;
         var isAllStatus = false;
+        var isUnderReview = false;
         var statusList = new List<ReportStatus>();
 
         if (request.DormitoryId != default && request.DormitoryId > 0 && !dormitoryIds.Contains(request.DormitoryId.Value))
@@ -49,6 +50,12 @@ public class GetAllReportForModHandler : IQueryHandler<GetAllReportForModQuery, 
         {
             statusList.Add(ReportStatus.Pending);
             isAllowAction = true;
+        }
+        else if (request.Status == GetAllReportForModQuery.FilterReportStatus.UnderReview)
+        {
+            statusList.Add(ReportStatus.Pending);
+            isAllowAction = true;
+            isUnderReview = true;
         }
         else if (request.Status == GetAllReportForModQuery.FilterReportStatus.Rejected)
         {
@@ -76,6 +83,7 @@ public class GetAllReportForModHandler : IQueryHandler<GetAllReportForModQuery, 
             DormitoryIds = dormitoryIds,
             SearchValue = request.SearchValue,
             IsAllowAction = isAllowAction,
+            IsUnderReview = isUnderReview,
             IsAllStatus = isAllStatus,
             StatusList = statusList,
             DormitoryId = request.DormitoryId,

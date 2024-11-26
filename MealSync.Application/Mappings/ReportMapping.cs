@@ -43,5 +43,7 @@ public class ReportMapping : Profile
             .ForMember(dest => dest.Status, src => src.MapFrom(opt => opt.Customer!.Status));
 
         CreateMap<Shop, ReportDetailForModResponse.ShopInfoForModResponse>();
+
+        CreateMap<Shop, ReportDetailForCusResponse.ShopInfoDetailResponse>();
     }
 }

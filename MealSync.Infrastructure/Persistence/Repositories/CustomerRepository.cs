@@ -106,6 +106,7 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
                 AvatarUrl = c.Account.AvatarUrl,
                 Status = c.Status,
                 CreatedDate = c.CreatedDate,
+                TotalOrderInProcess = c.Orders.Count(o => o.Status == OrderStatus.Preparing || o.Status == OrderStatus.Delivering),
             })
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
@@ -195,6 +196,11 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
                             || c.Orders.Any(o => dormitoryIds.Contains(o.Building.DormitoryId))
                         )
             ).FirstOrDefaultAsync();
+    }
+
+    public Task<Customer> GetIncludeAccount(long id)
+    {
+        return DbSet.Include(c => c.Account).FirstAsync(c => c.Id == id);
     }
 
     private static string EscapeLikeParameter(string input)

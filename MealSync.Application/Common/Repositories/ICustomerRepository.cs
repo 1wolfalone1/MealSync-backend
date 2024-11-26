@@ -15,4 +15,6 @@ public interface ICustomerRepository : IBaseRepository<Customer>
     Task<AccountDetailForModManageDto?> GetCustomerDetail(List<long> dormitoryIds, long customerId);
 
     Task<Customer?> GetCustomer(List<long> dormitoryIds, long customerId);
+
+    Task<Customer> GetIncludeAccount(long id);
 }

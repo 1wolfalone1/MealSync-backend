@@ -6,6 +6,8 @@ public class ReportDetailForModResponse
 {
     public bool IsAllowAction { get; set; }
 
+    public bool IsUnderReview { get; set; }
+
     public CustomerInfoForModResponse CustomerInfo { get; set; }
 
     public ShopInfoForModResponse ShopInfo { get; set; }

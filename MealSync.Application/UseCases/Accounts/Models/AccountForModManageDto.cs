@@ -17,4 +17,6 @@ public class AccountForModManageDto
     public CustomerStatus Status { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }
+
+    public int TotalOrderInProcess { get; set; }
 }
