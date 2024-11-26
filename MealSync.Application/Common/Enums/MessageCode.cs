@@ -86,12 +86,21 @@ public enum MessageCode
     [Description("E-Account-EmailHaveRegisterAccountButGotIssue")]
     E_ACCOUNT_EMAIL_HAVE_REGISTER_ACCOUNT_BUT_GOT_ISSUE,
 
+    [Description("E-Account-InBanning")]
+    E_ACCOUNT_IN_BANNING,
+
     // Platform Category
     [Description("E-PlatformCategory-NotFound")]
     E_PLATFORM_CATEGORY_NOT_FOUND,
 
-    [Description("E-PlatformCategory-NotFound")]
+    [Description("E-PlatformCategory-DoubleName")]
     E_PLATFORM_CATEGORY_DOUBLE_NAME,
+
+    [Description("W-PlatformCategory-HaveFoodLinked")]
+    E_PLATFORM_CATEGORY_HAVE_FOOD_LINKED,
+
+    [Description("E-PlatformCategory-NotEnoughIdToReArrange")]
+    E_PLATFORM_CATEGORY_NOT_ENOUGH_ID_TO_RE_ARRANGE,
 
     // Shop Category
     [Description("I-ShopCategory-DeleteSuccess")]
@@ -466,6 +475,11 @@ public enum MessageCode
     [Description("E-Order-ModeratorNotHaveAuthorToAccess")]
     E_ORDER_MODERATOR_NOT_HAVE_AUTHOR_TO_ACCESS,
 
+    [Description("E-Order-OverTime")]
+    E_ORDER_OVER_TIME,
+
+    [Description("E-Order_DeliveringEarlyOver15p")]
+    E_ORDER_DELIVERING_EARLY_OVER_15P,
     // Report
     [Description("E-Report-NotFound")]
     E_REPORT_NOT_FOUND,

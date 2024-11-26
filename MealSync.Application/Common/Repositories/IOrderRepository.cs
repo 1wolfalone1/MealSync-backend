@@ -49,4 +49,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     Order GetOrderWithDormitoryById(long orderId);
 
     Task<Order> GetOrderIncludePaymentById(long id);
+
+    List<Order> CheckOrderOfShopInDeliveringAndPeparing(long shopId);
 }

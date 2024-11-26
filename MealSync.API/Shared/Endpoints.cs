@@ -115,6 +115,8 @@ public static class Endpoints
     // Platform category
     public const string GET_ALL_PLATFORM_CATEGORY = "platform-category";
     public const string CREATE_PLATFORM_CATEGORY = "admin/platform-category";
+    public const string UPDATE_PLATFORM_CATEGORY = "admin/platform-category/{id:long}";
+    public const string REARRANGE_PLATFORM_CATEGORY = "admin/platform-category/re-arrange";
 
     // Customer Building
     public const string UPDATE_CUSTOMER_BUILDING = "customer/building/update";
@@ -241,6 +243,8 @@ public static class Endpoints
     public const string TOTAL_UNREAD_NOTIFICATION_SHOP_STAFF = "shop-owner-staff/notification/total-unread";
     public const string NOTIFICATION_UPDATE_SHOP_STAFF = "shop-owner-staff/notification";
     public const string NOTIFICATION_MARK_ALL_READ = "notification/mark-all-read";
+    public const string CUSTOMER_NOTIFICATION = "customer/notification";
+    public const string CUSTOMER_NOTIFICATION_TOTAL_UNREAD = "customer/notification/total-unread";
 
     // Chat
     public const string ORDER_INFOR_CHAT = "order/{id:long}/chat-info";

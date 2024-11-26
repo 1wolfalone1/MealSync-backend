@@ -1,6 +1,8 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.PlatformCategory.Commands.CreatePlatformCategory;
+using MealSync.Application.UseCases.PlatformCategory.Commands.ReArrangePlatformCategory;
+using MealSync.Application.UseCases.PlatformCategory.Commands.UpdatePlatformCategory;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.PlatformCategory.Queries.GetAll;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +21,21 @@ public class PlatformCategoryController : BaseApiController
     [HttpPost(Endpoints.CREATE_PLATFORM_CATEGORY)]
     [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
     public async Task<IActionResult> CreatePlatform([FromBody] CreatePlatformCategoryCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_PLATFORM_CATEGORY)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> UpdatePlatformCategory([FromBody] UpdatePlatformCategoryCommand command, long id)
+    {
+        command.Id = id;
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.REARRANGE_PLATFORM_CATEGORY)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> ReArrangePlatformCategory([FromBody] ReArrangePlatformCategoryCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }

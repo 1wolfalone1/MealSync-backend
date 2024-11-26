@@ -149,6 +149,11 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
 
         if (order.Status != OrderStatus.Confirmed)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.Id });
+
+        var currentDateTime = TimeFrameUtils.GetCurrentDateInUTC7();
+        var startEndTime = TimeFrameUtils.GetStartTimeEndTimeToDateTime(order.IntendedReceiveDate, order.StartTime, order.EndTime);
+        if (currentDateTime.DateTime > startEndTime.EndTime)
+            throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME.GetDescription(), new object[] { request.Id });
     }
 
     private async Task<bool> RefundOrderAsync(Order order, Payment payment)
@@ -278,8 +283,16 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
                 if (account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
                 {
                     _emailService.SendEmailToAnnounceAccountGotBanned(_currentPrincipalService.CurrentPrincipal, account.FullName);
-                    account.Status = AccountStatus.Banned;
-                    _accountRepository.Update(account);
+                    var orderProcessing = _orderRepository.CheckOrderOfShopInDeliveringAndPeparing(account.Id);
+                    if (orderProcessing.Count > 0)
+                    {
+                        shop.Status = ShopStatus.Banning;
+                    }
+                    else
+                    {
+                        account.Status = AccountStatus.Banned;
+                        _accountRepository.Update(account);
+                    }
                 }
                 else
                 {
@@ -294,6 +307,8 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
                 shop.NumOfWarning = 0;
             }
         }
+
+        _shopRepository.Update(shop);
     }
 
     private async Task SendEmailAnnounceModeratorAsync(Order order)

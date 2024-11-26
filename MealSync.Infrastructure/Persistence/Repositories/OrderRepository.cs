@@ -554,4 +554,9 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
         return DbSet.Include(o => o.Payments).FirstAsync(o => o.Id == id);
     }
+
+    public List<Order> CheckOrderOfShopInDeliveringAndPeparing(long shopId)
+    {
+        return DbSet.Where(o => o.ShopId == shopId && (o.Status == OrderStatus.Delivering || o.Status == OrderStatus.Preparing)).ToList();
+    }
 }
