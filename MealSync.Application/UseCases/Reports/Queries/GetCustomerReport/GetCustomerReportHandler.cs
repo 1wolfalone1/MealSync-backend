@@ -14,17 +14,19 @@ public class GetCustomerReportHandler : IQueryHandler<GetCustomerReportQuery, Re
 {
     private readonly IReportRepository _reportRepository;
     private readonly IShopRepository _shopRepository;
+    private readonly IOrderRepository _orderRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IMapper _mapper;
 
     public GetCustomerReportHandler(
         IReportRepository reportRepository, ICurrentPrincipalService currentPrincipalService,
-        IMapper mapper, IShopRepository shopRepository)
+        IMapper mapper, IShopRepository shopRepository, IOrderRepository orderRepository)
     {
         _reportRepository = reportRepository;
         _currentPrincipalService = currentPrincipalService;
         _mapper = mapper;
         _shopRepository = shopRepository;
+        _orderRepository = orderRepository;
     }
 
     public async Task<Result<Result>> Handle(GetCustomerReportQuery request, CancellationToken cancellationToken)
@@ -40,7 +42,8 @@ public class GetCustomerReportHandler : IQueryHandler<GetCustomerReportQuery, Re
                 Reports = reportDetailResponses,
             };
 
-            response.ShopInfo = _mapper.Map<ReportDetailForCusResponse.ShopInfoDetailResponse>(_shopRepository.GetById(reports.First(r => r.ShopId != default).ShopId!));
+            var order = _orderRepository.GetById(orderId)!;
+            response.ShopInfo = _mapper.Map<ReportDetailForCusResponse.ShopInfoDetailResponse>(_shopRepository.GetById(order.ShopId));
 
             return Result.Success(response);
         }
