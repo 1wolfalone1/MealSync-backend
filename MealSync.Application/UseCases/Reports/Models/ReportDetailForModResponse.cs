@@ -4,31 +4,36 @@ namespace MealSync.Application.UseCases.Reports.Models;
 
 public class ReportDetailForModResponse
 {
-    public long Id { get; set; }
-
-    public long OrderId { get; set; }
-
-    public string OrderDescription { get; set; }
-
-    public string Title { get; set; }
-
-    public string Content { get; set; }
-
-    public List<string> ImageUrls { get; set; }
-
-    public ReportStatus Status { get; set; }
-
-    public string? Reason { get; set; }
-
-    public bool IsReportedByCustomer { get; set; }
-
-    public DateTimeOffset CreatedDate { get; set; }
+    public bool IsAllowAction { get; set; }
 
     public CustomerInfoForModResponse CustomerInfo { get; set; }
 
     public ShopInfoForModResponse ShopInfo { get; set; }
 
-    public ShopDeliveryStaffInfoForModResponse? ShopDeliveryStaffInfo { get; set; }
+    public List<ReportResponse> Reports { get; set; }
+
+    public class ReportResponse
+    {
+        public long Id { get; set; }
+
+        public long OrderId { get; set; }
+
+        public string OrderDescription { get; set; }
+
+        public string Title { get; set; }
+
+        public string Content { get; set; }
+
+        public List<string> ImageUrls { get; set; }
+
+        public ReportStatus Status { get; set; }
+
+        public string? Reason { get; set; }
+
+        public bool IsReportedByCustomer { get; set; }
+
+        public DateTimeOffset CreatedDate { get; set; }
+    }
 
     public class CustomerInfoForModResponse
     {
@@ -43,21 +48,6 @@ public class ReportDetailForModResponse
         public string? FullName { get; set; }
 
         public CustomerStatus Status { get; set; }
-    }
-
-    public class ShopDeliveryStaffInfoForModResponse
-    {
-        public long DeliveryPackageId { get; set; }
-
-        public long Id { get; set; }
-
-        public string? FullName { get; set; }
-
-        public string PhoneNumber { get; set; }
-
-        public string Email { get; set; }
-
-        public string? AvatarUrl { get; set; }
     }
 
     public class ShopInfoForModResponse

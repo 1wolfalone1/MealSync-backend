@@ -31,10 +31,42 @@ public class GetAllReportForModHandler : IQueryHandler<GetAllReportForModQuery, 
         var moderatorAccountId = _currentPrincipalService.CurrentPrincipalId!.Value;
         var dormitories = await _moderatorDormitoryRepository.GetAllDormitoryByModeratorId(moderatorAccountId).ConfigureAwait(false);
         var dormitoryIds = dormitories.Select(d => d.DormitoryId).ToList();
+        var isAllowAction = false;
+        var isAllStatus = false;
+        var statusList = new List<ReportStatus>();
 
         if (request.DormitoryId != default && request.DormitoryId > 0 && !dormitoryIds.Contains(request.DormitoryId.Value))
         {
             throw new InvalidBusinessException(MessageCode.E_MODERATOR_ACTION_NOT_ALLOW.GetDescription());
+        }
+
+        if (request.Status == GetAllReportForModQuery.FilterReportStatus.PendingNotAllowAction)
+        {
+            statusList.Add(ReportStatus.Pending);
+            isAllowAction = false;
+        }
+        else if (request.Status == GetAllReportForModQuery.FilterReportStatus.PendingAllowAction)
+        {
+            statusList.Add(ReportStatus.Pending);
+            isAllowAction = true;
+        }
+        else if (request.Status == GetAllReportForModQuery.FilterReportStatus.Rejected)
+        {
+            statusList.Add(ReportStatus.Rejected);
+            isAllowAction = false;
+        }
+        else if (request.Status == GetAllReportForModQuery.FilterReportStatus.Approved)
+        {
+            statusList.Add(ReportStatus.Approved);
+            isAllowAction = false;
+        }
+        else
+        {
+            // All
+            isAllStatus = true;
+            statusList.Add(ReportStatus.Pending);
+            statusList.Add(ReportStatus.Approved);
+            statusList.Add(ReportStatus.Rejected);
         }
 
         var now = TimeFrameUtils.GetCurrentDateInUTC7().DateTime;
@@ -43,7 +75,9 @@ public class GetAllReportForModHandler : IQueryHandler<GetAllReportForModQuery, 
             Now = now,
             DormitoryIds = dormitoryIds,
             SearchValue = request.SearchValue,
-            Status = request.Status,
+            IsAllowAction = isAllowAction,
+            IsAllStatus = isAllStatus,
+            StatusList = statusList,
             DormitoryId = request.DormitoryId,
             DateFrom = request.DateFrom,
             DateTo = request.DateTo,

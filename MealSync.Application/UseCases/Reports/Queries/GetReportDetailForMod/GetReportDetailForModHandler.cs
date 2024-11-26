@@ -3,6 +3,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Reports.Models;
 using MealSync.Domain.Enums;
@@ -40,7 +41,7 @@ public class GetReportDetailForModHandler : IQueryHandler<GetReportDetailForModQ
         var dormitories = await _moderatorDormitoryRepository.GetAllDormitoryByModeratorId(moderatorAccountId).ConfigureAwait(false);
         var dormitoryIds = dormitories.Select(d => d.DormitoryId).ToList();
 
-        var orderId = await _reportRepository.GetOrderIdByReportIdAndDormitoryIds(request.ReportId, dormitoryIds).ConfigureAwait(false);
+        var orderId = await _reportRepository.GetOrderIdByCustomerReportIdAndDormitoryIds(request.ReportId, dormitoryIds).ConfigureAwait(false);
 
         if (orderId == default || orderId == 0)
         {
@@ -49,33 +50,43 @@ public class GetReportDetailForModHandler : IQueryHandler<GetReportDetailForModQ
         else
         {
             var reports = await _reportRepository.GetByOrderId(orderId.Value).ConfigureAwait(false);
-            var reportDetailShopWebResponses = _mapper.Map<List<ReportDetailForModResponse>>(reports);
-            var order = await _orderRepository.GetIncludeDeliveryPackageById(reportDetailShopWebResponses.Select(r => r.OrderId).First()).ConfigureAwait(false);
-            if (order.DeliveryPackage != default && order.DeliveryPackage.ShopDeliveryStaffId != default && order.DeliveryPackage.ShopDeliveryStaffId > 0)
+            var customerReport = reports.First(r => r.CustomerId != default);
+            var reportDetailShopWebResponses = new ReportDetailForModResponse();
+            var order = _orderRepository.GetById(orderId.Value);
+
+            var now = TimeFrameUtils.GetCurrentDateInUTC7();
+            DateTime receiveDateEndTime;
+            if (order.EndTime == 2400)
             {
-                var staffAccount = _accountRepository.GetById(order.DeliveryPackage.ShopDeliveryStaffId)!;
-                reportDetailShopWebResponses.ForEach(report =>
-                {
-                    report.ShopDeliveryStaffInfo = new ReportDetailForModResponse.ShopDeliveryStaffInfoForModResponse()
-                    {
-                        DeliveryPackageId = order.DeliveryPackageId!.Value,
-                        PhoneNumber = staffAccount.PhoneNumber,
-                        Email = staffAccount.Email,
-                        FullName = staffAccount.FullName,
-                        AvatarUrl = staffAccount.AvatarUrl,
-                        Id = staffAccount.Id,
-                    };
-                });
+                receiveDateEndTime = new DateTime(
+                        order.IntendedReceiveDate.Year,
+                        order.IntendedReceiveDate.Month,
+                        order.IntendedReceiveDate.Day,
+                        0,
+                        0,
+                        0)
+                    .AddDays(1);
+            }
+            else
+            {
+                receiveDateEndTime = new DateTime(
+                    order.IntendedReceiveDate.Year,
+                    order.IntendedReceiveDate.Month,
+                    order.IntendedReceiveDate.Day,
+                    order.EndTime / 100,
+                    order.EndTime % 100,
+                    0);
             }
 
-            var customerInfoResponse = _mapper.Map<ReportDetailForModResponse.CustomerInfoForModResponse>(_accountRepository.GetIncludeCustomerById(order.CustomerId));
-            var shopInfoResponse = _mapper.Map<ReportDetailForModResponse.ShopInfoForModResponse>(_shopRepository.GetById(order.ShopId));
-
-            reportDetailShopWebResponses.ForEach(report =>
+            var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
+            if (customerReport.Status == ReportStatus.Pending && (reports.Count > 1 || now > endTime.AddHours(20)))
             {
-                report.CustomerInfo = customerInfoResponse;
-                report.ShopInfo = shopInfoResponse;
-            });
+                reportDetailShopWebResponses.IsAllowAction = true;
+            }
+
+            reportDetailShopWebResponses.CustomerInfo = _mapper.Map<ReportDetailForModResponse.CustomerInfoForModResponse>(_accountRepository.GetIncludeCustomerById(order.CustomerId));
+            reportDetailShopWebResponses.ShopInfo = _mapper.Map<ReportDetailForModResponse.ShopInfoForModResponse>(_shopRepository.GetById(order.ShopId));
+            reportDetailShopWebResponses.Reports = _mapper.Map<List<ReportDetailForModResponse.ReportResponse>>(reports);
 
             return Result.Success(reportDetailShopWebResponses);
         }

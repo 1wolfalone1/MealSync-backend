@@ -26,7 +26,7 @@ public class GetCustomerReportHandler : IQueryHandler<GetCustomerReportQuery, Re
     public async Task<Result<Result>> Handle(GetCustomerReportQuery request, CancellationToken cancellationToken)
     {
         var customerId = _currentPrincipalService.CurrentPrincipalId!.Value;
-        var orderId = await _reportRepository.GetOrderIdByIdAndCustomerId(request.ReportId, customerId).ConfigureAwait(false);
+        var orderId = await _reportRepository.GetOrderIdByOrderIdAndCustomerId(request.OrderId, customerId).ConfigureAwait(false);
         if (orderId.HasValue && orderId.Value > 0)
         {
             var reports = await _reportRepository.GetByOrderId(orderId.Value).ConfigureAwait(false);
@@ -34,7 +34,7 @@ public class GetCustomerReportHandler : IQueryHandler<GetCustomerReportQuery, Re
         }
         else
         {
-            throw new InvalidBusinessException(MessageCode.E_REPORT_NOT_FOUND.GetDescription(), new object[] { request.ReportId });
+            throw new InvalidBusinessException(MessageCode.E_REPORT_NOT_FOUND.GetDescription(), new object[] { request.OrderId });
         }
     }
 }

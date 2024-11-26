@@ -697,6 +697,9 @@ public enum MessageCode
     [Description("W-Moderator-ShopBanStillWithdrawal")]
     W_MODERATOR_SHOP_BAN_STILL_WITHDRAWAL,
 
+    [Description("E-Report-NotYetProcessedReport")]
+    E_MODERATOR_NOT_YET_PROCESSED_REPORT,
+
     // Notifiation
     [Description("E-Notification-NotFound")]
     E_NOTIFICATION_NOT_FOUND,
