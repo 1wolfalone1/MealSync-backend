@@ -66,10 +66,6 @@
             @DateTo IS NULL
             OR r.created_date <= @DateTo
         )
-        AND (
-            @IsUnderReview = 0
-            OR o.status = 11 -- UnderReview
-        )
 )
 SELECT
     COUNT(*) OVER() AS TotalCount,
@@ -97,6 +93,16 @@ WHERE
         OR (
             @IsAllStatus = 0
             AND IsAllowAction = @IsAllowAction
+        )
+    )
+    AND (
+        (
+            @IsUnderReview = 1
+            AND IsUnderReview = 1
+        )
+        OR (
+            @IsUnderReview = 0
+            AND IsUnderReview = 0
         )
     )
 ORDER BY
