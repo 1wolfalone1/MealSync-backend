@@ -301,11 +301,7 @@ public class MappingProfile : Profile
         var startTime = new DateTimeOffset(receiveDateStartTime, TimeSpan.FromHours(7));
         var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
 
-        return (order.Status == OrderStatus.Delivered ||
-                ((order.Status == OrderStatus.IssueReported || order.Status == OrderStatus.UnderReview || order.Status == OrderStatus.Resolved)
-                 && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() && order.IsReport)
-                || (order.Status == OrderStatus.Completed && order.ReasonIdentity == default))
-               && order.Reviews.Count == 0 && now >= startTime && now <= endTime.AddHours(24);
+        return order.Status == OrderStatus.Completed && order.ReasonIdentity == default && order.Reviews.Count == 0 && now >= startTime && now <= endTime.AddHours(24);
     }
 
     private bool IsReportAllowed(Order order)

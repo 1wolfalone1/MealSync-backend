@@ -78,19 +78,20 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
             }
             else if (reports.Count > 1 || now > endTime.AddHours(20))
             {
+                var payment = order.Payments.First(p => p.Type == PaymentTypes.Payment);
+
                 if (request.Status == ReportStatus.Approved)
                 {
-                    Payment payment = order.Payments.First(p => p.Type == PaymentTypes.Payment);
                     if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription())
                     {
                         // Fail delivery
                         if (payment.PaymentMethods == PaymentMethods.COD)
                         {
-                            // Payment COD
+                            // Giao hàng thất bại, thanh toán COD => Approve customer report => Đánh cờ shop
                         }
                         else
                         {
-                            // Payment Online
+                            // Giao hàng thất bại, thanh toán Online => Approve customer report => Refund tiền customer, đánh cờ shop
                         }
                     }
                     else if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription())
@@ -98,11 +99,11 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                         // Delivered
                         if (payment.PaymentMethods == PaymentMethods.COD)
                         {
-                            // Payment COD
+                            // Giao hàng thành công, thanh toán COD => Approve customer report => Đánh cờ shop, refund bằng tiền sàn, chuyển lại tiền từ reporting về available (Payment - ChargeFee)
                         }
                         else
                         {
-                            // Payment Online
+                            // Giao hàng thành công, thanh toán Online => Approve customer report => Đánh cờ shop, refund bằng tiền sàn, chuyển lại tiền từ reporting về available (Payment - ChargeFee)
                         }
                     }
                     else
@@ -112,7 +113,34 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                 }
                 else if (request.Status == ReportStatus.Rejected)
                 {
-
+                    if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription())
+                    {
+                        // Fail delivery
+                        if (payment.PaymentMethods == PaymentMethods.COD)
+                        {
+                            // Giao hàng thất bại, thanh toán COD => Reject customer report => Đánh cờ cus
+                        }
+                        else
+                        {
+                            // Giao hàng thất bại, thanh toán COD => Reject customer report => Đánh cờ cus, tiền từ ví reporting về ví available (Payment - ChargeFee)
+                        }
+                    }
+                    else if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription())
+                    {
+                        // Delivered
+                        if (payment.PaymentMethods == PaymentMethods.COD)
+                        {
+                            // Giao hàng thành công, thanh toán COD => Reject customer report => Tiền từ ví reporting về ví available (Payment - ChargeFee)
+                        }
+                        else
+                        {
+                            // Giao hàng thành công, thanh toán Online => Reject customer report => Tiền từ ví reporting về ví available (Payment - ChargeFee)
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidBusinessException(MessageCode.E_MODERATOR_ACTION_NOT_ALLOW.GetDescription());
+                    }
                 }
                 else
                 {
