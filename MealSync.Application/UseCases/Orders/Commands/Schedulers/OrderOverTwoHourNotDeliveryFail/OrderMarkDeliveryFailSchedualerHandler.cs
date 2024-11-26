@@ -33,11 +33,12 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
     private readonly IWalletRepository _walletRepository;
     private readonly IWalletTransactionRepository _walletTransactionRepository;
     private readonly IPaymentRepository _paymentRepository;
+    private readonly IAccountFlagRepository _accountFlagRepository;
 
     public OrderMarkDeliveryFailSchedualerHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<OrderMarkDeliveryFailSchedualerHandler> logger, INotificationFactory notificationFactory,
         INotifierService notifierService, IShopRepository shopRepository, IDeliveryPackageRepository deliveryPackageRepository, IAccountRepository accountRepository, IBuildingRepository buildingRepository,
         IEmailService emailService, ISystemConfigRepository systemConfigRepository, IBatchHistoryRepository batchHistoryRepository, IVnPayPaymentService paymentService, IWalletRepository walletRepository,
-        IWalletTransactionRepository walletTransactionRepository, IPaymentRepository paymentRepository)
+        IWalletTransactionRepository walletTransactionRepository, IPaymentRepository paymentRepository, IAccountFlagRepository accountFlagRepository)
     {
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
@@ -55,6 +56,7 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
         _walletRepository = walletRepository;
         _walletTransactionRepository = walletTransactionRepository;
         _paymentRepository = paymentRepository;
+        _accountFlagRepository = accountFlagRepository;
     }
 
     public async Task<Result<BatchHistory>> Handle(OrderMarkDeliveryFailSchedulerCommand request, CancellationToken cancellationToken)
@@ -140,12 +142,24 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
         if (shopAccount.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
         {
             _emailService.SendEmailToAnnounceAccountGotBanned(shopAccount.Email, shopAccount.FullName);
-            shopAccount.Status = AccountStatus.Banned;
+            var orderProcessing = _orderRepository.CheckOrderOfShopInDeliveringAndPeparing(shopAccount.Id);
+            if (orderProcessing.Count > 0)
+            {
+                var shop = _shopRepository.GetById(shopId);
+                shop.Status = ShopStatus.Banning;
+                _shopRepository.Update(shop);
+            }
+            else
+            {
+                shopAccount.Status = AccountStatus.Banned;
+            }
         }
         else
         {
             var idOrders = string.Join(", ", orders.Select(o => string.Concat(IdPatternConstant.PREFIX_ID, o.Id)).ToList());
             _emailService.SendEmailToAnnounceApplyFlagForShop(shopAccount.Email, shopAccount.NumOfFlag, $"Bạn không thực hiện giao các đơn hàng sau: {idOrders}");
+            var accountFlag = new AccountFlag(AccountActionTypes.DeliveryFailByShopNotDelivery, shopId, idOrders);
+            await _accountFlagRepository.AddAsync(accountFlag).ConfigureAwait(false);
         }
 
         _accountRepository.Update(shopAccount);
