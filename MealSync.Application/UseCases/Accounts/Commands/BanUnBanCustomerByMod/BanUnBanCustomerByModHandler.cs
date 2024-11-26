@@ -32,6 +32,7 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IEmailService _emailService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISystemConfigRepository _systemConfigRepository;
     private readonly ILogger<BanUnBanCustomerByModHandler> _logger;
 
     public BanUnBanCustomerByModHandler(
@@ -41,7 +42,7 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
         IWalletTransactionRepository walletTransactionRepository, IWalletRepository walletRepository,
         IPaymentRepository paymentRepository, IVnPayPaymentService vnPayPaymentService,
         INotificationFactory notificationFactory, INotifierService notifierService, ICurrentPrincipalService currentPrincipalService,
-        IEmailService emailService, IUnitOfWork unitOfWork, ILogger<BanUnBanCustomerByModHandler> logger)
+        IEmailService emailService, IUnitOfWork unitOfWork, ILogger<BanUnBanCustomerByModHandler> logger, ISystemConfigRepository systemConfigRepository)
     {
         _customerRepository = customerRepository;
         _moderatorDormitoryRepository = moderatorDormitoryRepository;
@@ -59,6 +60,7 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
         _emailService = emailService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _systemConfigRepository = systemConfigRepository;
     }
 
     public async Task<Result<Result>> Handle(BanUnBanCustomerByModCommand request, CancellationToken cancellationToken)
@@ -143,6 +145,8 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
             }
             else if (request.Status == AccountStatus.Verify && (customer.Status == CustomerStatus.Banning || customer.Status == CustomerStatus.Banned))
             {
+                var systemConfig = _systemConfigRepository.GetSystemConfig();
+
                 // UnBan
                 try
                 {
@@ -151,6 +155,13 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
 
                     customer.Account.Status = AccountStatus.Verify;
                     customer.Status = CustomerStatus.Active;
+
+                    if (customer.Account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
+                    {
+                        customer.Account.NumOfFlag -= 1;
+                    }
+
+                    _customerRepository.Update(customer);
 
                     // Commit transaction
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);

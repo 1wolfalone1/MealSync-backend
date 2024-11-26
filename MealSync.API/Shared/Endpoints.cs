@@ -229,6 +229,7 @@ public static class Endpoints
 
     public const string MANAGE_REPORT = "moderator/report";
     public const string MANAGE_REPORT_DETAIL = "moderator/report/{id:long}";
+    public const string MANAGE_REPORT_UPDATE_STATUS = "moderator/report/status";
 
     public const string MODERATOR_ORDER = "moderator/order";
     public const string MODERATOR_ORDER_DETAIL = "moderator/order/{id:long}";

@@ -168,6 +168,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             {
                 Id = shop.Id,
                 Name = shop.Name,
+                Description = shop.Description,
                 LogoUrl = shop.LogoUrl,
                 BannerUrl = shop.BannerUrl,
                 PhoneNumber = shop.PhoneNumber,
@@ -296,6 +297,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             Status = shop.Status,
             TotalFood = shop.TotalFood,
             TotalOrder = shop.TotalOrder,
+            TotalOrderInProcess = shop.Orders.Count(o => o.Status == OrderStatus.Preparing || o.Status == OrderStatus.Delivering),
             CreatedDate = shop.CreatedDate,
             TotalRevenue = shop.Orders
                 .Where(o => o.Status == OrderStatus.Completed || o.Status == OrderStatus.Resolved)

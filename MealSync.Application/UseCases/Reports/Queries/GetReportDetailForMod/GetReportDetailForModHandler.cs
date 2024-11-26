@@ -84,6 +84,8 @@ public class GetReportDetailForModHandler : IQueryHandler<GetReportDetailForModQ
                 reportDetailShopWebResponses.IsAllowAction = true;
             }
 
+            reportDetailShopWebResponses.IsUnderReview = order.Status == OrderStatus.UnderReview;
+
             reportDetailShopWebResponses.CustomerInfo = _mapper.Map<ReportDetailForModResponse.CustomerInfoForModResponse>(_accountRepository.GetIncludeCustomerById(order.CustomerId));
             reportDetailShopWebResponses.ShopInfo = _mapper.Map<ReportDetailForModResponse.ShopInfoForModResponse>(_shopRepository.GetById(order.ShopId));
             reportDetailShopWebResponses.Reports = _mapper.Map<List<ReportDetailForModResponse.ReportResponse>>(reports);

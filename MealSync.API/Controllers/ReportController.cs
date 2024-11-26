@@ -2,6 +2,7 @@ using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Reports.Commands.CustomerReport;
 using MealSync.Application.UseCases.Reports.Commands.ShopReplyCustomerReport;
+using MealSync.Application.UseCases.Reports.Commands.UpdateReportStatusForMod;
 using MealSync.Application.UseCases.Reports.Queries.GetAllReportForMod;
 using MealSync.Application.UseCases.Reports.Queries.GetByOrderId;
 using MealSync.Application.UseCases.Reports.Queries.GetByReportIdOfCustomer;
@@ -78,5 +79,12 @@ public class ReportController : BaseApiController
     public async Task<IActionResult> ReportDetailForModManage(long id)
     {
         return HandleResult(await Mediator.Send(new GetReportDetailForModQuery { ReportId = id }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.MANAGE_REPORT_UPDATE_STATUS)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> UpdateStatusReportForModManage([FromBody] UpdateReportStatusForModCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }

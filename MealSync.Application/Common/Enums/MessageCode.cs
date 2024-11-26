@@ -689,6 +689,9 @@ public enum MessageCode
     [Description("E-Report-NotYetProcessedReport")]
     E_MODERATOR_NOT_YET_PROCESSED_REPORT,
 
+    [Description("W-Moderator-ApproveReportAndShopToBan")]
+    W_MODERATOR_APPROVE_REPORT_AND_SHOP_TO_BAN,
+
     // Notifiation
     [Description("E-Notification-NotFound")]
     E_NOTIFICATION_NOT_FOUND,

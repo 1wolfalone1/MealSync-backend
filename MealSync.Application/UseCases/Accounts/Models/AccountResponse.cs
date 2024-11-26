@@ -13,4 +13,6 @@ public class AccountResponse
     public long RoleId { get; set; }
 
     public string RoleName { get; set; } = null!;
+
+    public bool IsSelectedBuilding { get; set; }
 }
