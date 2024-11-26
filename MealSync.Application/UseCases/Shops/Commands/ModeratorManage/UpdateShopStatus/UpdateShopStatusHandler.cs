@@ -33,6 +33,7 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
     private readonly INotifierService _notifierService;
     private readonly IBuildingRepository _buildingRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly ISystemConfigRepository _systemConfigRepository;
 
     public UpdateShopStatusHandler(
         ICurrentPrincipalService currentPrincipalService, IModeratorDormitoryRepository moderatorDormitoryRepository,
@@ -40,7 +41,8 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
         IEmailService emailService, ILogger<UpdateShopStatusHandler> logger, IOrderRepository orderRepository,
         IWalletTransactionRepository walletTransactionRepository, IWalletRepository walletRepository,
         IPaymentRepository paymentRepository, IVnPayPaymentService vnPayPaymentService, INotificationFactory notificationFactory,
-        INotifierService notifierService, IBuildingRepository buildingRepository, IAccountRepository accountRepository)
+        INotifierService notifierService, IBuildingRepository buildingRepository,
+        IAccountRepository accountRepository, ISystemConfigRepository systemConfigRepository)
     {
         _currentPrincipalService = currentPrincipalService;
         _moderatorDormitoryRepository = moderatorDormitoryRepository;
@@ -58,6 +60,7 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
         _notifierService = notifierService;
         _buildingRepository = buildingRepository;
         _accountRepository = accountRepository;
+        _systemConfigRepository = systemConfigRepository;
     }
 
     public async Task<Result<Result>> Handle(UpdateShopStatusCommand request, CancellationToken cancellationToken)
@@ -122,10 +125,17 @@ public class UpdateShopStatusHandler : ICommandHandler<UpdateShopStatusCommand, 
             }
             else if (request.IsConfirm && (shop.Status == ShopStatus.Banning || shop.Status == ShopStatus.Banned) && request.Status == ShopStatus.InActive)
             {
+                var systemConfig = _systemConfigRepository.GetSystemConfig();
+
                 // Ban to Active
                 isSendMailUnBan = true;
                 shop.Status = request.Status;
                 shop.Account.Status = AccountStatus.Verify;
+
+                if (shop.Account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
+                {
+                    shop.Account.NumOfFlag -= 1;
+                }
             }
             else if (request.IsConfirm && totalOrderInProcess > 0 && shop.Status != ShopStatus.Banned && request.Status == ShopStatus.Banned)
             {

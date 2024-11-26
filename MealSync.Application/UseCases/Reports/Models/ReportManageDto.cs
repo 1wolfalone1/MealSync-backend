@@ -19,6 +19,8 @@ public class ReportManageDto
 
     public ReportStatus Status { get; set; }
 
+    public bool IsUnderReview { get; set; }
+
     public bool IsAllowAction { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }

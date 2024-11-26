@@ -7,6 +7,10 @@
         r.title AS Title,
         r.content AS Content,
         r.status AS Status,
+        CASE
+            WHEN o.status = 11 THEN 1
+            ELSE 0
+        END AS IsUnderReview,
         r.created_date AS CreatedDate,
         CASE
             WHEN r.status NOT IN (2, 3) -- Approved, Rejected
@@ -62,6 +66,10 @@
             @DateTo IS NULL
             OR r.created_date <= @DateTo
         )
+        AND (
+            @IsUnderReview = 0
+            OR o.status = 11 -- UnderReview
+        )
 )
 SELECT
     COUNT(*) OVER() AS TotalCount,
@@ -72,6 +80,7 @@ SELECT
     Title,
     Content,
     Status,
+    IsUnderReview,
     CreatedDate,
     IsAllowAction
 FROM

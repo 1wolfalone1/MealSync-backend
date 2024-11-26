@@ -11,6 +11,6 @@ public class SystemConfigRepository : BaseRepository<SystemConfig>, ISystemConfi
 
     public SystemConfig GetSystemConfig()
     {
-        return DbSet.FirstOrDefault();
+        return DbSet.First();
     }
 }
