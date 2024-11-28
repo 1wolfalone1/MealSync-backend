@@ -25,4 +25,6 @@ public interface IDeliveryPackageRepository : IBaseRepository<DeliveryPackage>
     bool CheckIsExistDeliveryPackageBaseOnRole(bool isShopOwner, long deliveryPackageId, long? shipperId);
 
     DeliveryPackage GetByOrderId(long id);
+
+    (int TotalCount, List<DeliveryPackage> DeliveryPackages) GetDeliveryPackageHistoryFilterForShopWeb(string? searchValue, long shopId, int statusMode, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize);
 }
