@@ -93,16 +93,16 @@ WHERE
         OR (
             @IsAllStatus = 0
             AND IsAllowAction = @IsAllowAction
-        )
-    )
-    AND (
-        (
-            @IsUnderReview = 1
-            AND IsUnderReview = 1
-        )
-        OR (
-            @IsUnderReview = 0
-            AND IsUnderReview = 0
+            AND (
+                (
+                    @IsUnderReview = 1
+                    AND IsUnderReview = 1
+                )
+                OR (
+                    @IsUnderReview = 0
+                    AND IsUnderReview = 0
+                )
+            )
         )
     )
 ORDER BY
