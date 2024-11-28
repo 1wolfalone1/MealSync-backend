@@ -6,6 +6,7 @@ using MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllDeliveryPacka
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllOwnDeliveryPackagesForWebs;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageDetailByTimeFrames;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageGroupDetailByTimeFrames;
+using MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageHistoryForShopWeb;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListDeliveryPackageForShopWebs;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListTimeFrameUnAssigns;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
@@ -95,6 +96,13 @@ public class DeliveryPackageController : BaseApiController
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     [HttpGet(Endpoints.SUGGEST_UPDATE_ASSIGN_ORDER)]
     public async Task<IActionResult> GetSuggestAssignUpdateOrder([FromQuery] SuggestAssignUpdateDeliveryPackageQuery query)
+    {
+        return HandleResult(await Mediator.Send(query));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpGet(Endpoints.GET_DELIVERY_PACKAGE_HISTORY)]
+    public async Task<IActionResult> GetDeliveryPackageHistory([FromQuery] GetDeliveryPackageHistoryForShopWebQuery query)
     {
         return HandleResult(await Mediator.Send(query));
     }
