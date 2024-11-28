@@ -3,6 +3,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Foods.Models;
 using MealSync.Application.UseCases.Shops.Models;
@@ -50,6 +51,7 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
     {
         var customerId = _currentPrincipalService.CurrentPrincipalId!.Value;
         var order = await _orderRepository.GetByIdAndCustomerIdForReorder(request.OrderId, customerId).ConfigureAwait(false);
+        var now = TimeFrameUtils.GetCurrentDateInUTC7();
         Building? buildingOrder = default;
         if (!request.IsGetShopInfo && request.BuildingOrderId.HasValue)
         {
@@ -273,6 +275,8 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                         var operatingSlotReOrderResponses = new List<FoodReOrderResponse.OperatingSlotReOrderResponse>();
                         foreach (var slot in shop.OperatingSlots)
                         {
+                            var endTimeInMinutes = TimeUtils.ConvertToMinutes(slot.EndTime);
+                            var currentTimeMinutes = (now.Hour * 60) + now.Minute;
                             var operatingSlotReOrderResponse = new FoodReOrderResponse.OperatingSlotReOrderResponse
                             {
                                 Id = slot.Id,
@@ -280,7 +284,7 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                                 StartTime = slot.StartTime,
                                 EndTime = slot.EndTime,
                                 IsAcceptingOrderTomorrow = shop.IsAcceptingOrderNextDay,
-                                IsAcceptingOrderToday = !shop.IsReceivingOrderPaused && !slot.IsReceivingOrderPaused,
+                                IsAcceptingOrderToday = !shop.IsReceivingOrderPaused && !slot.IsReceivingOrderPaused && (slot.EndTime == 2400 || currentTimeMinutes < endTimeInMinutes),
                             };
                             operatingSlotReOrderResponses.Add(operatingSlotReOrderResponse);
                         }
