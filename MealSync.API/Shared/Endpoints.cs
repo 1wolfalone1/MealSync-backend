@@ -181,6 +181,7 @@ public static class Endpoints
     public const string GET_DELIVERY_PACKAGE_FOR_WEB = "web/shop-owner/delivery-package";
     public const string GET_SHOP_OWN_DELIVERY_PACKAGE_FOR_WEB = "web/shop-owner/delivery-package/own";
     public const string SUGGEST_UPDATE_ASSIGN_ORDER = "shop-owner/delivery-package/suggest-update";
+    public const string GET_DELIVERY_PACKAGE_HISTORY = "web/shop-owner/delivery-package/history";
 
     // Review
     public const string REVIEW_ORDER = "customer/order/review";

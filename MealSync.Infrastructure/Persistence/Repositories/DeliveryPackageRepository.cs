@@ -162,4 +162,45 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
     {
         return DbSet.Where(dp => dp.Orders.Any(o => o.Id == id)).FirstOrDefault();
     }
+
+    public (int TotalCount, List<DeliveryPackage> DeliveryPackages) GetDeliveryPackageHistoryFilterForShopWeb(string? searchValue, long shopId, int statusMode, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize)
+    {
+        var query = DbSet.Where(dp => dp.ShopId == shopId ||
+                                      dp.ShopDeliveryStaffId.HasValue && dp.ShopDeliveryStaff.ShopId == shopId).AsQueryable();
+
+        if (searchValue != null)
+        {
+            query = query.Where(dp => dp.Id.ToString().Contains(searchValue) ||
+                                      dp.ShopId.HasValue && dp.Shop.Account.FullName.Contains(searchValue) ||
+                                      dp.ShopDeliveryStaffId.HasValue && dp.ShopDeliveryStaff.Account.FullName.Contains(searchValue));
+        }
+
+        if (dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(dp => dp.DeliveryDate.Date >= dateFrom.Value.Date && dp.DeliveryDate.Date <= dateTo.Value.Date);
+        }
+
+        switch (statusMode)
+        {
+            case 1:
+                query = query.Where(dp =>
+                    (dp.EndTime == 2400
+                        ? dp.DeliveryDate.AddDays(1)
+                        : dp.DeliveryDate).AddHours(dp.EndTime / 100).AddMinutes(dp.EndTime % 100) > TimeFrameUtils.GetCurrentDateInUTC7().Date);
+                break;
+            case 2:
+                query = query.Where(dp =>
+                    (dp.EndTime == 2400
+                        ? dp.DeliveryDate.AddDays(1)
+                        : dp.DeliveryDate).AddHours(dp.EndTime / 100).AddMinutes(dp.EndTime % 100) <= TimeFrameUtils.GetCurrentDateInUTC7().Date);
+                break;
+        }
+
+        var total = query.Count();
+        var result = query.OrderBy(dp => dp.StartTime)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize).ToList();
+
+        return (total, result);
+    }
 }
