@@ -2,6 +2,7 @@ using MealSync.API.Identites;
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.Reviews.Commands.ReviewOrderOfCustomer;
 using MealSync.Application.UseCases.Reviews.Commands.ShopReplyReviewOfCustomers;
+using MealSync.Application.UseCases.Reviews.Queries.GetAllReviewShopWeb;
 using MealSync.Application.UseCases.Reviews.Queries.GetOverviewOfShop;
 using MealSync.Application.UseCases.Reviews.Queries.GetReviewOfShop;
 using MealSync.Application.UseCases.Reviews.Queries.GetShopReviewByOrderId;
@@ -66,5 +67,12 @@ public class ReviewController : BaseApiController
         {
             OrderId = id,
         }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_REVIEW_FOR_SHOP_WEB)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetReviewForShopWeb([FromQuery] GetAllReviewShopWebQuery query)
+    {
+        return this.HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }
