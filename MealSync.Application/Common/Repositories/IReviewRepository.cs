@@ -17,4 +17,6 @@ public interface IReviewRepository : IBaseRepository<Review>
     Task<(int TotalCount, List<ReviewOfShopOwnerDto> Reviews)> GetShopReview(long shopId, string? searchValue, RatingRanges? rating, GetReviewByFilterQuery.FilterQuery filter, int pageIndex, int pageSize);
 
     List<ReviewOfShopOwnerDto> GetReviewByOrderId(long orderId);
+
+    (int TotalCount, List<Review> Reviews) GetReviewForShopWeb(string? searchValue, DateTime? dateFrom, DateTime? dateTo, int statusMode, long shopId, int pageIndex, int pageSize);
 }

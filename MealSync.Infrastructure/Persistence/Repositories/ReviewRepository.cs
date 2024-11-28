@@ -1,4 +1,5 @@
 using MealSync.Application.Common.Repositories;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.UseCases.Reviews.Models;
 using MealSync.Application.UseCases.Reviews.Queries.GetReviewOfShop;
 using MealSync.Application.UseCases.Reviews.Queries.Shop.GetReviewByFilter;
@@ -228,5 +229,66 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
             }).OrderByDescending(g => g.MinCreatedDate);
 
         return groupedQuery.ToList();
+    }
+
+    public (int TotalCount, List<Review> Reviews) GetReviewForShopWeb(string? searchValue, DateTime? dateFrom, DateTime? dateTo, int statusMode, long shopId, int pageIndex, int pageSize)
+    {
+        // Base query
+        var query = DbSet
+            .Include(r => r.Customer)
+            .Where(r => r.Entity == ReviewEntities.Customer && r.Order.ShopId == shopId);
+
+        // Apply search filter
+        if (!string.IsNullOrEmpty(searchValue))
+        {
+            query = query.Where(q => q.Id.ToString().Contains(searchValue) ||
+                                     q.OrderId.ToString().Contains(searchValue) ||
+                                     q.Customer.Account.FullName.Contains(searchValue));
+        }
+
+        // Apply date range filter
+        if (dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(r => r.CreatedDate.Date >= dateFrom && r.CreatedDate.Date <= dateTo);
+        }
+
+        // Fetch data and perform grouping/filtering
+        IQueryable<Review> filteredQuery = statusMode switch
+        {
+            1 => query
+                .Where(r => r.CreatedDate <= TimeFrameUtils.GetCurrentDate().AddHours(-24))
+                .AsEnumerable() // Switch to in-memory processing
+                .GroupBy(r => r.OrderId)
+                .Where(g => g.Count() == 1)
+                .Select(g => g.First())
+                .AsQueryable(),
+
+            2 => query
+                .AsEnumerable() // Switch to in-memory processing
+                .GroupBy(r => r.OrderId)
+                .Where(g => g.Count() == 2)
+                .Select(g => g.First())
+                .AsQueryable(),
+
+            3 => query
+                .Where(r => r.CreatedDate >= TimeFrameUtils.GetCurrentDate().AddHours(-24))
+                .AsEnumerable() // Switch to in-memory processing
+                .GroupBy(r => r.OrderId)
+                .Where(g => g.Count() >= 2)
+                .Select(g => g.First())
+                .AsQueryable(),
+
+            _ => query
+        };
+
+        // Pagination
+        var totalCount = filteredQuery.Count();
+        var result = filteredQuery
+            .OrderByDescending(r => r.CreatedDate)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (totalCount, result);
     }
 }
