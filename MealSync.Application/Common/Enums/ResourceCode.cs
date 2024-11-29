@@ -190,4 +190,13 @@ public enum ResourceCode
 
     [Description("Notification-RefundOrderForCustomer")]
     NOTIFICATION_REFUND_ORDER_FOR_CUSTOMER,
+
+    [Description("Notification-UnderReviewReport")]
+    NOTIFICATION_UNDER_REVIEW_REPORT,
+
+    [Description("Notification-ApproveReport")]
+    NOTIFICATION_APPROVE_REPORT,
+
+    [Description("Notification-RejectReport")]
+    NOTIFICATION_REJECT_REPORT,
 }

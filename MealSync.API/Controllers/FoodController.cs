@@ -45,11 +45,13 @@ public class FoodController : BaseApiController
 
     [HttpGet(Endpoints.GET_SHOP_FOOD)]
     [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
-    public async Task<IActionResult> GetShopFoodDivideByCategory(long id)
+    public async Task<IActionResult> GetShopFoodDivideByCategory(long id, string? searchValue, long? categoryId)
     {
         return HandleResult(await Mediator.Send(new GetShopFoodQuery
         {
-            ShopId = id,
+            Id = id,
+            SearchValue = searchValue,
+            CategoryId = categoryId,
         }).ConfigureAwait(false));
     }
 

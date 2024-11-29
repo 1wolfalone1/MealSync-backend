@@ -12,7 +12,7 @@ public interface IFoodRepository : IBaseRepository<Food>
 
     Task<bool> CheckExistedAndActiveByIdAndShopId(long id, long shopId);
 
-    Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopFood(long shopId);
+    Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopFood(long shopId, string? searchValue, long? categoryId);
 
     Task<bool> CheckExistedByIdAndShopId(long id, long shopId);
 

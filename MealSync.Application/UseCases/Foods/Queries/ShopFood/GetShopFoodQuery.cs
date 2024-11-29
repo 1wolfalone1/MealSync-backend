@@ -5,5 +5,9 @@ namespace MealSync.Application.UseCases.Foods.Queries.ShopFood;
 
 public class GetShopFoodQuery : IQuery<Result>
 {
-    public long ShopId { get; set; }
+    public long Id { get; set; }
+
+    public string? SearchValue { get; set; }
+
+    public long? CategoryId { get; set; }
 }

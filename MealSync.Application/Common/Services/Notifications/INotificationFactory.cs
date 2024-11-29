@@ -57,4 +57,12 @@ public interface INotificationFactory
     Notification CreateSystemCancelOrderOfShopNotification(Order order, Account account);
 
     Notification CreateRefundCustomerNotification(Order order, Account account, double amountRefund);
+
+    Notification CreateUnderReviewCustomerReportNotification(Account customerAccount, Shop shop, Report report);
+
+    Notification CreateUnderReviewReportOfShopNotification(Shop shop, Account customerAccount, Report report);
+
+    Notification CreateApproveOrRejectCustomerReportNotification(Account customerAccount, Shop shop, Report report, bool isApprove);
+
+    Notification CreateApproveOrRejectReportOfShopNotification(Shop shop, Account customerAccount, Report report, bool isApprove);
 }
