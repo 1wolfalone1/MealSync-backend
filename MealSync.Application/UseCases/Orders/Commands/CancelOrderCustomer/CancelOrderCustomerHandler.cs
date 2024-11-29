@@ -155,6 +155,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                     // Rút tiền từ ví hoa hồng về ví hệ thống sau đó refund tiền về cho customer
                     var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
                     var systemCommissionWallet = await _walletRepository.GetByType(WalletTypes.SystemCommission).ConfigureAwait(false);
+                    var listWalletTransaction = new List<WalletTransaction>();
 
                     WalletTransaction transactionWithdrawalSystemCommissionToSystemTotal = new WalletTransaction
                     {
@@ -169,6 +170,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                     };
 
                     systemCommissionWallet.AvailableAmount -= order.ChargeFee;
+                    listWalletTransaction.Add(transactionWithdrawalSystemCommissionToSystemTotal);
 
                     WalletTransaction transactionAddFromSystemCommissionToSystemTotal = new WalletTransaction
                     {
@@ -182,6 +184,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                         Description = $"Tiền từ ví hoa hồng chuyển về ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(order.ChargeFee)} VNĐ",
                     };
                     systemTotalWallet.AvailableAmount += order.ChargeFee;
+                    listWalletTransaction.Add(transactionAddFromSystemCommissionToSystemTotal);
 
                     WalletTransaction transactionWithdrawalSystemTotalForRefundPaymentOnline = new WalletTransaction
                     {
@@ -194,10 +197,9 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
                         Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(payment.Amount)} VNĐ để hoàn tiền giao dịch thanh toán online của đơn hàng MS-{payment.OrderId}",
                     };
                     systemTotalWallet.AvailableAmount -= payment.Amount;
+                    listWalletTransaction.Add(transactionWithdrawalSystemTotalForRefundPaymentOnline);
 
-                    await _walletTransactionRepository.AddAsync(transactionWithdrawalSystemCommissionToSystemTotal).ConfigureAwait(false);
-                    await _walletTransactionRepository.AddAsync(transactionAddFromSystemCommissionToSystemTotal).ConfigureAwait(false);
-                    await _walletTransactionRepository.AddAsync(transactionWithdrawalSystemTotalForRefundPaymentOnline).ConfigureAwait(false);
+                    refundPayment.WalletTransactions = listWalletTransaction;
                     _walletRepository.Update(systemTotalWallet);
                     _walletRepository.Update(systemCommissionWallet);
                 }

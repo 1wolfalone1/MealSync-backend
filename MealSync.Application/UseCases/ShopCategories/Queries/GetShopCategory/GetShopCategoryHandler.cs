@@ -3,26 +3,26 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Shared;
-using MealSync.Application.UseCases.Foods.Models;
+using MealSync.Application.UseCases.ShopCategories.Models;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 
-namespace MealSync.Application.UseCases.Foods.Queries.ShopFood;
+namespace MealSync.Application.UseCases.ShopCategories.Queries.GetShopCategory;
 
-public class GetShopFoodHandler : IQueryHandler<GetShopFoodQuery, Result>
+public class GetShopCategoryHandler : IQueryHandler<GetShopCategoryQuery, Result>
 {
-    private readonly IFoodRepository _foodRepository;
     private readonly IShopRepository _shopRepository;
+    private readonly IShopCategoryRepository _shopCategoryRepository;
     private readonly IMapper _mapper;
 
-    public GetShopFoodHandler(IFoodRepository foodRepository, IShopRepository shopRepository, IMapper mapper)
+    public GetShopCategoryHandler(IShopRepository shopRepository, IShopCategoryRepository shopCategoryRepository, IMapper mapper)
     {
-        _foodRepository = foodRepository;
         _shopRepository = shopRepository;
+        _shopCategoryRepository = shopCategoryRepository;
         _mapper = mapper;
     }
 
-    public async Task<Result<Result>> Handle(GetShopFoodQuery request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(GetShopCategoryQuery request, CancellationToken cancellationToken)
     {
         var shop = _shopRepository.GetById(request.Id);
         if (shop == default)
@@ -35,13 +35,8 @@ public class GetShopFoodHandler : IQueryHandler<GetShopFoodQuery, Result>
         }
         else
         {
-            var data = await _foodRepository.GetShopFood(request.Id, request.SearchValue, request.CategoryId).ConfigureAwait(false);
-            var response = data.Select(g => new ShopFoodResponse
-            {
-                CategoryId = g.CategoryId,
-                CategoryName = g.CategoryName,
-                Foods = _mapper.Map<List<ShopFoodResponse.FoodResponse>>(g.Foods),
-            }).ToList();
+            var shopCategories = _shopCategoryRepository.GetAllByShopId(request.Id);
+            var response = _mapper.Map<List<ShopCategoryResponse>>(shopCategories);
             return Result.Success(response);
         }
     }

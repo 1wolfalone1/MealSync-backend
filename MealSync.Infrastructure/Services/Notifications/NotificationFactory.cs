@@ -344,6 +344,92 @@ public class NotificationFactory : INotificationFactory
         };
     }
 
+    public Notification CreateUnderReviewCustomerReportNotification(Account customerAccount, Shop shop, Report report)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var reportNotification = mapper.Map<ReportNotification>(report);
+        return new Notification
+        {
+            AccountId = customerAccount.Id,
+            ReferenceId = report.OrderId,
+            Title = NotificationConstant.REPORT_ORDER,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_UNDER_REVIEW_REPORT.GetDescription(), report.OrderId) ?? string.Empty,
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(reportNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateUnderReviewReportOfShopNotification(Shop shop, Account customerAccount, Report report)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var reportNotification = mapper.Map<ReportNotification>(report);
+        return new Notification
+        {
+            AccountId = shop.Id,
+            ReferenceId = report.OrderId,
+            Title = NotificationConstant.REPORT_ORDER,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_UNDER_REVIEW_REPORT.GetDescription(), report.OrderId) ?? string.Empty,
+            ImageUrl = customerAccount.AvatarUrl,
+            Data = JsonConvert.SerializeObject(reportNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateApproveOrRejectCustomerReportNotification(Account customerAccount, Shop shop, Report report, bool isApprove)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var reportNotification = mapper.Map<ReportNotification>(report);
+        var content = isApprove
+            ? systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_APPROVE_REPORT.GetDescription(), report.OrderId) ?? string.Empty
+            : systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_REJECT_REPORT.GetDescription(), report.OrderId) ?? string.Empty;
+        return new Notification
+        {
+            AccountId = customerAccount.Id,
+            ReferenceId = report.OrderId,
+            Title = NotificationConstant.REPORT_ORDER,
+            Content = content,
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(reportNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateApproveOrRejectReportOfShopNotification(Shop shop, Account customerAccount, Report report, bool isApprove)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var reportNotification = mapper.Map<ReportNotification>(report);
+        var content = isApprove
+            ? systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_APPROVE_REPORT.GetDescription(), report.OrderId) ?? string.Empty
+            : systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_REJECT_REPORT.GetDescription(), report.OrderId) ?? string.Empty;
+        return new Notification
+        {
+            AccountId = shop.Id,
+            ReferenceId = report.OrderId,
+            Title = NotificationConstant.REPORT_ORDER,
+            Content = content,
+            ImageUrl = customerAccount.AvatarUrl,
+            Data = JsonConvert.SerializeObject(reportNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
     public Notification CreateOrderDeliveryFailedAutoByBatchToShopNotification(Order order, Shop shop)
     {
         using var scope = _serviceScopeFactory.CreateScope();
@@ -557,7 +643,7 @@ public class NotificationFactory : INotificationFactory
             ReferenceId = order.Id,
             Title = NotificationConstant.ORDER_TITLE,
             Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_REFUND_ORDER_FOR_CUSTOMER.GetDescription(),
-                new object[] { order.Id, MoneyUtils.FormatMoneyWithDots(amountRefund)}),
+                new object[] { order.Id, MoneyUtils.FormatMoneyWithDots(amountRefund) }),
             ImageUrl = account.AvatarUrl,
             Data = JsonConvert.SerializeObject(orderNotification),
             Type = NotificationTypes.SendToCustomer,

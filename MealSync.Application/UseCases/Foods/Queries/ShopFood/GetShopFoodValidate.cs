@@ -6,7 +6,7 @@ public class GetShopFoodValidate : AbstractValidator<GetShopFoodQuery>
 {
     public GetShopFoodValidate()
     {
-        RuleFor(q => q.ShopId)
+        RuleFor(q => q.Id)
             .GreaterThan(0)
             .WithMessage("Shop id phải lớn hơn 0");
     }

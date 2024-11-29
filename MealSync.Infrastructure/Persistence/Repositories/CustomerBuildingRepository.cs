@@ -57,6 +57,7 @@ public class CustomerBuildingRepository : BaseRepository<CustomerBuilding>, ICus
     {
         return DbSet
             .Include(cb => cb.Building)
+            .ThenInclude(b => b.Dormitory)
             .Where(cb => cb.CustomerId == customerId)
             .OrderByDescending(cb => cb.IsDefault).ThenByDescending(cb => cb.CreatedDate)
             .ToListAsync();

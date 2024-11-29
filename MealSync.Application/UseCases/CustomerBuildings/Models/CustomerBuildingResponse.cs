@@ -9,4 +9,6 @@ public class CustomerBuildingResponse
     public bool IsDefault { get; set; }
 
     public long DormitoryId { get; set; }
+
+    public string DormitoryName { get; set; }
 }

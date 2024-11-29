@@ -8,7 +8,7 @@ public class GetReviewOfShopQuery : PaginationRequest, IQuery<Result>
 {
     public long ShopId { get; set; }
 
-    public ReviewFilter Filter { get; set; }
+    public ReviewFilter Filter { get; set; } = ReviewFilter.All;
 
     public enum ReviewFilter
     {

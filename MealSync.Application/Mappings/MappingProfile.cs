@@ -108,7 +108,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
             .ForMember(dest => dest.BuildingId, opt => opt.MapFrom(src => src.BuildingId))
             .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Building.Name))
-            .ForMember(dest => dest.DormitoryId, opt => opt.MapFrom(src => src.Building.DormitoryId));
+            .ForMember(dest => dest.DormitoryId, opt => opt.MapFrom(src => src.Building.DormitoryId))
+            .ForMember(dest => dest.DormitoryName, opt => opt.MapFrom(src => src.Building.Dormitory.Name));
         CreateMap<Food, FoodCartSummaryResponse>();
         CreateMap<Account, CustomerInfoResponse>();
         CreateMap<Food, FoodDetailOfShopResponse>()
