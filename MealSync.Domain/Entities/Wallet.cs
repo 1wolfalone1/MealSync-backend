@@ -28,4 +28,6 @@ public class Wallet : BaseEntity
     public virtual ICollection<WalletTransaction> WalletTransactionTos { get; set; } = new List<WalletTransaction>();
 
     public virtual ICollection<WithdrawalRequest> WithdrawalRequests { get; set; } = new List<WithdrawalRequest>();
+
+    public virtual ICollection<Deposit> Deposits { get; set; } = new List<Deposit>();
 }
