@@ -27,6 +27,8 @@ public class MealSyncContext : DbContext
 
     public virtual DbSet<CustomerBuilding> CustomerBuildings { get; set; }
 
+    public virtual DbSet<Deposit> Deposits { get; set; }
+
     public virtual DbSet<Shop> Shops { get; set; }
 
     public virtual DbSet<Moderator> Moderators { get; set; }
@@ -146,6 +148,18 @@ public class MealSyncContext : DbContext
             .WithMany(b => b.CustomerBuildings)
             .HasForeignKey(bb => bb.CustomerId)
             .HasConstraintName("FK_CustomerBuilding_Customer");
+
+        modelBuilder.Entity<WalletTransaction>()
+            .HasOne(wt => wt.Deposit)
+            .WithMany(d => d.WalletTransactions)
+            .HasForeignKey(d => d.DepositId)
+            .HasConstraintName("FK_WalletTransaction_Deposit");
+
+        modelBuilder.Entity<Deposit>()
+            .HasOne(d => d.Wallet)
+            .WithMany(w => w.Deposits)
+            .HasForeignKey(d => d.WalletId)
+            .HasConstraintName("FK_Deposit_Wallet");
 
         modelBuilder.Entity<Shop>()
             .HasOne(so => so.Account)
