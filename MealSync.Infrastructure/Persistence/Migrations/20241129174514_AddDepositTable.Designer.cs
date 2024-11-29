@@ -4,6 +4,7 @@ using MealSync.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealSync.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MealSyncContext))]
-    partial class MealSyncContextModelSnapshot : ModelSnapshot
+    [Migration("20241129174514_AddDepositTable")]
+    partial class AddDepositTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -628,14 +631,17 @@ namespace MealSync.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_date");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("description");
 
                     b.Property<string>("PaymentThirdpartyContent")
+                        .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("payment_thirdparty_content");
 
                     b.Property<string>("PaymentThirdpartyId")
+                        .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("payment_thirdparty_id");
 

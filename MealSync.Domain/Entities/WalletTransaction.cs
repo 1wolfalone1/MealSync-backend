@@ -19,6 +19,8 @@ public class WalletTransaction : BaseEntity
 
     public long? PaymentId { get; set; }
 
+    public long? DepositId { get; set; }
+
     public double AvaiableAmountBefore { get; set; }
 
     public double IncomingAmountBefore { get; set; }
@@ -39,4 +41,6 @@ public class WalletTransaction : BaseEntity
     public virtual WithdrawalRequest? WithdrawalRequest { get; set; }
 
     public virtual Payment? Payment { get; set; }
+
+    public virtual Deposit? Deposit { get; set; }
 }
