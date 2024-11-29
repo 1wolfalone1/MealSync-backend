@@ -1,4 +1,5 @@
 using AutoMapper;
+using MealSync.Application.Common.Services.Notifications.Models;
 using MealSync.Application.UseCases.Reports.Models;
 using MealSync.Domain.Entities;
 
@@ -45,5 +46,7 @@ public class ReportMapping : Profile
         CreateMap<Shop, ReportDetailForModResponse.ShopInfoForModResponse>();
 
         CreateMap<Shop, ReportDetailForCusResponse.ShopInfoDetailResponse>();
+
+        CreateMap<Report, ReportNotification>();
     }
 }

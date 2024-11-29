@@ -8,6 +8,7 @@ using MealSync.Application.UseCases.ShopCategories.Commands.Update;
 using MealSync.Application.UseCases.ShopCategories.Queries;
 using MealSync.Application.UseCases.ShopCategories.Queries.GetAll;
 using MealSync.Application.UseCases.ShopCategories.Queries.GetAllForShopWeb;
+using MealSync.Application.UseCases.ShopCategories.Queries.GetShopCategory;
 using MealSync.Application.UseCases.ShopCategories.Queries.GetShopCategoryDetail;
 using Microsoft.AspNetCore.Authorization;
 
@@ -70,5 +71,15 @@ public class ShopCategoryController : BaseApiController
     public async Task<IActionResult> GetWebhopCategory([FromQuery] AllForShopWebQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.SHOP_CATEGORY)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> GetShopCategoryForCus(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetShopCategoryQuery
+        {
+            Id = id,
+        }));
     }
 }

@@ -68,13 +68,16 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
         return (totalCount, foods);
     }
 
-    public async Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopFood(long shopId)
+    public async Task<List<(long CategoryId, string CategoryName, IEnumerable<Food> Foods)>> GetShopFood(long shopId, string? searchValue, long? categoryId)
     {
         var groupedFoods = await DbSet
             .Where(f => f.ShopId == shopId
                         && f.Status == FoodStatus.Active
                         && f.ShopCategoryId.HasValue
-                        && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive))
+                        && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.IsActive)
+                        && (!categoryId.HasValue || (f.ShopCategoryId == categoryId && categoryId > 0))
+                        && (string.IsNullOrEmpty(searchValue) ||
+                            f.Name.Contains(searchValue) || (f.Description != default && f.Description.Contains(searchValue))))
             .GroupBy(f => new { f.ShopCategoryId, f.ShopCategory!.DisplayOrder, f.ShopCategory.Name }) // Group by ShopCategoryId and include DisplayOrder
             .OrderBy(g => g.Key.DisplayOrder) // Order by DisplayOrder of ShopCategory
             .Select(g => new { CategoryId = g.Key.ShopCategoryId!.Value, CategoryName = g.Key.Name, Foods = g.ToList() })

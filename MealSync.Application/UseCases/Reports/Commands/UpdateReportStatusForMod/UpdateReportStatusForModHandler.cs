@@ -114,6 +114,9 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
             var reports = await _reportRepository.GetByOrderId(orderId.Value).ConfigureAwait(false);
             var customerReport = reports.First(r => r.CustomerId != default);
             var shopReport = reports.Count > 1 ? reports.First(r => r.ShopId != default) : default;
+            var shopAccount = _accountRepository.GetById(order.ShopId)!;
+            var customer = await _customerRepository.GetIncludeAccount(order.CustomerId).ConfigureAwait(false);
+            var shop = _shopRepository.GetById(order.ShopId)!;
 
             // BR: Mod report after shop reply report or now > time report limit(20h)
             if (customerReport.Status != ReportStatus.Pending)
@@ -134,6 +137,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                     _orderRepository.Update(order);
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
+                    NotifyUnderReview(customer.Account, shop, customerReport);
                     return Result.Success(new
                     {
                         Code = MessageCode.I_MODERATOR_UPDATE_STATUS_SUCCESS.GetDescription(),
@@ -157,14 +161,11 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
             )
             {
                 var payment = order.Payments.First(p => p.Type == PaymentTypes.Payment);
-                var shop = _shopRepository.GetById(order.ShopId)!;
                 var systemConfig = _systemConfigRepository.GetSystemConfig();
                 var shopWallet = _walletRepository.GetById(shop.WalletId)!;
 
                 if (request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.Approved)
                 {
-                    var shopAccount = _accountRepository.GetById(order.ShopId)!;
-
                     try
                     {
                         await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
@@ -207,6 +208,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
 
                         await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
+                        NotifyApproveOrReject(customer.Account, shop, customerReport);
                         return Result.Success(new
                         {
                             Code = MessageCode.I_MODERATOR_UPDATE_STATUS_SUCCESS.GetDescription(),
@@ -222,8 +224,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                 }
                 else if (request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.Rejected)
                 {
-                    var customer = await _customerRepository.GetIncludeAccount(order.CustomerId).ConfigureAwait(false);
-
+                    var isFlagCustomer = false;
                     try
                     {
                         await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
@@ -236,12 +237,15 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                                 // Giao hàng thất bại, thanh toán COD => Reject customer report, đánh cờ cus
                                 RejectCustomerReport(request, customerReport, shopReport);
                                 await FlagCustomerAccount(customer, order, systemConfig).ConfigureAwait(false);
+                                isFlagCustomer = true;
                             }
                             else
                             {
                                 // Giao hàng thất bại, thanh toán COD => Reject customer report, đánh cờ cus => Tiền từ ví reporting về ví available (Payment - ChargeFee)
                                 RejectCustomerReport(request, customerReport, shopReport);
                                 await FlagCustomerAccount(customer, order, systemConfig).ConfigureAwait(false);
+                                await TransactionReportingToAvailable(payment, order, shop, shopWallet).ConfigureAwait(false);
+                                isFlagCustomer = true;
                             }
                         }
                         else
@@ -267,6 +271,11 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
 
                         await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
+                        if (isFlagCustomer)
+                        {
+                            SendMailBanCustomer(customer, systemConfig);
+                        }
+
                         return Result.Success(new
                         {
                             Code = MessageCode.I_MODERATOR_UPDATE_STATUS_SUCCESS.GetDescription(),
@@ -289,6 +298,50 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
             {
                 throw new InvalidBusinessException(MessageCode.E_MODERATOR_NOT_YET_PROCESSED_REPORT.GetDescription());
             }
+        }
+    }
+
+    private void NotifyApproveOrReject(Account customerAccount, Shop shop, Report customerReport)
+    {
+        if (customerReport.Status == ReportStatus.Approved)
+        {
+            var customerNotify = _notificationFactory.CreateApproveOrRejectCustomerReportNotification(customerAccount, shop, customerReport, true);
+            var shopNotify = _notificationFactory.CreateApproveOrRejectReportOfShopNotification(shop, customerAccount, customerReport, false);
+            _notifierService.NotifyAsync(customerNotify);
+            _notifierService.NotifyAsync(shopNotify);
+        }
+        else
+        {
+            var customerNotify = _notificationFactory.CreateApproveOrRejectCustomerReportNotification(customerAccount, shop, customerReport, false);
+            var shopNotify = _notificationFactory.CreateApproveOrRejectReportOfShopNotification(shop, customerAccount, customerReport, true);
+            _notifierService.NotifyAsync(customerNotify);
+            _notifierService.NotifyAsync(shopNotify);
+        }
+    }
+
+    private void NotifyUnderReview(Account customerAccount, Shop shop, Report customerReport)
+    {
+        var customerNotify = _notificationFactory.CreateUnderReviewCustomerReportNotification(customerAccount, shop, customerReport);
+        var shopNotify = _notificationFactory.CreateUnderReviewReportOfShopNotification(shop, customerAccount, customerReport);
+        _notifierService.NotifyAsync(customerNotify);
+        _notifierService.NotifyAsync(shopNotify);
+    }
+
+    private void SendMailBanShop(Account account)
+    {
+
+    }
+
+    private void SendMailBanCustomer(Customer customer, SystemConfig systemConfig)
+    {
+        if (customer.Account.NumOfFlag < systemConfig.MaxFlagsBeforeBan)
+        {
+            var notification = _notificationFactory.CreateWarningFlagCustomerNotification(customer.Account);
+            _notifierService.NotifyAsync(notification);
+        }
+        else
+        {
+            _emailService.SendNotifyBannedCustomerAccount(customer.Account.Email, customer.Account.FullName, customer.Account.NumOfFlag);
         }
     }
 
