@@ -182,6 +182,7 @@ public static class Endpoints
     public const string GET_DELIVERY_PACKAGE_FOR_WEB = "web/shop-owner/delivery-package";
     public const string GET_SHOP_OWN_DELIVERY_PACKAGE_FOR_WEB = "web/shop-owner/delivery-package/own";
     public const string SUGGEST_UPDATE_ASSIGN_ORDER = "shop-owner/delivery-package/suggest-update";
+    public const string GET_DELIVERY_PACKAGE_HISTORY = "web/shop-owner/delivery-package/history";
 
     // Review
     public const string REVIEW_ORDER = "customer/order/review";
@@ -190,6 +191,7 @@ public static class Endpoints
     public const string GET_REVIEW_OF_SHOP_OWNER = "shop-onwer/review";
     public const string CREATE_REVIEW_OF_SHOP_OWNER = "shop-onwer/review";
     public const string GET_REVIEW_BASE_ON_ORDER_ID = "shop-onwer/review/order/{id:long}";
+    public const string GET_REVIEW_FOR_SHOP_WEB = "web/shop-onwer/review";
 
     // Promotion
     public const string CREATE_PROMOTION = "shop-owner/promotion/create";

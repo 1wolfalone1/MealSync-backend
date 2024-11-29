@@ -1,4 +1,5 @@
-﻿using MealSync.Application.UseCases.Orders.Models;
+﻿using MealSync.Application.Common.Utils;
+using MealSync.Application.UseCases.Orders.Models;
 
 namespace MealSync.Application.UseCases.DeliveryPackages.Models;
 
@@ -23,6 +24,20 @@ public class DeliveryPackageGroupDetailForWebResponse
     public int Successful { get; set; }
 
     public int Failed { get; set; }
+
+    public int StartTime { get; set; }
+
+    public int EndTime { get; set; }
+
+    public string TimeFrameFormat
+    {
+        get
+        {
+            return TimeFrameUtils.GetTimeFrameString(StartTime, EndTime);
+        }
+    }
+
+    public DateTime IntenededReceiveDate { get; set; }
 
     public DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage ShopDeliveryStaff { get; set; }
 
