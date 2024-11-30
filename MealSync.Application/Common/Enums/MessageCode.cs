@@ -89,6 +89,9 @@ public enum MessageCode
     [Description("E-Account-InBanning")]
     E_ACCOUNT_IN_BANNING,
 
+    [Description("I-Account-ModeratorCreated")]
+    E_ACCOUNT_MODERATOR_CREATED,
+
     // Platform Category
     [Description("E-PlatformCategory-NotFound")]
     E_PLATFORM_CATEGORY_NOT_FOUND,

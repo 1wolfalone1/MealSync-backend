@@ -135,6 +135,13 @@ public class EmailService : IEmailService, IBaseService
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_UN_BAN_CUSTOMER_WITH_REASON.GetDescription(), fullName, reason));
     }
 
+    public bool SendCreatedAccountModerator(string email, string? fullName, string userName, string password)
+    {
+        return SendEmail(email,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_ACCOUNT_FOR_MODERATOR.GetDescription()),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ACCOUNT_FOR_MODERATOR.GetDescription(), fullName, userName, password));
+    }
+
     private bool SendEmail(string toEmail, string subject, string body)
     {
         try
