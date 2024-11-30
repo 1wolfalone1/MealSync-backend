@@ -107,6 +107,12 @@ public enum ResourceCode
     [Description("Email-Body-UnBanCustomerWithReason")]
     EMAIL_BODY_UN_BAN_CUSTOMER_WITH_REASON,
 
+    [Description("Email-Body-AccountForModerator")]
+    EMAIL_BODY_ACCOUNT_FOR_MODERATOR,
+
+    [Description("Email-Subject-AccountForModerator")]
+    EMAIL_SUBJECT_ACCOUNT_FOR_MODERATOR,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,

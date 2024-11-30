@@ -108,8 +108,9 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         }
 
         // Noti to customer
+        var listNoti = new List<Notification>();
         var notiCustomer = _notificationFactory.CreateOrderCustomerDeliveredNotification(order, shop);
-        _notifierService.NotifyAsync(notiCustomer);
+        listNoti.Add(notiCustomer);
 
         // Noti to shop
         Account accShip;
@@ -123,7 +124,9 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         }
 
         var notiShop = _notificationFactory.CreateOrderShopDeliveredNotification(order, accShip);
-        _notifierService.NotifyAsync(notiShop);
+        listNoti.Add(notiShop);
+        _notifierService.NotifyRangeAsync(listNoti);
+
         return Result.Success(new
         {
             Code = MessageCode.I_ORDER_DELIVERD.GetDescription(),

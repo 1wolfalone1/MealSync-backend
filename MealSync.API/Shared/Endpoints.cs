@@ -252,4 +252,8 @@ public static class Endpoints
     // Chat
     public const string ORDER_INFOR_CHAT = "order/{id:long}/chat-info";
     public const string ORDER_LIST_INFOR_CHAT = "order/chat-info";
+
+    // Admin
+    public const string CREATE_MODERATOR_ACCOUNT = "admin/moderator/account";
+    public const string GET_MODERATOR_ACCOUNT = "admin/moderator";
 }
