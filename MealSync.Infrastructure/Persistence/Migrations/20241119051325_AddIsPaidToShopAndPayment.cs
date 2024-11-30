@@ -10,21 +10,12 @@ namespace MealSync.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "ix_wallet_transaction_payment_id",
-                table: "wallet_transaction");
-
             migrationBuilder.AddColumn<bool>(
                 name: "is_paid_to_shop",
                 table: "order",
                 type: "tinyint(1)",
                 nullable: false,
                 defaultValue: false);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_wallet_transaction_payment_id",
-                table: "wallet_transaction",
-                column: "payment_id");
         }
 
         /// <inheritdoc />
