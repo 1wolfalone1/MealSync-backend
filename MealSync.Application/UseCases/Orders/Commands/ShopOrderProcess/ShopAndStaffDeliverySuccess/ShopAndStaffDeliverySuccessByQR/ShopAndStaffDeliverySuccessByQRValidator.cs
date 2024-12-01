@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess.ShopAndStaffDeliverySuccessByQR;
 
-public class ShopAndStaffDeliverySuccessValidator : AbstractValidator<ShopAndStaffDeliverySuccessCommand>
+public class ShopAndStaffDeliverySuccessByQRValidator : AbstractValidator<ShopAndStaffDeliverySuccessByQRCommand>
 {
-    public ShopAndStaffDeliverySuccessValidator()
+    public ShopAndStaffDeliverySuccessByQRValidator()
     {
         RuleFor(x => x.OrderId)
             .NotEmpty()

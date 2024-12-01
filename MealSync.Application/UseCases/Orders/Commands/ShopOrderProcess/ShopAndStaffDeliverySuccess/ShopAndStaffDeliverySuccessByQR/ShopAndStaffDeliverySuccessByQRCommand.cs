@@ -1,9 +1,9 @@
 ﻿using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Shared;
 
-namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess.ShopAndStaffDeliverySuccessByQR;
 
-public class ShopAndStaffDeliverySuccessCommand : ICommand<Result>
+public class ShopAndStaffDeliverySuccessByQRCommand : ICommand<Result>
 {
     public long OrderRequestId { get; set; }
 
