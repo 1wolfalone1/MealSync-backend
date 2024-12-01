@@ -13,14 +13,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
+namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess.ShopAndStaffDeliverySuccessByQR;
 
-public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDeliverySuccessCommand, Result>
+public class ShopAndStaffDeliverySuccessByQRHandler : ICommandHandler<ShopAndStaffDeliverySuccessByQRCommand, Result>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IOrderRepository _orderRepository;
-    private readonly ILogger<ShopAndStaffDeliverySuccessHandler> _logger;
+    private readonly ILogger<ShopAndStaffDeliverySuccessByQRHandler> _logger;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IShopRepository _shopRepository;
     private readonly IOrderDetailRepository _orderDetailRepository;
@@ -37,7 +37,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
     private readonly IPaymentRepository _paymentRepository;
     private const string QR_KEY = "QR_KEY";
 
-    public ShopAndStaffDeliverySuccessHandler(IUnitOfWork unitOfWork, ICurrentPrincipalService currentPrincipalService, IOrderRepository orderRepository, ILogger<ShopAndStaffDeliverySuccessHandler> logger,
+    public ShopAndStaffDeliverySuccessByQRHandler(IUnitOfWork unitOfWork, ICurrentPrincipalService currentPrincipalService, IOrderRepository orderRepository, ILogger<ShopAndStaffDeliverySuccessByQRHandler> logger,
         ISystemResourceRepository systemResourceRepository, IShopRepository shopRepository, IOrderDetailRepository orderDetailRepository, IFoodRepository foodRepository, INotificationFactory notificationFactory,
         INotifierService notifierService, IAccountRepository accountRepository, IConfiguration configuration, IWalletRepository walletRepository, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IWalletTransactionRepository walletTransactionRepository, IEmailService emailService, IPaymentRepository paymentRepository)
     {
@@ -61,7 +61,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         _paymentRepository = paymentRepository;
     }
 
-    public async Task<Result<Result>> Handle(ShopAndStaffDeliverySuccessCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(ShopAndStaffDeliverySuccessByQRCommand request, CancellationToken cancellationToken)
     {
         // Validate
         Validate(request);
@@ -182,7 +182,8 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
             _walletRepository.UpdateRange(wallets);
             await _walletTransactionRepository.AddRangeAsync(transactionsAdds).ConfigureAwait(false);
             var order = _orderRepository.GetById(orderId);
-            var noti = _notificationFactory.CreateShopWalletReceiveIncommingAmountNotification(order, shop.Account, amountSendToShop);
+            var accountShop = _accountRepository.GetById(shop.Id);
+            var noti = _notificationFactory.CreateShopWalletReceiveIncommingAmountNotification(order, accountShop, amountSendToShop);
             _notifierService.NotifyAsync(noti);
 
             return true;
@@ -250,7 +251,7 @@ public class ShopAndStaffDeliverySuccessHandler : ICommandHandler<ShopAndStaffDe
         return false;
     }
 
-    private void Validate(ShopAndStaffDeliverySuccessCommand request)
+    private void Validate(ShopAndStaffDeliverySuccessByQRCommand request)
     {
         if (request.OrderId != request.OrderRequestId)
             throw new InvalidBusinessException(MessageCode.E_ORDER_QR_SCAN_NOT_CORRECT.GetDescription());
