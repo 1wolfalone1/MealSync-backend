@@ -287,6 +287,7 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
                     if (orderProcessing.Count > 0)
                     {
                         shop.Status = ShopStatus.Banning;
+                        //Todo: cancel and reject order
                     }
                     else
                     {
