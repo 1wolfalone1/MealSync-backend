@@ -42,7 +42,7 @@ public class GetAllReviewShopWebHandler : IQueryHandler<GetAllReviewShopWebQuery
                 DateFrom = request.DateFrom.HasValue ? request.DateFrom.Value.ToString("yyyy-MM-dd") : null,
                 DateTo = request.DateTo.HasValue ? request.DateTo.Value.ToString("yyyy-MM-dd") : null,
                 ShopId = _currentPrincipalService.CurrentPrincipalId,
-                CurrentDate = TimeFrameUtils.GetCurrentDate().ToString("yyyy-MM-dd"),
+                CurrentDate = TimeFrameUtils.GetCurrentDate().DateTime.ToString("yyyy-MM-dd HH:mm:ss"),
                 PageIndex = request.PageIndex,
                 PageSize = request.PageSize,
             },

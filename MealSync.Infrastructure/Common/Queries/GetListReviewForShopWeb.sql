@@ -27,8 +27,8 @@ WITH ReviewCustomerOfShopOnly AS (
             SELECT
                 DATE_FORMAT(
                     DATE_ADD(o.created_date, INTERVAL 24 HOUR),
-                    '%Y-%m-%d'
-                ) < DATE_FORMAT(@CurrentDate, '%Y-%m-%d')
+                    '%Y-%m-%d %H:%i:%s'
+                ) >= DATE_FORMAT(@CurrentDate, '%Y-%m-%d %H:%i:%s')
                 AND order_id IN (
                     SELECT
                         order_id
@@ -71,8 +71,8 @@ WITH ReviewCustomerOfShopOnly AS (
             OR @StatusMode = 1 -- GET review NOT reply
             AND DATE_FORMAT(
                 DATE_ADD(o.created_date, INTERVAL 24 HOUR),
-                '%Y-%m-%d'
-            ) < DATE_FORMAT(@CurrentDate, '%Y-%m-%d')
+                '%Y-%m-%d %H:%i:%s'
+            ) >= DATE_FORMAT(@CurrentDate, '%Y-%m-%d %H:%i:%s')
             AND order_id IN (
                 SELECT
                     order_id
@@ -97,8 +97,8 @@ WITH ReviewCustomerOfShopOnly AS (
             OR @StatusMode = 3 -- OVER TIME TO REPLY
             AND DATE_FORMAT(
                 DATE_ADD(o.created_date, INTERVAL 24 HOUR),
-                '%Y-%m-%d'
-            ) >= DATE_FORMAT(@CurrentDate, '%Y-%m-%d')
+                '%Y-%m-%d %H:%i:%s'
+            ) < DATE_FORMAT(@CurrentDate, '%Y-%m-%d %H:%i:%s')
             AND order_id IN (
                 SELECT
                     order_id
