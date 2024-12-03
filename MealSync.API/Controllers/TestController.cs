@@ -29,7 +29,7 @@ public class TestController : BaseApiController
     {
         return Ok(new
         {
-            Version = "0.0.4",
+            Version = "0.0.5",
         });
     }
 

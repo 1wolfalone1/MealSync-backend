@@ -6,6 +6,7 @@ using MealSync.Application.Common.Services.Dapper;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.DeliveryPackages.Models;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.GetAllDeliveryPackages;
+using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.DeliveryPackages.Queries.GetDeliveryPackageHistoryForShopWeb;
@@ -37,6 +38,7 @@ public class GetDeliveryPackageHistoryForShopWebHandler : IQueryHandler<GetDeliv
                 dp.StartTime = dp.StartTime;
                 dp.EndTime = dp.EndTime;
                 dp.Status = dp.Status;
+                dp.Orders = await GetListOrderByDeliveryPackageIdAsync(deliveryPackage.Id, _currentPrincipalService.CurrentPrincipalId.Value).ConfigureAwait(false);
                 deliveryPackageResponse.Add(dp);
             }
             else
@@ -86,5 +88,53 @@ public class GetDeliveryPackageHistoryForShopWebHandler : IQueryHandler<GetDeliv
 
         var deliveryPackage = dicDormitoryUniq.Values.FirstOrDefault();
         return deliveryPackage;
+    }
+
+    private async Task<List<OrderDetailForShopResponse>> GetListOrderByDeliveryPackageIdAsync(long? packageId, long shopId)
+    {
+        var uniqOrder = new Dictionary<long, OrderDetailForShopResponse>();
+        Func<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail, OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail,
+            OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse> map =
+            (parent, child1, child2, child3, child4) =>
+            {
+                if (!uniqOrder.TryGetValue(parent.Id, out var order))
+                {
+                    parent.Customer = child1;
+                    if (child2.Id != 0)
+                    {
+                        parent.Promotion = child2;
+                    }
+
+                    if (child3.DeliveryPackageId != 0 && (child3.Id != 0 || child3.IsShopOwnerShip))
+                    {
+                        parent.ShopDeliveryStaff = child3;
+                    }
+
+                    parent.OrderDetails.Add(child4);
+                    uniqOrder.Add(parent.Id, parent);
+                }
+                else
+                {
+                    order.OrderDetails.Add(child4);
+                    uniqOrder.Remove(order.Id);
+                    uniqOrder.Add(order.Id, order);
+                }
+
+                return parent;
+            };
+
+        await _dapperService
+            .SelectAsync<OrderDetailForShopResponse, OrderDetailForShopResponse.CustomerInforInShoprderDetailForShop, OrderDetailForShopResponse.PromotionInShopOrderDetail,
+                OrderDetailForShopResponse.ShopDeliveryStaffInShopOrderDetail, OrderDetailForShopResponse.FoodInShopOrderDetail, OrderDetailForShopResponse>(
+                QueryName.GetListOrderByPackageId,
+                map,
+                new
+                {
+                    ShopId = shopId,
+                    DeliveryPackageId = packageId,
+                },
+                "CustomerSection, PromotionSection, DeliveryPackageSection, OrderDetailSection").ConfigureAwait(false);
+
+        return uniqOrder.Values.ToList();
     }
 }
