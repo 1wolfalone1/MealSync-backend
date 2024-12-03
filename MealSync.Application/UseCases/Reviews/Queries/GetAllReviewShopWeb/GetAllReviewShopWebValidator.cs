@@ -22,7 +22,7 @@ public class GetAllReviewShopWebValidator : AbstractValidator<GetAllReviewShopWe
                 .WithMessage("Vui lòng cung cấp ngày kết thúc")
                 .GreaterThanOrEqualTo(x => x.DateFrom.Value.Date)
                 .WithMessage("Ngày from <  to")
-                .LessThanOrEqualTo(TimeFrameUtils.GetCurrentDate().Date)
+                .LessThanOrEqualTo(TimeFrameUtils.GetCurrentDateInUTC7().Date)
                 .WithMessage("Dateto phải nhỏ hơn hoặc bằng ngày hiện tại");
         });
     }
