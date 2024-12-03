@@ -1,0 +1,33 @@
+name: Deploy to ECR
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - "main"
+      - "release/**"
+      - "dev/**"
+  workflow_dispatch:
+
+jobs:
+  update_images:
+    name: Build image batch
+    runs-on: ubuntu-latest
+    environment: Product
+    permissions:
+      id-token: write
+      contents: write
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Build, tag, and push docker image to Docker hub
+        run: |
+          echo "${{ secrets.DOCKER_HUB_SECRETS }}" | docker login -u 1wolfalone1 --password-stdin
+          docker build -t 1wolfalone1/mealsync-batch:latest -f Dockerfile.batch .
+          docker push 1wolfalone1/mealsync-batch:latest
+
+
