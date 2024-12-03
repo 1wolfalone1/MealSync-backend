@@ -85,7 +85,7 @@ DormitoryStasticAndInfor AS (
             WHERE
                 o.delivery_package_id = oTemp.delivery_package_id
                 AND oTemp.dormitory_id = d.id
-                AND oTemp.status IN (5, 6, 7, 8)
+                AND oTemp.status IN (5, 6, 7, 8, 9, 10, 11, 12)
             GROUP BY
                 oTemp.ship_id
         ) AS total,
@@ -123,7 +123,7 @@ DormitoryStasticAndInfor AS (
             WHERE
                 o.delivery_package_id = oTemp.delivery_package_id
                 AND oTemp.dormitory_id = d.id
-                AND oTemp.status = 7
+                AND oTemp.status IN (7 ,9)
             GROUP BY
                 oTemp.ship_id
         ) AS successful,
@@ -139,7 +139,19 @@ DormitoryStasticAndInfor AS (
                 AND oTemp.status = 8
             GROUP BY
                 oTemp.ship_id
-        ) AS failed -- Delivery failed
+        ) AS failed, -- Delivery failed,
+        (
+            SELECT
+                COUNT(*)
+            FROM
+                OrderHaveAssignToDeliveryPackage oTemp
+            WHERE
+                o.delivery_package_id = oTemp.delivery_package_id
+              AND oTemp.dormitory_id = d.id
+              AND oTemp.status IN (10, 11, 12)
+            GROUP BY
+                oTemp.ship_id
+        ) AS issue_reported -- IssueReported
     FROM
         dormitory d
         INNER JOIN OrderHaveAssignToDeliveryPackage o ON d.id = o.dormitory_id
@@ -163,7 +175,7 @@ SELECT
         WHERE
             dp.id = oTemp.delivery_package_id
             AND dp.ship_id = oTemp.ship_id
-            AND oTemp.status IN (5, 6, 7, 8)
+            AND oTemp.status IN (5, 6, 7, 8, 9, 10, 11, 12)
     ) AS Total,
     (
         SELECT
@@ -195,7 +207,7 @@ SELECT
         WHERE
             dp.id = oTemp.delivery_package_id
             AND dp.ship_id = oTemp.ship_id
-            AND oTemp.status = 7
+            AND oTemp.status IN (7 ,9)
     ) AS Successful,
     -- Successful
     (
@@ -209,6 +221,16 @@ SELECT
             AND oTemp.status = 8
     ) AS Failed,
     -- Delivery failed,
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            OrderHaveAssignToDeliveryPackage oTemp
+        WHERE
+          dp.id = oTemp.delivery_package_id
+          AND dp.ship_id = oTemp.ship_id
+          AND oTemp.status IN (10, 11, 12)
+    ) AS IssueReported, -- Issue Reported,
     -- Shop Delivery Staff or Shop Owner Information (conditional)
     dp.id AS ShopDeliverySection,
     dp.id AS DeliveryPackageId,
@@ -229,6 +251,7 @@ SELECT
     do.delivering AS Delivering,
     do.successful AS Successful,
     do.failed AS Failed,
+    do.issue_reported AS IssueReported,
     -- Shop delivery staff each dorm infor
     accShipperInDor.id AS ShopDeliveryInDorSection,
     do.delivery_package_id AS DeliveryPackageId,

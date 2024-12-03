@@ -36,6 +36,7 @@ public class GetDeliveryPackageHistoryForShopWebHandler : IQueryHandler<GetDeliv
                 dp.IntenededReceiveDate = deliveryPackage.DeliveryDate;
                 dp.StartTime = dp.StartTime;
                 dp.EndTime = dp.EndTime;
+                dp.Status = dp.Status;
                 deliveryPackageResponse.Add(dp);
             }
             else

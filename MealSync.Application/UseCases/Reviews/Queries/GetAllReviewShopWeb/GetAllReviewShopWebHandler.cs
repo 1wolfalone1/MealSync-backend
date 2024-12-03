@@ -39,10 +39,10 @@ public class GetAllReviewShopWebHandler : IQueryHandler<GetAllReviewShopWebQuery
             {
                 SearchValue = request.SearchValue,
                 StatusMode = request.StatusMode,
-                DateFrom = request.DateFrom.HasValue ? request.DateFrom.Value.ToString("yyyy-MM-dd HH:mm:ss") : null,
-                DateTo = request.DateTo.HasValue ? request.DateTo.Value.ToString("yyyy-MM-dd HH:mm:ss") : null,
+                DateFrom = request.DateFrom.HasValue ? request.DateFrom.Value.ToString("yyyy-MM-dd") : null,
+                DateTo = request.DateTo.HasValue ? request.DateTo.Value.ToString("yyyy-MM-dd") : null,
                 ShopId = _currentPrincipalService.CurrentPrincipalId,
-                CurrentDate = TimeFrameUtils.GetCurrentDate().ToString("yyyy-MM-dd HH:mm:ss"),
+                CurrentDate = TimeFrameUtils.GetCurrentDate().ToString("yyyy-MM-dd"),
                 PageIndex = request.PageIndex,
                 PageSize = request.PageSize,
             },

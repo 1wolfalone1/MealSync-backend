@@ -24,6 +24,8 @@ public class DeliveryPackageGroupDetailForMobileResponse
 
     public int Failed { get; set; }
 
+    public int IssueReported { get; set; }
+
     public DeliveryPackageGroupDetailResponse.ShopStaffInforInDelvieryPackage ShopDeliveryStaff { get; set; }
 
     public List<DeliveryPackageGroupDetailResponse.DormitoryStasisticForEachStaff> Dormitories { get; set; } = new();
