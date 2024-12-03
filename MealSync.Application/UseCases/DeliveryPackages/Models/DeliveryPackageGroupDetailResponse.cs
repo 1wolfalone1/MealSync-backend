@@ -51,6 +51,8 @@ public class DeliveryPackageGroupDetailResponse
 
         public int Failed { get; set; }
 
+        public int IssueReported { get; set; }
+
         public ShopStaffInforInDelvieryPackage ShopDeliveryStaff { get; set; }
     }
 }

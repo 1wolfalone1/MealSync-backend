@@ -68,7 +68,7 @@ ShopOwnerDeliveryTaskAndInfor AS (
             FROM
                 ShopOwnerDeliveryTask
             WHERE
-                status IN (5, 6, 7, 8)
+                status IN (5, 6, 7, 8, 9, 10, 11, 12)
         ) AS total,
         -- Total
         (
@@ -95,7 +95,7 @@ ShopOwnerDeliveryTaskAndInfor AS (
             FROM
                 ShopOwnerDeliveryTask
             WHERE
-                status = 7
+                status IN (7, 9)
         ) AS successful,
         -- Delivered
         (
@@ -126,7 +126,7 @@ ShopDeliveryStaffTaskAndInfor AS (
             FROM
                 ShopDeliveryStaffTask sds
             WHERE
-                sds.status IN (5, 6, 7, 8)
+                sds.status IN (5, 6, 7, 8, 9, 10, 11, 12)
                 AND shop_delivery_staff_id = a.id
         ) AS total,
         -- Total
@@ -156,7 +156,7 @@ ShopDeliveryStaffTaskAndInfor AS (
             FROM
                 ShopDeliveryStaffTask sds
             WHERE
-                sds.status = 7
+                sds.status IN (7, 9)
                 AND shop_delivery_staff_id = a.id
         ) AS successful,
         -- Delivered
