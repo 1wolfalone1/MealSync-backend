@@ -72,7 +72,7 @@ DormitoryStasticAndInfor AS (
             WHERE
                 o.delivery_package_id = oTemp.delivery_package_id
                 AND oTemp.dormitory_id = d.id
-                AND oTemp.status IN (5, 6, 7, 8)
+                AND oTemp.status IN (5, 6, 7, 8, 9, 10, 11, 12)
             GROUP BY
                 oTemp.ship_id
         ) AS total,
@@ -110,7 +110,7 @@ DormitoryStasticAndInfor AS (
             WHERE
                 o.delivery_package_id = oTemp.delivery_package_id
                 AND oTemp.dormitory_id = d.id
-                AND oTemp.status = 7
+                AND oTemp.status IN (7, 9)
             GROUP BY
                 oTemp.ship_id
         ) AS successful,
@@ -146,7 +146,7 @@ SELECT
         WHERE
             dp.id = oTemp.delivery_package_id
             AND dp.ship_id = oTemp.ship_id
-            AND oTemp.status IN (5, 6, 7, 8)
+            AND oTemp.status IN (5, 6, 7, 8, 9, 10, 11, 12)
     ) AS Total,
     (
         SELECT
@@ -178,7 +178,7 @@ SELECT
         WHERE
             dp.id = oTemp.delivery_package_id
             AND dp.ship_id = oTemp.ship_id
-            AND oTemp.status = 7
+            AND oTemp.status IN (7, 9)
     ) AS Successful,
     -- Successful
     (

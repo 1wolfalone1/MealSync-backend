@@ -1,5 +1,6 @@
 ﻿using MealSync.Application.Common.Utils;
 using MealSync.Application.UseCases.Orders.Models;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.DeliveryPackages.Models;
 
@@ -26,6 +27,8 @@ public class DeliveryPackageGroupDetailForWebResponse
     public int Failed { get; set; }
 
     public int StartTime { get; set; }
+
+    public DeliveryPackageStatus Status { get; set; }
 
     public int EndTime { get; set; }
 
