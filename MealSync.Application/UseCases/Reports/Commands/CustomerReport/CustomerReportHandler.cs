@@ -114,8 +114,12 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
             var startTime = new DateTimeOffset(receiveDateStartTime, TimeSpan.FromHours(7));
             var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
 
+            // Nếu sau 2h mới report mà shop đã nhận lỗi do nó thì ko cho report nữa
             // BR: Report within 12 hours after the 'endTime'
-            if (now >= startTime && now <= endTime.AddHours(12))
+            if (now >= startTime && now <= endTime.AddHours(12) &&
+                !(now >= endTime.AddHours(2)
+                  && order.Status == OrderStatus.FailDelivery
+                  && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription()))
             {
                 var imageUrls = new List<string>();
                 foreach (var file in request.Images)
@@ -137,6 +141,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                 var payment = await _paymentRepository.GetPaymentByOrderId(order.Id).ConfigureAwait(false);
                 var shop = _shopRepository.GetById(order.ShopId)!;
                 var shopWallet = _walletRepository.GetById(shop.WalletId)!;
+                var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
                 var isNotifyLimitAvailableAmount = false;
 
                 try
@@ -148,8 +153,18 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                     {
                         if (payment.PaymentMethods == PaymentMethods.VnPay && payment.Status == PaymentStatus.PaidSuccess)
                         {
-                            // Tiền từ incoming về reporting
-                            await TransactionInComingAmountToReportingAmount(payment, order, shop, shopWallet).ConfigureAwait(false);
+                            // Check cờ isPaidToShop cho trường hợp report trước 2h
+                            if (order.IsPaidToShop)
+                            {
+                                // Tiền từ incoming về reporting
+                                await TransactionInComingAmountToReportingAmount(payment, order, shop, shopWallet).ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                // Tiền từ tổng hệ thống về reporting
+                                await TransactionSystemAmountToReportingAmount(payment, order, systemTotalWallet, shop, shopWallet).ConfigureAwait(false);
+                            }
+
                         }
                         else
                         {
@@ -205,6 +220,75 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                 throw new InvalidBusinessException(MessageCode.E_REPORT_CUSTOMER_REPORT_TIME_LIMIT.GetDescription());
             }
         }
+    }
+
+    private async Task TransactionSystemAmountToReportingAmount(Payment payment, Order order, Wallet systemTotalWallet, Shop shop, Wallet shopWallet)
+    {
+
+        var incomingAmountOrder = payment.Amount - order.ChargeFee;
+        List<WalletTransaction> transactionsAdds = new();
+        WalletTransaction transactionWithdrawalSystemTotalToShopWallet = new WalletTransaction
+        {
+            WalletFromId = systemTotalWallet.Id,
+            WalletToId = shop.WalletId,
+            AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
+            IncomingAmountBefore = systemTotalWallet.IncomingAmount,
+            ReportingAmountBefore = systemTotalWallet.ReportingAmount,
+            Amount = -incomingAmountOrder,
+            PaymentId = payment.Id,
+            Type = WalletTransactionType.Withdrawal,
+            Description = $"Rút tiền từ ví tổng hệ thống {MoneyUtils.FormatMoneyWithDots(incomingAmountOrder)} VNĐ về ví chờ cửa hàng id {order.ShopId} từ đơn hàng MS-{order.Id}",
+        };
+        systemTotalWallet.AvailableAmount -= incomingAmountOrder;
+        transactionsAdds.Add(transactionWithdrawalSystemTotalToShopWallet);
+
+        WalletTransaction transactionAddFromSystemTotalToShop = new WalletTransaction
+        {
+            WalletFromId = systemTotalWallet.Id,
+            WalletToId = shop.WalletId,
+            AvaiableAmountBefore = shop.Wallet.AvailableAmount,
+            IncomingAmountBefore = shop.Wallet.IncomingAmount,
+            ReportingAmountBefore = shop.Wallet.ReportingAmount,
+            Amount = incomingAmountOrder,
+            Type = WalletTransactionType.Transfer,
+            PaymentId = payment.Id,
+            Description = $"Tiền thanh toán cho đơn hàng MS-{order.Id} {MoneyUtils.FormatMoneyWithDots(incomingAmountOrder)} VNĐ về ví chờ",
+        };
+        shopWallet.IncomingAmount += incomingAmountOrder;
+        transactionsAdds.Add(transactionAddFromSystemTotalToShop);
+
+        var transactionWithdrawalIncomingAmountToReportingAmountOfShop = new WalletTransaction
+        {
+            WalletFromId = shop.WalletId,
+            WalletToId = shop.WalletId,
+            AvaiableAmountBefore = shopWallet.AvailableAmount,
+            IncomingAmountBefore = shopWallet.IncomingAmount,
+            ReportingAmountBefore = shopWallet.ReportingAmount,
+            Amount = -incomingAmountOrder,
+            Type = WalletTransactionType.Withdrawal,
+            Description = $"Rút tiền từ tiền chờ về {MoneyUtils.FormatMoneyWithDots(incomingAmountOrder)} VNĐ sang tiền đang bị báo cáo",
+        };
+        transactionsAdds.Add(transactionWithdrawalIncomingAmountToReportingAmountOfShop);
+        shopWallet.IncomingAmount -= incomingAmountOrder;
+
+        var transactionAddFromIncomingAmountToReportingAmountOfShop = new WalletTransaction
+        {
+            WalletFromId = shop.WalletId,
+            WalletToId = shop.WalletId,
+            AvaiableAmountBefore = shopWallet.AvailableAmount,
+            IncomingAmountBefore = shopWallet.IncomingAmount,
+            ReportingAmountBefore = shopWallet.ReportingAmount,
+            Amount = incomingAmountOrder,
+            Type = WalletTransactionType.Transfer,
+            Description = $"Tiền từ tiền chờ về cộng vào {MoneyUtils.FormatMoneyWithDots(incomingAmountOrder)} VNĐ tiền đang bị báo cáo",
+        };
+
+        shopWallet.ReportingAmount += incomingAmountOrder;
+        transactionsAdds.Add(transactionAddFromIncomingAmountToReportingAmountOfShop);
+
+        _walletRepository.Update(systemTotalWallet);
+        _walletRepository.Update(shopWallet);
+        await _walletTransactionRepository.AddRangeAsync(transactionsAdds).ConfigureAwait(false);
     }
 
     private async Task<bool> TransactionAvailableAmountToReportingAmount(Payment payment, Order order, Shop shop, Wallet shopWallet)
