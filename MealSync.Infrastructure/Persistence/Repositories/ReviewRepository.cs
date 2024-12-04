@@ -75,7 +75,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
 
     public async Task<ReviewOverviewDto> GetReviewOverviewByShopId(long shopId)
     {
-        var query = DbSet.Where(r => r.ShopId == shopId);
+        var query = DbSet.Where(r => r.Order.ShopId == shopId && r.CustomerId != default && r.ShopId == default);
 
         var overview = await query
             .GroupBy(r => 1)

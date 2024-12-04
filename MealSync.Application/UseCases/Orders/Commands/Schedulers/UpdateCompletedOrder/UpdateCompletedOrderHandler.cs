@@ -65,7 +65,7 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
     public async Task<Result<Result>> Handle(UpdateCompletedOrderCommand request, CancellationToken cancellationToken)
     {
         var errors = new List<string>();
-        var (intendedReceiveDate, startTime, endTime) = TimeFrameUtils.OrderTimeFrameForBatchProcess(TimeFrameUtils.GetCurrentDateInUTC7(), 24);
+        var (intendedReceiveDate, startTime, endTime) = TimeFrameUtils.OrderTimeFrameForBatchProcess(TimeFrameUtils.GetCurrentDateInUTC7(), 12);
         var startBatchDateTime = TimeFrameUtils.GetCurrentDate();
         var endBatchDateTime = TimeFrameUtils.GetCurrentDate();
         _logger.LogInformation($"Update Completed Order Batch Start At: {startBatchDateTime}  (Intended Receive Date: {intendedReceiveDate} - End Time: {endTime})");
@@ -130,29 +130,6 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
                         }
                         else
                         {
-                            // => Flag customer - Todo: Question
-                            account.NumOfFlag += 1;
-                            accountFlags.Add(GetAccountFlagForFailDeliveryByCustomer(account, order));
-
-                            if (account.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
-                            {
-                                var totalOrderInProcess = await _orderRepository.CountTotalOrderInProcessByCustomerId(account.Id).ConfigureAwait(false);
-                                var ordersCancelBeforeBan = await _orderRepository.GetForSystemCancelByCustomerId(account.Id).ConfigureAwait(false);
-                                if (totalOrderInProcess > 0)
-                                {
-                                    customer.Status = CustomerStatus.Banning;
-                                }
-                                else
-                                {
-                                    customer.Status = CustomerStatus.Banned;
-                                    account.Status = AccountStatus.Banned;
-                                }
-
-                                accountsBanNotify.Add(account);
-                                _customerRepository.Update(customer);
-                                await CancelOrderPendingOrConfirmedForBanCustomer(ordersCancelBeforeBan).ConfigureAwait(false);
-                            }
-
                             // => Update status to completed
                             order.Status = OrderStatus.Completed;
                         }

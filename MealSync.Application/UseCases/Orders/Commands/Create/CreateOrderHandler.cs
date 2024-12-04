@@ -228,7 +228,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             CreateOrderResponse response = new CreateOrderResponse()
             {
                 PaymentMethod = request.PaymentMethod,
-                PaymentLink = request.PaymentMethod == PaymentMethods.VnPay ? await _paymentService.CreatePaymentUrl(payment).ConfigureAwait(false) : null,
+                PaymentLink = request.PaymentMethod == PaymentMethods.VnPay ? await _paymentService.CreatePaymentOrderUrl(payment).ConfigureAwait(false) : null,
                 Order = _mapper.Map<OrderResponse>(order),
                 Message = _systemResourceRepository.GetByResourceCode(MessageCode.I_ORDER_SUCCESS.GetDescription()) ?? string.Empty,
             };

@@ -86,6 +86,41 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
                 !shop.IsReceivingOrderPaused && shop.OperatingSlots.Any(os => os.IsActive)
             ).AsQueryable();
 
+        if (platformCategoryId.HasValue && platformCategoryId.Value > 0)
+        {
+            query = query.Where(shop =>
+                shop.Foods.Any(food => food.PlatformCategoryId == platformCategoryId.Value)
+            );
+        }
+
+        if (startTime.HasValue && endTime.HasValue)
+        {
+            query = query.Where(shop =>
+                shop.OperatingSlots.Any(slot => slot.IsActive && slot.StartTime < endTime && slot.EndTime > startTime) ||
+                shop.Foods.Any(food =>
+                    food.FoodOperatingSlots.Any(slot =>
+                        slot.OperatingSlot.IsActive && slot.OperatingSlot.StartTime < endTime && slot.OperatingSlot.EndTime > startTime))
+            );
+        }
+        else if (startTime.HasValue && !endTime.HasValue)
+        {
+            query = query.Where(shop =>
+                shop.OperatingSlots.Any(slot => slot.IsActive && slot.EndTime > startTime) ||
+                shop.Foods.Any(food =>
+                    food.FoodOperatingSlots.Any(slot =>
+                        slot.OperatingSlot.IsActive && slot.OperatingSlot.EndTime > startTime))
+            );
+        }
+        else if (!startTime.HasValue && endTime.HasValue)
+        {
+            query = query.Where(shop =>
+                shop.OperatingSlots.Any(slot => slot.IsActive && slot.StartTime < endTime) ||
+                shop.Foods.Any(food =>
+                    food.FoodOperatingSlots.Any(slot =>
+                        slot.OperatingSlot.IsActive && slot.OperatingSlot.StartTime < endTime))
+            );
+        }
+
         if (!string.IsNullOrWhiteSpace(searchValue))
         {
             searchValue = EscapeLikeParameter(searchValue);
@@ -112,38 +147,6 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
                     )
                 );
             }
-        }
-
-        if (platformCategoryId.HasValue && platformCategoryId.Value > 0)
-        {
-            query = query.Where(shop =>
-                shop.Foods.Any(food => food.PlatformCategoryId == platformCategoryId.Value)
-            );
-        }
-
-        if (startTime.HasValue && endTime.HasValue)
-        {
-            query = query.Where(shop =>
-                shop.OperatingSlots.Any(slot => slot.StartTime <= startTime && slot.EndTime >= endTime) ||
-                shop.Foods.Any(food => food.FoodOperatingSlots.Any(slot =>
-                    slot.OperatingSlot.StartTime <= startTime && slot.OperatingSlot.EndTime >= endTime))
-            );
-        }
-        else if (startTime.HasValue && !endTime.HasValue)
-        {
-            query = query.Where(shop =>
-                shop.OperatingSlots.Any(slot => slot.StartTime <= startTime && slot.EndTime > startTime) ||
-                shop.Foods.Any(food => food.FoodOperatingSlots.Any(slot =>
-                    slot.OperatingSlot.StartTime <= startTime && slot.OperatingSlot.EndTime > startTime))
-            );
-        }
-        else if (!startTime.HasValue && endTime.HasValue)
-        {
-            query = query.Where(shop =>
-                shop.OperatingSlots.Any(slot => slot.EndTime >= endTime && slot.StartTime < endTime) ||
-                shop.Foods.Any(food => food.FoodOperatingSlots.Any(slot =>
-                    slot.OperatingSlot.EndTime >= endTime && slot.OperatingSlot.StartTime < endTime))
-            );
         }
 
         if (orderBy.HasValue && orderBy == SearchShopQuery.OrderBy.Price)
@@ -176,15 +179,16 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
                 Foods = shop.Foods
                     .Where(food => food.Status == FoodStatus.Active &&
                                    (!platformCategoryId.HasValue || platformCategoryId.Value == 0 || food.PlatformCategoryId == platformCategoryId.Value) &&
+                                   (string.IsNullOrEmpty(searchValue) || food.Name.Contains(searchValue) || (food.Description != default && food.Description.Contains(searchValue))) &&
                                    (
                                        (!startTime.HasValue && !endTime.HasValue) ||
                                        (startTime.HasValue && !endTime.HasValue &&
-                                        food.FoodOperatingSlots.Any(slot => slot.OperatingSlot.StartTime <= startTime && slot.OperatingSlot.EndTime > startTime)) ||
+                                        food.FoodOperatingSlots.Any(slot => slot.OperatingSlot.IsActive && slot.OperatingSlot.EndTime > startTime)) ||
                                        (!startTime.HasValue && endTime.HasValue &&
-                                        food.FoodOperatingSlots.Any(slot => slot.OperatingSlot.EndTime >= endTime && slot.OperatingSlot.StartTime < endTime)) ||
+                                        food.FoodOperatingSlots.Any(slot => slot.OperatingSlot.IsActive && slot.OperatingSlot.StartTime < endTime)) ||
                                        (startTime.HasValue && endTime.HasValue &&
                                         food.FoodOperatingSlots.Any(slot =>
-                                            slot.OperatingSlot.StartTime < endTime && slot.OperatingSlot.EndTime > startTime))
+                                            slot.OperatingSlot.IsActive && slot.OperatingSlot.StartTime < endTime && slot.OperatingSlot.EndTime > startTime))
                                    ))
                     .OrderBy(food =>
                             orderBy.HasValue && orderBy == SearchShopQuery.OrderBy.Price

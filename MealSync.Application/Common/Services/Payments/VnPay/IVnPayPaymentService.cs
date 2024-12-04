@@ -6,9 +6,15 @@ namespace MealSync.Application.Common.Services.Payments.VnPay;
 
 public interface IVnPayPaymentService
 {
-    Task<string> CreatePaymentUrl(Payment payment);
+    Task<string> CreatePaymentOrderUrl(Payment payment);
+
+    Task<string> CreatePaymentDepositUrl(Deposit deposit);
 
     Task<VnPayRefundResponse> CreateRefund(Payment payment);
 
-    Task<VnPayIPNResponse> GetIPN(IQueryCollection queryParams, Payment payment);
+    Task<VnPayIPNResponse> GetIPNPaymentOrder(IQueryCollection queryParams, Payment payment);
+
+    Task<VnPayIPNResponse> GetIPNDeposit(IQueryCollection queryParams, Deposit deposit);
+
+    Task<string> GetPaymentType(IQueryCollection queryParams);
 }
