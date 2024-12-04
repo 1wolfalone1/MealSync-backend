@@ -3,14 +3,15 @@
  Date: 28/11/2024
  
  */
--- SET @SearchValue:=null;
--- SET @StatusMode:=0;
--- SET @DateFrom:='2024-10-10';
--- SET @DateTo:='2024-12-12';
--- SET @ShopId:=2;
--- SET @CurrentDate:='2024-11-25';
--- SET @PageIndex:=1;
--- SET @PageSize:=15;
+-- SET @SearchValue := null;
+-- SET @StatusMode := 0;
+-- SET @DateFrom := '2024-10-10';
+-- SET @DateTo := '2024-12-12';
+-- SET @ShopId := 2;
+-- SET @CurrentDate := '2024-12-04 03:48:15';
+-- SET @PageIndex := 1;
+-- SET @PageSize := 100;
+
 WITH ReviewCustomerOfShopOnly AS (
     SELECT
         r.id,
@@ -40,6 +41,19 @@ WITH ReviewCustomerOfShopOnly AS (
                         COUNT(*) = 1
                 )
         ) AS IsAllowShopReply,
+        (
+            SELECT
+                order_id IN (
+                    SELECT
+                        order_id
+                    FROM
+                        review
+                    GROUP BY
+                        (order_id)
+                    HAVING
+                        COUNT(*) = 2
+                )
+        ) AS IsShopReplied,
         a2.avatar_url,
         a2.full_name,
         ROW_NUMBER() OVER (
@@ -122,6 +136,7 @@ SELECT
     entity AS Entity,
     shop_id AS ShopId,
     r.IsAllowShopReply AS IsAllowShopReply,
+    r.IsShopReplied AS IsShopReplied,
     r.TotalCount AS TotalCount,
     r.customer_id AS CustomerSection,
     r.customer_id AS Id,
