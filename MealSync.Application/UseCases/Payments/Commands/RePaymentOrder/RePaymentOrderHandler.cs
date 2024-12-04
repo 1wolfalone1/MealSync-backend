@@ -99,7 +99,7 @@ public class RePaymentOrderHandler : ICommandHandler<RePaymentOrderCommand, Resu
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
                 return Result.Success(new
                 {
-                    PaymentUrl = await _paymentService.CreatePaymentUrl(newPayment).ConfigureAwait(false),
+                    PaymentUrl = await _paymentService.CreatePaymentOrderUrl(newPayment).ConfigureAwait(false),
                 });
             }
             catch (Exception e)

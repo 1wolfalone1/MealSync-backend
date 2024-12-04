@@ -342,11 +342,12 @@ public class MappingProfile : Profile
         var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
 
         return (
-                   (order.Status == OrderStatus.FailDelivery
-                    && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
-                   || order.Status == OrderStatus.Delivered
+                   order.Status == OrderStatus.FailDelivery || order.Status == OrderStatus.Delivered
                )
-               && order.Reports.Count == 0 && now >= startTime && now <= endTime.AddHours(12);
+               && order.Reports.Count == 0 && now >= startTime && now <= endTime.AddHours(12) &&
+               !(now >= endTime.AddHours(2)
+                 && order.Status == OrderStatus.FailDelivery
+                 && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription());
     }
 
     private bool IsCancelAllowed(Order order)

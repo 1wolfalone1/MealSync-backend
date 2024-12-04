@@ -39,6 +39,7 @@ public static class Endpoints
     public const string UPDATE_SHOP_AVATAR = "shop-owner-staff/avatar/update";
     public const string GET_SHOP_STAFF_INFO = "shop-staff/info";
     public const string UPDATE_SHOP_STAFF_INFO = "shop-staff/info/update";
+    public const string CREATE_DEPOSIT_PAYMENT_URL = "shop-owner/deposit";
 
     // Shop Owner For Web
     public const string GET_FOOD_FOR_WEB = "web/shop-owner/food";
