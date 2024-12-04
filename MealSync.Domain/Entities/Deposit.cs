@@ -19,9 +19,9 @@ public class Deposit : BaseEntity
 
     public string? Description { get; set; }
 
-    public string? PaymentThirdpartyId { get; set; }
+    public string? PaymentThirdPartyId { get; set; }
 
-    public string? PaymentThirdpartyContent { get; set; }
+    public string? PaymentThirdPartyContent { get; set; }
 
     public virtual Wallet Wallet { get; set; }
 
