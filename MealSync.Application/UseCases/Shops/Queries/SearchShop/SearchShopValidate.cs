@@ -23,9 +23,9 @@ public class SearchShopValidate : AbstractValidator<SearchShopQuery>
 
         When(query => query.EndTime.HasValue, () =>
         {
-            RuleFor(x => x)
-                .Must(x => x.EndTime > x.StartTime && TimeUtils.IsValidOperatingSlot(x.EndTime!.Value))
-                .WithMessage("Thời gian kết thúc lớn hơn thời gian bắt đầu và phải đúng định dạng hhMM.");
+            RuleFor(x => x.EndTime!.Value)
+                .Must(TimeUtils.IsValidOperatingSlot)
+                .WithMessage("Vui lòng cung cấp thời gian kết thúc đúng định dạng hhMM.");
         });
 
         RuleFor(query => query.FoodSize)
