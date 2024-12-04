@@ -25,6 +25,8 @@ public class ReviewForShopWebResponse
 
     public bool IsAllowShopReply { get; set; }
 
+    public bool IsShopReplied { get; set; }
+
     [JsonIgnore]
     public int TotalCount { get; set; }
 
