@@ -64,7 +64,7 @@ public class MarkFavouriteHandler : ICommandHandler<MarkFavouriteCommand, Result
                     return Result.Success(new
                     {
                         Message = _systemResourceRepository.GetByResourceCode(
-                            MessageCode.E_SHOP_MARK_FAVOURITE.GetDescription(), new object[] { request.ShopId }
+                            MessageCode.E_SHOP_MARK_FAVOURITE.GetDescription(), new object[] { shop.Name }
                         ),
                     });
                 }
@@ -76,7 +76,7 @@ public class MarkFavouriteHandler : ICommandHandler<MarkFavouriteCommand, Result
                     return Result.Success(new
                     {
                         Message = _systemResourceRepository.GetByResourceCode(
-                            MessageCode.E_SHOP_UN_MARK_FAVOURITE.GetDescription(), new object[] { request.ShopId }
+                            MessageCode.E_SHOP_UN_MARK_FAVOURITE.GetDescription(), new object[] { shop.Name }
                         ),
                     });
                 }
