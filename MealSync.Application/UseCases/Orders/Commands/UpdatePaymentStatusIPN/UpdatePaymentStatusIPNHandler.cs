@@ -199,8 +199,8 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                         // Begin transaction
                         await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
-                        deposit.PaymentThirdpartyId = request.Query[VnPayRequestParam.VNP_TRANSACTION_NO];
-                        deposit.PaymentThirdpartyContent = ConvertQueryCollectionToString(request.Query);
+                        deposit.PaymentThirdPartyId = request.Query[VnPayRequestParam.VNP_TRANSACTION_NO];
+                        deposit.PaymentThirdPartyContent = ConvertQueryCollectionToString(request.Query);
 
                         if (response.Message == "Confirm Success")
                         {
