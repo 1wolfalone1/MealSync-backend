@@ -275,19 +275,19 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         totalReportResolvedHaveRefund = await totalOrdersQuery
             .CountAsync(o => o.Status == OrderStatus.Resolved && o.IsReport &&
                              (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
-                              || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription())
+                              || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription())
                              && o.IsRefund).ConfigureAwait(false);
 
         totalReportResolved = await totalOrdersQuery
             .CountAsync(o => o.Status == OrderStatus.Resolved && o.IsReport &&
                              (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
-                              || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription()))
+                              || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()))
             .ConfigureAwait(false);
 
         // Status: Completed, ReasonIdentity: default => Có Revenue
         // Status: Completed, ReasonIdentity: DeliveryFailByCustomer, PaymentType = Payment, PaymentMethod != COD => Có Revenue
         // Status: Resolved, ReasonIdentity: DeliveredReportedByCustomer, IsReport: true => Có Revenue
-        // Status: Resolved, ReasonIdentity: DeliveryFailReportedByCustomer, IsReport: true, IsRefund: false, PaymentMethods == PaymentMethods.VnPay, PaymentType == PaymentTypes.Payment, PaymentStatus == PaymentStatus.PaidSuccess => Có Revenue
+        // Status: Resolved, ReasonIdentity: DeliveryFailByCustomerReportedByCustomer || DeliveryFailByShopReportedByCustomer, IsReport: true, IsRefund: false, PaymentMethods == PaymentMethods.VnPay, PaymentType == PaymentTypes.Payment, PaymentStatus == PaymentStatus.PaidSuccess => Có Revenue
         var revenue = await totalOrdersQuery
             .Where(o => (o.Status == OrderStatus.Completed && o.ReasonIdentity == default)
                         || (o.Status == OrderStatus.Completed && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription()

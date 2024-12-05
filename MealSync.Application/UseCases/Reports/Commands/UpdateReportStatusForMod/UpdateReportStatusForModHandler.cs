@@ -127,7 +127,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                 order.Status == OrderStatus.IssueReported
                 && customerReport.Status == ReportStatus.Pending
                 && request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.UnderReview
-                && (reports.Count > 1 || now > endTime.AddHours(20))
+                && ((reports.Count > 1 && now > endTime.AddHours(2)) || now > endTime.AddHours(20))
             )
             {
                 try
@@ -157,7 +157,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                 && (
                     request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.Approved
                     || request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.Rejected)
-                && (reports.Count > 1 || now > endTime.AddHours(20))
+                && ((reports.Count > 1 && now > endTime.AddHours(2)) || now > endTime.AddHours(20))
             )
             {
                 var payment = order.Payments.First(p => p.Type == PaymentTypes.Payment);
@@ -170,7 +170,8 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                     {
                         await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
-                        if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription())
+                        if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()
+                            || order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription())
                         {
                             // Fail delivery
                             if (payment.PaymentMethods == PaymentMethods.COD)
@@ -183,7 +184,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                                 // Giao hàng thất bại, thanh toán Online => Approve customer report, đánh cờ shop => Refund tiền customer
                                 await TransactionWithdrawalReportingForRefund(payment, order, shop, shopWallet).ConfigureAwait(false);
                                 await ApproveCustomerAndFlagShop(request, customerReport, shopReport, shop, systemConfig, shopAccount).ConfigureAwait(false);
-                                await RefundOrderAsync(order, payment).ConfigureAwait(false);
+                                order.IsRefund = await RefundOrderAsync(order, payment).ConfigureAwait(false);
                             }
                         }
                         else
@@ -230,7 +231,11 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                     {
                         await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
-                        if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription())
+                        if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription())
+                        {
+                            throw new InvalidBusinessException(MessageCode.E_MODERATOR_ONLY_APPROVE_REPORT.GetDescription());
+                        }
+                        else if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription())
                         {
                             // Fail delivery
                             if (payment.PaymentMethods == PaymentMethods.COD)
@@ -519,12 +524,13 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
         {
             order.Status = OrderStatus.Cancelled;
             order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription();
-            _orderRepository.Update(order);
             var payment = order.Payments.FirstOrDefault(p => p.PaymentMethods == PaymentMethods.VnPay && p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess);
             if (payment != default)
             {
-                await RefundOrderAsync(order, payment).ConfigureAwait(false);
+                order.IsRefund = await RefundOrderAsync(order, payment).ConfigureAwait(false);
             }
+
+            _orderRepository.Update(order);
         }
     }
 
@@ -534,12 +540,13 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
         {
             order.Status = OrderStatus.Cancelled;
             order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription();
-            _orderRepository.Update(order);
             var payment = order.Payments.FirstOrDefault(p => p.PaymentMethods == PaymentMethods.VnPay && p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess);
             if (payment != default)
             {
-                await RefundOrderAsync(order, payment).ConfigureAwait(false);
+                order.IsRefund = await RefundOrderAsync(order, payment).ConfigureAwait(false);
             }
+
+            _orderRepository.Update(order);
         }
     }
 

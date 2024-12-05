@@ -185,10 +185,20 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                         }
                     }
 
+                    if (order.Status == OrderStatus.FailDelivery && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription())
+                    {
+                        order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription();
+                    }
+                    else if (order.Status == OrderStatus.FailDelivery && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
+                    {
+                        order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription();
+                    }
+                    else
+                    {
+                        order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription();
+                    }
+
                     order.IsReport = true;
-                    order.ReasonIdentity = order.Status == OrderStatus.FailDelivery
-                        ? OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription()
-                        : OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription();
                     order.Status = OrderStatus.IssueReported;
                     await _reportRepository.AddAsync(report).ConfigureAwait(false);
                     _orderRepository.Update(order);

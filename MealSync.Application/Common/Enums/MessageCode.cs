@@ -723,6 +723,9 @@ public enum MessageCode
     [Description("W-Moderator-ApproveReportAndShopToBan")]
     W_MODERATOR_APPROVE_REPORT_AND_SHOP_TO_BAN,
 
+    [Description("E-Moderator-Only-Approve-Report")]
+    E_MODERATOR_ONLY_APPROVE_REPORT,
+
     // Notifiation
     [Description("E-Notification-NotFound")]
     E_NOTIFICATION_NOT_FOUND,

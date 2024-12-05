@@ -197,7 +197,7 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
         {
             order.Status = OrderStatus.Cancelled;
             order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription();
-            _orderRepository.Update(order);
+
             var payment = order.Payments.FirstOrDefault(p => p.PaymentMethods == PaymentMethods.VnPay && p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess);
             if (payment != default)
             {
@@ -215,6 +215,7 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
 
                 refundPayment.PaymentThirdPartyId = refundResult.VnpTransactionNo;
                 refundPayment.PaymentThirdPartyContent = content;
+                order.IsRefund = true;
 
                 if (refundResult.VnpResponseCode == ((int)VnPayRefundResponseCode.CODE_00).ToString("D2"))
                 {
@@ -282,6 +283,8 @@ public class BanUnBanCustomerByModHandler : ICommandHandler<BanUnBanCustomerByMo
 
                 await _paymentRepository.AddAsync(refundPayment).ConfigureAwait(false);
             }
+
+            _orderRepository.Update(order);
         }
     }
 
