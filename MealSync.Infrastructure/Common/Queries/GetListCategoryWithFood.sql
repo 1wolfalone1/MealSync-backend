@@ -119,7 +119,7 @@ SELECT
             WitNumberOrderIn2HoursAdvance fn
         WHERE
             fn.id = f.id
-    ) AS TotalOrderInNext2Hours,
+    ) AS TotalOrderInNextTwoHours,
     f.os_id AS OperatingSection,
     f.os_id AS Id,
     f.title AS Title,
