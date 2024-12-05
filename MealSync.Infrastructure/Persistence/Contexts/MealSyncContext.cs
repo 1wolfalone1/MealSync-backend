@@ -45,6 +45,8 @@ public class MealSyncContext : DbContext
 
     public virtual DbSet<Permission> Permissions { get; set; }
 
+    public virtual DbSet<FoodPackingUnit> FoodPackingUnits { get; set; }
+
     public virtual DbSet<AccountPermission> AccountPermissions { get; set; }
 
     public virtual DbSet<ShopDormitory> ShopDormitories { get; set; }
@@ -308,6 +310,12 @@ public class MealSyncContext : DbContext
             .HasForeignKey(p => p.ShopCategoryId)
             .HasConstraintName("FK_Food_ShopCategory");
 
+        modelBuilder.Entity<Food>()
+            .HasOne(f => f.FoodPackingUnit)
+            .WithMany(pku => pku.Foods)
+            .HasForeignKey(p => p.FoodPackingUnitId)
+            .HasConstraintName("FK_Food_FoodPackingUnit");
+
         modelBuilder.Entity<OptionGroup>()
             .HasOne(og => og.Shop)
             .WithMany(p => p.OptionGroups)
@@ -396,6 +404,12 @@ public class MealSyncContext : DbContext
             .WithMany(s => s.Promotions)
             .HasForeignKey(p => p.ShopId)
             .HasConstraintName("FK_Promotion_Shop");
+
+        modelBuilder.Entity<FoodPackingUnit>()
+            .HasOne(p => p.Shop)
+            .WithMany(s => s.FoodPackingUnits)
+            .HasForeignKey(p => p.ShopId)
+            .HasConstraintName("FK_FoodPackingUnit_Shop");
 
         modelBuilder.Entity<Order>()
             .HasOne(o => o.Promotion)

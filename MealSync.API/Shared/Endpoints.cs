@@ -111,6 +111,11 @@ public static class Endpoints
     public const string FOOD_LINK_SHOP_CATEGORY = "shop-owner/food/link-shop-category";
     public const string FOOD_LINK_OPTION_GROUPS = "shop-owner/food/link-option-group";
 
+    // Food packing unit
+    public const string CREATE_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit";
+    public const string GET_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit";
+    public const string DELETE_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit/{id:long}";
+
     // Storage
     public const string UPLOAD_FILE = "storage/file/upload";
     public const string DELETE_FILE = "storage/file/delete";

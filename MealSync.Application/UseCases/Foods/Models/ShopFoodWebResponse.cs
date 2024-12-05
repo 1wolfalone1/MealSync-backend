@@ -29,6 +29,8 @@ public class ShopFoodWebResponse
 
     public int NumberOfOptionGroupLinked { get; set; }
 
+    public FoodPackingUnitForShopFoodWeb FoodPackingUnit { get; set; }
+
     public ShopCategoryForShopFoodWeb ShopCategory { get; set; }
 
     public List<OperatingSlotForShopFoodWeb> OperatingSlots { get; set; }
@@ -46,6 +48,19 @@ public class ShopFoodWebResponse
         public string? ImageUrl { get; set; }
 
         public int DisplayOrder { get; set; }
+    }
+
+    public class FoodPackingUnitForShopFoodWeb
+    {
+        public long Id { get; set; }
+
+        public long ShopId { get; set; }
+
+        public string Name { get; set; }
+
+        public double Weight { get; set; }
+
+        public FoodPackingUnitType Type { get; set; }
     }
 
     public class OperatingSlotForShopFoodWeb

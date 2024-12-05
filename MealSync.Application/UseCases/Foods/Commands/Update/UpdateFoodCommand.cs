@@ -22,6 +22,8 @@ public class UpdateFoodCommand : ICommand<Result>
 
     public long ShopCategoryId { get; set; }
 
+    public long FoodPackingUnitId { get; set; }
+
     public List<long>? OperatingSlots { get; set; }
 
     public List<long>? FoodOptionGroups { get; set; }

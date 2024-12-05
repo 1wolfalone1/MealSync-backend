@@ -23,13 +23,13 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IFoodPackingUnitRepository _foodPackingUnitRepository;
 
     public UpdateFoodHandler(
         ILogger<UpdateFoodHandler> logger, IPlatformCategoryRepository platformCategoryRepository,
         IShopCategoryRepository shopCategoryRepository, IOperatingSlotRepository operatingSlotRepository,
         IOptionGroupRepository optionGroupRepository, IFoodRepository foodRepository,
-        ICurrentPrincipalService currentPrincipalService, IMapper mapper, IUnitOfWork unitOfWork
-    )
+        ICurrentPrincipalService currentPrincipalService, IMapper mapper, IUnitOfWork unitOfWork, IFoodPackingUnitRepository foodPackingUnitRepository)
     {
         _logger = logger;
         _platformCategoryRepository = platformCategoryRepository;
@@ -40,6 +40,7 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
         _currentPrincipalService = currentPrincipalService;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
+        _foodPackingUnitRepository = foodPackingUnitRepository;
     }
 
     public async Task<Result<Result>> Handle(UpdateFoodCommand request, CancellationToken cancellationToken)
@@ -85,6 +86,7 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
         food.Status = request.Status;
         food.PlatformCategoryId = request.PlatformCategoryId;
         food.ShopCategoryId = request.ShopCategoryId;
+        food.FoodPackingUnitId = request.FoodPackingUnitId;
         food.FoodOperatingSlots = foodOperatingSlots;
         food.FoodOptionGroups = foodOptionGroups;
 
@@ -178,6 +180,11 @@ public class UpdateFoodHandler : ICommandHandler<UpdateFoodCommand, Result>
                     );
                 }
             });
+        }
+
+        if (_foodPackingUnitRepository.Get(fpu => fpu.Id == request.FoodPackingUnitId && (fpu.ShopId == _currentPrincipalService.CurrentPrincipalId || fpu.Type == FoodPackingUnitType.System)).SingleOrDefault() == null)
+        {
+            throw new InvalidBusinessException(MessageCode.E_FOOD_PACKING_UNIT_NOT_FOUND.GetDescription(), new object[] { request.FoodPackingUnitId });
         }
     }
 }

@@ -8,6 +8,7 @@ public class ShopFoodForWebMapping : Profile
 {
     public ShopFoodForWebMapping()
     {
+        CreateMap<FoodPackingUnit, ShopFoodWebResponse.FoodPackingUnitForShopFoodWeb>();
         CreateMap<OperatingSlot, ShopFoodWebResponse.OperatingSlotForShopFoodWeb>();
         CreateMap<ShopCategory, ShopFoodWebResponse.ShopCategoryForShopFoodWeb>();
         CreateMap<Food, ShopFoodWebResponse>()

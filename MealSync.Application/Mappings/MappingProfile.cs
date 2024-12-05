@@ -67,6 +67,7 @@ public class MappingProfile : Profile
         CreateMap<PlatformCategory, FoodDetailResponse.PlatformCategoryResponse>();
         CreateMap<ShopCategory, FoodDetailResponse.ShopCategoryResponse>();
         CreateMap<OperatingSlot, FoodDetailResponse.OperatingSlotResponse>();
+        CreateMap<FoodPackingUnit, FoodDetailResponse.FoodPackingUnitCreateResponse>();
         CreateMap<FoodOperatingSlot, FoodDetailResponse.OperatingSlotResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.OperatingSlot.Id))
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.OperatingSlot.Title))
@@ -112,6 +113,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.DormitoryName, opt => opt.MapFrom(src => src.Building.Dormitory.Name));
         CreateMap<Food, FoodCartSummaryResponse>();
         CreateMap<Account, CustomerInfoResponse>();
+        CreateMap<FoodPackingUnit, FoodDetailOfShopResponse.FoodPackingUnitOfShopResponse>();
         CreateMap<Food, FoodDetailOfShopResponse>()
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.FoodOperatingSlots))
             .ForMember(dest => dest.OptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups));

@@ -22,6 +22,8 @@ public class FoodDetailOfShopResponse
 
     public bool IsSoldOut { get; set; }
 
+    public FoodPackingUnitOfShopResponse FoodPackingUnit { get; set; }
+
     public List<OperatingSlotOfShopResponse> OperatingSlots { get; set; }
 
     public List<OptionGroupOfShopResponse> OptionGroups { get; set; }
@@ -44,5 +46,18 @@ public class FoodDetailOfShopResponse
         public string Title { get; set; }
 
         public int DisplayOrder { get; set; }
+    }
+
+    public class FoodPackingUnitOfShopResponse
+    {
+        public long Id { get; set; }
+
+        public long ShopId { get; set; }
+
+        public string Name { get; set; }
+
+        public double Weight { get; set; }
+
+        public FoodPackingUnitType Type { get; set; }
     }
 }

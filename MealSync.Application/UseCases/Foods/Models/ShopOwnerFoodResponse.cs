@@ -31,6 +31,8 @@ public class ShopOwnerFoodResponse
 
         public int TotalOrderInNextTwoHours { get; set; }
 
+        public FoodPackingUnitOfShopResponse FoodPackingUnit { get; set; }
+
         public List<OperatingSlotInFood> OperatingSlots { get; set; } = new();
 
         public class OperatingSlotInFood
@@ -63,6 +65,19 @@ public class ShopOwnerFoodResponse
                     return TimeFrameUtils.GetTimeFrameString(StartTime, EndTime);
                 }
             }
+        }
+
+        public class FoodPackingUnitOfShopResponse
+        {
+            public long Id { get; set; }
+
+            public long ShopId { get; set; }
+
+            public string Name { get; set; }
+
+            public double Weight { get; set; }
+
+            public FoodPackingUnitType Type { get; set; }
         }
     }
 }
