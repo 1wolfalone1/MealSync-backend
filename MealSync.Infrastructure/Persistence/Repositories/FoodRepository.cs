@@ -31,6 +31,7 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
     public Food GetByIdIncludeAllInfoForShop(long id)
     {
         return DbSet.Include(f => f.PlatformCategory)
+            .Include(f => f.FoodPackingUnit)
             .Include(f => f.ShopCategory)
             .Include(f => f.FoodOperatingSlots).ThenInclude(op => op.OperatingSlot)
             .Include(f => f.FoodOptionGroups.Where(fog => fog.OptionGroup.Status != OptionGroupStatus.Delete))
@@ -173,6 +174,7 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
     public async Task<(int TotalCount, IEnumerable<Food> Foods)> GetAllShopFoodForWeb(long shopId, int pageIndex, int pageSize, int statusMode, long? operatingSlotId, string? name)
     {
         var query = DbSet.Where(f => f.ShopId == shopId && f.Status != FoodStatus.Delete)
+            .Include(f => f.FoodPackingUnit)
             .Include(f => f.ShopCategory)
             .Include(f => f.FoodOperatingSlots)
             .ThenInclude(fog => fog.OperatingSlot)

@@ -26,6 +26,30 @@ public class OrderDetailForShopResponse
 
     public DateTime IntendedReceiveDate { get; set; }
 
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string DeliverySuccessImageUrl { get; set; }
+
+    public bool IsDeliveredByQR
+    {
+        get
+        {
+            return ReceiveAt.HasValue && string.IsNullOrEmpty(DeliverySuccessImageUrl);
+        }
+    }
+
+    public string[] DeliverySuccessImageUrls
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(DeliverySuccessImageUrl))
+            {
+                return DeliverySuccessImageUrl.Split(",");
+            }
+
+            return new string[0];
+        }
+    }
+
     public int StartTime { get; set; }
 
     private int _endTime; // Backing field

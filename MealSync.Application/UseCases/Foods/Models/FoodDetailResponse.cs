@@ -19,6 +19,8 @@ public class FoodDetailResponse
 
     public bool IsSoldOut { get; set; }
 
+    public FoodPackingUnitCreateResponse FoodPackingUnit { get; set; }
+
     public PlatformCategoryResponse PlatformCategory { get; set; }
 
     public ShopCategoryResponse ShopCategory { get; set; }
@@ -47,6 +49,19 @@ public class FoodDetailResponse
         public string? Description { get; set; }
 
         public string? ImageUrl { get; set; }
+    }
+
+    public class FoodPackingUnitCreateResponse
+    {
+        public long Id { get; set; }
+
+        public long ShopId { get; set; }
+
+        public string Name { get; set; }
+
+        public double Weight { get; set; }
+
+        public FoodPackingUnitType Type { get; set; }
     }
 
     public class OperatingSlotResponse

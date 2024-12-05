@@ -71,6 +71,7 @@ SELECT
     o.intended_receive_date AS IntendedReceiveDate,
     o.start_time AS StartTime,
     o.end_time AS EndTime,
+    o.delivery_success_image_url AS DeliverySuccessImageUrl,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
     -- Customer
