@@ -12,15 +12,13 @@ public class OrderSummaryResponse
 
     public OrderStatus Status { get; set; }
 
+    public string? ReasonIdentity { get; set; }
+
     public double ShippingFee { get; set; }
 
     public double TotalPrice { get; set; }
 
     public double TotalPromotion { get; set; }
-
-    // public int TotalOrderDetail { get; set; }
-
-    // public bool IsReviewAllowed { get; set; }
 
     public long OrderDate { get; set; }
 
