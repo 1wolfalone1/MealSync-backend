@@ -47,7 +47,8 @@ SELECT
             AND o.is_report = TRUE
             AND (
                 o.reason_identity = @DeliveredReportedByCustomer
-                OR o.reason_identity = @DeliveryFailReportedByCustomer
+                OR o.reason_identity = @DeliveryFailByCustomerReportedByCustomer
+                OR o.reason_identity = @DeliveryFailByShopReportedByCustomer
             )
             AND o.is_refund = TRUE THEN 1
             ELSE 0
@@ -67,7 +68,10 @@ SELECT
                 AND o.reason_identity = @DeliveredReportedByCustomer THEN o.total_price - o.total_promotion - o.charge_fee
                 WHEN o.status = 12 -- Resolved
                 AND o.is_report = TRUE
-                AND o.reason_identity = @DeliveryFailReportedByCustomer
+                AND (
+                    o.reason_identity = @DeliveryFailByCustomerReportedByCustomer
+                    OR o.reason_identity = @DeliveryFailByShopReportedByCustomer
+                )
                 AND o.is_refund = FALSE
                 AND p.payment_methods IN @PaymentOnlineList
                 AND p.type = 1 -- Payment

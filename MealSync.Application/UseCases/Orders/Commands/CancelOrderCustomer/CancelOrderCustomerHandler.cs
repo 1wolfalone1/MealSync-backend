@@ -222,6 +222,7 @@ public class CancelOrderCustomerHandler : ICommandHandler<CancelOrderCustomerCom
             order.Status = OrderStatus.Cancelled;
             order.IsRefund = isRefund;
             order.Reason = reason;
+            order.CancelAt = TimeFrameUtils.GetCurrentDate();
             order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription();
             _orderRepository.Update(order);
 

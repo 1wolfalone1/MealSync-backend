@@ -33,7 +33,9 @@ public class TransferIncomingAmountForShopAfterTwoHourHandler : ICommandHandler<
     private readonly IBuildingRepository _buildingRepository;
     private readonly IEmailService _emailService;
 
-    public TransferIncomingAmountForShopAfterTwoHourHandler(IOrderRepository orderRepository, IUnitOfWork unitOfWork, ILogger<TransferIncomingAmountForShopAfterTwoHourHandler> logger, INotifierService notifierService, INotificationFactory notificationFactory, IBatchHistoryRepository batchHistoryRepository, IWalletRepository walletRepository, IShopRepository shopRepository, IPaymentRepository paymentRepository, IWalletTransactionRepository walletTransactionRepository, IVnPayPaymentService paymentService, IAccountRepository accountRepository, IBuildingRepository buildingRepository, IEmailService emailService)
+    public TransferIncomingAmountForShopAfterTwoHourHandler(IOrderRepository orderRepository, IUnitOfWork unitOfWork, ILogger<TransferIncomingAmountForShopAfterTwoHourHandler> logger, INotifierService notifierService,
+        INotificationFactory notificationFactory, IBatchHistoryRepository batchHistoryRepository, IWalletRepository walletRepository, IShopRepository shopRepository, IPaymentRepository paymentRepository,
+        IWalletTransactionRepository walletTransactionRepository, IVnPayPaymentService paymentService, IAccountRepository accountRepository, IBuildingRepository buildingRepository, IEmailService emailService)
     {
         _orderRepository = orderRepository;
         _unitOfWork = unitOfWork;
@@ -260,12 +262,10 @@ public class TransferIncomingAmountForShopAfterTwoHourHandler : ICommandHandler<
                 var shopAccount = _accountRepository.GetById(order.ShopId);
                 var noti = _notificationFactory.CreateRefundCustomerNotification(order, shopAccount, payment.Amount);
                 notifications.Add(noti);
-                isRefund = true;
             }
             else
             {
                 refundPayment.Status = PaymentStatus.PaidFail;
-                isRefund = false;
 
                 // Get moderator account to send mail
                 await SendEmailAnnounceModeratorAsync(order).ConfigureAwait(false);
@@ -274,6 +274,7 @@ public class TransferIncomingAmountForShopAfterTwoHourHandler : ICommandHandler<
                 notifications.AddRange(NotiAnnounceRefundFail(order));
             }
 
+            isRefund = true;
             await _paymentRepository.AddAsync(refundPayment).ConfigureAwait(false);
         }
 

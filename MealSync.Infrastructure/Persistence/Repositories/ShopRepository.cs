@@ -176,6 +176,9 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
                 BannerUrl = shop.BannerUrl,
                 PhoneNumber = shop.PhoneNumber,
                 IsAcceptingOrderNextDay = shop.IsAcceptingOrderNextDay,
+                TotalRating = shop.TotalRating,
+                TotalReview = shop.TotalReview,
+                TotalOrder = shop.TotalOrder,
                 Foods = shop.Foods
                     .Where(food => food.Status == FoodStatus.Active &&
                                    (!platformCategoryId.HasValue || platformCategoryId.Value == 0 || food.PlatformCategoryId == platformCategoryId.Value) &&
@@ -210,6 +213,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
                         Price = food.Price,
                         ImageUrl = food.ImageUrl,
                         IsSoldOut = food.IsSoldOut,
+                        TotalOrder = food.TotalOrder,
                     })
                     .ToList(),
             })
@@ -318,7 +322,8 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
                                 ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
                                 : o.Status == OrderStatus.Resolved &&
                                   o.IsReport &&
-                                  o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription() &&
+                                  (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()
+                                   || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription()) &&
                                   !o.IsRefund &&
                                   o.Payments.Any(p =>
                                       p.PaymentMethods == PaymentMethods.VnPay &&
@@ -427,7 +432,8 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
                             ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
                             : o.Status == OrderStatus.Resolved &&
                               o.IsReport &&
-                              o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER.GetDescription() &&
+                              (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()
+                               || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription()) &&
                               !o.IsRefund &&
                               o.Payments.Any(p =>
                                   p.PaymentMethods == PaymentMethods.VnPay &&

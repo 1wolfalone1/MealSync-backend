@@ -16,7 +16,8 @@ WITH FilteredOrders AS (
     COUNT(r.id) AS ReviewCount,
     o.reason_identity AS ReasonIdentity,
     o.is_report AS IsReport,
-    o.created_date AS CreatedDate
+    o.created_date AS CreatedDate,
+    o.updated_date AS UpdatedDate
   FROM
     `order` o
     INNER JOIN `shop` s ON o.shop_id = s.id
@@ -46,6 +47,7 @@ SELECT
   COUNT(*) OVER() AS TotalCount,
   Id,
   Status,
+  ReasonIdentity,
   ShippingFee,
   TotalPrice,
   TotalPromotion,
@@ -63,8 +65,8 @@ WHERE
     @ReviewMode = 0
     OR (
       (
-          Status = 9 -- Completed
-          AND ReasonIdentity IS NULL
+        Status = 9 -- Completed
+        AND ReasonIdentity IS NULL
       )
       AND ReviewCount = 0
       AND @Now BETWEEN DATE_ADD(
@@ -78,6 +80,6 @@ WHERE
     )
   )
 ORDER BY
-  CreatedDate DESC
+  UpdatedDate DESC
 LIMIT
   @PageSize OFFSET @Offset;

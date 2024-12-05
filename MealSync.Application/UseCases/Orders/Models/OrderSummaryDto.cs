@@ -14,6 +14,8 @@ public class OrderSummaryDto
 
     public OrderStatus Status { get; set; }
 
+    public string? ReasonIdentity { get; set; }
+
     public double ShippingFee { get; set; }
 
     public double TotalPrice { get; set; }
