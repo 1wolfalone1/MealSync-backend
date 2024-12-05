@@ -59,6 +59,8 @@ public class Shop : BaseEntity
 
     public int NumOfWarning { get; set; }
 
+    public double? MaxCarryWeight { get; set; }
+
     public virtual Account Account { get; set; }
 
     public virtual Location Location { get; set; }
@@ -89,4 +91,6 @@ public class Shop : BaseEntity
     public virtual ICollection<OptionGroup> OptionGroups { get; set; } = new List<OptionGroup>();
 
     public virtual ICollection<Review> ReviewReplys { get; set; } = new List<Review>();
+
+    public virtual ICollection<FoodPackingUnit> FoodPackingUnits { get; set; } = new List<FoodPackingUnit>();
 }

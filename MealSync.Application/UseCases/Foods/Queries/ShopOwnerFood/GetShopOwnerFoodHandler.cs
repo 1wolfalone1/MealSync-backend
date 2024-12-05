@@ -29,15 +29,17 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
     {
         Dictionary<long, ShopOwnerFoodResponse> listCategoryDic = new Dictionary<long, ShopOwnerFoodResponse>();
         Dictionary<long, ShopOwnerFoodResponse.FoodResponse> listOperatingDic = new Dictionary<long, ShopOwnerFoodResponse.FoodResponse>();
-        Func<ShopOwnerFoodResponse, ShopOwnerFoodResponse.FoodResponse, ShopOwnerFoodResponse.FoodResponse.OperatingSlotInFood, ShopOwnerFoodResponse> map = (parent, child1, child2) =>
+        Func<ShopOwnerFoodResponse, ShopOwnerFoodResponse.FoodResponse, ShopOwnerFoodResponse.FoodResponse.FoodPackingUnitOfShopResponse, ShopOwnerFoodResponse.FoodResponse.OperatingSlotInFood, ShopOwnerFoodResponse> map = (parent, child1, child2, child3) =>
         {
             if (!listCategoryDic.TryGetValue(parent.Id, out var category))
             {
                 if (child1.Id != 0)
                 {
-                    if (child2.Id != 0)
+                    child1.FoodPackingUnit = child2;
+
+                    if (child3.Id != 0)
                     {
-                        child1.OperatingSlots.Add(child2);
+                        child1.OperatingSlots.Add(child3);
                         listOperatingDic.Add(child1.Id, child1);
                     }
 
@@ -50,12 +52,14 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
             {
                 if (child1.Id != 0)
                 {
+                    child1.FoodPackingUnit = child2;
+
                     if (listOperatingDic.TryGetValue(child1.Id, out var food))
                     {
                         child1 = food;
-                        if (child2.Id != 0)
+                        if (child3.Id != 0)
                         {
-                            child1.OperatingSlots.Add(child2);
+                            child1.OperatingSlots.Add(child3);
                             listOperatingDic.Remove(child1.Id);
                             listOperatingDic.Add(child1.Id, child1);
                             var foodInCategory = category.Foods.Where(f => f.Id == child1.Id).Single();
@@ -65,10 +69,11 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
                     }
                     else
                     {
+                        child1.FoodPackingUnit = child2;
 
-                        if (child2.Id != 0)
+                        if (child3.Id != 0)
                         {
-                            child1.OperatingSlots.Add(child2);
+                            child1.OperatingSlots.Add(child3);
                         }
 
                         category.Foods.Add(child1);
@@ -83,7 +88,7 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
             return parent;
         };
 
-        await _dapperService.SelectAsync<ShopOwnerFoodResponse, ShopOwnerFoodResponse.FoodResponse, ShopOwnerFoodResponse.FoodResponse.OperatingSlotInFood, ShopOwnerFoodResponse>(
+        await _dapperService.SelectAsync<ShopOwnerFoodResponse, ShopOwnerFoodResponse.FoodResponse, ShopOwnerFoodResponse.FoodResponse.FoodPackingUnitOfShopResponse, ShopOwnerFoodResponse.FoodResponse.OperatingSlotInFood, ShopOwnerFoodResponse>(
             QueryName.GetListCategoryWithFood,
             map,
             new
@@ -93,7 +98,7 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
                 StartLastTwoHour = TimeFrameUtils.GetCurrentDateInUTC7().AddHours(2).ToString("HHmm"),
                 FilterMode = request.FilterMode,
             },
-            "FoodId, OperatingSection");
+            "FoodId, FoodPackingUnitSection, OperatingSection");
 
         if (request.FilterMode == 0)
             return Result.Success(listCategoryDic.Values.ToList());

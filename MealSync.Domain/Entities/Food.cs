@@ -17,6 +17,8 @@ public class Food : BaseEntity
 
     public long? ShopCategoryId { get; set; }
 
+    public long? FoodPackingUnitId { get; set; }
+
     public string Name { get; set; }
 
     public string? Description { get; set; }
@@ -36,6 +38,8 @@ public class Food : BaseEntity
     public virtual PlatformCategory PlatformCategory { get; set; }
 
     public virtual ShopCategory? ShopCategory { get; set; }
+
+    public virtual FoodPackingUnit? FoodPackingUnit { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 

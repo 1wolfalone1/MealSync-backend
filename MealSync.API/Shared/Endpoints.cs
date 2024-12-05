@@ -79,6 +79,7 @@ public static class Endpoints
     public const string SEARCH_SHOP = "shop/search";
     public const string SHOP_INFO_REORDER = "shop/info/re-order/{id:long}";
     public const string SHOP_CATEGORY = "shop/{id:long}/category";
+    public const string SHOP_CART_INFO = "shop/cart";
 
     // Shop delivery staff
     public const string GET_SHOP_DELIVER_STAFF_AVAILABLE = "shop/shop-delivery-staff/available";
@@ -109,6 +110,11 @@ public static class Endpoints
     public const string GET_FOOD_BY_IDS = "food";
     public const string FOOD_LINK_SHOP_CATEGORY = "shop-owner/food/link-shop-category";
     public const string FOOD_LINK_OPTION_GROUPS = "shop-owner/food/link-option-group";
+
+    // Food packing unit
+    public const string CREATE_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit";
+    public const string GET_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit";
+    public const string DELETE_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit/{id:long}";
 
     // Storage
     public const string UPLOAD_FILE = "storage/file/upload";

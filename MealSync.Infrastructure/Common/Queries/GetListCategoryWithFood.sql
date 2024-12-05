@@ -75,7 +75,8 @@ WithFoodAndOperatingSlot AS (
         os.title,
         os.start_time,
         os.end_time,
-        fo.created_date
+        fo.created_date,
+        fo.food_packing_unit_id
     FROM
         WithFoodCondition f
         INNER JOIN food fo ON f.id = fo.id
@@ -120,6 +121,12 @@ SELECT
         WHERE
             fn.id = f.id
     ) AS TotalOrderInNextTwoHours,
+    fpu.id AS FoodPackingUnitSection,
+    fpu.id AS Id,
+    fpu.shop_id AS ShopId,
+    fpu.name AS Name,
+    fpu.weight AS Weight,
+    fpu.type AS 'Type',
     f.os_id AS OperatingSection,
     f.os_id AS Id,
     f.title AS Title,
@@ -128,6 +135,7 @@ SELECT
 FROM
     ShopCategoryTable AS sc
     LEFT JOIN WithFoodAndOperatingSlot f ON sc.id = f.shop_category_id
+    LEFT JOIN food_packing_unit AS fpu ON f.food_packing_unit_id = fpu.id
 ORDER BY
     sc.display_order,
     sc.id,

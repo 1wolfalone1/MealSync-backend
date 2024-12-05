@@ -267,6 +267,19 @@ public enum MessageCode
     [Description("I-Food-ShopCategoryLinkSuccess")]
     I_FOOD_SHOP_CATEGORY_LINK_SUCCESS,
 
+    // Food Packing Unit
+    [Description("E-FoodPackingUnit-DoubleName")]
+    E_FOOD_PACKING_UNIT_DOUBLE_NAME,
+
+    [Description("E-FoodPackingUnit-NotFound")]
+    E_FOOD_PACKING_UNIT_NOT_FOUND,
+
+    [Description("E-FoodPackingUnit-HaveFoodLinked")]
+    E_FOOD_PACKING_UNIT_HAVE_FOOD_LINKED,
+
+    [Description("I-FoodPackingUnit-DeleteSuccess")]
+    I_FOOD_PACKING_UNIT_DELETE_SUCCESS,
+
     // Shopowner
     [Description("E-Shop-NotAbleToInActive")]
     E_SHOP_NOT_ABLE_TO_IN_ACTIVE,
@@ -483,6 +496,7 @@ public enum MessageCode
 
     [Description("E-Order_DeliveringEarlyOver30p")]
     E_ORDER_DELIVERING_EARLY_OVER_30p,
+
     // Report
     [Description("E-Report-NotFound")]
     E_REPORT_NOT_FOUND,
