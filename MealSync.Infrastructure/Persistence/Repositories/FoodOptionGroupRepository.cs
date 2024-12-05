@@ -33,7 +33,7 @@ public class FoodOptionGroupRepository : BaseRepository<FoodOptionGroup>, IFoodO
 
     public Task<List<long>> GetAllIdsRequiredByFoodId(long foodId)
     {
-        return DbSet.Where(fog => fog.FoodId == foodId && fog.OptionGroup.IsRequire)
+        return DbSet.Where(fog => fog.FoodId == foodId && fog.OptionGroup.IsRequire && fog.OptionGroup.Status == OptionGroupStatus.Active)
             .Select(fog => fog.OptionGroupId).ToListAsync();
     }
 }

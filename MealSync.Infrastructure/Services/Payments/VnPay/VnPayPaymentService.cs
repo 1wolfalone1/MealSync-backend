@@ -34,7 +34,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
         _logger = logger;
     }
 
-    public async Task<string> CreatePaymentUrl(Payment payment)
+    public async Task<string> CreatePaymentOrderUrl(Payment payment)
     {
         HttpContext? context = _contextAccessor.HttpContext;
 
@@ -54,11 +54,35 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
         vnPay.AddRequestData(VnPayRequestParam.VNP_CURR_CODE, CURRENCY_CODE);
         vnPay.AddRequestData(VnPayRequestParam.VNP_IP_ADDRESS, Utils.GetIpAddress(context));
         vnPay.AddRequestData(VnPayRequestParam.VNP_LOCALE, LOCALE);
-        vnPay.AddRequestData(VnPayRequestParam.VNP_ORDER_INFO, "Thanh toan don hang: " + payment.OrderId);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_ORDER_INFO, VnPayPaymentType.ORDER_PAYMENT + " Thanh toan don hang: " + payment.OrderId);
         vnPay.AddRequestData(VnPayRequestParam.VNP_ORDER_TYPE, ORDER_TYPE);
         vnPay.AddRequestData(VnPayRequestParam.VNP_RETURN_URL, _vnPaySetting.ReturnUrl);
         vnPay.AddRequestData(VnPayRequestParam.VNP_EXPIRE_DATE, payment.CreatedDate.ToOffset(TimeSpan.FromHours(7)).AddMinutes(10).ToString(DATE_FORMAT));
         vnPay.AddRequestData(VnPayRequestParam.VNP_TXN_REF, payment.Id.ToString());
+
+        return vnPay.CreateRequestUrl(_vnPaySetting.PaymentUrl, _vnPaySetting.HashSecret);
+    }
+
+    public async Task<string> CreatePaymentDepositUrl(Deposit deposit)
+    {
+        HttpContext? context = _contextAccessor.HttpContext;
+
+        var vnPay = new VnPayLibrary();
+
+        vnPay.AddRequestData(VnPayRequestParam.VNP_VERSION, VnPayLibrary.VERSION);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_COMMAND, PAYMENT);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_TMN_CODE, _vnPaySetting.TmpCode);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_AMOUNT, (deposit.Amount * 100).ToString());
+        vnPay.AddRequestData(VnPayRequestParam.VNP_BANK_CODE, VN_BANK);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_CREATE_DATE, deposit.CreatedDate.ToOffset(TimeSpan.FromHours(7)).ToString(DATE_FORMAT));
+        vnPay.AddRequestData(VnPayRequestParam.VNP_CURR_CODE, CURRENCY_CODE);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_IP_ADDRESS, Utils.GetIpAddress(context));
+        vnPay.AddRequestData(VnPayRequestParam.VNP_LOCALE, LOCALE);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_ORDER_INFO, VnPayPaymentType.DEPOSIT + " Nap tien vao vi: " + deposit.WalletId);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_ORDER_TYPE, ORDER_TYPE);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_RETURN_URL, _vnPaySetting.ReturnUrl);
+        vnPay.AddRequestData(VnPayRequestParam.VNP_EXPIRE_DATE, deposit.CreatedDate.ToOffset(TimeSpan.FromHours(7)).AddMinutes(10).ToString(DATE_FORMAT));
+        vnPay.AddRequestData(VnPayRequestParam.VNP_TXN_REF, deposit.Id.ToString());
 
         return vnPay.CreateRequestUrl(_vnPaySetting.PaymentUrl, _vnPaySetting.HashSecret);
     }
@@ -130,7 +154,7 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
         }
     }
 
-    public async Task<VnPayIPNResponse> GetIPN(IQueryCollection queryParams, Payment payment)
+    public async Task<VnPayIPNResponse> GetIPNPaymentOrder(IQueryCollection queryParams, Payment payment)
     {
         VnPayIPNResponse response = new VnPayIPNResponse();
 
@@ -225,5 +249,127 @@ public class VnPayPaymentService : IVnPayPaymentService, IBaseService
         }
 
         return response;
+    }
+
+    public async Task<VnPayIPNResponse> GetIPNDeposit(IQueryCollection queryParams, Deposit deposit)
+    {
+        VnPayIPNResponse response = new VnPayIPNResponse();
+
+        if (queryParams.Count > 0)
+        {
+            string vnpHashSecret = _vnPaySetting.HashSecret;
+            VnPayLibrary vnPay = new VnPayLibrary();
+
+            // Iterate over query parameters
+            foreach (string key in queryParams.Keys)
+            {
+                // Add only VNPAY-related parameters that start with "vnp_"
+                if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
+                {
+                    vnPay.AddResponseData(key, queryParams[key]);
+                }
+            }
+
+            // Extract values from vnPay object
+            long depositId = Convert.ToInt64(vnPay.GetResponseData(VnPayRequestParam.VNP_TXN_REF));
+            long vnpAmount = Convert.ToInt64(vnPay.GetResponseData(VnPayRequestParam.VNP_AMOUNT)) / 100; // Convert to original amount
+            long vnpTranId = Convert.ToInt64(vnPay.GetResponseData(VnPayRequestParam.VNP_TRANSACTION_NO));
+            string vnpResponseCode = vnPay.GetResponseData(VnPayRequestParam.VNP_RESPONSE_CODE);
+            string vnpTransactionStatus = vnPay.GetResponseData(VnPayRequestParam.VNP_TRANSACTION_STATUS);
+            string vnpSecureHash = queryParams[VnPayRequestParam.VNP_SECURE_HASH];
+
+            // Validate the signature
+            bool checkSignature = vnPay.ValidateSignature(vnpSecureHash, vnpHashSecret);
+
+            if (checkSignature)
+            {
+                if (deposit.Id == depositId)
+                {
+                    if (Convert.ToInt64(deposit.Amount) == vnpAmount)
+                    {
+                        if (deposit.Status == DepositStatus.Pending)
+                        {
+                            if (vnpResponseCode == ((int)VnPayTransactionStatus.CODE_00).ToString("D2")
+                                && vnpTransactionStatus == ((int)VnPayTransactionStatus.CODE_00).ToString("D2"))
+                            {
+                                // Payment success
+                                response.RspCode = ((int)VnPayIPNResponseCode.CODE_00).ToString("D2");
+                                response.Message = "Confirm Success";
+                                _logger.LogInformation("VNPAY: Thanh toan thanh cong, DepositId={0}, VnPay TranId={1}", deposit.Id, vnpTranId);
+                            }
+                            else
+                            {
+                                // Payment failed
+                                response.RspCode = ((int)VnPayIPNResponseCode.CODE_00).ToString("D2");
+                                response.Message = "Payment Failed";
+                                _logger.LogWarning("VNPAY: Thanh toan loi, DepositId={0}, VnPay TranId={1}", deposit.Id, vnpTranId);
+                            }
+                        }
+                        else
+                        {
+                            // Payment already confirmed
+                            response.RspCode = ((int)VnPayIPNResponseCode.CODE_02).ToString("D2");
+                            response.Message = VnPayIPNResponseCode.CODE_02.GetDescription();
+                            _logger.LogWarning("VNPAY: Payment already confirmed, DepositId={0}, VnPay TranId={1}", deposit.Id, vnpTranId);
+                        }
+                    }
+                    else
+                    {
+                        // Invalid amount
+                        response.RspCode = ((int)VnPayIPNResponseCode.CODE_04).ToString("D2");
+                        response.Message = VnPayIPNResponseCode.CODE_04.GetDescription();
+                        _logger.LogWarning("VNPAY: Payment already confirmed, DepositId={0}, VnPay TranId={1}", deposit.Id, vnpTranId);
+                    }
+                }
+                else
+                {
+                    // Order not found
+                    response.RspCode = ((int)VnPayIPNResponseCode.CODE_01).ToString("D2");
+                    response.Message = VnPayIPNResponseCode.CODE_01.GetDescription();
+                    _logger.LogWarning("VNPAY: Order not found, DepositId={0}, VnPay TranId={1}", deposit.Id, vnpTranId);
+                }
+            }
+            else
+            {
+                // Invalid signature
+                response.RspCode = ((int)VnPayIPNResponseCode.CODE_97).ToString("D2");
+                response.Message = VnPayIPNResponseCode.CODE_97.GetDescription();
+                _logger.LogWarning("VNPAY: Invalid signature");
+            }
+        }
+        else
+        {
+            // No query parameters provided
+            response.RspCode = ((int)VnPayIPNResponseCode.CODE_99).ToString("D2");
+            response.Message = VnPayIPNResponseCode.CODE_99.GetDescription();
+            _logger.LogWarning("VNPAY: No query parameters provided");
+        }
+
+        return response;
+    }
+
+    public async Task<string> GetPaymentType(IQueryCollection queryParams)
+    {
+        if (queryParams.Count > 0)
+        {
+            string vnpHashSecret = _vnPaySetting.HashSecret;
+            VnPayLibrary vnPay = new VnPayLibrary();
+
+            // Iterate over query parameters
+            foreach (string key in queryParams.Keys)
+            {
+                // Add only VNPAY-related parameters that start with "vnp_"
+                if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
+                {
+                    vnPay.AddResponseData(key, queryParams[key]);
+                }
+            }
+
+            return vnPay.GetResponseData(VnPayRequestParam.VNP_ORDER_INFO);
+        }
+        else
+        {
+            return string.Empty;
+        }
     }
 }

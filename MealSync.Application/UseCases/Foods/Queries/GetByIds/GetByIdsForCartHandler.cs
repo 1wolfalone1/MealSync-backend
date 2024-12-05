@@ -178,13 +178,26 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
             }
         }
 
-        var now = TimeFrameUtils.GetCurrentDateInUTC7();
-        var endTimeInMinutes = TimeUtils.ConvertToMinutes(shopOperatingSlot.EndTime);
-        var currentTimeMinutes = (now.Hour * 60) + now.Minute;
-        if (shopOperatingSlot.EndTime != 2400 && currentTimeMinutes >= endTimeInMinutes)
+        if (shopOperatingSlot != default)
+        {
+            var now = TimeFrameUtils.GetCurrentDateInUTC7();
+            var endTimeInMinutes = TimeUtils.ConvertToMinutes(shopOperatingSlot.EndTime);
+            var currentTimeMinutes = (now.Hour * 60) + now.Minute;
+            if (shopOperatingSlot.EndTime != 2400 && currentTimeMinutes >= endTimeInMinutes)
+            {
+                foodCartCheckResponse.IsAcceptingOrderToday = false;
+                foodCartCheckResponse.MessageFoodNeedRemoveToday = $"Thời gian hiện tại đã vượt quá khung thời gian bán {TimeFrameUtils.GetTimeFrameString(shopOperatingSlot.StartTime, shopOperatingSlot.EndTime)}.";
+            }
+        }
+
+        if (foodCartCheckResponse.IdsNotFoundToday != null && foodCartCheckResponse.IdsNotFoundToday.Count == request.Foods.Count)
         {
             foodCartCheckResponse.IsAcceptingOrderToday = false;
-            foodCartCheckResponse.MessageFoodNeedRemoveToday = $"Thời gian hiện tại đã vượt quá khung thời gian bán {TimeFrameUtils.GetTimeFrameString(shopOperatingSlot.StartTime, shopOperatingSlot.EndTime)}.";
+        }
+
+        if (foodCartCheckResponse.IdsNotFoundTomorrow != null && foodCartCheckResponse.IdsNotFoundTomorrow.Count == request.Foods.Count)
+        {
+            foodCartCheckResponse.IsAcceptingOrderTomorrow = false;
         }
 
         return Result.Success(foodCartCheckResponse);

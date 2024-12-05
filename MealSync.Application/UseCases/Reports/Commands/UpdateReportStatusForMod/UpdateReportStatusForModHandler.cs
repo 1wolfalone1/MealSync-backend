@@ -181,6 +181,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                             else
                             {
                                 // Giao hàng thất bại, thanh toán Online => Approve customer report, đánh cờ shop => Refund tiền customer
+                                await TransactionWithdrawalReportingForRefund(payment, order, shop, shopWallet).ConfigureAwait(false);
                                 await ApproveCustomerAndFlagShop(request, customerReport, shopReport, shop, systemConfig, shopAccount).ConfigureAwait(false);
                                 await RefundOrderAsync(order, payment).ConfigureAwait(false);
                             }
@@ -241,9 +242,8 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                             }
                             else
                             {
-                                // Giao hàng thất bại, thanh toán COD => Reject customer report, đánh cờ cus => Tiền từ ví reporting về ví available (Payment - ChargeFee)
+                                // Giao hàng thất bại, thanh toán Online => Reject customer report => Tiền từ ví reporting về ví available (Payment - ChargeFee)
                                 RejectCustomerReport(request, customerReport, shopReport);
-                                await FlagCustomerAccount(customer, order, systemConfig).ConfigureAwait(false);
                                 await TransactionReportingToAvailable(payment, order, shop, shopWallet).ConfigureAwait(false);
                                 isFlagCustomer = true;
                             }
@@ -399,13 +399,33 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
         };
     }
 
+    private async Task TransactionWithdrawalReportingForRefund(Payment payment, Order order, Shop shop, Wallet shopWallet)
+    {
+        var reportAmountOrder = payment.Amount - order.ChargeFee;
+        var transactionWithdrawalReportingForRefund = new WalletTransaction
+        {
+            WalletFromId = shop.WalletId,
+            AvaiableAmountBefore = shopWallet.AvailableAmount,
+            IncomingAmountBefore = shopWallet.IncomingAmount,
+            ReportingAmountBefore = shopWallet.ReportingAmount,
+            Amount = -reportAmountOrder,
+            Type = WalletTransactionType.Withdrawal,
+            Description = $"Rút tiền từ tiền đang bị báo cáo {MoneyUtils.FormatMoneyWithDots(reportAmountOrder)} VNĐ để hoàn tiền cho khách hàng đơn hàng MS-{order.Id}",
+        };
+
+        shopWallet.ReportingAmount -= reportAmountOrder;
+
+        await _walletTransactionRepository.AddAsync(transactionWithdrawalReportingForRefund).ConfigureAwait(false);
+        _walletRepository.Update(shopWallet);
+    }
+
     private async Task TransactionReportingToAvailable(Payment payment, Order order, Shop shop, Wallet shopWallet)
     {
 
         // Reporting to available
         var walletTransactions = new List<WalletTransaction>();
         var reportAmountOrder = payment.Amount - order.ChargeFee;
-        var transactionWithdrawalIncomingAmountToAvailableAmountOfShop = new WalletTransaction
+        var transactionWithdrawalReportingAmountToAvailableAmountOfShop = new WalletTransaction
         {
             WalletFromId = shop.WalletId,
             WalletToId = shop.WalletId,
@@ -419,7 +439,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
 
         shopWallet.ReportingAmount -= reportAmountOrder;
 
-        var transactionAddFromIncomingAmountToAvailableAmountOfShop = new WalletTransaction
+        var transactionAddFromReportingAmountToAvailableAmountOfShop = new WalletTransaction
         {
             WalletFromId = shop.WalletId,
             WalletToId = shop.WalletId,
@@ -433,8 +453,8 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
 
         shopWallet.AvailableAmount += reportAmountOrder;
 
-        walletTransactions.Add(transactionWithdrawalIncomingAmountToAvailableAmountOfShop);
-        walletTransactions.Add(transactionAddFromIncomingAmountToAvailableAmountOfShop);
+        walletTransactions.Add(transactionWithdrawalReportingAmountToAvailableAmountOfShop);
+        walletTransactions.Add(transactionAddFromReportingAmountToAvailableAmountOfShop);
 
         await _walletTransactionRepository.AddRangeAsync(walletTransactions).ConfigureAwait(false);
         _walletRepository.Update(shopWallet);
