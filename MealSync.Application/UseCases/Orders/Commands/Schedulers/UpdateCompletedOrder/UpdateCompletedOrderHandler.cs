@@ -222,12 +222,15 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
         {
             order.Status = OrderStatus.Cancelled;
             order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription();
-            _orderRepository.Update(order);
+
             var payment = order.Payments.FirstOrDefault(p => p.PaymentMethods == PaymentMethods.VnPay && p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess);
             if (payment != default)
             {
-                await RefundOrderAsync(order, payment).ConfigureAwait(false);
+                var isRefund = await RefundOrderAsync(order, payment).ConfigureAwait(false);
+                order.IsRefund = isRefund;
             }
+
+            _orderRepository.Update(order);
         }
     }
 

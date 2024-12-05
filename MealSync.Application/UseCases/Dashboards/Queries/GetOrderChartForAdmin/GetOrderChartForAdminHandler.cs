@@ -52,7 +52,7 @@ public class GetOrderChartForAdminHandler : IQueryHandler<GetOrderChartForAdminQ
             DateFrom = dateStep.ToString("yyyy-MM-dd"),
             DateTo = dateStep.ToString("yyyy-MM-dd"),
             PaymentOnlineList = new PaymentMethods[] { PaymentMethods.VnPay },
-            DeliveryFailReportedByCustomer = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_REPORTED_BY_CUSTOMER,
+            DeliveryFailReportedByCustomer = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER,
             DeliveredReportedByCustomer = OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER,
             DeliveryFailByCustomer = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER,
             CustomerCancel = OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL,

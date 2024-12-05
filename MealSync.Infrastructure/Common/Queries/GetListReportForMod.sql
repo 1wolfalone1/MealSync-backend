@@ -19,14 +19,20 @@
                     CAST(o.intended_receive_date AS DATETIME),
                     INTERVAL FLOOR(o.end_time / 100) HOUR
                 ) + INTERVAL (o.end_time % 100) MINUTE + INTERVAL 20 HOUR
-                OR EXISTS (
-                    SELECT
-                        1
-                    FROM
-                        report r2
-                    WHERE
-                        r2.order_id = o.id
-                        AND r2.shop_id IS NOT NULL
+                OR (
+                    EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            report r2
+                        WHERE
+                            r2.order_id = o.id
+                            AND r2.shop_id IS NOT NULL
+                    )
+                    AND @Now > DATE_ADD(
+                        CAST(o.intended_receive_date AS DATETIME),
+                        INTERVAL FLOOR(o.end_time / 100) HOUR
+                    ) + INTERVAL (o.end_time % 100) MINUTE + INTERVAL 2 HOUR
                 )
             ) THEN 1
             ELSE 0
