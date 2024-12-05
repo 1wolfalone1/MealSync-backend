@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
@@ -16,10 +17,12 @@ public class DeliveryInforResponseMapping : Profile
 
     private int GetDeliveryStatus(Order order)
     {
-        if (order.Status == OrderStatus.Delivered)
+        if (order.Status == OrderStatus.Delivered || order.ReceiveAt != default)
             return 1; // success
-        if (order.Status == OrderStatus.FailDelivery)
+
+        if (order.Status == OrderStatus.FailDelivery || order.LastestDeliveryFailAt != default)
             return 2; // fail
+
         return 0;
     }
 }
