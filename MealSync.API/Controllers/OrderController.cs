@@ -7,6 +7,7 @@ using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaf
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveryFailOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess.ShopAndStaffDeliverySuccessByQR;
+using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess.ShopAndStaffDeliverySuccessWithProof;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCancelOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopConfirmOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
@@ -241,5 +242,13 @@ public class OrderController : BaseApiController
         {
             OrderId = id,
         }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.SHOP_STAFF_DELIVERED_ORDER_BY_PROOF)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
+    public async Task<IActionResult> ShopAndStaffConfirmDeliveredByProof([FromBody] ShopAndStaffDeliverySuccessWithProofCommand command, long id)
+    {
+        command.OrderId = id;
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }
