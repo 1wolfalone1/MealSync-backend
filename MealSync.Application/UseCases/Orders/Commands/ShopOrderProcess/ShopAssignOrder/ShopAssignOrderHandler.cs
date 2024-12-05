@@ -106,6 +106,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
+            // Todo: Check if reassign staff need to re generate qrcode
             DeliveryPackage dp;
             if (order.DeliveryPackageId == null)
             {

@@ -133,8 +133,8 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
             if (currentDateTime.DateTime > startEndTime.EndTime)
                 throw new InvalidBusinessException(MessageCode.E_ORDER_OVER_TIME.GetDescription(), new object[] { id });
 
-            if (currentDateTime.DateTime < startEndTime.StartTime.AddMinutes(-15))
-                throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERING_EARLY_OVER_15P.GetDescription(), new object[] { id, TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime) });
+            if (currentDateTime.DateTime < startEndTime.StartTime.AddMinutes(-30))
+                throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERING_EARLY_OVER_30p.GetDescription(), new object[] { id, TimeFrameUtils.GetTimeFrameString(order.StartTime, order.EndTime) });
 
             listOrder.Add(order);
         }
