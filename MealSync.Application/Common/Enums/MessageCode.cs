@@ -481,8 +481,8 @@ public enum MessageCode
     [Description("E-Order-OverTime")]
     E_ORDER_OVER_TIME,
 
-    [Description("E-Order_DeliveringEarlyOver15p")]
-    E_ORDER_DELIVERING_EARLY_OVER_15P,
+    [Description("E-Order_DeliveringEarlyOver30p")]
+    E_ORDER_DELIVERING_EARLY_OVER_30p,
     // Report
     [Description("E-Report-NotFound")]
     E_REPORT_NOT_FOUND,
