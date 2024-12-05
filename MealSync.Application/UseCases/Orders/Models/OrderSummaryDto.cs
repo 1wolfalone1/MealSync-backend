@@ -24,6 +24,8 @@ public class OrderSummaryDto
 
     public DateTime IntendedReceiveDate { get; set; }
 
+    public DateTime? ReceiveAt { get; set; }
+
     public int StartTime { get; set; }
 
     public int EndTime { get; set; }

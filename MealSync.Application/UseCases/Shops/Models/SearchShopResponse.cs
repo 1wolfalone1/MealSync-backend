@@ -18,6 +18,10 @@ public class SearchShopResponse
 
     public bool IsAcceptingOrderNextDay { get; set; }
 
+    public int TotalOrder { get; set; }
+
+    public double AverageRating { get; set; }
+
     public List<FoodShopResponse> Foods { get; set; }
 
     public class FoodShopResponse
@@ -35,5 +39,7 @@ public class SearchShopResponse
         public string? ImageUrl { get; set; }
 
         public bool IsSoldOut { get; set; }
+
+        public int TotalOrder { get; set; }
     }
 }

@@ -79,6 +79,7 @@ public static class Endpoints
     public const string SEARCH_SHOP = "shop/search";
     public const string SHOP_INFO_REORDER = "shop/info/re-order/{id:long}";
     public const string SHOP_CATEGORY = "shop/{id:long}/category";
+    public const string SHOP_CART_INFO = "shop/cart";
 
     // Shop delivery staff
     public const string GET_SHOP_DELIVER_STAFF_AVAILABLE = "shop/shop-delivery-staff/available";

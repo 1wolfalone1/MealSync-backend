@@ -26,6 +26,10 @@ public class OrderSummaryResponse
 
     public long IntendedReceiveDate { get; set; }
 
+    public long ReceiveAt { get; set; }
+
+    public bool IsOrderTomorrow { get; set; }
+
     public int StartTime { get; set; }
 
     public int EndTime { get; set; }

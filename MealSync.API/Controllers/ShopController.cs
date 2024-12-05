@@ -16,6 +16,7 @@ using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatistics;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatisticSummary;
 using MealSync.Application.UseCases.Shops.Commands.ModeratorManage.UpdateShopStatus;
+using MealSync.Application.UseCases.Shops.Queries.GetShopInCart;
 using MealSync.Application.UseCases.Shops.Queries.ModeratorManage.GetListShop;
 using MealSync.Application.UseCases.Shops.Queries.ModeratorManage.GetShopDetail;
 using MealSync.Application.UseCases.Shops.Queries.SearchShop;
@@ -189,5 +190,12 @@ public class ShopController : BaseApiController
     public async Task<IActionResult> UpdateShopStatus([FromBody] UpdateShopStatusCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.SHOP_CART_INFO)]
+    [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
+    public async Task<IActionResult> GetShopInCart([FromQuery] GetShopInCartQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }
