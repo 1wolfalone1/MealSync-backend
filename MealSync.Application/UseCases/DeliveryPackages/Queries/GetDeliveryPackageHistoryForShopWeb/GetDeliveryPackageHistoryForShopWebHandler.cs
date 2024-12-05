@@ -35,9 +35,9 @@ public class GetDeliveryPackageHistoryForShopWebHandler : IQueryHandler<GetDeliv
             if (dp != null)
             {
                 dp.IntenededReceiveDate = deliveryPackage.DeliveryDate;
-                dp.StartTime = dp.StartTime;
-                dp.EndTime = dp.EndTime;
-                dp.Status = dp.Status;
+                dp.StartTime = deliveryPackage.StartTime;
+                dp.EndTime = deliveryPackage.EndTime;
+                dp.Status = deliveryPackage.Status;
                 dp.Orders = await GetListOrderByDeliveryPackageIdAsync(deliveryPackage.Id, _currentPrincipalService.CurrentPrincipalId.Value).ConfigureAwait(false);
                 deliveryPackageResponse.Add(dp);
             }
