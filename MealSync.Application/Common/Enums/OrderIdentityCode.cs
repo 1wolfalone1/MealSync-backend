@@ -18,6 +18,7 @@ public enum OrderIdentityCode
     [Description("DeliveryFailByCustomer")]
     ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER,
 
+    // Report
     [Description("DeliveryFailByCustomerReportedByCustomer")]
     ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER,
 

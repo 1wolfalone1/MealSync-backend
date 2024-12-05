@@ -16,6 +16,8 @@ public class ShopInfoResponse
 
     public string PhoneNumber { get; set; } = null!;
 
+    public int TotalOrder { get; set; }
+
     public double AverageRating { get; set; }
 
     public ShopStatus Status { get; set; }

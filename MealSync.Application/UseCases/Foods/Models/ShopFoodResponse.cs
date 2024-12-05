@@ -21,5 +21,7 @@ public class ShopFoodResponse
         public string ImageUrl { get; set; } = null!;
 
         public bool IsSoldOut { get; set; }
+
+        public int TotalOrder { get; set; }
     }
 }
