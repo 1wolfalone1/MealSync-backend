@@ -16,7 +16,7 @@ public class ShopDeliveryStaffRepository : BaseRepository<ShopDeliveryStaff>, IS
     public List<ShopDeliveryStaff> GetListAvailableShopDeliveryStaff(string? searchText, int orderMode, long shopId)
     {
         var query = DbSet.Include(sdf => sdf.Account)
-            .Include(sdf => sdf.DeliveryPackages.Where(dp => (dp.Status == DeliveryPackageStatus.Created || dp.Status == DeliveryPackageStatus.OnGoing)
+            .Include(sdf => sdf.DeliveryPackages.Where(dp => (dp.Status == DeliveryPackageStatus.InProcess)
                                                              && DateTime.Compare(dp.DeliveryDate.Date, TimeFrameUtils.GetCurrentDateInUTC7().Date) == 0))
             .Where(sdf => sdf.ShopId == shopId && sdf.Status != ShopDeliveryStaffStatus.Offline).AsQueryable();
 

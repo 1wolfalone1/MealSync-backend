@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using MealSync.Application.Common.Utils;
+using MealSync.Domain.Entities;
 using Newtonsoft.Json;
 
 namespace MealSync.Application.UseCases.Orders.Models;
@@ -24,7 +25,35 @@ public class OrderDetailForShopResponse
 
     public DateTime? CompletedAt { get; set; }
 
+    public DateTime RejectAt { get; set; }
+
+    public DateTimeOffset CancelAt { get; set; }
+
+    public DateTimeOffset ResolveAt { get; set; }
+
+    public DateTime LatestDeliveryFailAt { get; set; }
+
     public DateTime IntendedReceiveDate { get; set; }
+
+    public string Reason { get; set; }
+
+    public string ReasonIdentity { get; set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string EvidenceDeliveryFailJson { get; set; }
+
+    public List<ShopDeliveyFailEvidence> Evidences
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(EvidenceDeliveryFailJson))
+            {
+                return JsonConvert.DeserializeObject<List<ShopDeliveyFailEvidence>>(EvidenceDeliveryFailJson);
+            }
+
+            return new List<ShopDeliveyFailEvidence>();
+        }
+    }
 
     [System.Text.Json.Serialization.JsonIgnore]
     public string DeliverySuccessImageUrl { get; set; }
