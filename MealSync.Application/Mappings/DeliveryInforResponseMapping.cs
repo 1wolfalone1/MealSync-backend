@@ -12,7 +12,9 @@ public class DeliveryInforResponseMapping : Profile
     {
         CreateMap<Order, DeliveryInforResponse>()
             .ForMember(dest => dest.DeliveryStatus, opt => opt.MapFrom(
-                src => GetDeliveryStatus(src)));
+                src => GetDeliveryStatus(src)))
+            .ForMember(dest => dest.IsDeliveredByQR, opt => opt.MapFrom(
+                src => string.IsNullOrEmpty(src.DeliverySuccessImageUrl)));
     }
 
     private int GetDeliveryStatus(Order order)

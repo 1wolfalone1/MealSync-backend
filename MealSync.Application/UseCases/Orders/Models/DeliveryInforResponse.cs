@@ -8,6 +8,8 @@ public class DeliveryInforResponse
 
     public DateTimeOffset ReceiveAt { get; set; }
 
+    public bool IsDeliveredByQR { get; set; }
+
     public int DeliveryStatus { get; set; }
 
     public EvidenceOrderResponse DeliveryFaileEvidence { get; set; }
