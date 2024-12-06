@@ -19,9 +19,11 @@ public class EvidenceOrderResponse
     {
         get
         {
-            if (!string.IsNullOrEmpty(ReasonIdentity) && ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
+            if (!string.IsNullOrEmpty(ReasonIdentity) && (ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription() ||
+                                                          ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()))
                 return 2;
-            else if (!string.IsNullOrEmpty(ReasonIdentity) && ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription())
+            else if (!string.IsNullOrEmpty(ReasonIdentity) && ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription() ||
+                     ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription())
                 return 1;
 
             return 0;
