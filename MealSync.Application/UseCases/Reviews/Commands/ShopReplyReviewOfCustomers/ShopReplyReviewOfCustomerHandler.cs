@@ -3,6 +3,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Reviews.Commands.ShopReplyReviewOfCustomers;
@@ -22,8 +23,12 @@ public class ShopReplyReviewOfCustomerHandler : ICommandHandler<ShopReplyReviewO
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IOrderRepository _orderRepository;
     private readonly IMapper _mapper;
+    private readonly INotificationFactory _notificationFactory;
+    private readonly INotifierService _notifierService;
+    private readonly IShopRepository _shopRepository;
 
-    public ShopReplyReviewOfCustomerHandler(IUnitOfWork unitOfWork, IReviewRepository reviewRepository, ILogger<ShopReplyReviewOfCustomerHandler> logger, ICurrentPrincipalService currentPrincipalService, IOrderRepository orderRepository, IMapper mapper)
+    public ShopReplyReviewOfCustomerHandler(IUnitOfWork unitOfWork, IReviewRepository reviewRepository, ILogger<ShopReplyReviewOfCustomerHandler> logger, ICurrentPrincipalService currentPrincipalService,
+        IOrderRepository orderRepository, IMapper mapper, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository)
     {
         _unitOfWork = unitOfWork;
         _reviewRepository = reviewRepository;
@@ -31,16 +36,22 @@ public class ShopReplyReviewOfCustomerHandler : ICommandHandler<ShopReplyReviewO
         _currentPrincipalService = currentPrincipalService;
         _orderRepository = orderRepository;
         _mapper = mapper;
+        _notificationFactory = notificationFactory;
+        _notifierService = notifierService;
+        _shopRepository = shopRepository;
     }
 
     public async Task<Result<Result>> Handle(ShopReplyReviewOfCustomerCommand request, CancellationToken cancellationToken)
     {
+        var shopId = _currentPrincipalService.CurrentPrincipalId.Value;
+        var order = _orderRepository.Get(x => x.Id == request.OrderId && x.ShopId == shopId).SingleOrDefault();
+
         // Validate
-        await ValidateAsync(request).ConfigureAwait(false);
+        await ValidateAsync(request, order).ConfigureAwait(false);
 
         Review review = new Review
         {
-            ShopId = _currentPrincipalService.CurrentPrincipalId.Value,
+            ShopId = shopId,
             OrderId = request.OrderId,
             Rating = RatingRanges.FiveStar,
             Comment = request.Comment,
@@ -54,6 +65,10 @@ public class ShopReplyReviewOfCustomerHandler : ICommandHandler<ShopReplyReviewO
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             await _reviewRepository.AddAsync(review).ConfigureAwait(false);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+
+            var shop = _shopRepository.GetById(shopId)!;
+            var notification = _notificationFactory.CreateShopReplyReviewOrderNotification(order, shop);
+            _notifierService.NotifyAsync(notification);
             return Result.Create(_mapper.Map<ReviewDetailResponse>(review));
         }
         catch (Exception e)
@@ -65,9 +80,8 @@ public class ShopReplyReviewOfCustomerHandler : ICommandHandler<ShopReplyReviewO
         }
     }
 
-    private async Task ValidateAsync(ShopReplyReviewOfCustomerCommand request)
+    private async Task ValidateAsync(ShopReplyReviewOfCustomerCommand request, Order? order)
     {
-        var order = _orderRepository.Get(x => x.Id == request.OrderId && x.ShopId == _currentPrincipalService.CurrentPrincipalId.Value).SingleOrDefault();
         if (order == default)
         {
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.OrderId });
@@ -85,7 +99,7 @@ public class ShopReplyReviewOfCustomerHandler : ICommandHandler<ShopReplyReviewO
         var customerReview = _reviewRepository.Get(rv => rv.OrderId == request.OrderId && rv.Entity == ReviewEntities.Customer).FirstOrDefault();
         TimeSpan difference = TimeFrameUtils.GetCurrentDate().Date - customerReview.CreatedDate.Date;
         if (customerReview != null && difference.TotalHours > 24)
-            throw new InvalidBusinessException(MessageCode.E_REVIEW_SHOP_OVER_TIME_REPLY.GetDescription(), new object[]{ request.OrderId });
+            throw new InvalidBusinessException(MessageCode.E_REVIEW_SHOP_OVER_TIME_REPLY.GetDescription(), new object[] { request.OrderId });
 
     }
 }
