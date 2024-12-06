@@ -5,7 +5,8 @@
  */
 -- SET @DateOfYear:='2024-11-14';
 -- SET @PaymentOnlineList:='1';
--- SET @DeliveryFailReportedByCustomer:='DeliveryFailReportedByCustomer';
+-- SET @DeliveryFailByCustomerReportedByCustomer:='DeliveryFailByCustomerReportedByCustomer';
+-- SET @DeliveryFailByShopReportedByCustomer:='DeliveryFailByShopReportedByCustomer';
 -- SET @DeliveredReportedByCustomer:='DeliveredReportedByCustomer';
 -- SET @DeliveryFailByCustomer:='DeliveryFailByCustomer';
 -- SET @CustomerCancel:='CustomerCancel';
@@ -28,7 +29,10 @@ WITH Revenue AS (
             AND o.reason_identity = @DeliveredReportedByCustomer THEN o.charge_fee
             WHEN o.status = 12 -- Resolved
             AND o.is_report = TRUE
-            AND o.reason_identity = @DeliveryFailReportedByCustomer
+            AND (
+                o.reason_identity = @DeliveryFailByCustomerReportedByCustomer
+                OR o.reason_identity = @DeliveryFailByShopReportedByCustomer
+            )
             AND o.is_refund = FALSE
             AND p.payment_methods IN @PaymentOnlineList
             AND p.type = 1 -- Payment
@@ -61,7 +65,10 @@ PreviousRevenue AS (
             AND o.reason_identity = @DeliveredReportedByCustomer THEN o.charge_fee
             WHEN o.status = 12 -- Resolved
             AND o.is_report = TRUE
-            AND o.reason_identity = @DeliveryFailReportedByCustomer
+            AND (
+                o.reason_identity = @DeliveryFailByCustomerReportedByCustomer
+                OR o.reason_identity = @DeliveryFailByShopReportedByCustomer
+            )
             AND o.is_refund = FALSE
             AND p.payment_methods IN @PaymentOnlineList
             AND p.type = 1 -- Payment

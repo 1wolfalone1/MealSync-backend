@@ -23,7 +23,7 @@ public class OverviewChartResponse
     public void CalTotalTradingRate(double previousTrading)
     {
         if (previousTrading != 0)
-            this.TotalTradingAmountRate = (this.TotalTradingAmount - previousTrading) / previousTrading * 100;
+            this.TotalTradingAmountRate = Math.Round((this.TotalTradingAmount - previousTrading) / previousTrading * 100, 1);
         else if (previousTrading == 0 && TotalTradingAmount == 0)
             TotalTradingAmountRate = 0;
         else
@@ -33,7 +33,7 @@ public class OverviewChartResponse
     public void CalTotalChargeFeeRate(double previousChargeFee)
     {
         if (previousChargeFee != 0)
-            this.TotalChargeFeeRate = (this.TotalChargeFee - previousChargeFee) / previousChargeFee * 100;
+            this.TotalChargeFeeRate = Math.Round((this.TotalChargeFee - previousChargeFee) / previousChargeFee * 100, 1);
         else if (previousChargeFee == 0 && TotalChargeFee == 0)
             TotalChargeFeeRate = 0;
         else
@@ -43,7 +43,7 @@ public class OverviewChartResponse
     public void CalTotalOrderRate(double previousOrder)
     {
         if (previousOrder != 0)
-            TotalOrderRate = (TotalOrder - previousOrder) / previousOrder * 100;
+            TotalOrderRate = Math.Round((TotalOrder - previousOrder) / previousOrder * 100, 1);
         else if (previousOrder == 0 && TotalOrder == 0)
             TotalOrderRate = 0;
         else
@@ -53,7 +53,7 @@ public class OverviewChartResponse
     public void CalTotalUserRate(double previousUser)
     {
         if (previousUser != 0)
-            TotalUserRate = (TotalUser - previousUser) / previousUser * 100;
+            TotalUserRate = Math.Round((TotalUser - previousUser) / previousUser * 100, 1);
         else if (previousUser == 0 && TotalUser == 0)
             TotalUserRate = 0;
         else

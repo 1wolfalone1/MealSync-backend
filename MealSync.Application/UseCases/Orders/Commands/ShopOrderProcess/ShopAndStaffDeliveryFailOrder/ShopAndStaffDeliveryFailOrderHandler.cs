@@ -58,22 +58,46 @@ public class ShopAndStaffDeliveryFailOrderHandler : ICommandHandler<ShopAndStaff
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
             var order = _orderRepository.GetById(request.OrderId);
-            order.Status = OrderStatus.FailDelivery;
-            order.Reason = request.Reason;
-            order.LastestDeliveryFailAt = TimeFrameUtils.GetCurrentDate();
 
-            if (request.Evidences != null && request.Evidences.Count > 0)
+            // Order with status FailDelivery and delivering
+            if (order.Status == OrderStatus.Delivering || order.Status == OrderStatus.FailDelivery)
             {
-                order.EvidenceDeliveryFailJson = JsonConvert.SerializeObject(request.Evidences);
-            }
+                order.Status = OrderStatus.FailDelivery;
+                order.Reason = request.Reason;
+                order.LastestDeliveryFailAt = TimeFrameUtils.GetCurrentDate();
 
-            if (request.ReasonIndentity == 1)
-            {
-                order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription();
+                if (request.Evidences != null && request.Evidences.Count > 0)
+                {
+                    order.EvidenceDeliveryFailJson = JsonConvert.SerializeObject(request.Evidences);
+                }
+
+                if (request.ReasonIndentity == 1)
+                {
+                    order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription();
+                }
+                else
+                {
+                    order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription();
+                }
             }
-            else
+            else if (order.Status == OrderStatus.IssueReported)
             {
-                order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription();
+                order.Reason = request.Reason;
+                order.LastestDeliveryFailAt = TimeFrameUtils.GetCurrentDate();
+
+                if (request.Evidences != null && request.Evidences.Count > 0)
+                {
+                    order.EvidenceDeliveryFailJson = JsonConvert.SerializeObject(request.Evidences);
+                }
+
+                if (request.ReasonIndentity == 1)
+                {
+                    order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription();
+                }
+                else
+                {
+                    order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription();
+                }
             }
 
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
@@ -105,7 +129,7 @@ public class ShopAndStaffDeliveryFailOrderHandler : ICommandHandler<ShopAndStaff
         if (order == default)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_FOUND.GetDescription(), new object[] { request.OrderId }, HttpStatusCode.NotFound);
 
-        if (order.Status != OrderStatus.Delivering && order.Status != OrderStatus.FailDelivery)
+        if (order.Status != OrderStatus.Delivering && order.Status != OrderStatus.FailDelivery && order.Status != OrderStatus.IssueReported)
             throw new InvalidBusinessException(MessageCode.E_ORDER_NOT_IN_CORRECT_STATUS.GetDescription(), new object[] { request.OrderId });
 
         if (order.DeliveryPackage.ShopDeliveryStaffId.HasValue && order.DeliveryPackage.ShopDeliveryStaffId != _currentPrincipalService.CurrentPrincipalId && order.DeliveryPackage.ShopId.HasValue && order.DeliveryPackage.ShopId != _currentPrincipalService.CurrentPrincipalId)
