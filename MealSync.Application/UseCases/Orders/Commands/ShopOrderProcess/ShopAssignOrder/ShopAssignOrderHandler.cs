@@ -169,7 +169,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 DeliveryDate = order.IntendedReceiveDate,
                 StartTime = order.StartTime,
                 EndTime = order.EndTime,
-                Status = DeliveryPackageStatus.Created,
+                Status = DeliveryPackageStatus.InProcess,
 
             };
             dp.Orders.Add(order);
@@ -219,7 +219,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 DeliveryDate = order.IntendedReceiveDate,
                 StartTime = order.StartTime,
                 EndTime = order.EndTime,
-                Status = DeliveryPackageStatus.Created,
+                Status = DeliveryPackageStatus.InProcess,
 
             };
             await _deliveryPackageRepository.AddAsync(dp).ConfigureAwait(false);

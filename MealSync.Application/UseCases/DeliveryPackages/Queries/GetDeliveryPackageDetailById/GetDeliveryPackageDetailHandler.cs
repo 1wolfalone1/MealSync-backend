@@ -37,7 +37,7 @@ public class GetDeliveryPackageDetailHandler : IQueryHandler<GetDeliveryPackageD
         long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
         var response = await GetDeliveryPackageStatisticsAsync(deliveryPackage.StartTime, deliveryPackage.EndTime, deliveryPackage.DeliveryDate, shopId, deliveryPackage.ShopDeliveryStaffId, new DeliveryPackageStatus[]
         {
-            DeliveryPackageStatus.Created, DeliveryPackageStatus.Done, DeliveryPackageStatus.OnGoing
+            DeliveryPackageStatus.InProcess, DeliveryPackageStatus.Done,
         }).ConfigureAwait(false);
 
         return Result.Success(response);
@@ -89,7 +89,10 @@ public class GetDeliveryPackageDetailHandler : IQueryHandler<GetDeliveryPackageD
 
         var deliveryPackage = dicDormitoryUniq.Values.ToList().FirstOrDefault();
 
-        deliveryPackage.Orders = await GetListOrderByDeliveryPackageIdAsync(deliveryPackage.DeliveryPackageId, shopId).ConfigureAwait(false);
+        if (deliveryPackage != default)
+        {
+            deliveryPackage.Orders = await GetListOrderByDeliveryPackageIdAsync(deliveryPackage.DeliveryPackageId, shopId).ConfigureAwait(false);
+        }
 
         return deliveryPackage;
     }

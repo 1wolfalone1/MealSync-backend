@@ -302,7 +302,7 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
                 DeliveryDate = firstOrder.IntendedReceiveDate,
                 StartTime = firstOrder.StartTime,
                 EndTime = firstOrder.EndTime,
-                Status = DeliveryPackageStatus.Created,
+                Status = DeliveryPackageStatus.InProcess,
             };
 
             var ordersUpdateToNewDelvieryPackage = _orderRepository.GetByIds(dpRequest.OrderIds.ToList());
