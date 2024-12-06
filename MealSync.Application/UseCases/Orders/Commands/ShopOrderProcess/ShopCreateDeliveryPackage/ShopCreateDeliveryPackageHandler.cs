@@ -142,7 +142,7 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
             DeliveryDate = TimeFrameUtils.GetCurrentDateInUTC7().Date,
             StartTime = orders.First().StartTime,
             EndTime = orders.First().EndTime,
-            Status = DeliveryPackageStatus.Created,
+            Status = DeliveryPackageStatus.InProcess,
 
         };
         dp.Orders = orders;

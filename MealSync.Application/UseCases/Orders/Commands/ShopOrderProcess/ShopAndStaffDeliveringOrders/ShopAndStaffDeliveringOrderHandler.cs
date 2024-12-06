@@ -78,7 +78,7 @@ public class ShopAndStaffDeliveringOrderHandler : ICommandHandler<ShopAndStaffDe
 
             // Update delivery package status
             var dp = _deliveryPackageRepository.GetByOrderId(request.Ids.First());
-            dp.Status = DeliveryPackageStatus.OnGoing;
+            dp.Status = DeliveryPackageStatus.InProcess;
 
             _deliveryPackageRepository.Update(dp);
             _orderRepository.UpdateRange(orders);

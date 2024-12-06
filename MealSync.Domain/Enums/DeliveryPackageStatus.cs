@@ -2,7 +2,6 @@
 
 public enum DeliveryPackageStatus
 {
-    Created = 1,
-    OnGoing = 2,
-    Done = 3
+    InProcess = 1,
+    Done = 2
 }
