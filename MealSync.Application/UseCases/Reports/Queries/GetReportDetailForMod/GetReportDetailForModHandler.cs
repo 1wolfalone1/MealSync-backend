@@ -79,7 +79,7 @@ public class GetReportDetailForModHandler : IQueryHandler<GetReportDetailForModQ
             }
 
             var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
-            if (customerReport.Status == ReportStatus.Pending && (reports.Count > 1 || now > endTime.AddHours(20)))
+            if (customerReport.Status == ReportStatus.Pending && ((reports.Count > 1 && now > endTime.AddHours(2)) || now > endTime.AddHours(20)))
             {
                 reportDetailShopWebResponses.IsAllowAction = true;
             }

@@ -182,8 +182,8 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                             else
                             {
                                 // Giao hàng thất bại, thanh toán Online => Approve customer report, đánh cờ shop => Refund tiền customer
-                                await TransactionWithdrawalReportingForRefund(payment, order, shop, shopWallet).ConfigureAwait(false);
                                 await ApproveCustomerAndFlagShop(request, customerReport, shopReport, shop, systemConfig, shopAccount).ConfigureAwait(false);
+                                await TransactionWithdrawalReportingForRefund(payment, order, shop, shopWallet).ConfigureAwait(false);
                                 order.IsRefund = await RefundOrderAsync(order, payment).ConfigureAwait(false);
                             }
                         }
