@@ -19,6 +19,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
         return DbSet.Include(o => o.OrderDetails)
             .ThenInclude(od => od.Food)
+            .Include(o => o.Promotion)
             .Include(o => o.CustomerLocation)
             .Include(o => o.Payments)
             .Include(o => o.Shop)
