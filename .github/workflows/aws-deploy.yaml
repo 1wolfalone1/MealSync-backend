@@ -27,8 +27,8 @@ jobs:
       - name: Build, tag, and push docker image to Docker hub
         run: |
           echo "${{ secrets.DOCKER_HUB_SECRETS }}" | docker login -u 1wolfalone1 --password-stdin
-          docker build -t 1wolfalone1/mealsync-api:latest .
-          docker push 1wolfalone1/mealsync-api:latest
+          docker build -t 1wolfalone1/mealsync-api-2:latest .
+          docker push 1wolfalone1/mealsync-api-2:latest
 
   # sync-argocd:
   #   needs: update_images
