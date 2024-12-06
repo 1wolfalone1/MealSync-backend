@@ -12,5 +12,5 @@ public class CustomerReportCommand : ICommand<Result>
 
     public string Content { get; set; }
 
-    public IFormFile[] Images { get; set; }
+    public IFormFile[]? Images { get; set; }
 }

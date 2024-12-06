@@ -118,10 +118,13 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                   && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription()))
             {
                 var imageUrls = new List<string>();
-                foreach (var file in request.Images)
+                if (request.Images != default && request.Images.Length > 0)
                 {
-                    var url = await _storageService.UploadFileAsync(file).ConfigureAwait(false);
-                    imageUrls.Add(url);
+                    foreach (var file in request.Images)
+                    {
+                        var url = await _storageService.UploadFileAsync(file).ConfigureAwait(false);
+                        imageUrls.Add(url);
+                    }
                 }
 
                 var report = new Report
@@ -130,7 +133,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                     CustomerId = customerId,
                     Title = request.Title,
                     Content = request.Content,
-                    ImageUrl = string.Join(",", imageUrls),
+                    ImageUrl = imageUrls.Count > 0 ? string.Join(",", imageUrls) : string.Empty,
                     Status = ReportStatus.Pending,
                 };
 
