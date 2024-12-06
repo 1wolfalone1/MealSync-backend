@@ -203,16 +203,23 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                     _orderRepository.Update(order);
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
+                    var notifications = new List<Notification>();
+
                     if (isNotifyLimitAvailableAmount)
                     {
                         var account = _accountRepository.GetById(shop.Id)!;
                         var notification = _notificationFactory.CreateLimitAvailableAmountAndInActiveShopNotification(shop, shopWallet);
-                        _notifierService.NotifyAsync(notification);
+                        notifications.Add(notification);
                         _emailService.SendNotifyLimitAvailableAmountAndInActiveShop(
                             account.Email,
                             MoneyUtils.FormatMoneyWithDots(shopWallet.AvailableAmount),
                             MoneyUtils.FormatMoneyWithDots(MoneyUtils.AVAILABLE_AMOUNT_LIMIT));
                     }
+
+                    var accountCustomer = _accountRepository.GetById(customerId)!;
+                    var customerReportOrderNotification = _notificationFactory.CreateCustomerReportOrderNotification(order, accountCustomer);
+                    notifications.Add(customerReportOrderNotification);
+                    _notifierService.NotifyRangeAsync(notifications);
 
                     return Result.Create(_mapper.Map<ReportDetailResponse>(report));
                 }
