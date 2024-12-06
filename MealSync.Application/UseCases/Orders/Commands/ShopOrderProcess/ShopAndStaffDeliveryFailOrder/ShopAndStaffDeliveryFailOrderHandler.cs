@@ -147,16 +147,17 @@ public class ShopAndStaffDeliveryFailOrderHandler : ICommandHandler<ShopAndStaff
 
     private async Task SendNotification(Order order)
     {
+        List<Notification> notifications = new List<Notification>();
         var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
         // Send notification for customer
         var notiToCustomer = _notificationFactory.CreateOrderDeliveryFailedToCustomerNotification(order, shop);
-        await _notifierService.NotifyAsync(notiToCustomer).ConfigureAwait(false);
+        notifications.Add(notiToCustomer);
 
         // Send notification for shop
         var deliveryPackage = _deliveryPackageRepository.GetById(order.DeliveryPackageId.Value);
         var accShip = _accountRepository.GetById(deliveryPackage.ShopDeliveryStaffId ?? deliveryPackage.ShopId);
         var notiToShop = _notificationFactory.CreateOrderDeliveryFailedToShopNotification(order, accShip, shop);
-        await _notifierService.NotifyAsync(notiToShop).ConfigureAwait(false);
+        notifications.Add(notiToShop);
 
         // Send notification for moderator
         var building = _buildingRepository.GetById(order.BuildingId);
@@ -164,7 +165,9 @@ public class ShopAndStaffDeliveryFailOrderHandler : ICommandHandler<ShopAndStaff
         foreach (var moderator in moderators)
         {
             var notiToModerator = _notificationFactory.CreateOrderDeliveryFailedToModeratorNotification(order, moderator, shop);
-            await _notifierService.NotifyAsync(notiToModerator).ConfigureAwait(false);
+            notifications.Add(notiToModerator);
         }
+
+        await _notifierService.NotifyRangeAsync(notifications).ConfigureAwait(false);
     }
 }

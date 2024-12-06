@@ -180,20 +180,9 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
             query = query.Where(dp => dp.DeliveryDate.Date >= dateFrom.Value.Date && dp.DeliveryDate.Date <= dateTo.Value.Date);
         }
 
-        switch (statusMode)
+        if (statusMode != 0)
         {
-            case 1:
-                query = query.Where(dp =>
-                    (dp.EndTime == 2400
-                        ? dp.DeliveryDate.AddDays(1)
-                        : dp.DeliveryDate).AddHours(dp.EndTime / 100).AddMinutes(dp.EndTime % 100) > TimeFrameUtils.GetCurrentDateInUTC7().Date);
-                break;
-            case 2:
-                query = query.Where(dp =>
-                    (dp.EndTime == 2400
-                        ? dp.DeliveryDate.AddDays(1)
-                        : dp.DeliveryDate).AddHours(dp.EndTime / 100).AddMinutes(dp.EndTime % 100) <= TimeFrameUtils.GetCurrentDateInUTC7().Date);
-                break;
+            query = query.Where(dp => (int)dp.Status == statusMode);
         }
 
         var total = query.Count();
