@@ -65,4 +65,12 @@ public interface INotificationFactory
     Notification CreateApproveOrRejectCustomerReportNotification(Account customerAccount, Shop shop, Report report, bool isApprove);
 
     Notification CreateApproveOrRejectReportOfShopNotification(Shop shop, Account customerAccount, Report report, bool isApprove);
+
+    Notification CreateCustomerReportOrderNotification(Order order, Account accountCustomer);
+
+    Notification CreateShopReplyReportOrderNotification(Order order, Shop shop);
+
+    Notification CreateCustomerReviewOrderNotification(Order order, Account accountCustomer);
+
+    Notification CreateShopReplyReviewOrderNotification(Order order, Shop shop);
 }

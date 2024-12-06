@@ -282,6 +282,8 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                             SendMailBanCustomer(customer, systemConfig);
                         }
 
+                        NotifyApproveOrReject(customer.Account, shop, customerReport);
+
                         return Result.Success(new
                         {
                             Code = MessageCode.I_MODERATOR_UPDATE_STATUS_SUCCESS.GetDescription(),

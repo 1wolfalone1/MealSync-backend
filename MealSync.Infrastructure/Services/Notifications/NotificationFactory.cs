@@ -430,6 +430,86 @@ public class NotificationFactory : INotificationFactory
         };
     }
 
+    public Notification CreateCustomerReportOrderNotification(Order order, Account accountCustomer)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.REPORT_ORDER,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_CUSTOMER_REPORT.GetDescription(), order.Id) ?? string.Empty,
+            ImageUrl = accountCustomer.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateShopReplyReportOrderNotification(Order order, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.REPORT_ORDER,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_SHOP_REPLY_REPORT.GetDescription(), order.Id) ?? string.Empty,
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateCustomerReviewOrderNotification(Order order, Account accountCustomer)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.REVIEW_ORDER,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_CUSTOMER_REVIEW.GetDescription(), order.Id) ?? string.Empty,
+            ImageUrl = accountCustomer.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
+    public Notification CreateShopReplyReviewOrderNotification(Order order, Shop shop)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.REVIEW_ORDER,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_SHOP_REPLY_REVIEW.GetDescription(), order.Id) ?? string.Empty,
+            ImageUrl = shop.LogoUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
     public Notification CreateOrderDeliveryFailedAutoByBatchToShopNotification(Order order, Shop shop)
     {
         using var scope = _serviceScopeFactory.CreateScope();
