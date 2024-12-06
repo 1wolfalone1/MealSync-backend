@@ -21,9 +21,5 @@ public class ShopReplyCustomerReportValidate : AbstractValidator<ShopReplyCustom
             .WithMessage("Nội dung báo cáo đơn hàng không được để trống")
             .MaximumLength(800)
             .WithMessage("Nội dung báo cáo tối đa 800 kí tự.");
-
-        RuleFor(x => x.Images)
-            .Must(images => images != default && images.Count > 0 && images.Count <= 5)
-            .WithMessage("Ảnh báo cáo phải có ít nhất 1 và tối đa 5");
     }
 }

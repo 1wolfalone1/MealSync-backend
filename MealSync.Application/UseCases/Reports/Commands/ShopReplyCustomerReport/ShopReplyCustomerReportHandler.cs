@@ -94,9 +94,15 @@ public class ShopReplyCustomerReportHandler : ICommandHandler<ShopReplyCustomerR
                     ShopId = shopId,
                     Title = request.Title,
                     Content = request.Content,
-                    ImageUrl = string.Join(",", request.Images),
+                    ImageUrl = string.Empty,
                     Status = ReportStatus.Pending,
                 };
+
+                if (request.Images != default && request.Images.Count > 0)
+                {
+                    report.ImageUrl = string.Join(",", request.Images);
+                }
+
                 try
                 {
                     // Begin transaction
