@@ -92,7 +92,7 @@ public enum MessageCode
     [Description("I-Account-ModeratorCreated")]
     E_ACCOUNT_MODERATOR_CREATED,
 
-    [Description("I-Token-NotValid")]
+    [Description("E-Token-NotValid")]
     E_TOKEN_NOT_VALID,
 
     // Platform Category
