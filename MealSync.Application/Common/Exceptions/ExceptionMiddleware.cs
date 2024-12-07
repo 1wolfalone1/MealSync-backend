@@ -36,6 +36,7 @@ public class ExceptionMiddleware
         }
         catch (ValidationException exception)
         {
+            _logger.LogError(exception, exception.Message);
             await HandleValidationExceptionASync(context, exception);
         }
         catch (InvalidBusinessException exception)
