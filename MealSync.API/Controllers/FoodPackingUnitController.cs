@@ -2,6 +2,7 @@
 using MealSync.API.Shared;
 using MealSync.Application.UseCases.FoodPackingUnits.Commands.Create.ShopCreate;
 using MealSync.Application.UseCases.FoodPackingUnits.Commands.Delete;
+using MealSync.Application.UseCases.FoodPackingUnits.Commands.Update.ShopUpdateFPU;
 using MealSync.Application.UseCases.FoodPackingUnits.Queries.GetListFoodPackingUnitForShop;
 using MealSync.Application.UseCases.Foods.Queries.TopFood;
 using Microsoft.AspNetCore.Authorization;
@@ -34,5 +35,13 @@ public class FoodPackingUnitController : BaseApiController
         {
             Id = id,
         }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.UPDATE_FOOD_PACKING_UNIT)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> ShopUpdateFoodPackingUnit([FromBody] ShopUpdateFPUCommand command, int id)
+    {
+        command.Id = id;
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }
