@@ -81,7 +81,7 @@ public class ValidIdTokenFromFirebaseHandler : ICommandHandler<ValidIdTokenFromF
 
                 return Result.Warning(new
                 {
-                    CodeConfirm = code,
+                    CodeConfirm = int.Parse(code),
                     Email = firebaseUser.Email,
                     FUserId = firebaseUser.UserId,
                     AvatarUrl = firebaseUser.Picture,

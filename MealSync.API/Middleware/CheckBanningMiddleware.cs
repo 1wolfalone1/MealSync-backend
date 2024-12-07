@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using MealSync.API.Shared;
@@ -8,6 +9,7 @@ using MealSync.Application.Common.Services;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
+using Microsoft.AspNetCore.Authentication;
 
 namespace MealSync.API.Middleware;
 
@@ -48,11 +50,19 @@ public class CheckBanningMiddleware
         if (role == Roles.Customer.GetDescription())
         {
             var customer = customerRepository.GetById(long.Parse(accountId));
+            if (customer == null)
+            {
+                throw new InvalidBusinessException(MessageCode.E_TOKEN_NOT_VALID.GetDescription(), HttpStatusCode.Unauthorized);
+            }
             ValidateRequest(customer.Status, context.Request.Path.Value, context.Request.Method);
         }
         else if (role == Roles.ShopOwner.GetDescription())
         {
             var shop = shopRepository.GetById(long.Parse(accountId));
+            if (shop == null)
+            {
+                throw new InvalidBusinessException(MessageCode.E_TOKEN_NOT_VALID.GetDescription(), HttpStatusCode.Unauthorized);
+            }
             ValidateRequest(shop.Status, context.Request.Path.Value, context.Request.Method);
         }
 
