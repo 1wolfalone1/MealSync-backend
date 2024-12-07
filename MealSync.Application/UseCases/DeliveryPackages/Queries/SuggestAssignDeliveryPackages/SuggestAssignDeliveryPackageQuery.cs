@@ -10,4 +10,6 @@ public class SuggestAssignDeliveryPackageQuery : IQuery<Result>
     public int EndTime { get; set; }
 
     public long[] ShipperIds { get; set; }
+
+    public double StaffMaxCarryWeight { get; set; }
 }

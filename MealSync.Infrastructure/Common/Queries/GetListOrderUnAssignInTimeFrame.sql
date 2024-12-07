@@ -122,7 +122,8 @@ SELECT
     od.total_price AS TotalPrice,
     od.basic_price AS BasicPrice,
     od.description AS OrderDescription,
-    od.note AS Note
+    od.note AS Note,
+    od.quantity * fpu.weight AS Weight
 FROM
     OrdersOfShop o
     INNER JOIN building b ON o.building_id = b.id
@@ -135,6 +136,7 @@ FROM
     LEFT JOIN account accShop ON dp.shop_id = accShop.id
     INNER JOIN order_detail od ON o.id = od.order_id
     INNER JOIN food f ON od.food_id = f.id
+    INNER JOIN food_packing_unit fpu ON f.food_packing_unit_id = fpu.id
 ORDER BY
     o.start_time ASC,
     o.order_date ASC;

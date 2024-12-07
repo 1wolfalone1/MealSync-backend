@@ -114,19 +114,21 @@ SELECT
     od.total_price AS TotalPrice,
     od.basic_price AS BasicPrice,
     od.description AS OrderDescription,
-    od.note AS Note
+    od.note AS Note,
+    od.quantity * fpu.weight AS Weight
 FROM
     OrdersOfShop o
-        INNER JOIN building b ON o.building_id = b.id
-        INNER JOIN dormitory d ON b.dormitory_id = d.id
-        INNER JOIN location l ON o.customer_location_id = l.id
-        LEFT JOIN promotion p ON o.promotion_id = p.id
-        INNER JOIN account accCus ON o.customer_id = accCus.id
-        LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
-        LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
-        LEFT JOIN account accShop ON dp.shop_id = accShop.id
-        INNER JOIN order_detail od ON o.id = od.order_id
-        INNER JOIN food f ON od.food_id = f.id
+    INNER JOIN building b ON o.building_id = b.id
+    INNER JOIN dormitory d ON b.dormitory_id = d.id
+    INNER JOIN location l ON o.customer_location_id = l.id
+    LEFT JOIN promotion p ON o.promotion_id = p.id
+    INNER JOIN account accCus ON o.customer_id = accCus.id
+    LEFT JOIN delivery_package dp ON o.delivery_package_id = dp.id
+    LEFT JOIN account accShip ON dp.shop_delivery_staff_id = accShip.id
+    LEFT JOIN account accShop ON dp.shop_id = accShop.id
+    INNER JOIN order_detail od ON o.id = od.order_id
+    INNER JOIN food f ON od.food_id = f.id
+    INNER JOIN food_packing_unit fpu ON f.food_packing_unit_id = fpu.id
 ORDER BY
     o.start_time ASC,
     o.order_date ASC;

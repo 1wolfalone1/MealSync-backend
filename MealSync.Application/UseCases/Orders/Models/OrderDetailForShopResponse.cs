@@ -157,6 +157,14 @@ public class OrderDetailForShopResponse
         }
     }
 
+    public double TotalWeight
+    {
+        get
+        {
+            return OrderDetails.Sum(od => od.Weight);
+        }
+    }
+
     public CustomerInforInShoprderDetailForShop Customer { get; set; }
 
     public PromotionInShopOrderDetail Promotion { get; set; }
@@ -241,6 +249,8 @@ public class OrderDetailForShopResponse
         public double BasicPrice { get; set; }
 
         public string Note { get; set; }
+
+        public double Weight { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
         public string OrderDescription { get; set; }

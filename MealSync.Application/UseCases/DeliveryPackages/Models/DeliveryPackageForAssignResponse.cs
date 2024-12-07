@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
+using MealSync.Application.Common.Constants;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.UseCases.Orders.Models;
-using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.ShopDeliveryStaffs.Models;
 
@@ -19,7 +20,55 @@ public class DeliveryPackageForAssignResponse
     public int Failed { get; set; }
 
     [JsonIgnore]
+    public int StartTime { get; set; }
+
+    [JsonIgnore]
+    public int EndTime { get; set; }
+
+    // [JsonIgnore]
     public double CurrentDistance { get; set; }
+
+    // [JsonIgnore]
+    public double CurrentTaskLoad {
+        get
+        {
+            return DeliveryPackageWeight;
+        }
+    }
+
+    public double DeliveryPackageWeight
+    {
+        get
+        {
+            return Orders.Sum(o => o.TotalWeight);
+        }
+    }
+
+    // [JsonIgnore]
+    public int TotalMinutesHandleDelivery
+    {
+        get
+        {
+            return TotalMinutesToWaitCustomer + DevidedOrderConstant.MinutesAddWhenOrderMoreThanFive + (Total / 5 * DevidedOrderConstant.MinutesAddWhenOrderMoreThanFive) + TotalMinutestToMove;
+        }
+    }
+
+    // [JsonIgnore]
+    public int TotalMinutestToMove { get; set; }
+
+    // [JsonIgnore]
+    public int TotalMinutesToWaitCustomer { get; set; }
+
+    public int SuggestStartTimeDelivery
+    {
+        get
+        {
+            var endTime = TimeFrameUtils.GetStartTimeToDateTime(DateTime.Now, EndTime);
+
+            endTime = endTime.AddMinutes(-TotalMinutesHandleDelivery);
+            return int.Parse(endTime.ToString("HHmm"));
+        }
+    }
 
     public ShopStaffInforResponse ShopDeliveryStaff { get; set; }
 
@@ -42,6 +91,8 @@ public class DeliveryPackageForAssignResponse
         public int Successful { get; set; }
 
         public int Failed { get; set; }
+
+        public int MinutesMoveTo { get; set; }
 
         public ShopStaffInforResponse ShopDeliveryStaff { get; set; }
     }
@@ -66,8 +117,5 @@ public class DeliveryPackageForAssignResponse
         public bool IsShopOwner { get; set; }
 
         public bool IsShopOwnerShip { get => IsShopOwner; }
-
-        [JsonIgnore]
-        public double CurrentTaskLoad { get; set; }
     }
 }

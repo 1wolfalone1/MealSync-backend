@@ -22,4 +22,9 @@ public class BuildingRepository : BaseRepository<Building>, IBuildingRepository
     {
         return DbSet.Include(b => b.Location).Include(b => b.Dormitory).FirstOrDefaultAsync(b => b.Id == id);
     }
+
+    public List<Location> GetListLocationBaseOnBuildingIds(List<long> ids)
+    {
+        return DbSet.Where(b => ids.Contains(b.Id)).Select(b => b.Location).ToList();
+    }
 }
