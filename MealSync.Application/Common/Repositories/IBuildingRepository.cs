@@ -7,4 +7,6 @@ public interface IBuildingRepository : IBaseRepository<Building>
     List<Building> GetByDormitoryIdAndName(long dormitoryId, string name);
 
     Task<Building?> GetByIdIncludeLocation(long id);
+
+    List<Location> GetListLocationBaseOnBuildingIds(List<long> ids);
 }

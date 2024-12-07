@@ -497,6 +497,9 @@ public enum MessageCode
     [Description("E-Order_DeliveringEarlyOver30p")]
     E_ORDER_DELIVERING_EARLY_OVER_30p,
 
+    [Description("E-SuggestOrder-NotAvailable")]
+    E_SUGGEST_ORDER_NOT_AVAILABLE,
+
     // Report
     [Description("E-Report-NotFound")]
     E_REPORT_NOT_FOUND,

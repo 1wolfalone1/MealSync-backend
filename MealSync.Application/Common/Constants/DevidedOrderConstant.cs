@@ -15,4 +15,8 @@ public static class DevidedOrderConstant
     public static double DeliveringTaskWorkLoad = 0.5;
 
     public static double DistanceLoad = 1;
+
+    public static int MinutesAddWhenOrderMoreThanFive = 7;
+
+    public static int VariantKgCanBeAccept = 1;
 }

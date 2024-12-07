@@ -25,4 +25,9 @@ public class Location : BaseEntity
     public virtual Order OrderShop { get; set; }
 
     public virtual Order OrderCustomer { get; set; }
+
+    public string GetLocationForGoongMap()
+    {
+        return $"{Latitude},{Longitude}";
+    }
 }

@@ -133,6 +133,19 @@ public class TimeFrameUtils
         return endDateTime;
     }
 
+    public static DateTime GetStartTimeToDateTime(DateTime intendedReceiveDate, int startTime)
+    {
+        var endDateTime = new DateTime(
+            intendedReceiveDate.Year,
+            intendedReceiveDate.Month,
+            intendedReceiveDate.Day,
+            startTime / 100,
+            startTime % 100,
+            0);
+
+        return endDateTime;
+    }
+
     public static (DateTime IntendedReceiveDate, int StartTime, int EndTime) OrderTimeFrameForBatchProcess(DateTimeOffset currentTime, int hoursBack)
     {
         // Round the current time to the nearest 30-minute frame

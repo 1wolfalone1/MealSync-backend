@@ -7,4 +7,6 @@ public interface IDormitoryRepository : IBaseRepository<Dormitory>
     List<Dormitory> GetAll();
 
     bool CheckExistedById(long id);
+
+    Location GetLocationByDormitoryId(long id);
 }
