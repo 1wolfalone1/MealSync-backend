@@ -3,6 +3,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Reviews.Models;
@@ -23,11 +24,15 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReviewOrderOfCustomerHandler> _logger;
     private readonly IMapper _mapper;
+    private readonly INotificationFactory _notificationFactory;
+    private readonly INotifierService _notifierService;
+    private readonly IAccountRepository _accountRepository;
 
     public ReviewOrderOfCustomerHandler(
         IOrderRepository orderRepository, IReviewRepository reviewRepository, IShopRepository shopRepository,
         ICurrentPrincipalService currentPrincipalService, IStorageService storageService,
-        IUnitOfWork unitOfWork, ILogger<ReviewOrderOfCustomerHandler> logger, IMapper mapper)
+        IUnitOfWork unitOfWork, ILogger<ReviewOrderOfCustomerHandler> logger, IMapper mapper,
+        INotificationFactory notificationFactory, INotifierService notifierService, IAccountRepository accountRepository)
     {
         _orderRepository = orderRepository;
         _reviewRepository = reviewRepository;
@@ -37,6 +42,9 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mapper = mapper;
+        _notificationFactory = notificationFactory;
+        _notifierService = notifierService;
+        _accountRepository = accountRepository;
     }
 
     public async Task<Result<Result>> Handle(ReviewOrderOfCustomerCommand request, CancellationToken cancellationToken)
@@ -125,6 +133,11 @@ public class ReviewOrderOfCustomerHandler : ICommandHandler<ReviewOrderOfCustome
                         await _reviewRepository.AddAsync(review).ConfigureAwait(false);
                         _shopRepository.Update(shop);
                         await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+
+                        var customerAccount = _accountRepository.GetById(customerId)!;
+                        var customerReviewOrderNotification = _notificationFactory.CreateCustomerReviewOrderNotification(order, customerAccount);
+                        _notifierService.NotifyAsync(customerReviewOrderNotification);
+
                         return Result.Create(_mapper.Map<ReviewDetailResponse>(review));
                     }
                     catch (Exception e)

@@ -3,6 +3,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Reports.Models;
 using MealSync.Domain.Entities;
@@ -17,22 +18,27 @@ public class ShopReplyCustomerReportHandler : ICommandHandler<ShopReplyCustomerR
     private readonly IReportRepository _reportRepository;
     private readonly IOrderRepository _orderRepository;
     private readonly ICurrentPrincipalService _currentPrincipalService;
-    private readonly IStorageService _storageService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ShopReplyCustomerReportHandler> _logger;
     private readonly IMapper _mapper;
+    private readonly INotificationFactory _notificationFactory;
+    private readonly INotifierService _notifierService;
+    private readonly IShopRepository _shopRepository;
 
     public ShopReplyCustomerReportHandler(
         IReportRepository reportRepository, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService,
-        IStorageService storageService, IUnitOfWork unitOfWork, ILogger<ShopReplyCustomerReportHandler> logger, IMapper mapper)
+        IUnitOfWork unitOfWork, ILogger<ShopReplyCustomerReportHandler> logger,
+        IMapper mapper, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository)
     {
         _reportRepository = reportRepository;
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
-        _storageService = storageService;
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mapper = mapper;
+        _notificationFactory = notificationFactory;
+        _notifierService = notifierService;
+        _shopRepository = shopRepository;
     }
 
     public async Task<Result<Result>> Handle(ShopReplyCustomerReportCommand request, CancellationToken cancellationToken)
@@ -94,15 +100,26 @@ public class ShopReplyCustomerReportHandler : ICommandHandler<ShopReplyCustomerR
                     ShopId = shopId,
                     Title = request.Title,
                     Content = request.Content,
-                    ImageUrl = string.Join(",", request.Images),
+                    ImageUrl = string.Empty,
                     Status = ReportStatus.Pending,
                 };
+
+                if (request.Images != default && request.Images.Count > 0)
+                {
+                    report.ImageUrl = string.Join(",", request.Images);
+                }
+
                 try
                 {
                     // Begin transaction
                     await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
                     await _reportRepository.AddAsync(report).ConfigureAwait(false);
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+
+                    var shop = _shopRepository.GetById(shopId)!;
+                    var notification = _notificationFactory.CreateShopReplyReportOrderNotification(order, shop);
+                    _notifierService.NotifyAsync(notification);
+
                     return Result.Create(_mapper.Map<ReportDetailResponse>(report));
                 }
                 catch (Exception e)

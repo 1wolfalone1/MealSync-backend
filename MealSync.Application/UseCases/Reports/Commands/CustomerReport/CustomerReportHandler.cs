@@ -74,10 +74,6 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
         {
             throw new InvalidBusinessException(MessageCode.E_REPORT_NOT_IN_STATUS_FOR_CUSTOMER_REPORT.GetDescription());
         }
-        // else if (order.Status == OrderStatus.FailDelivery && order.ReasonIdentity != OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
-        // {
-        //     throw new InvalidBusinessException(MessageCode.E_REPORT_NOT_IN_STATUS_FOR_CUSTOMER_REPORT.GetDescription());
-        // }
         else
         {
             var now = DateTimeOffset.UtcNow;
@@ -122,10 +118,13 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                   && order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription()))
             {
                 var imageUrls = new List<string>();
-                foreach (var file in request.Images)
+                if (request.Images != default && request.Images.Length > 0)
                 {
-                    var url = await _storageService.UploadFileAsync(file).ConfigureAwait(false);
-                    imageUrls.Add(url);
+                    foreach (var file in request.Images)
+                    {
+                        var url = await _storageService.UploadFileAsync(file).ConfigureAwait(false);
+                        imageUrls.Add(url);
+                    }
                 }
 
                 var report = new Report
@@ -134,7 +133,7 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                     CustomerId = customerId,
                     Title = request.Title,
                     Content = request.Content,
-                    ImageUrl = string.Join(",", imageUrls),
+                    ImageUrl = imageUrls.Count > 0 ? string.Join(",", imageUrls) : string.Empty,
                     Status = ReportStatus.Pending,
                 };
 
@@ -204,16 +203,23 @@ public class CustomerReportHandler : ICommandHandler<CustomerReportCommand, Resu
                     _orderRepository.Update(order);
                     await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
+                    var notifications = new List<Notification>();
+
                     if (isNotifyLimitAvailableAmount)
                     {
                         var account = _accountRepository.GetById(shop.Id)!;
                         var notification = _notificationFactory.CreateLimitAvailableAmountAndInActiveShopNotification(shop, shopWallet);
-                        _notifierService.NotifyAsync(notification);
+                        notifications.Add(notification);
                         _emailService.SendNotifyLimitAvailableAmountAndInActiveShop(
                             account.Email,
                             MoneyUtils.FormatMoneyWithDots(shopWallet.AvailableAmount),
                             MoneyUtils.FormatMoneyWithDots(MoneyUtils.AVAILABLE_AMOUNT_LIMIT));
                     }
+
+                    var accountCustomer = _accountRepository.GetById(customerId)!;
+                    var customerReportOrderNotification = _notificationFactory.CreateCustomerReportOrderNotification(order, accountCustomer);
+                    notifications.Add(customerReportOrderNotification);
+                    _notifierService.NotifyRangeAsync(notifications);
 
                     return Result.Create(_mapper.Map<ReportDetailResponse>(report));
                 }

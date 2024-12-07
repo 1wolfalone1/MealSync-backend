@@ -205,4 +205,16 @@ public enum ResourceCode
 
     [Description("Notification-RejectReport")]
     NOTIFICATION_REJECT_REPORT,
+
+    [Description("Notification-CustomerReport")]
+    NOTIFICATION_CUSTOMER_REPORT,
+
+    [Description("Notification-CustomerReview")]
+    NOTIFICATION_CUSTOMER_REVIEW,
+
+    [Description("Notification-ShopReplyReport")]
+    NOTIFICATION_SHOP_REPLY_REPORT,
+
+    [Description("Notification-ShopReplyReview")]
+    NOTIFICATION_SHOP_REPLY_REVIEW,
 }

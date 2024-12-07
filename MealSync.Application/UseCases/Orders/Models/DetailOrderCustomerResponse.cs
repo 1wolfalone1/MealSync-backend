@@ -18,6 +18,10 @@ public class DetailOrderCustomerResponse
 
     public OrderStatus Status { get; set; }
 
+    public string? ReasonIdentity { get; set; }
+
+    public bool IsRefund { get; set; }
+
     public string? Note { get; set; }
 
     public double ShippingFee { get; set; }

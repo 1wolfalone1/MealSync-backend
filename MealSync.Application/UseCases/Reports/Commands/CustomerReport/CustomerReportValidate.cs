@@ -21,12 +21,15 @@ public class CustomerReportValidate : AbstractValidator<CustomerReportCommand>
             .MaximumLength(800)
             .WithMessage("Nội dung báo cáo tối đa 800 kí tự.");
 
-        RuleFor(x => x.Images)
-            .Must(images => images != null && (images.Length > 0 && images.Length <= 5))
-            .WithMessage("Ảnh báo cáo bắt buộc và tối đa 5 ảnh")
-            .ForEach(image =>
-                image.Must(file => file.Length <= 5 * 1024 * 1024)
-                    .WithMessage("Ảnh không được vượt quá 5 MB.")
-            );
+        When(x => x.Images != default && x.Images.Any(), () =>
+        {
+            RuleFor(x => x.Images)
+                .Must(images => images.Length <= 5)
+                .WithMessage("Tối đa 5 ảnh được phép tải lên.");
+
+            RuleForEach(x => x.Images)
+                .Must(file => file.Length <= 5 * 1024 * 1024)
+                .WithMessage("Mỗi ảnh phải nhỏ hơn hoặc bằng 5 MB.");
+        });
     }
 }

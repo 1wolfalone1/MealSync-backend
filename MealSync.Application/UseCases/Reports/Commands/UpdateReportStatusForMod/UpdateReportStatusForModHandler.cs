@@ -182,8 +182,8 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                             else
                             {
                                 // Giao hàng thất bại, thanh toán Online => Approve customer report, đánh cờ shop => Refund tiền customer
-                                await TransactionWithdrawalReportingForRefund(payment, order, shop, shopWallet).ConfigureAwait(false);
                                 await ApproveCustomerAndFlagShop(request, customerReport, shopReport, shop, systemConfig, shopAccount).ConfigureAwait(false);
+                                await TransactionWithdrawalReportingForRefund(payment, order, shop, shopWallet).ConfigureAwait(false);
                                 order.IsRefund = await RefundOrderAsync(order, payment).ConfigureAwait(false);
                             }
                         }
@@ -226,16 +226,17 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                 }
                 else if (request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.Rejected)
                 {
+                    if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription())
+                    {
+                        throw new InvalidBusinessException(MessageCode.E_MODERATOR_ONLY_APPROVE_REPORT.GetDescription());
+                    }
+
                     var isFlagCustomer = false;
                     try
                     {
                         await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
-                        if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription())
-                        {
-                            throw new InvalidBusinessException(MessageCode.E_MODERATOR_ONLY_APPROVE_REPORT.GetDescription());
-                        }
-                        else if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription())
+                        if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription())
                         {
                             // Fail delivery
                             if (payment.PaymentMethods == PaymentMethods.COD)
@@ -280,6 +281,8 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                         {
                             SendMailBanCustomer(customer, systemConfig);
                         }
+
+                        NotifyApproveOrReject(customer.Account, shop, customerReport);
 
                         return Result.Success(new
                         {
