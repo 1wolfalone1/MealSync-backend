@@ -87,7 +87,6 @@ public class CustomerRegisterWithGoogleHandler : ICommandHandler<CustomerRegiste
                 var customerBuilding = new CustomerBuilding()
                 {
                     BuildingId = request.BuildingId,
-                    CustomerId = account.Id,
                     IsDefault = true,
                 };
 
