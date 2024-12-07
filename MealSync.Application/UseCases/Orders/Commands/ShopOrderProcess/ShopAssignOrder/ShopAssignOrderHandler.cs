@@ -13,7 +13,11 @@ using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
 
@@ -31,10 +35,13 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly IMapper _mapper;
+    private readonly IStorageService _storageService;
+    private const string QR_KEY = "QR_KEY";
+    private readonly IConfiguration _configuration;
 
     public ShopAssignOrderHandler(IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IUnitOfWork unitOfWork, ILogger<ShopAssignOrderCommand> logger,
         IDeliveryPackageRepository deliveryPackageRepository, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository, IAccountRepository accountRepository,
-        ISystemResourceRepository systemResourceRepository, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapper mapper)
+        ISystemResourceRepository systemResourceRepository, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapper mapper, IStorageService storageService, IConfiguration configuration)
     {
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
@@ -48,6 +55,8 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
         _systemResourceRepository = systemResourceRepository;
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
         _mapper = mapper;
+        _storageService = storageService;
+        _configuration = configuration;
     }
 
     public async Task<Result<Result>> Handle(ShopAssignOrderCommand request, CancellationToken cancellationToken)
@@ -116,6 +125,18 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
             else
             {
                 dp = await ReAssignOrderInDeliveryPackageAsync(order, request).ConfigureAwait(false);
+
+                // If order in delivering status must be re generate qr code
+                if (order.Status == OrderStatus.Delivering)
+                {
+                    var hashString = order.Id + dp.Id + order.CustomerId + order.PhoneNumber + order.FullName + _configuration[QR_KEY];
+                    var token = BCrypUnitls.Hash(hashString);
+                    var shipperId = dp.ShopId.HasValue ? dp.ShopId.Value : dp.ShopDeliveryStaffId.Value;
+                    var qrCode = await GenerateOrderQRCodeBitmapAsync(order, token, shipperId).ConfigureAwait(false);
+                    var imageUrl = await _storageService.UploadFileAsync(qrCode).ConfigureAwait(false);
+                    order.QrScanToDeliveried = imageUrl;
+                    _orderRepository.Update(order);
+                }
             }
 
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
@@ -286,5 +307,19 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
             if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status != AccountStatus.Deleted)
                 throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_ACTIVE.GetDescription(), new object[] { request.ShopDeliveryStaffId });
         }
+    }
+
+    public async Task<Image<Rgba32>> GenerateOrderQRCodeBitmapAsync(Order orderInfo, string token, long shipperId)
+    {
+        string orderDataJson = JsonConvert.SerializeObject(new
+        {
+            OrderId = orderInfo.Id,
+            CustomerId = orderInfo.CustomerId,
+            ShipperId = shipperId,
+            OrderDate = orderInfo.OrderDate,
+            Token = token,
+        });
+
+        return await _storageService.GenerateQRCodeWithLogoAsync(orderDataJson).ConfigureAwait(false);
     }
 }
