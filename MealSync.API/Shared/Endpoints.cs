@@ -115,6 +115,7 @@ public static class Endpoints
     public const string CREATE_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit";
     public const string GET_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit";
     public const string DELETE_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit/{id:long}";
+    public const string UPDATE_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit/{id:long}";
 
     // Storage
     public const string UPLOAD_FILE = "storage/file/upload";
