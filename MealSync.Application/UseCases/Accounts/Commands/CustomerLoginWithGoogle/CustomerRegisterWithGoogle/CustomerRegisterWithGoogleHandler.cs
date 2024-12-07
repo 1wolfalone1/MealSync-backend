@@ -84,9 +84,20 @@ public class CustomerRegisterWithGoogleHandler : ICommandHandler<CustomerRegiste
                     throw new InvalidBusinessException(MessageCode.E_ACCOUNT_PHONE_NUMBER_EXIST.GetDescription());
                 }
 
+                var customerBuilding = new CustomerBuilding()
+                {
+                    BuildingId = request.BuildingId,
+                    CustomerId = account.Id,
+                    IsDefault = true,
+                };
+
                 var customer = new Customer()
                 {
                     Status = CustomerStatus.Active,
+                    CustomerBuildings = new List<CustomerBuilding>()
+                    {
+                        customerBuilding,
+                    },
                 };
 
                 account = new Account()

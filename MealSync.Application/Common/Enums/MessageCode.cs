@@ -92,6 +92,9 @@ public enum MessageCode
     [Description("I-Account-ModeratorCreated")]
     E_ACCOUNT_MODERATOR_CREATED,
 
+    [Description("I-Token-NotValid")]
+    E_TOKEN_NOT_VALID,
+
     // Platform Category
     [Description("E-PlatformCategory-NotFound")]
     E_PLATFORM_CATEGORY_NOT_FOUND,
