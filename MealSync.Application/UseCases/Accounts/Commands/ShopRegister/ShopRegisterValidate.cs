@@ -43,11 +43,11 @@ public class ShopRegisterValidate : AbstractValidator<ShopRegisterCommand>
             .GreaterThan(0)
             .WithMessage("Vui lòng cung cấp đúng tọa độ");
 
-        RuleFor(x => x.PhoneNumber)
-            .NotEmpty()
-            .WithMessage("Số điện thoại không thể để trống")
-            .Matches(RegularPatternConstant.VN_PHONE_NUMBER_PATTERN)
-            .WithMessage("Vui lòng cung cấp đúng số điện thoại");
+        // RuleFor(x => x.PhoneNumber)
+        //     .NotEmpty()
+        //     .WithMessage("Số điện thoại không thể để trống")
+        //     .Matches(RegularPatternConstant.VN_PHONE_NUMBER_PATTERN)
+        //     .WithMessage("Vui lòng cung cấp đúng số điện thoại");
 
         RuleFor(x => x.DormitoryIds)
             .NotEmpty()

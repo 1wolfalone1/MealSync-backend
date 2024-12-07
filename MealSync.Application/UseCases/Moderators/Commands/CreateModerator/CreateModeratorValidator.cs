@@ -15,11 +15,11 @@ public class CreateModeratorValidator : AbstractValidator<CreateModeratorCommand
             .EmailAddress()
             .WithMessage("Vui lòng cung cấp đúng email");
 
-        RuleFor(x => x.PhoneNumber)
-            .NotEmpty()
-            .WithMessage("Số điện thoại không thể để trống")
-            .Matches(RegularPatternConstant.VN_PHONE_NUMBER_PATTERN)
-            .WithMessage("Vui lòng cung cấp đúng số điện thoại");
+        // RuleFor(x => x.PhoneNumber)
+        //     .NotEmpty()
+        //     .WithMessage("Số điện thoại không thể để trống")
+        //     .Matches(RegularPatternConstant.VN_PHONE_NUMBER_PATTERN)
+        //     .WithMessage("Vui lòng cung cấp đúng số điện thoại");
 
         RuleFor(x => x.DormitoryIds)
             .Must(x => x != null && x.Length > 0)
