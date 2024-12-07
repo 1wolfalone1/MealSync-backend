@@ -40,6 +40,7 @@ public class ExceptionMiddleware
         }
         catch (InvalidBusinessException exception)
         {
+            _logger.LogError(exception, exception.Message);
             await HandleInValidBusinessExceptionAsync(context, exception);
         }
         catch (Exception exception)
