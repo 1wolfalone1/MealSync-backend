@@ -19,4 +19,9 @@ public class DormitoryRepository : BaseRepository<Dormitory>, IDormitoryReposito
     {
         return DbSet.Any(d => d.Id == id);
     }
+
+    public Location GetLocationByDormitoryId(long id)
+    {
+        return DbSet.Where(d => d.Id == id).Select(d => d.Location).FirstOrDefault();
+    }
 }

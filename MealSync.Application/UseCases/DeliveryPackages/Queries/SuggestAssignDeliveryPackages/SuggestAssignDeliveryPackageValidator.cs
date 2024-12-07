@@ -18,12 +18,16 @@ public class SuggestAssignDeliveryPackageValidator : AbstractValidator<SuggestAs
             .GreaterThanOrEqualTo(x => x.StartTime + FrameConstant.TIME_FRAME_IN_MINUTES)
             .WithMessage($"Thời gian kết thúc phải lớn hơn thời gian bắt đầu {FrameConstant.TIME_FRAME_IN_MINUTES} phút");
 
-        RuleFor(x => x.EndTime)
-            .GreaterThan(TimeFrameUtils.GetCurrentHoursInUTC7())
-            .WithMessage("Vui lòng cung cấp khoảng thời gian hiện tại và tương lai");
+        // RuleFor(x => x.EndTime)
+        //     .GreaterThan(TimeFrameUtils.GetCurrentHoursInUTC7())
+        //     .WithMessage("Vui lòng cung cấp khoảng thời gian hiện tại và tương lai");
 
         RuleFor(x => x.ShipperIds)
             .NotEmpty()
             .WithMessage("Vui lòng cung cấp ít nhất 1 nhân viên");
+
+        RuleFor(x => x.StaffMaxCarryWeight)
+            .GreaterThan(0)
+            .WithMessage("Vui lòng cung cấp số cân nặng tối đa mà nhân viên có thể mang");
     }
 }
