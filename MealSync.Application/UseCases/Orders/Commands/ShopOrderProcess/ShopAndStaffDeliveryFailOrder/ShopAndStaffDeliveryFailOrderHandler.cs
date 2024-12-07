@@ -31,8 +31,9 @@ public class ShopAndStaffDeliveryFailOrderHandler : ICommandHandler<ShopAndStaff
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly ICurrentAccountService _currentAccountService;
     private readonly IShopDeliveryStaffRepository _deliveryStaffRepository;
+    private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
 
-    public ShopAndStaffDeliveryFailOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopAndStaffDeliveryFailOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository, IDeliveryPackageRepository deliveryPackageRepository, IAccountRepository accountRepository, IBuildingRepository buildingRepository, ISystemResourceRepository systemResourceRepository, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository deliveryStaffRepository)
+    public ShopAndStaffDeliveryFailOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, ILogger<ShopAndStaffDeliveryFailOrderHandler> logger, ICurrentPrincipalService currentPrincipalService, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository, IDeliveryPackageRepository deliveryPackageRepository, IAccountRepository accountRepository, IBuildingRepository buildingRepository, ISystemResourceRepository systemResourceRepository, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository deliveryStaffRepository, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
     {
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
@@ -47,6 +48,7 @@ public class ShopAndStaffDeliveryFailOrderHandler : ICommandHandler<ShopAndStaff
         _systemResourceRepository = systemResourceRepository;
         _currentAccountService = currentAccountService;
         _deliveryStaffRepository = deliveryStaffRepository;
+        _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
     }
 
     public async Task<Result<Result>> Handle(ShopAndStaffDeliveryFailOrderCommand request, CancellationToken cancellationToken)
@@ -148,7 +150,10 @@ public class ShopAndStaffDeliveryFailOrderHandler : ICommandHandler<ShopAndStaff
     private async Task SendNotification(Order order)
     {
         List<Notification> notifications = new List<Notification>();
-        var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
+        var account = _currentAccountService.GetCurrentAccount();
+        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
+        var shop = _shopRepository.GetById(shopId);
+
         // Send notification for customer
         var notiToCustomer = _notificationFactory.CreateOrderDeliveryFailedToCustomerNotification(order, shop);
         notifications.Add(notiToCustomer);
