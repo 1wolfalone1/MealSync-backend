@@ -14,11 +14,11 @@ public class CustomerRegisterWithGoogleValidator : AbstractValidator<CustomerReg
             .NotEmpty()
             .WithMessage("Vui lòng cung cấp id địa chỉ tòa ký túc");
 
-        RuleFor(x => x.PhoneNumber)
-            .NotEmpty()
-            .WithMessage("Vui lòng cung cấp số điện thoại")
-            .Matches(RegularPatternConstant.VN_PHONE_NUMBER_PATTERN)
-            .WithMessage("Vui lòng cung cấp số điện thoại đúng");
+        // RuleFor(x => x.PhoneNumber)
+        //     .NotEmpty()
+        //     .WithMessage("Vui lòng cung cấp số điện thoại")
+        //     .Matches(RegularPatternConstant.VN_PHONE_NUMBER_PATTERN)
+        //     .WithMessage("Vui lòng cung cấp số điện thoại đúng");
 
         RuleFor(x => x.Email)
             .NotEmpty()
