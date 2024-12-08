@@ -1,19 +1,23 @@
 using System.Net;
-using Amazon;
-using Amazon.Runtime;
+using Amazon.Rekognition;
+using Amazon.Rekognition.Model;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Services;
+using MealSync.Domain.Enums;
+using MealSync.Domain.Exceptions.Base;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using QRCoder;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Image = SixLabors.ImageSharp.Image;
+using Point = SixLabors.ImageSharp.Point;
 
 namespace MealSync.Infrastructure.Services;
 
@@ -23,28 +27,27 @@ public class StorageService : IStorageService, IBaseService
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
     private readonly IAmazonS3 _client;
+    private readonly IAmazonRekognition _rekognitionClient;
+    private readonly HashSet<string> _foodCategories = new HashSet<string>
+    {
+        "Food", "Drink", "Beverage", "Meal", "Fruit", "Vegetable", "Dessert"
+    };
 
-    public StorageService(ILogger<StorageService> logger, IConfiguration configuration)
+    public StorageService(ILogger<StorageService> logger, IConfiguration configuration, IAmazonS3 client, IAmazonRekognition rekognitionClient)
     {
         _logger = logger;
         _configuration = configuration;
-        _client = new AmazonS3Client(
-            new BasicAWSCredentials(
-                _configuration["AWS_ACCESS_KEY"] ?? string.Empty,
-                _configuration["AWS_SECRET_KEY"] ?? string.Empty
-            ),
-            new AmazonS3Config
-            {
-                RegionEndpoint = RegionEndpoint.GetBySystemName(_configuration["AWS_REGION"] ?? string.Empty),
-            }
-        );
+        _client = client;
+        _rekognitionClient = rekognitionClient;
     }
 
-    public async Task<string> UploadFileAsync(IFormFile file)
+    public async Task<string> UploadFileAsync(IFormFile file, bool isCheckFoodDrink)
     {
         var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
         using var ms = new MemoryStream();
         await file.CopyToAsync(ms).ConfigureAwait(false);
+
+        await CheckImageViolation(ms, isCheckFoodDrink).ConfigureAwait(false);
 
         // Get file extension
         var fileExtension = Path.GetExtension(file.FileName);
@@ -77,6 +80,69 @@ public class StorageService : IStorageService, IBaseService
         _logger.LogInformation("Push to S3 success with link url {0}", imageUrl);
 
         return imageUrl;
+    }
+
+    private async Task CheckImageViolation(MemoryStream ms, bool isCheckFoodDrink)
+    {
+        var responseDetectModeration = await _rekognitionClient.DetectModerationLabelsAsync(new DetectModerationLabelsRequest
+        {
+            Image = new Amazon.Rekognition.Model.Image
+            {
+                Bytes = new MemoryStream(ms.ToArray()),
+            },
+            MinConfidence = 50,
+        }).ConfigureAwait(false);
+
+        if (responseDetectModeration.ModerationLabels.Count != 0)
+        {
+            var categorizedViolations = new Dictionary<string, List<Violation>>();
+            foreach (var label in responseDetectModeration.ModerationLabels)
+            {
+                var parentName = string.IsNullOrEmpty(label.ParentName) ? "Other" : label.ParentName;
+
+                if (!categorizedViolations.ContainsKey(parentName))
+                {
+                    categorizedViolations[parentName] = new List<Violation>();
+                }
+
+                categorizedViolations[parentName].Add(new Violation
+                {
+                    Name = label.Name,
+                    Confidence = label.Confidence,
+                });
+            }
+
+            throw new InvalidBusinessException(MessageCode.E_VIOLATION_IMAGE.GetDescription());
+        }
+
+        if (isCheckFoodDrink)
+        {
+            var responseDetectLabels = await _rekognitionClient.DetectLabelsAsync(new DetectLabelsRequest
+            {
+                Image = new Amazon.Rekognition.Model.Image
+                {
+                    Bytes = new MemoryStream(ms.ToArray()),
+                },
+                MinConfidence = 70,
+                MaxLabels = 50, // Adjust as needed
+            }).ConfigureAwait(false);
+
+            var isFood = false;
+            foreach (var label in responseDetectLabels.Labels)
+            {
+                isFood = _foodCategories.Contains(label.Name) ||
+                         label.Parents.Any(p => _foodCategories.Contains(p.Name));
+                if (isFood)
+                {
+                    break;
+                }
+            }
+
+            if (!isFood)
+            {
+                throw new InvalidBusinessException(MessageCode.E_VIOLATION_IMAGE_NOT_FOOD_DRINK.GetDescription());
+            }
+        }
     }
 
     public async Task<bool> DeleteFileAsync(string url)
@@ -147,34 +213,34 @@ public class StorageService : IStorageService, IBaseService
 
     public async Task<Image<Rgba32>> GenerateQRCodeWithLogoAsync(string qrText)
     {
-    // Download the logo from S3
-    var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
-    var logoKey = _configuration["MEAL_SYNC_LOGO_KEY"] ?? string.Empty;
+        // Download the logo from S3
+        var bucketName = _configuration["AWS_BUCKET_NAME"] ?? string.Empty;
+        var logoKey = _configuration["MEAL_SYNC_LOGO_KEY"] ?? string.Empty;
 
-    // Step 1: Generate the QR code and retrieve it as a byte array
-    using var qrGenerator = new QRCodeGenerator();
-    var qrData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
-    var qrCode = new PngByteQRCode(qrData);
-    byte[] qrCodeBytes = qrCode.GetGraphic(20);
+        // Step 1: Generate the QR code and retrieve it as a byte array
+        using var qrGenerator = new QRCodeGenerator();
+        var qrData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
+        var qrCode = new PngByteQRCode(qrData);
+        byte[] qrCodeBytes = qrCode.GetGraphic(20);
 
-    // Step 2: Load the QR code byte array into an ImageSharp Image<Rgba32>
-    using var qrCodeImage = Image.Load<Rgba32>(qrCodeBytes);
+        // Step 2: Load the QR code byte array into an ImageSharp Image<Rgba32>
+        using var qrCodeImage = Image.Load<Rgba32>(qrCodeBytes);
 
-    // Step 3: Retrieve the logo from S3 and load it as an ImageSharp image
-    var logoImage = await GetLogoFromS3Async(bucketName, logoKey);
+        // Step 3: Retrieve the logo from S3 and load it as an ImageSharp image
+        var logoImage = await GetLogoFromS3Async(bucketName, logoKey);
 
-    // Resize the logo to fit in the center of the QR code
-    int logoSize = qrCodeImage.Width / 5; // Adjust size as needed
-    logoImage.Mutate(x => x.Resize(logoSize, logoSize));
+        // Resize the logo to fit in the center of the QR code
+        int logoSize = qrCodeImage.Width / 5; // Adjust size as needed
+        logoImage.Mutate(x => x.Resize(logoSize, logoSize));
 
-    // Center the logo on the QR code
-    var centerPosition = new Point(
-        (qrCodeImage.Width - logoImage.Width) / 2,
-        (qrCodeImage.Height - logoImage.Height) / 2
-    );
-    qrCodeImage.Mutate(ctx => ctx.DrawImage(logoImage, centerPosition, 1f));
+        // Center the logo on the QR code
+        var centerPosition = new Point(
+            (qrCodeImage.Width - logoImage.Width) / 2,
+            (qrCodeImage.Height - logoImage.Height) / 2
+        );
+        qrCodeImage.Mutate(ctx => ctx.DrawImage(logoImage, centerPosition, 1f));
 
-    return qrCodeImage.Clone();
+        return qrCodeImage.Clone();
     }
 
     private async Task<Image<Rgba32>> GetLogoFromS3Async(string bucketName, string logoKey)
@@ -191,5 +257,12 @@ public class StorageService : IStorageService, IBaseService
                 return Image.Load<Rgba32>(ms); // Return an ImageSharp image directly
             }
         }
+    }
+
+    public class Violation
+    {
+        public string Name { get; set; }
+
+        public float Confidence { get; set; }
     }
 }

@@ -102,6 +102,11 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
                             shopWalletUpdateAmount.Add(wallet);
                             shopWalletTransactionInsert.AddRange(walletTransactions);
 
+                            // => Update status to completed
+                            order.Status = OrderStatus.Completed;
+                        }
+                        else
+                        {
                             // => Flag customer - Todo: Question
                             account.NumOfFlag += 1;
                             accountFlags.Add(GetAccountFlagForFailDeliveryByCustomer(account, order));
@@ -125,11 +130,6 @@ public class UpdateCompletedOrderHandler : ICommandHandler<UpdateCompletedOrderC
                                 await CancelOrderPendingOrConfirmedForBanCustomer(ordersCancelBeforeBan).ConfigureAwait(false);
                             }
 
-                            // => Update status to completed
-                            order.Status = OrderStatus.Completed;
-                        }
-                        else
-                        {
                             // => Update status to completed
                             order.Status = OrderStatus.Completed;
                         }

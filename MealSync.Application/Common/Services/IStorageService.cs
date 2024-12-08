@@ -6,7 +6,7 @@ namespace MealSync.Application.Common.Services;
 
 public interface IStorageService
 {
-    Task<string> UploadFileAsync(IFormFile file);
+    Task<string> UploadFileAsync(IFormFile file, bool isCheckFoodDrink = false);
 
     Task<bool> DeleteFileAsync(string url);
 
