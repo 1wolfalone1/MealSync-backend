@@ -12,9 +12,9 @@ public class StorageController : BaseApiController
 {
     [HttpPut(Endpoints.UPLOAD_FILE)]
     [Authorize(Roles = $"{IdentityConst.CustomerClaimName}, {IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}, {IdentityConst.ModeratorClaimName}, {IdentityConst.AdminClaimName}")]
-    public async Task<IActionResult> UploadFile(IFormFile file)
+    public async Task<IActionResult> UploadFile([FromForm] UploadFileCommand command)
     {
-        return HandleResult(await Mediator.Send(new UploadFileCommand { File = file }).ConfigureAwait(false));
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 
     [HttpDelete(Endpoints.DELETE_FILE)]

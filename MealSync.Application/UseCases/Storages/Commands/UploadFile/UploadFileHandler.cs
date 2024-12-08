@@ -15,7 +15,7 @@ public class UploadFileHandler : ICommandHandler<UploadFileCommand, Result>
 
     public async Task<Result<Result>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
-        var url = await _storageService.UploadFileAsync(request.File).ConfigureAwait(false);
+        var url = await _storageService.UploadFileAsync(request.File, request.IsCheckFoodDrink).ConfigureAwait(false);
         return Result.Create(new
         {
             Url = url,
