@@ -333,11 +333,11 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
 
     public List<Order> GetListOrderOnStatusDeliveringButOverTimeFrame(int hoursToMarkDeliveryFail, DateTime currentDateTime)
     {
-        var result = DbSet.Where(o => o.Status == OrderStatus.Delivering &&
+        var result = DbSet.Where(o => o.Status == OrderStatus.FailDelivery && o.ReasonIdentity == null &&
                                       (
-                                          (o.EndTime == 2400
-                                              ? o.IntendedReceiveDate.AddDays(1)
-                                              : o.IntendedReceiveDate).AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
+                                      o.EndTime == 2400
+                                      ? o.IntendedReceiveDate.AddDays(1)
+                                      : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
                                       ).AddHours(OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON) <= currentDateTime)
             .ToList();
         return result;
@@ -351,10 +351,9 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                                       && !o.IsRefund && !o.IsReport && !o.IsPaidToShop
                                       && o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess && p.PaymentMethods == PaymentMethods.VnPay)
                                       &&
-                                      (
-                                          (o.EndTime == 2400
-                                              ? o.IntendedReceiveDate.AddDays(1)
-                                              : o.IntendedReceiveDate).AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
+                                      (o.EndTime == 2400
+                                      ? o.IntendedReceiveDate.AddDays(1)
+                                      : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
                                       ).AddHours(OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON) <= currentDateTime)
             .ToList();
         return result;
@@ -559,5 +558,13 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     public List<Order> CheckOrderOfShopInDeliveringAndPeparing(long shopId)
     {
         return DbSet.Where(o => o.ShopId == shopId && (o.Status == OrderStatus.Delivering || o.Status == OrderStatus.Preparing)).ToList();
+    }
+
+    public async Task<List<Order>> GetOrderOverEndFrameAsync(DateTime currentDateTime)
+    {
+        return await DbSet.Where(o => OrderConstant.LIST_ORDER_STATUS_IN_PROCESSING.Contains(o.Status) &&
+                                (o.EndTime == 2400
+                                        ? o.IntendedReceiveDate.AddDays(1)
+                                        : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)) <= currentDateTime).ToListAsync();
     }
 }

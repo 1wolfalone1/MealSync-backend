@@ -192,4 +192,13 @@ public class DeliveryPackageRepository : BaseRepository<DeliveryPackage>, IDeliv
 
         return (total, result);
     }
+
+    public List<DeliveryPackage> GetListDeliveryPackageOverFrame(DateTime currentDateTime)
+    {
+        return DbSet.Where(dp => dp.Status == DeliveryPackageStatus.InProcess &&
+                                 (dp.EndTime == 2400
+                                     ? dp.DeliveryDate.AddDays(1)
+                                     : dp.DeliveryDate.AddHours(dp.EndTime / 100).AddMinutes(dp.EndTime % 100)) <= currentDateTime
+        ).ToList();
+    }
 }
