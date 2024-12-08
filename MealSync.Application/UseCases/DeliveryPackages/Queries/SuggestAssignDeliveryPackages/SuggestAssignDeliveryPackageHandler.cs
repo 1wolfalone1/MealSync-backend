@@ -14,7 +14,7 @@ using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
+using Microsoft.Extensions.Logging;
 
 namespace MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
 
@@ -28,8 +28,10 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
     private readonly IShopRepository _shopRepository;
     private readonly IBuildingRepository _buildingRepository;
     private readonly IDormitoryRepository _dormitoryRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<SuggestAssignDeliveryPackageHandler> _logger;
 
-    public SuggestAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapApiService mapApiService, IShopRepository shopRepository, IBuildingRepository buildingRepository, IDormitoryRepository dormitoryRepository)
+    public SuggestAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapApiService mapApiService, IShopRepository shopRepository, IBuildingRepository buildingRepository, IDormitoryRepository dormitoryRepository, IUnitOfWork unitOfWork, ILogger<SuggestAssignDeliveryPackageHandler> logger)
     {
         _dapperService = dapperService;
         _deliveryPackageRepository = deliveryPackageRepository;
@@ -39,12 +41,30 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         _shopRepository = shopRepository;
         _buildingRepository = buildingRepository;
         _dormitoryRepository = dormitoryRepository;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<Result<Result>> Handle(SuggestAssignDeliveryPackageQuery request, CancellationToken cancellationToken)
     {
         // Valiate
         Validate(request);
+
+        // Save shop max carry weight
+        try
+        {
+            await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+            var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
+            shop.MaxCarryWeight = request.StaffMaxCarryWeight;
+            _shopRepository.Update(shop);
+            await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _unitOfWork.RollbackTransaction();
+            _logger.LogError(e, e.Message);
+            throw;
+        }
 
         var unAssignOrders = await GetListOrderUnAssignByTimeFrameAsync(request).ConfigureAwait(false);
         var shopStaffs = await GetListShopDeliveryStaffAsync(request).ConfigureAwait(false);
@@ -347,7 +367,13 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
 
     private async Task<int> AverageTimeToWaitCustomer(Location origin, List<Location> destinations)
     {
-        return (await _mapApiService.GetDistanceMatrixAsync(origin, destinations, VehicleMaps.Bike).ConfigureAwait(false)).Rows.First().AverageDuration;
+        var matrix = await _mapApiService.GetDistanceMatrixAsync(origin, destinations, VehicleMaps.Bike).ConfigureAwait(false);
+        if (matrix != null)
+        {
+            return matrix.Rows.First().AverageDuration;
+        }
+
+        return 5;
     }
 
     private DeliveryPackageForAssignResponse AssignOrderToStaff(DeliveryPackageForAssignResponse staff, List<OrderDetailForShopResponse> orders)

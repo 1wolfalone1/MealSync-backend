@@ -40,6 +40,7 @@ public static class Endpoints
     public const string GET_SHOP_STAFF_INFO = "shop-staff/info";
     public const string UPDATE_SHOP_STAFF_INFO = "shop-staff/info/update";
     public const string CREATE_DEPOSIT_PAYMENT_URL = "shop-owner/deposit";
+    public const string GET_SHOPM_MAX_CARRY_WEIGHT = "shop-owner/max-carry-weight";
 
     // Shop Owner For Web
     public const string GET_FOOD_FOR_WEB = "web/shop-owner/food";

@@ -7,6 +7,8 @@ using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Distance = MealSync.Application.Common.Services.Map.Distance;
+using Duration = MealSync.Application.Common.Services.Map.Duration;
 
 namespace MealSync.Infrastructure.Services;
 
@@ -51,13 +53,32 @@ public class GoongMapApiService : BaseService, IMapApiService
         {
             // Handle exceptions as needed
             _logger.LogError(ex, ex.Message);
-            throw new InvalidBusinessException(MessageCode.E_SUGGEST_ORDER_NOT_AVAILABLE.GetDescription());
+            // throw new InvalidBusinessException(MessageCode.E_SUGGEST_ORDER_NOT_AVAILABLE.GetDescription());
+            return null;
         }
     }
 
     public async Task<Element> GetDistanceOneDestinationAsync(Location origins, Location destination, VehicleMaps vehicle)
     {
         var row = await GetDistanceMatrixAsync(origins, new List<Location>() { destination }, vehicle).ConfigureAwait(false);
+        if (row == null)
+        {
+            return new Element()
+            {
+                Status = "OK",
+                Distance = new Application.Common.Services.Map.Distance()
+                {
+                    Text = "5 km",
+                    Value = 5000,
+                },
+                Duration = new Application.Common.Services.Map.Duration
+                {
+                    Text = "8 phút",
+                    Value = 480,
+                }
+            };
+        }
+
         var element = row.Rows.FirstOrDefault().Elements.Where(e => e.Status == "OK").FirstOrDefault();
         return element;
     }
