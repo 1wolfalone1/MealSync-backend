@@ -73,4 +73,8 @@ public interface INotificationFactory
     Notification CreateCustomerReviewOrderNotification(Order order, Account accountCustomer);
 
     Notification CreateShopReplyReviewOrderNotification(Order order, Shop shop);
+
+    Notification CreateOrderCancelAutoByBatchToCustomerNotification(Order order, Shop shop);
+
+    Notification CreateOrderCancelAutoByBatchToShopNotification(Order order, Shop shop);
 }

@@ -27,4 +27,6 @@ public interface IDeliveryPackageRepository : IBaseRepository<DeliveryPackage>
     DeliveryPackage GetByOrderId(long id);
 
     (int TotalCount, List<DeliveryPackage> DeliveryPackages) GetDeliveryPackageHistoryFilterForShopWeb(string? searchValue, long shopId, int statusMode, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize);
+
+    List<DeliveryPackage> GetListDeliveryPackageOverFrame(DateTime currentDateTime);
 }

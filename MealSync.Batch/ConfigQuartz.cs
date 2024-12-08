@@ -47,6 +47,11 @@ public static class ConfigQuartz
                 .AddTrigger(trigger => trigger
                     .ForJob(JobKey.Create(nameof(UpdateFlagReceiveOrderPauseAndSoldOutJob)))
                     .WithCronSchedule("0 0 0 * * ?"));
+
+            options.AddJob<HalfHourlyBatchMarkOrderOverTimeFrame>(JobKey.Create(nameof(HalfHourlyBatchMarkOrderOverTimeFrame)))
+                .AddTrigger(trigger => trigger
+                    .ForJob(JobKey.Create(nameof(HalfHourlyBatchMarkOrderOverTimeFrame)))
+                    .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
         });
 
         services.AddQuartzHostedService();

@@ -217,4 +217,7 @@ public enum ResourceCode
 
     [Description("Notification-ShopReplyReview")]
     NOTIFICATION_SHOP_REPLY_REVIEW,
+
+    [Description("Notification-CancelOrder_AutoByBatch")]
+    NOTIFICATION_CANCEL_ORDER_AUTO_BY_BATCH,
 }
