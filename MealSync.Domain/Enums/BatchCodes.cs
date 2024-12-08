@@ -21,4 +21,7 @@ public enum BatchCodes
 
     [Description("BatchCheduleTransferMoneyToShopWallet")]
     BatchCheduleTransferMoneyToShopWallet = 6,
+
+    [Description("BatchCheduleCancelOrderOverTimeFrame")]
+    BatchCheduleCancelOrderOverTimeFrame = 7,
 }

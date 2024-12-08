@@ -51,4 +51,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<Order> GetOrderIncludePaymentById(long id);
 
     List<Order> CheckOrderOfShopInDeliveringAndPeparing(long shopId);
+
+    Task<List<Order>> GetOrderOverEndFrameAsync(DateTime currentDateTime);
 }
