@@ -163,7 +163,7 @@ public class TimeFrameUtils
         DateTimeOffset endDateTime = startDateTime.AddMinutes(30);
         int endTime = (endDateTime.Hour == 0 && endDateTime.Minute == 0) ? 2400 : (endDateTime.Hour * 100) + endDateTime.Minute;
 
-        return (startDateTime.DateTime, startTime, endTime);
+        return (startDateTime.Date, startTime, endTime);
     }
 
     public static double ConvertToHours(int hhmm)

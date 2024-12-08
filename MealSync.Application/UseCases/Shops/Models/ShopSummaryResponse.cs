@@ -15,4 +15,6 @@ public class ShopSummaryResponse
     public string PhoneNumber { get; set; }
 
     public double AverageRating { get; set; }
+
+    public int TotalOrder { get; set; }
 }

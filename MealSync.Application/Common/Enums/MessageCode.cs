@@ -738,4 +738,10 @@ public enum MessageCode
 
     [Description("I-Notification-MarkAllReadSuccess")]
     E_NOTIFICATION_MARL_ALL_READ_SUCCESS,
+
+    [Description("E-Violation-Image")]
+    E_VIOLATION_IMAGE,
+
+    [Description("E-Violation-Image-Not-Food-Drink")]
+    E_VIOLATION_IMAGE_NOT_FOOD_DRINK,
 }
