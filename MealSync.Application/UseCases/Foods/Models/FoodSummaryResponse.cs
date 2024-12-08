@@ -13,4 +13,6 @@ public class FoodSummaryResponse
     public long ShopId { get; set; }
 
     public bool IsSoldOut { get; set; }
+
+    public int TotalOrder { get; set; }
 }

@@ -98,11 +98,11 @@ public class SignupCustomerHandler : ICommandHandler<SignupCustomerCommand, Resu
                 PhoneNumber = request.PhoneNumber,
                 Password = BCrypUnitls.Hash(request.Password),
                 AvatarUrl = _systemResourceRepository.GetByResourceCode(ResourceCode.ACCOUNT_AVATAR.GetDescription()) ?? string.Empty,
-                FullName = string.Empty,
+                FullName = request.FullName,
                 RoleId = (int)Domain.Enums.Roles.Customer,
                 Type = AccountTypes.Local,
                 Status = AccountStatus.UnVerify,
-                Genders = Genders.UnKnown,
+                Genders = request.Gender,
             };
 
             var refreshToken = _jwtTokenService.GenerateJwtToken(newAccount);
