@@ -145,8 +145,8 @@ public class AutoCancelEndTimeFrameHandler : ICommandHandler<AutoCancelEndTimeFr
         var orderDeliveryFail = await MarkShopDeliveryFailAsync(orderDelivering, shopId).ConfigureAwait(false);
 
         var orderUpdates = orderPCP.Orders;
-        var notificationUpdates = orderDeliveryFail.Notifications;
         orderUpdates.AddRange(orderDeliveryFail.Orders);
+        var notificationUpdates = orderPCP.Notifications;
         notificationUpdates.AddRange(orderDeliveryFail.Notifications);
 
         return (orderUpdates, notificationUpdates);
