@@ -112,7 +112,7 @@ public class PromotionRepository : BaseRepository<Promotion>, IPromotionReposito
         }
 
         var totalCount = await query.CountAsync().ConfigureAwait(false);
-        query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+        query = query.OrderByDescending(p => p.CreatedDate).Skip((pageIndex - 1) * pageSize).Take(pageSize);
         var promotions = await query.ToListAsync().ConfigureAwait(false);
 
         return (totalCount, promotions);
