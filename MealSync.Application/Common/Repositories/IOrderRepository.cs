@@ -53,4 +53,8 @@ public interface IOrderRepository : IBaseRepository<Order>
     List<Order> CheckOrderOfShopInDeliveringAndPeparing(long shopId);
 
     Task<List<Order>> GetOrderOverEndFrameAsync(DateTime currentDateTime);
+
+    List<long> GetListAccountIdRelatedToOrder(long orderId);
+
+    Dictionary<long, List<long>> GetDictionaryAccountIdRelated(List<long> orderIds);
 }

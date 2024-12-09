@@ -204,7 +204,7 @@ public class AutoCancelEndTimeFrameHandler : ICommandHandler<AutoCancelEndTimeFr
                 }
                 else
                 {
-                    _emailService.SendEmailToAnnounceApplyFlagForShop(shopAccount.Email, shopAccount.NumOfFlag, "Cửa hàng bạn đã đủ 5 cảnh cảo từ hệ thống");
+                    _emailService.SendEmailToAnnounceApplyFlagForShop(shopAccount.Email, shopAccount.NumOfFlag, "Cửa hàng bạn đã đủ 5 cảnh cáo từ hệ thống");
                 }
 
                 _accountRepository.Update(shopAccount);

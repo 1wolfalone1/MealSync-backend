@@ -11,7 +11,6 @@
 -- SET @CurrentDate := '2024-12-04 03:48:15';
 -- SET @PageIndex := 1;
 -- SET @PageSize := 100;
-
 WITH ReviewCustomerOfShopOnly AS (
     SELECT
         r.id,
@@ -27,7 +26,7 @@ WITH ReviewCustomerOfShopOnly AS (
         (
             SELECT
                 DATE_FORMAT(
-                    DATE_ADD(o.created_date, INTERVAL 24 HOUR),
+                    DATE_ADD(r.created_date, INTERVAL 24 HOUR),
                     '%Y-%m-%d %H:%i:%s'
                 ) >= DATE_FORMAT(@CurrentDate, '%Y-%m-%d %H:%i:%s')
                 AND order_id IN (
@@ -77,14 +76,14 @@ WITH ReviewCustomerOfShopOnly AS (
         AND (
             @DateFrom IS NULL
             AND @DateTo IS NULL
-            OR DATE_FORMAT(o.created_date, '%Y-%m-%d') BETWEEN DATE_FORMAT(@DateFrom, '%Y-%m-%d')
+            OR DATE_FORMAT(r.created_date, '%Y-%m-%d') BETWEEN DATE_FORMAT(@DateFrom, '%Y-%m-%d')
             AND DATE_FORMAT(@DateTo, '%Y-%m-%d')
         )
         AND (
             @StatusMode = 0 -- GET all
             OR @StatusMode = 1 -- GET review NOT reply
             AND DATE_FORMAT(
-                DATE_ADD(o.created_date, INTERVAL 24 HOUR),
+                DATE_ADD(r.created_date, INTERVAL 24 HOUR),
                 '%Y-%m-%d %H:%i:%s'
             ) >= DATE_FORMAT(@CurrentDate, '%Y-%m-%d %H:%i:%s')
             AND order_id IN (
@@ -110,7 +109,7 @@ WITH ReviewCustomerOfShopOnly AS (
             )
             OR @StatusMode = 3 -- OVER TIME TO REPLY
             AND DATE_FORMAT(
-                DATE_ADD(o.created_date, INTERVAL 24 HOUR),
+                DATE_ADD(r.created_date, INTERVAL 24 HOUR),
                 '%Y-%m-%d %H:%i:%s'
             ) < DATE_FORMAT(@CurrentDate, '%Y-%m-%d %H:%i:%s')
             AND order_id IN (

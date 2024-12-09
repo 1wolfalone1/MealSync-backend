@@ -25,13 +25,14 @@ public class CompleteOrderHandler : ICommandHandler<CompleteOrderCommand, Result
     private readonly IWalletRepository _walletRepository;
     private readonly IShopRepository _shopRepository;
     private readonly IWalletTransactionRepository _walletTransactionRepository;
+    private readonly INotifierService _notifierService;
 
     public CompleteOrderHandler(
         IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService,
         ISystemResourceRepository systemResourceRepository, IUnitOfWork unitOfWork,
         INotificationFactory notificationFactory, INotificationService notificationService,
         ILogger<CompleteOrderHandler> logger, IAccountRepository accountRepository,
-        IWalletRepository walletRepository, IShopRepository shopRepository, IWalletTransactionRepository walletTransactionRepository)
+        IWalletRepository walletRepository, IShopRepository shopRepository, IWalletTransactionRepository walletTransactionRepository, INotifierService notifierService)
     {
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
@@ -44,6 +45,7 @@ public class CompleteOrderHandler : ICommandHandler<CompleteOrderCommand, Result
         _walletRepository = walletRepository;
         _shopRepository = shopRepository;
         _walletTransactionRepository = walletTransactionRepository;
+        _notifierService = notifierService;
     }
 
     public async Task<Result<Result>> Handle(CompleteOrderCommand request, CancellationToken cancellationToken)
@@ -100,7 +102,7 @@ public class CompleteOrderHandler : ICommandHandler<CompleteOrderCommand, Result
 
                 var account = _accountRepository.GetById(order.CustomerId)!;
                 var notification = _notificationFactory.CreateCustomerCompletedOrderNotification(order, account);
-                await _notificationService.NotifyAsync(notification).ConfigureAwait(false);
+                await _notifierService.NotifyAsync(notification).ConfigureAwait(false);
 
                 return Result.Success(new
                 {
