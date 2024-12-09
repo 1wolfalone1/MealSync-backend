@@ -49,4 +49,9 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
     {
         return DbSet.Any(a => a.PhoneNumber == phoneNumber && a.Email != email);
     }
+
+    public List<Account> GetAccountByIds(List<long> ids)
+    {
+        return DbSet.Where(a => ids.Contains(a.Id)).ToList();
+    }
 }

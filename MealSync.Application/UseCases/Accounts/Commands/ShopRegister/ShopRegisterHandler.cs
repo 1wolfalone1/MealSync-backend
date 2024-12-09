@@ -12,6 +12,7 @@ using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Ocsp;
 
 namespace MealSync.Application.UseCases.Accounts.Commands.ShopRegister;
 
@@ -117,8 +118,7 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
         if (account != default && account.PhoneNumber != register.PhoneNumber && _accountRepository.CheckExistByPhoneNumber(register.PhoneNumber))
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_PHONE_NUMBER_EXIST.GetDescription(), HttpStatusCode.Conflict);
 
-        account = _accountRepository.GetAccountByPhoneNumber(register.PhoneNumber);
-        if (account != default)
+        if (_accountRepository.CheckExistPhoneNumberInOtherEmailAccount(register.Email, register.PhoneNumber))
         {
             throw new InvalidBusinessException(MessageCode.E_ACCOUNT_PHONE_NUMBER_EXIST.GetDescription(), HttpStatusCode.Conflict);
         }

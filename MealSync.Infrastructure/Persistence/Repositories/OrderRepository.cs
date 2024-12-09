@@ -567,4 +567,30 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                                         ? o.IntendedReceiveDate.AddDays(1)
                                         : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)) <= currentDateTime).ToListAsync();
     }
+
+    public List<long> GetListAccountIdRelatedToOrder(long orderId)
+    {
+        var accountIds = new List<long>();
+        var order = DbSet.Where(o => o.Id == orderId)
+            .Include(o => o.DeliveryPackage).Single();
+        accountIds.Add(order.ShopId);
+        accountIds.Add(order.CustomerId);
+        if (order.DeliveryPackageId.HasValue && order.DeliveryPackage.ShopDeliveryStaffId.HasValue)
+        {
+            accountIds.Add(order.DeliveryPackage.ShopDeliveryStaffId.Value);
+        }
+
+        return accountIds;
+    }
+
+    public Dictionary<long, List<long>> GetDictionaryAccountIdRelated(List<long> orderIds)
+    {
+        var result = new Dictionary<long, List<long>>();
+        foreach (var id in orderIds)
+        {
+            result.Add(id, GetListAccountIdRelatedToOrder(id));
+        }
+
+        return result;
+    }
 }
