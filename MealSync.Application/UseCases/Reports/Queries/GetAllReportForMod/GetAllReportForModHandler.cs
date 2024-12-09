@@ -79,6 +79,7 @@ public class GetAllReportForModHandler : IQueryHandler<GetAllReportForModQuery, 
         var now = TimeFrameUtils.GetCurrentDateInUTC7().DateTime;
         var reports = await _dapperService.SelectAsync<ReportManageDto>(QueryName.GetListReportForMod, new
         {
+            DeliveredReportedByCustomer = OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription(),
             Now = now,
             DormitoryIds = dormitoryIds,
             SearchValue = request.SearchValue,

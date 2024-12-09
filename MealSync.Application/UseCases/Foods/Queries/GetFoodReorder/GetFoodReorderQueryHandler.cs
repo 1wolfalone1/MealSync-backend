@@ -90,10 +90,19 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                 foodReOrderResponse.Foods = default;
                 return Result.Success(foodReOrderResponse);
             }
-            else if (!request.IsGetShopInfo && !request.IsOrderForNextDay!.Value && (shop.IsReceivingOrderPaused || operatingSlot.IsReceivingOrderPaused))
+            else if (!request.IsGetShopInfo && !request.IsOrderForNextDay!.Value && operatingSlot != default && (shop.IsReceivingOrderPaused || operatingSlot.IsReceivingOrderPaused))
             {
                 foodReOrderResponse.IsAllowReOrder = false;
                 foodReOrderResponse.MessageNotAllow = "Cửa hàng đã ngưng nhận đơn cho ngày hôm nay.";
+                foodReOrderResponse.Note = default;
+                foodReOrderResponse.ShopInfo = default;
+                foodReOrderResponse.Foods = default;
+                return Result.Success(foodReOrderResponse);
+            }
+            else if (!request.IsGetShopInfo && !request.IsOrderForNextDay!.Value && operatingSlot != default && operatingSlot.EndTime != 2400 && ((now.Hour * 60) + now.Minute) >= TimeUtils.ConvertToMinutes(operatingSlot.EndTime))
+            {
+                foodReOrderResponse.IsAllowReOrder = false;
+                foodReOrderResponse.MessageNotAllow = $"Thời gian hiện tại đã vượt quá khung thời gian bán cho ngày hôm nay {TimeFrameUtils.GetTimeFrameString(operatingSlot.StartTime, operatingSlot.EndTime)}.";
                 foodReOrderResponse.Note = default;
                 foodReOrderResponse.ShopInfo = default;
                 foodReOrderResponse.Foods = default;
