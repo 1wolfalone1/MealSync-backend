@@ -90,6 +90,7 @@ public class UpdateWithdrawalRequestStatusHandler : ICommandHandler<UpdateWithdr
                                 ReportingAmountBefore = withdrawalRequest.Wallet.ReportingAmount,
                                 Amount = -withdrawalRequest.Amount,
                                 Type = WalletTransactionType.Withdrawal,
+                                WithdrawalRequestId = withdrawalRequest.Id,
                                 Description = $"Rút tiền từ tiền có sẵn {MoneyUtils.FormatMoneyWithDots(withdrawalRequest.Amount)} VNĐ để chuyển tiền cho cửa hàng",
                             };
 

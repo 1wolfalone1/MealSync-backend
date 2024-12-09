@@ -127,7 +127,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                 order.Status == OrderStatus.IssueReported
                 && customerReport.Status == ReportStatus.Pending
                 && request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.UnderReview
-                && ((reports.Count > 1 && now > endTime.AddHours(2)) || now > endTime.AddHours(20))
+                && ((reports.Count > 1 && (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() || now > endTime.AddHours(2))) || now > endTime.AddHours(20))
             )
             {
                 try
@@ -157,7 +157,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                 && (
                     request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.Approved
                     || request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.Rejected)
-                && ((reports.Count > 1 && now > endTime.AddHours(2)) || now > endTime.AddHours(20))
+                && ((reports.Count > 1 && (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() || now > endTime.AddHours(2))) || now > endTime.AddHours(20))
             )
             {
                 var payment = order.Payments.First(p => p.Type == PaymentTypes.Payment);

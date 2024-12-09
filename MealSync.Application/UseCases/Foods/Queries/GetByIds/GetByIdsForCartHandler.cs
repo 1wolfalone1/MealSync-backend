@@ -186,7 +186,7 @@ public class GetByIdsForCartHandler : IQueryHandler<GetByIdsForCartQuery, Result
             if (shopOperatingSlot.EndTime != 2400 && currentTimeMinutes >= endTimeInMinutes)
             {
                 foodCartCheckResponse.IsAcceptingOrderToday = false;
-                foodCartCheckResponse.MessageFoodNeedRemoveToday = $"Thời gian hiện tại đã vượt quá khung thời gian bán {TimeFrameUtils.GetTimeFrameString(shopOperatingSlot.StartTime, shopOperatingSlot.EndTime)}.";
+                foodCartCheckResponse.MessageFoodNeedRemoveToday = $"Thời gian hiện tại đã vượt quá khung thời gian bán cho ngày hôm nay {TimeFrameUtils.GetTimeFrameString(shopOperatingSlot.StartTime, shopOperatingSlot.EndTime)}.";
             }
         }
 
