@@ -19,15 +19,20 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<LoginHandler> _logger;
     private readonly ICustomerBuildingRepository _customerBuildingRepository;
+    private readonly IShopRepository _shopRepository;
+    private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
 
     public LoginHandler(IAccountRepository accountRepository, IJwtTokenService jwtTokenService,
-        IUnitOfWork unitOfWork, ILogger<LoginHandler> logger, ICustomerBuildingRepository customerBuildingRepository)
+        IUnitOfWork unitOfWork, ILogger<LoginHandler> logger, ICustomerBuildingRepository customerBuildingRepository,
+        IShopRepository shopRepository, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
     {
         _accountRepository = accountRepository;
         _jwtTokenService = jwtTokenService;
         _unitOfWork = unitOfWork;
         _logger = logger;
         _customerBuildingRepository = customerBuildingRepository;
+        _shopRepository = shopRepository;
+        _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
     }
 
     public async Task<Result<Result>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -63,44 +68,55 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         }
         else
         {
-            var accessToken = _jwtTokenService.GenerateJwtToken(account);
-            var refreshToken = _jwtTokenService.GenerateJwtToken(account);
-            try
+            if (account.RoleId == (int)Domain.Enums.Roles.ShopOwner && _shopRepository.GetById(account.Id)!.Status == ShopStatus.UnApprove)
             {
-                await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-                account.RefreshToken = refreshToken;
-                _accountRepository.Update(account);
-                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+                throw new InvalidBusinessException(MessageCode.E_SHOP_UN_APPROVE.GetDescription());
             }
-            catch (Exception e)
+            else if (account.RoleId == (int)Domain.Enums.Roles.ShopDelivery && !_shopDeliveryStaffRepository.CheckStaffOfShopActiveAndStaffActive(account.Id))
             {
-                _unitOfWork.RollbackTransaction();
-                _logger.LogError(e, e.Message);
-                throw new("Internal Server Error");
+                throw new InvalidBusinessException(MessageCode.E_SHOP_DELIVERY_STAFF_CAN_NOT_LOGIN.GetDescription());
             }
+            else
+            {
+                var accessToken = _jwtTokenService.GenerateJwtToken(account);
+                var refreshToken = _jwtTokenService.GenerateJwtToken(account);
+                try
+                {
+                    await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
+                    account.RefreshToken = refreshToken;
+                    _accountRepository.Update(account);
+                    await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    _unitOfWork.RollbackTransaction();
+                    _logger.LogError(e, e.Message);
+                    throw new("Internal Server Error");
+                }
 
-            LoginResponse loginResponse = new LoginResponse();
-            loginResponse.TokenResponse = new TokenResponse
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
-            };
-            loginResponse.AccountResponse = new AccountResponse
-            {
-                Id = account.Id,
-                Email = account.Email,
-                RoleId = account.RoleId,
-                RoleName = account.Role.Name,
-                AvatarUrl = account.AvatarUrl,
-                FullName = account.FullName,
-            };
-            if (account.RoleId == (int)Domain.Enums.Roles.Customer)
-            {
-                var customerBuilding = _customerBuildingRepository.GetDefaultByCustomerId(account.Id);
-                loginResponse.AccountResponse.IsSelectedBuilding = customerBuilding != default;
-            }
+                LoginResponse loginResponse = new LoginResponse();
+                loginResponse.TokenResponse = new TokenResponse
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken
+                };
+                loginResponse.AccountResponse = new AccountResponse
+                {
+                    Id = account.Id,
+                    Email = account.Email,
+                    RoleId = account.RoleId,
+                    RoleName = account.Role.Name,
+                    AvatarUrl = account.AvatarUrl,
+                    FullName = account.FullName,
+                };
+                if (account.RoleId == (int)Domain.Enums.Roles.Customer)
+                {
+                    var customerBuilding = _customerBuildingRepository.GetDefaultByCustomerId(account.Id);
+                    loginResponse.AccountResponse.IsSelectedBuilding = customerBuilding != default;
+                }
 
-            return Result.Success(loginResponse);
+                return Result.Success(loginResponse);
+            }
         }
     }
 }
