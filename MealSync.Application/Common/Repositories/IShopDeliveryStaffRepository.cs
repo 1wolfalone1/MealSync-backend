@@ -13,4 +13,6 @@ public interface IShopDeliveryStaffRepository : IBaseRepository<ShopDeliveryStaf
     Task<ShopDeliveryStaff?> GetByIdAndShopId(long id, long shopId);
 
     Task<ShopDeliveryStaff> GetByIdIncludeAccount(long id);
+
+    bool CheckStaffOfShopActiveAndStaffActive(long id);
 }
