@@ -79,6 +79,11 @@ public class ShopDeliveryStaffRepository : BaseRepository<ShopDeliveryStaff>, IS
         return DbSet.Include(sds => sds.Account).FirstAsync(sds => sds.Id == id);
     }
 
+    public bool CheckStaffOfShopActiveAndStaffActive(long id)
+    {
+        return DbSet.Any(sds => sds.Id == id && sds.Status != ShopDeliveryStaffStatus.InActive && (sds.Shop.Status == ShopStatus.Active || sds.Shop.Status == ShopStatus.InActive));
+    }
+
     private static string EscapeLikeParameter(string input)
     {
         return input

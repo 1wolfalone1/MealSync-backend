@@ -185,6 +185,9 @@ public enum MessageCode
     E_OPTION_OF_OPTION_GROUP_NOT_FOUND,
 
     // Shop
+    [Description("E-Shop-UnApprove")]
+    E_SHOP_UN_APPROVE,
+
     [Description("E-Shop-NotFound")]
     E_SHOP_NOT_FOUND,
 
@@ -663,6 +666,9 @@ public enum MessageCode
     //Shop Delivery Staff
     [Description("E-ShopDeliveryStaff-Not-Found")]
     E_SHOP_DELIVERY_STAFF_NOT_FOUND,
+
+    [Description("E-ShopDeliveryStaff-Can-Not-Login")]
+    E_SHOP_DELIVERY_STAFF_CAN_NOT_LOGIN,
 
     [Description("W-ShopDeliveryStaff-Status-To-Online")]
     W_SHOP_DELIVERY_STAFF_STATUS_TO_ONLINE,
