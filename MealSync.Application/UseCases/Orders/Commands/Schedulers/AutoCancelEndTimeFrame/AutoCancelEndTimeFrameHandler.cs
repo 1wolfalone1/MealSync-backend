@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using MealSync.Application.Common.Abstractions.Messaging;
+using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Notifications;
@@ -158,6 +159,7 @@ public class AutoCancelEndTimeFrameHandler : ICommandHandler<AutoCancelEndTimeFr
         var numberConfirmOrderOverAHour = 0;
         foreach (var order in orders)
         {
+            order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription();
             order.Status = OrderStatus.Cancelled;
             order.Reason = "Cửa hàng không tiến hành thực hiện việc làm hoặc nhận đơn hàng";
             order.CancelAt = TimeFrameUtils.GetCurrentDate();
