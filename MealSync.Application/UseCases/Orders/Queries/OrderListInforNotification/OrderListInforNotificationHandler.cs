@@ -18,14 +18,16 @@ public class OrderListInforNotificationHandler : IQueryHandler<OrderListInforNot
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly IMapper _mapper;
+    private readonly IAccountRepository _accountRepository;
 
-    public OrderListInforNotificationHandler(IOrderRepository orderRepository, ICurrentAccountService currentAccountService, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapper mapper)
+    public OrderListInforNotificationHandler(IOrderRepository orderRepository, ICurrentAccountService currentAccountService, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapper mapper, IAccountRepository accountRepository)
     {
         _orderRepository = orderRepository;
         _currentAccountService = currentAccountService;
         _currentPrincipalService = currentPrincipalService;
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
         _mapper = mapper;
+        _accountRepository = accountRepository;
     }
 
     public async Task<Result<Result>> Handle(OrderListInforNotificationQuery request, CancellationToken cancellationToken)
@@ -33,8 +35,15 @@ public class OrderListInforNotificationHandler : IQueryHandler<OrderListInforNot
         // Validate
         Validate(request);
 
-        var order = _orderRepository.GetOrderListInforNotification(request.Ids);
-        var result = _mapper.Map<List<OrderInforNotificationResponse>>(order);
+        var dictionaryAccountId = _orderRepository.GetDictionaryAccountIdRelated(request.Ids.ToList());
+        var result = new List<Dictionary<object, object?>>();
+        foreach (var accountDic in dictionaryAccountId)
+        {
+            var accounts = _accountRepository.GetAccountByIds(accountDic.Value.ToList());
+            var response = _mapper.Map<List<AccountInforInChatRepsonse>>(accounts);
+            result.Add(AccountInformationChatConverter.ConvertListToDictionaryFormat(response, accountDic.Key));
+        }
+
         return Result.Success(result);
     }
 

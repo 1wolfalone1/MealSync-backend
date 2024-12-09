@@ -133,36 +133,53 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
             order.IsRefund = isRefund;
         }
 
-        // Mark flag to shop account
+         // Check order is in 1 hours to warning. if > 3 need to send mail warning, 5 -> flag account.
+        var shop = _shopRepository.GetById(shopId);
         var shopAccount = _accountRepository.GetById(shopId);
-        shopAccount.NumOfFlag += numberOrderDeliveryFail;
+        if (numberOrderDeliveryFail > 0)
+        {
+            var systemConfig = _systemConfigRepository.Get().FirstOrDefault();
+            shop.NumOfWarning += numberOrderDeliveryFail;
+            if (shop.NumOfWarning >= 3 && shop.NumOfWarning < systemConfig.MaxWarningBeforeInscreaseFlag)
+            {
+                // Send email for shop
+                _emailService.SendEmailToAnnounceWarningForShop(shopAccount.Email, shop.NumOfWarning);
+            }
+            else if (shop.NumOfWarning >= systemConfig.MaxWarningBeforeInscreaseFlag)
+            {
+                // Apply flag for shop account and increase flag
+                shopAccount.NumOfFlag += 1;
 
-        // Send email for shop annouce flag increase
-        var systemConfig = _systemConfigRepository.GetSystemConfig();
-        if (shopAccount.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
-        {
-            _emailService.SendEmailToAnnounceAccountGotBanned(shopAccount.Email, shopAccount.FullName);
-            var orderProcessing = _orderRepository.CheckOrderOfShopInDeliveringAndPeparing(shopAccount.Id);
-            if (orderProcessing.Count > 0)
-            {
-                var shop = _shopRepository.GetById(shopId);
-                shop.Status = ShopStatus.Banning;
-                _shopRepository.Update(shop);
+                // Send email for shop annouce flag increase
+                if (shopAccount.NumOfFlag >= systemConfig.MaxFlagsBeforeBan)
+                {
+                    _emailService.SendEmailToAnnounceAccountGotBanned(shopAccount.Email, shopAccount.FullName);
+                    var orderProcessing = _orderRepository.CheckOrderOfShopInDeliveringAndPeparing(shopId);
+                    if (orderProcessing.Count > 0)
+                    {
+                        shop.Status = ShopStatus.Banning;
+                    }
+                    else
+                    {
+                        shopAccount.Status = AccountStatus.Banned;
+                        _accountRepository.Update(shopAccount);
+                    }
+                }
+                else
+                {
+                    var idOrders = string.Join(", ", orders.Select(o => string.Concat(IdPatternConstant.PREFIX_ID, o.Id)).ToList());
+                    var accountFlag = new AccountFlag(AccountActionTypes.DeliveryFailByShopNotDelivery, shopId, idOrders);
+                    await _accountFlagRepository.AddAsync(accountFlag).ConfigureAwait(false);
+                    _emailService.SendEmailToAnnounceApplyFlagForShop(shopAccount.Email, shopAccount.NumOfFlag, $"Cửa hàng bạn đã đủ 5 cảnh cáo từ hệ thống do không thực hiện giao các đơn hàng sau: {idOrders}");
+                }
+
+                // Reset warning
+                shop.NumOfWarning = 0;
             }
-            else
-            {
-                shopAccount.Status = AccountStatus.Banned;
-            }
-        }
-        else
-        {
-            var idOrders = string.Join(", ", orders.Select(o => string.Concat(IdPatternConstant.PREFIX_ID, o.Id)).ToList());
-            _emailService.SendEmailToAnnounceApplyFlagForShop(shopAccount.Email, shopAccount.NumOfFlag, $"Bạn không thực hiện giao các đơn hàng sau: {idOrders}");
-            var accountFlag = new AccountFlag(AccountActionTypes.DeliveryFailByShopNotDelivery, shopId, idOrders);
-            await _accountFlagRepository.AddAsync(accountFlag).ConfigureAwait(false);
         }
 
         _accountRepository.Update(shopAccount);
+        _shopRepository.Update(shop);
         return (orders, notfications);
     }
 

@@ -18,14 +18,16 @@ public class GetOrderInforNotificationHandler : IQueryHandler<GetOrderInforChatQ
     private readonly ICurrentAccountService _currentAccountService;
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly IMapper _mapper;
+    private readonly IAccountRepository _accountRepository;
 
-    public GetOrderInforNotificationHandler(IOrderRepository orderRepository, IMapper mapper, ICurrentPrincipalService currentPrincipalService, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository)
+    public GetOrderInforNotificationHandler(IOrderRepository orderRepository, IMapper mapper, ICurrentPrincipalService currentPrincipalService, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IAccountRepository accountRepository)
     {
         _orderRepository = orderRepository;
         _mapper = mapper;
         _currentPrincipalService = currentPrincipalService;
         _currentAccountService = currentAccountService;
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
+        _accountRepository = accountRepository;
     }
 
     public async Task<Result<Result>> Handle(GetOrderInforChatQuery request, CancellationToken cancellationToken)
@@ -33,9 +35,9 @@ public class GetOrderInforNotificationHandler : IQueryHandler<GetOrderInforChatQ
         // Validate
         Validate(request);
 
-        var order = _orderRepository.GetOrderInforNotification(request.Id);
-        var result = _mapper.Map<OrderInforNotificationResponse>(order);
-        return Result.Success(result);
+        var accounts = _accountRepository.GetAccountByIds(_orderRepository.GetListAccountIdRelatedToOrder(request.Id));
+        var response = _mapper.Map<List<AccountInforInChatRepsonse>>(accounts);
+        return Result.Success(AccountInformationChatConverter.ConvertListToDictionaryFormat(response, request.Id));
     }
 
     private void Validate(GetOrderInforChatQuery request)

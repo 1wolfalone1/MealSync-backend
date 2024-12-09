@@ -1,5 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Data;
+using Amazon;
+using Amazon.Rekognition;
+using Amazon.Runtime;
+using Amazon.S3;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Services.Dapper;
@@ -80,6 +84,30 @@ public static class ConfigureService
 
         // Register the RedisSettings instance as a singleton
         services.AddSingleton<VnPaySetting>(vnPaySetting);
+
+        services.AddSingleton<IAmazonRekognition>(sp =>
+        {
+            return new AmazonRekognitionClient(
+                config["AWS_ACCESS_KEY"],
+                config["AWS_SECRET_KEY"],
+                RegionEndpoint.GetBySystemName(config["AWS_REGION"])
+            );
+        });
+
+        // S3
+        services.AddSingleton<IAmazonS3>(sp =>
+        {
+            return new AmazonS3Client(
+                new BasicAWSCredentials(
+                    config["AWS_ACCESS_KEY"] ?? string.Empty,
+                    config["AWS_SECRET_KEY"] ?? string.Empty
+                ),
+                new AmazonS3Config
+                {
+                    RegionEndpoint = RegionEndpoint.GetBySystemName(config["AWS_REGION"] ?? string.Empty),
+                }
+            );
+        });
 
         //Config service
         var assembly = typeof(BaseService).Assembly;
