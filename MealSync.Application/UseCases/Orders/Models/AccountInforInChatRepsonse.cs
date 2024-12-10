@@ -29,6 +29,7 @@ public static class AccountInformationChatConverter
         {
             result[account.Id] = new Dictionary<string, object?>
             {
+                { "id", account.Id },
                 { "phoneNumber", account.PhoneNumber },
                 { "email", account.Email },
                 { "avatarUrl", account.AvatarUrl },
