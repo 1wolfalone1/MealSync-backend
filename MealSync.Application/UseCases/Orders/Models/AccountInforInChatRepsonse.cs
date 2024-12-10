@@ -1,4 +1,7 @@
-﻿namespace MealSync.Application.UseCases.Orders.Models;
+﻿using MealSync.Application.Common.Repositories;
+using MealSync.Domain.Entities;
+
+namespace MealSync.Application.UseCases.Orders.Models;
 
 public class AccountInforInChatRepsonse
 {
@@ -17,7 +20,7 @@ public class AccountInforInChatRepsonse
 
 public static class AccountInformationChatConverter
 {
-    public static Dictionary<object, object?> ConvertListToDictionaryFormat(List<AccountInforInChatRepsonse> accounts, long orderId)
+    public static Dictionary<object, object?> ConvertListToDictionaryFormat(List<AccountInforInChatRepsonse> accounts, long orderId, IShopRepository shopRepository)
     {
         var result = new Dictionary<object, object?>
         {
@@ -27,6 +30,17 @@ public static class AccountInformationChatConverter
         // Add account data to the dictionary
         foreach (var account in accounts)
         {
+            if (account.RoleId == (int)Domain.Enums.Roles.ShopOwner)
+            {
+                var shop = shopRepository.GetById(account.Id);
+                account.FullName = shop.Name;
+                account.AvatarUrl = shop.LogoUrl;
+            }
+            else if (account.RoleId == (int)Domain.Enums.Roles.ShopDelivery)
+            {
+                account.FullName = "Shipper - " + account.FullName;
+            }
+
             result[account.Id] = new Dictionary<string, object?>
             {
                 { "id", account.Id },

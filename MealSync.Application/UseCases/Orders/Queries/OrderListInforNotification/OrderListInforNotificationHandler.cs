@@ -19,8 +19,9 @@ public class OrderListInforNotificationHandler : IQueryHandler<OrderListInforNot
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly IMapper _mapper;
     private readonly IAccountRepository _accountRepository;
+    private readonly IShopRepository _shopRepository;
 
-    public OrderListInforNotificationHandler(IOrderRepository orderRepository, ICurrentAccountService currentAccountService, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapper mapper, IAccountRepository accountRepository)
+    public OrderListInforNotificationHandler(IOrderRepository orderRepository, ICurrentAccountService currentAccountService, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapper mapper, IAccountRepository accountRepository, IShopRepository shopRepository)
     {
         _orderRepository = orderRepository;
         _currentAccountService = currentAccountService;
@@ -28,6 +29,7 @@ public class OrderListInforNotificationHandler : IQueryHandler<OrderListInforNot
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
         _mapper = mapper;
         _accountRepository = accountRepository;
+        _shopRepository = shopRepository;
     }
 
     public async Task<Result<Result>> Handle(OrderListInforNotificationQuery request, CancellationToken cancellationToken)
@@ -41,7 +43,7 @@ public class OrderListInforNotificationHandler : IQueryHandler<OrderListInforNot
         {
             var accounts = _accountRepository.GetAccountByIds(accountDic.Value.ToList());
             var response = _mapper.Map<List<AccountInforInChatRepsonse>>(accounts);
-            result.Add(AccountInformationChatConverter.ConvertListToDictionaryFormat(response, accountDic.Key));
+            result.Add(AccountInformationChatConverter.ConvertListToDictionaryFormat(response, accountDic.Key, _shopRepository));
         }
 
         return Result.Success(result);
