@@ -9,4 +9,6 @@ public interface IShopDormitoryRepository : IBaseRepository<ShopDormitory>
     Task<List<ShopDormitory>> GetByShopId(long shopId);
 
     Task<bool> CheckShopDormitory(long shopId, List<long> dormitoryIds);
+
+    ShopDormitory GetShopDormitory(long shopId, long dormitoryId);
 }
