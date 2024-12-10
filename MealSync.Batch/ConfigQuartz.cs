@@ -46,7 +46,7 @@ public static class ConfigQuartz
             options.AddJob<UpdateFlagReceiveOrderPauseAndSoldOutJob>(JobKey.Create(nameof(UpdateFlagReceiveOrderPauseAndSoldOutJob)))
                 .AddTrigger(trigger => trigger
                     .ForJob(JobKey.Create(nameof(UpdateFlagReceiveOrderPauseAndSoldOutJob)))
-                    .WithCronSchedule("0 0 0 * * ?"));
+                    .WithCronSchedule("0 0 15 * * ?"));
 
             options.AddJob<HalfHourlyBatchMarkOrderOverTimeFrame>(JobKey.Create(nameof(HalfHourlyBatchMarkOrderOverTimeFrame)))
                 .AddTrigger(trigger => trigger
