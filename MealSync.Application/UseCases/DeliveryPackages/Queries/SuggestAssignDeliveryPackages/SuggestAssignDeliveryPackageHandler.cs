@@ -162,10 +162,10 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                     }
                 }
 
-                if (staff.CurrentTaskLoad > staffMaxWeightCarry)
+                if ((staff.CurrentTaskLoad + order.TotalWeight) > staffMaxWeightCarry)
                 {
                     // Check have any staff can carry this order
-                    if (listStaff.Any(s => s.CurrentTaskLoad < staffMaxWeightCarry))
+                    if (listStaff.Any(s => (s.CurrentTaskLoad + order.TotalWeight) < staffMaxWeightCarry))
                     {
                         salt = int.MaxValue;
                     }

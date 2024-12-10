@@ -25,4 +25,9 @@ public class ShopDormitoryRepository : BaseRepository<ShopDormitory>, IShopDormi
     {
         return DbSet.AnyAsync(sd => sd.ShopId == shopId && sd.Shop.Status != ShopStatus.Deleted && dormitoryIds.Contains(sd.DormitoryId));
     }
+
+    public ShopDormitory GetShopDormitory(long shopId, long dormitoryId)
+    {
+        return DbSet.Where(sd => sd.ShopId == shopId && sd.DormitoryId == dormitoryId).FirstOrDefault();
+    }
 }
