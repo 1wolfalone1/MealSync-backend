@@ -113,50 +113,6 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         }
     }
 
-    // private (List<DeliveryPackageForAssignResponse> AssignedStaff, List<OrderDetailForShopResponse> UnAssignOrder) AssignOrder(List<DeliveryPackageForAssignResponse> listStaff, List<OrderDetailForShopResponse> orders, SuggestAssignDeliveryPackageQuery request)
-    // {
-    //     var ordersByDormitory = orders.GroupBy(o => o.DormitoryId)
-    //         .ToDictionary(g => g.Key, g => (g.Count(), g.ToList()));
-    //
-    //     // Calculate the ideal number of orders each staff should handle
-    //     var equallyOrderForEachStaff = Math.Round(orders.Count / listStaff.Count * 1.0, MidpointRounding.ToEven);
-    //
-    //     var staffIndex = 0;
-    //     List<(long DormitoryId, long NumberOfOrder)> dormitoryIdsSatisfyCondition = new();
-    //     foreach (var orderDormitory in ordersByDormitory)
-    //     {
-    //         if (orderDormitory.Value.Item1 <= equallyOrderForEachStaff)
-    //         {
-    //             dormitoryIdsSatisfyCondition.Add((orderDormitory.Key, orderDormitory.Value.Item1));
-    //         }
-    //     }
-    //
-    //     for (var i = 0; i < listStaff.Count(); i++)
-    //     {
-    //         // Assign for staff until not left
-    //         if (dormitoryIdsSatisfyCondition.Count > 0)
-    //         {
-    //             // Get out list order can add full for a staff
-    //             var dormitoryIdContainsNearestEquallyOrder = dormitoryIdsSatisfyCondition.OrderByDescending(x => x.NumberOfOrder).First();
-    //             dormitoryIdsSatisfyCondition.Remove(dormitoryIdContainsNearestEquallyOrder);
-    //
-    //             var listOrderOfDormitoryCanAssignAllToStaff = ordersByDormitory[dormitoryIdContainsNearestEquallyOrder.DormitoryId].Item2;
-    //             ordersByDormitory.Remove(dormitoryIdContainsNearestEquallyOrder.DormitoryId);
-    //             listStaff[i] = AssignOrderToStaff(listStaff[i], listOrderOfDormitoryCanAssignAllToStaff);
-    //         }
-    //     }
-    //
-    //     // Assign left orders to shop delivery staff base on formular
-    //     var listOrderLeft = ordersByDormitory.Values.SelectMany(x => x.Item2).ToList();
-    //     if (listOrderLeft != null && listOrderLeft.Count() > 0)
-    //     {
-    //         var result = AssignOrderByFormular(listStaff, listOrderLeft, request.StaffMaxCarryWeight);
-    //         return (result.AssignedStaff, result.UnAssignOrder);
-    //     }
-    //
-    //     return (listStaff, new List<OrderDetailForShopResponse>());
-    // }
-
     private async Task<(List<DeliveryPackageForAssignResponse> AssignedStaff, List<OrderDetailForShopResponse> UnAssignOrder)> AssignOrderByFormularAsync(List<DeliveryPackageForAssignResponse> listStaff,
         List<OrderDetailForShopResponse> orders, double staffMaxWeightCarry)
     {
@@ -168,7 +124,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         foreach (var order in orders)
         {
             DeliveryPackageForAssignResponse bestStaff = null;
-            var bestScore = staffMaxWeightCarry * DevidedOrderConstant.StaffMaxCapacity;
+            var bestScore = staffMaxWeightCarry * DevidedOrderConstant.StaffMaxCapacity * 10;
 
             foreach (var staff in listStaff)
             {
@@ -373,7 +329,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             return matrix.Rows.First().AverageDuration;
         }
 
-        return 5;
+        return 5 * 60;
     }
 
     private DeliveryPackageForAssignResponse AssignOrderToStaff(DeliveryPackageForAssignResponse staff, List<OrderDetailForShopResponse> orders)

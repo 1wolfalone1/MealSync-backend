@@ -49,4 +49,5 @@ public enum QueryName
     GetOrderDetailForModeratorById,
     GetListReportForMod,
     GetListReviewForShopWeb,
+    GetListOrderForCalculateSuggestTime,
 }

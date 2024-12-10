@@ -220,4 +220,7 @@ public enum ResourceCode
 
     [Description("Notification-CancelOrder_AutoByBatch")]
     NOTIFICATION_CANCEL_ORDER_AUTO_BY_BATCH,
+
+    [Description("Notification-JoinRoomToCustomer")]
+    NOTIFICATION_JOIN_ROOM_TO_CUSTOMER,
 }

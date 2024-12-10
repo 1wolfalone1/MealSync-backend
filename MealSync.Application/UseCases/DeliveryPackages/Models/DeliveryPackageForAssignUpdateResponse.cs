@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using MealSync.Application.Common.Constants;
+using MealSync.Application.Common.Utils;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Domain.Enums;
 
@@ -20,18 +21,53 @@ public class DeliveryPackageForAssignUpdateResponse
     public int Failed { get; set; }
 
     [JsonIgnore]
-    public double CurrentDistance {
-        get
-        {
-            return Dormitories.Count * DevidedOrderConstant.DistanceLoad;
-        }
-    }
+    public int StartTime { get; set; }
 
     [JsonIgnore]
+    public int EndTime { get; set; }
+
+    // [JsonIgnore]
+    public double CurrentDistance { get; set; }
+
+    // [JsonIgnore]
     public double CurrentTaskLoad {
         get
         {
-            return Waiting * DevidedOrderConstant.WaitingTaskWorkLoad + Delivering * DevidedOrderConstant.DeliveringTaskWorkLoad;
+            return DeliveryPackageWeight;
+        }
+    }
+
+    public double DeliveryPackageWeight
+    {
+        get
+        {
+            return Orders.Sum(o => o.TotalWeight);
+        }
+    }
+
+    // [JsonIgnore]
+    public int TotalMinutesHandleDelivery
+    {
+        get
+        {
+            return TotalMinutesToWaitCustomer + DevidedOrderConstant.MinutesAddWhenOrderMoreThanFive + (Total / 5 * DevidedOrderConstant.MinutesAddWhenOrderMoreThanFive) + TotalMinutestToMove;
+        }
+    }
+
+    // [JsonIgnore]
+    public int TotalMinutestToMove { get; set; }
+
+    // [JsonIgnore]
+    public int TotalMinutesToWaitCustomer { get; set; }
+
+    public int SuggestStartTimeDelivery
+    {
+        get
+        {
+            var endTime = TimeFrameUtils.GetStartTimeToDateTime(DateTime.Now, EndTime);
+
+            endTime = endTime.AddMinutes(-TotalMinutesHandleDelivery);
+            return int.Parse(endTime.ToString("HHmm"));
         }
     }
 
