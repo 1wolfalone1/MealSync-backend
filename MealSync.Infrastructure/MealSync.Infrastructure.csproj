@@ -99,6 +99,8 @@
         <EmbeddedResource Include="Common\Queries\GetOrderDetailForModeratorById.sql" />
         <None Remove="Common\Queries\GetListReviewForShopWeb.sql" />
         <EmbeddedResource Include="Common\Queries\GetListReviewForShopWeb.sql" />
+        <None Remove="Common\Queries\GetListOrderForCalculateSuggestTime.sql" />
+        <EmbeddedResource Include="Common\Queries\GetListOrderForCalculateSuggestTime.sql" />
     </ItemGroup>
 
 </Project>

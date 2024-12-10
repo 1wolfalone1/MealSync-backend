@@ -2,6 +2,8 @@ using System.Text;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
+using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Chat;
 using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Services.Payments.VnPay;
 using MealSync.Application.Common.Services.Payments.VnPay.Models;
@@ -28,13 +30,16 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
     private readonly INotifierService _notifierService;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IDepositRepository _depositRepository;
+    private readonly IOrderRepository _orderRepository;
+    private readonly IChatService _chatService;
+    private readonly IAccountRepository _accountRepository;
 
     public UpdatePaymentStatusIPNHandler(
         IVnPayPaymentService paymentService, IPaymentRepository paymentRepository,
         ILogger<UpdatePaymentStatusIPNHandler> logger, IUnitOfWork unitOfWork,
         IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository,
         IShopRepository shopRepository, INotificationFactory notificationFactory,
-        INotifierService notifierService, ISystemResourceRepository systemResourceRepository, IDepositRepository depositRepository)
+        INotifierService notifierService, ISystemResourceRepository systemResourceRepository, IDepositRepository depositRepository, IOrderRepository orderRepository, IChatService chatService, IAccountRepository accountRepository)
     {
         _paymentService = paymentService;
         _paymentRepository = paymentRepository;
@@ -47,6 +52,9 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
         _notifierService = notifierService;
         _systemResourceRepository = systemResourceRepository;
         _depositRepository = depositRepository;
+        _orderRepository = orderRepository;
+        _chatService = chatService;
+        _accountRepository = accountRepository;
     }
 
     public async Task<Result<VnPayIPNResponse>> Handle(UpdatePaymentStatusIPNCommand request, CancellationToken cancellationToken)
@@ -163,6 +171,27 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                             {
                                 // Do nothing
                             }
+
+                            // Send notification for open chat
+                            var order = _orderRepository.GetById(payment.OrderId);
+                            var shopAccount = _accountRepository.GetById(order.ShopId);
+                            var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shopAccount);
+
+                            _chatService.OpenOrCloseRoom(new AddChat()
+                            {
+                                IsOpen = true,
+                                RoomId = order.Id,
+                                UserId = order.CustomerId,
+                                Notification = null,
+                            });
+
+                            _chatService.OpenOrCloseRoom(new AddChat()
+                            {
+                                IsOpen = true,
+                                RoomId = order.Id,
+                                UserId = order.ShopId,
+                                Notification = notificationJoinRoom,
+                            });
                         }
                         else
                         {

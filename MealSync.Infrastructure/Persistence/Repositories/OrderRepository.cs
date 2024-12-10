@@ -225,6 +225,12 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         return DbSet.Where(o => ids.Contains(o.Id)).ToList();
     }
 
+    public List<Order> GetByIdsWithBuilding(List<long> ids)
+    {
+        return DbSet.Where(o => ids.Contains(o.Id))
+            .Include(o => o.Building).ToList();
+    }
+
     public async Task<ShopStatisticDto> GetShopOrderStatistic(long shopId, DateTime startDate, DateTime endDate)
     {
         var totalOrdersQuery = DbSet
