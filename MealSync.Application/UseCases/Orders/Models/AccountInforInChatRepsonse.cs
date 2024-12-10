@@ -21,7 +21,7 @@ public static class AccountInformationChatConverter
     {
         var result = new Dictionary<object, object?>
         {
-            { "Id", orderId } // Add the OrderId as the first key-value pair
+            { "id", orderId } // Add the OrderId as the first key-value pair
         };
 
         // Add account data to the dictionary
@@ -29,11 +29,11 @@ public static class AccountInformationChatConverter
         {
             result[account.Id] = new Dictionary<string, object?>
             {
-                { "PhoneNumber", account.PhoneNumber },
-                { "Email", account.Email },
-                { "AvatarUrl", account.AvatarUrl },
-                { "FullName", account.FullName },
-                { "RoleId", account.RoleId }
+                { "phoneNumber", account.PhoneNumber },
+                { "email", account.Email },
+                { "avatarUrl", account.AvatarUrl },
+                { "fullName", account.FullName },
+                { "roleId", account.RoleId }
             };
         }
 
