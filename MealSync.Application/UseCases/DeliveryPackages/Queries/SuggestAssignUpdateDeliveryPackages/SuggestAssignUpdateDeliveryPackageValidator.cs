@@ -25,5 +25,9 @@ public class SuggestAssignUpdateDeliveryPackageValidator : AbstractValidator<Sug
         RuleFor(x => x.ShipperIds)
             .NotEmpty()
             .WithMessage("Vui lòng cung cấp ít nhất 1 nhân viên");
+
+        RuleFor(x => x.StaffMaxCarryWeight)
+            .GreaterThan(0)
+            .WithMessage("Vui lòng cung cấp số cân nặng tối đa mà nhân viên có thể mang");
     }
 }

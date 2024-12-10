@@ -57,4 +57,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     List<long> GetListAccountIdRelatedToOrder(long orderId);
 
     Dictionary<long, List<long>> GetDictionaryAccountIdRelated(List<long> orderIds);
+
+    List<Order> GetByIdsWithBuilding(List<long> ids);
 }

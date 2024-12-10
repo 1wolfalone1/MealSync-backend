@@ -12,6 +12,7 @@ using MealSync.Application.UseCases.DeliveryPackages.Queries.GetListTimeFrameUnA
 using MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignDeliveryPackages;
 using MealSync.Application.UseCases.DeliveryPackages.Queries.SuggestAssignUpdateDeliveryPackages;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCreateDeliveryPackage;
+using MealSync.Application.UseCases.Orders.Queries.GetDeliveryStatisticInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -103,6 +104,13 @@ public class DeliveryPackageController : BaseApiController
     [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
     [HttpGet(Endpoints.GET_DELIVERY_PACKAGE_HISTORY)]
     public async Task<IActionResult> GetDeliveryPackageHistory([FromQuery] GetDeliveryPackageHistoryForShopWebQuery query)
+    {
+        return HandleResult(await Mediator.Send(query));
+    }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    [HttpGet(Endpoints.GET_DELIVERY_PACKAGE_CALCULATE_TIME_SUGGEST)]
+    public async Task<IActionResult> GetDeliveryPackageHistory([FromQuery] GetDeliveryStatisticInfoQuery  query)
     {
         return HandleResult(await Mediator.Send(query));
     }

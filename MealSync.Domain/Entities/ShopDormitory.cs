@@ -10,6 +10,10 @@ public class ShopDormitory : BaseEntity
 
     public long DormitoryId { get; set; }
 
+    public int Duration { get; set; }
+
+    public double Distance { get; set; }
+
     public virtual Shop Shop { get; set; }
 
     public virtual Dormitory Dormitory { get; set; }
