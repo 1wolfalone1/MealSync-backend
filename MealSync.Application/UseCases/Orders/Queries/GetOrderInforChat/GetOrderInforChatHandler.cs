@@ -19,8 +19,9 @@ public class GetOrderInforNotificationHandler : IQueryHandler<GetOrderInforChatQ
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly IMapper _mapper;
     private readonly IAccountRepository _accountRepository;
+    private readonly IShopRepository _shopRepository;
 
-    public GetOrderInforNotificationHandler(IOrderRepository orderRepository, IMapper mapper, ICurrentPrincipalService currentPrincipalService, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IAccountRepository accountRepository)
+    public GetOrderInforNotificationHandler(IOrderRepository orderRepository, IMapper mapper, ICurrentPrincipalService currentPrincipalService, ICurrentAccountService currentAccountService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IAccountRepository accountRepository, IShopRepository shopRepository)
     {
         _orderRepository = orderRepository;
         _mapper = mapper;
@@ -28,6 +29,7 @@ public class GetOrderInforNotificationHandler : IQueryHandler<GetOrderInforChatQ
         _currentAccountService = currentAccountService;
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
         _accountRepository = accountRepository;
+        _shopRepository = shopRepository;
     }
 
     public async Task<Result<Result>> Handle(GetOrderInforChatQuery request, CancellationToken cancellationToken)
@@ -37,7 +39,7 @@ public class GetOrderInforNotificationHandler : IQueryHandler<GetOrderInforChatQ
 
         var accounts = _accountRepository.GetAccountByIds(_orderRepository.GetListAccountIdRelatedToOrder(request.Id));
         var response = _mapper.Map<List<AccountInforInChatRepsonse>>(accounts);
-        return Result.Success(AccountInformationChatConverter.ConvertListToDictionaryFormat(response, request.Id));
+        return Result.Success(AccountInformationChatConverter.ConvertListToDictionaryFormat(response, request.Id, _shopRepository));
     }
 
     private void Validate(GetOrderInforChatQuery request)
