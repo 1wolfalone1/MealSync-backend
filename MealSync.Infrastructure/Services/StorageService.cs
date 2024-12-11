@@ -47,8 +47,6 @@ public class StorageService : IStorageService, IBaseService
         using var ms = new MemoryStream();
         await file.CopyToAsync(ms).ConfigureAwait(false);
 
-        await CheckImageViolation(ms, isCheckFoodDrink).ConfigureAwait(false);
-
         // Get file extension
         var fileExtension = Path.GetExtension(file.FileName);
 
@@ -59,6 +57,7 @@ public class StorageService : IStorageService, IBaseService
         if (file.ContentType.StartsWith("image/"))
         {
             fileName = "image/" + fileName;
+            await CheckImageViolation(ms, isCheckFoodDrink).ConfigureAwait(false);
         }
         else if (file.ContentType.StartsWith("video/"))
         {

@@ -22,7 +22,7 @@ public class ReviewOrderOfCustomerValidate : AbstractValidator<ReviewOrderOfCust
             .WithMessage("Tối đa 5 ảnh")
             .When(images => images != default && images.Images != default && images.Images.Length > 0)
             .ForEach(image =>
-                image.Must(file => file.Length <= 5 * 1024 * 1024)
+                image.Must(file => file.Length <= 10 * 1024 * 1024)
                     .WithMessage("Ảnh không được vượt quá 5 MB.")
             );
     }
