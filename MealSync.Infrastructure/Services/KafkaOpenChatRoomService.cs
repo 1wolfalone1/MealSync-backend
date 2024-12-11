@@ -38,7 +38,7 @@ public class KafkaOpenChatRoomService : BaseService, IChatService
                 });
 
                 // Log the result
-                _logger.LogInformation($"Message sent to partition {result.Partition} with offset {result.Offset} to open room chat");
+                _logger.LogInformation($"Message sent to partition {result.Partition} with offset {result.Offset} to open room chat for userId: {addChat.UserId}");
             }
             catch (ProduceException<string, string> e)
             {

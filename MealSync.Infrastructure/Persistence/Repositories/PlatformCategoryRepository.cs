@@ -46,4 +46,28 @@ public class PlatformCategoryRepository : BaseRepository<PlatformCategory>, IPla
 
         return platform;
     }
+
+    public (int TotalCount, List<PlatformCategory> Result) GetPlatformCategoryForAdmin(string? searchValue, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize)
+    {
+        var query = DbSet.AsQueryable();
+
+        if (searchValue != null)
+        {
+            query = query.Where(pl => pl.Id.ToString().Contains(searchValue)
+                                      || pl.Name.Contains(searchValue));
+        }
+
+        if (dateFrom.HasValue && dateTo.HasValue)
+        {
+            query = query.Where(pl => pl.CreatedDate.DateTime >= dateFrom && pl.CreatedDate.DateTime <= dateTo);
+        }
+
+        var totalCount = query.Count();
+        var result = query.OrderByDescending(o => o.CreatedDate)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (totalCount, result);
+    }
 }

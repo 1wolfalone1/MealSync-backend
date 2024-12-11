@@ -4,6 +4,7 @@ using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Chat;
 using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
@@ -24,9 +25,11 @@ public class ShopPreparingOrderHandler : ICommandHandler<ShopPreparingOrderComma
     private readonly INotificationFactory _notificationFactory;
     private readonly IShopRepository _shopRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
+    private readonly IChatService _chatService;
+    private readonly IAccountRepository _accountRepository;
 
     public ShopPreparingOrderHandler(IOrderRepository orderRepository, IUnitOfWork unitOfWork, ILogger<Result> logger, ICurrentPrincipalService currentPrincipalService, INotifierService notifierService,
-        INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository)
+        INotificationFactory notificationFactory, IShopRepository shopRepository, ISystemResourceRepository systemResourceRepository, IChatService chatService, IAccountRepository accountRepository)
     {
         _orderRepository = orderRepository;
         _unitOfWork = unitOfWork;
@@ -36,6 +39,8 @@ public class ShopPreparingOrderHandler : ICommandHandler<ShopPreparingOrderComma
         _notificationFactory = notificationFactory;
         _shopRepository = shopRepository;
         _systemResourceRepository = systemResourceRepository;
+        _chatService = chatService;
+        _accountRepository = accountRepository;
     }
 
     public async Task<Result<Result>> Handle(ShopPreparingOrderCommand request, CancellationToken cancellationToken)
@@ -91,6 +96,25 @@ public class ShopPreparingOrderHandler : ICommandHandler<ShopPreparingOrderComma
             var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId.Value);
             var noti = _notificationFactory.CreateOrderPreparingNotification(order, shop);
             _notifierService.NotifyAsync(noti);
+
+            var shopAccount = _accountRepository.GetById(order.ShopId);
+            var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shopAccount);
+
+            _chatService.OpenOrCloseRoom(new AddChat()
+            {
+                IsOpen = true,
+                RoomId = order.Id,
+                UserId = order.CustomerId,
+                Notification = null,
+            });
+
+            _chatService.OpenOrCloseRoom(new AddChat()
+            {
+                IsOpen = true,
+                RoomId = order.Id,
+                UserId = order.ShopId,
+                Notification = notificationJoinRoom,
+            });
 
             return Result.Success(new
             {

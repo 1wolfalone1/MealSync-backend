@@ -81,6 +81,8 @@ public class Order : BaseEntity
 
     public string? ReasonIdentity { get; set; }
 
+    public string? HistoryAssignJson { get; set; }
+
     public virtual Promotion? Promotion { get; set; }
 
     public virtual Shop Shop { get; set; }
@@ -109,4 +111,11 @@ public class ShopDeliveyFailEvidence
     public string ImageUrl { get; set; }
 
     public DateTimeOffset TakePictureDateTime { get; set; }
+}
+
+public class HistoryAssign
+{
+    public long Id { get; set; }
+
+    public DateTimeOffset AssignDate { get; set; }
 }
