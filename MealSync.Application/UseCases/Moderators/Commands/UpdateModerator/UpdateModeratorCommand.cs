@@ -2,10 +2,12 @@
 using MealSync.Application.Shared;
 using MealSync.Domain.Enums;
 
-namespace MealSync.Application.UseCases.Moderators.Commands.CreateModerator;
+namespace MealSync.Application.UseCases.Moderators.Commands.UpdateModerator;
 
-public class CreateModeratorCommand : ICommand<Result>
+public class UpdateModeratorCommand : ICommand<Result>
 {
+    public long Id { get; set; }
+
     public string FullName { get; set; }
 
     public string Email { get; set; }

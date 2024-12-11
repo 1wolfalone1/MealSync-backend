@@ -266,5 +266,6 @@ public static class Endpoints
 
     // Admin
     public const string CREATE_MODERATOR_ACCOUNT = "admin/moderator/account";
+    public const string UPDATE_MODERATOR_ACCOUNT = "admin/moderator/account/{id:long}";
     public const string GET_MODERATOR_ACCOUNT = "admin/moderator";
 }

@@ -19,4 +19,6 @@ public interface IAccountRepository : IBaseRepository<Account>
     bool CheckExistPhoneNumberInOtherEmailAccount(string email, string phoneNumber);
 
     List<Account> GetAccountByIds(List<long> ids);
+
+    bool CheckExistEmailWhenUpdate(long id, string email);
 }
