@@ -113,6 +113,12 @@ public enum ResourceCode
     [Description("Email-Subject-AccountForModerator")]
     EMAIL_SUBJECT_ACCOUNT_FOR_MODERATOR,
 
+    [Description("Email-Body-ModeratorAccountEmailChange")]
+    EMAIL_BODY_MODERATOR_ACCOUNT_EMAIL_CHANGE,
+
+    [Description("Email-Subject-ModeratorAccountEmailChange")]
+    EMAIL_SUBJECT_MODERATOR_ACCOUNT_EMAIL_CHANGE,
+
     // Account
     [Description("Account-Avatar")]
     ACCOUNT_AVATAR,

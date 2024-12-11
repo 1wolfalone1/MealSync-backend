@@ -142,6 +142,13 @@ public class EmailService : IEmailService, IBaseService
             _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_ACCOUNT_FOR_MODERATOR.GetDescription(), fullName, userName, password));
     }
 
+    public bool SendChangeEmailAccountModerator(string oldEmail, string newEmail, string? fullName)
+    {
+        return SendEmail(oldEmail,
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_SUBJECT_MODERATOR_ACCOUNT_EMAIL_CHANGE.GetDescription()),
+            _systemResourceRepository.GetByResourceCode(ResourceCode.EMAIL_BODY_MODERATOR_ACCOUNT_EMAIL_CHANGE.GetDescription(), fullName, oldEmail, newEmail));
+    }
+
     private bool SendEmail(string toEmail, string subject, string body)
     {
         try

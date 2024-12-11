@@ -53,6 +53,7 @@ public class CreateModeratorHandler : ICommandHandler<CreateModeratorCommand, Re
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
                 accountTemp.PhoneNumber = request.PhoneNumber;
                 accountTemp.Password = password;
+                accountTemp.Status = request.Status;
                 var moderatorDormitories = new List<ModeratorDormitory>();
                 foreach (var id in request.DormitoryIds)
                 {
@@ -111,7 +112,7 @@ public class CreateModeratorHandler : ICommandHandler<CreateModeratorCommand, Re
                 Genders = Genders.UnKnown,
                 AvatarUrl = _systemResourceRepository.GetByResourceCode(ResourceCode.ACCOUNT_AVATAR.GetDescription()),
                 Type = AccountTypes.Local,
-                Status = AccountStatus.UnVerify,
+                Status = request.Status,
                 RoleId = (int)Domain.Enums.Roles.Moderator,
             };
             account.Moderator = moderator;
