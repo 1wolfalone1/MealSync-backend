@@ -126,6 +126,7 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                             {
                                 WalletFromId = systemTotalWallet.Id,
                                 WalletToId = systemCommissionWallet.Id,
+                                PaymentId = payment.Id,
                                 AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
                                 IncomingAmountBefore = systemTotalWallet.IncomingAmount,
                                 ReportingAmountBefore = systemTotalWallet.ReportingAmount,
@@ -141,6 +142,7 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                             {
                                 WalletFromId = systemTotalWallet.Id,
                                 WalletToId = systemCommissionWallet.Id,
+                                PaymentId = payment.Id,
                                 AvaiableAmountBefore = systemCommissionWallet.AvailableAmount,
                                 IncomingAmountBefore = systemCommissionWallet.IncomingAmount,
                                 ReportingAmountBefore = systemCommissionWallet.ReportingAmount,

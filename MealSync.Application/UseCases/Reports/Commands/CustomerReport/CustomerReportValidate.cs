@@ -28,7 +28,7 @@ public class CustomerReportValidate : AbstractValidator<CustomerReportCommand>
                 .WithMessage("Tối đa 5 ảnh được phép tải lên.");
 
             RuleForEach(x => x.Images)
-                .Must(file => file.Length <= 5 * 1024 * 1024)
+                .Must(file => file.Length <= 10 * 1024 * 1024)
                 .WithMessage("Mỗi ảnh phải nhỏ hơn hoặc bằng 5 MB.");
         });
     }
