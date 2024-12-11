@@ -26,4 +26,6 @@ public interface IWithdrawalRequestRepository : IBaseRepository<WithdrawalReques
     Task<WithdrawalRequestDetailManageDto?> GetDetailForManage(List<long> dormitoryIds, long withdrawalRequestId);
 
     Task<WithdrawalRequest?> GetForManageIncludeWalletAndShop(List<long> dormitoryIds, long withdrawalRequestId);
+
+    Task<WithdrawalRequestDetailManageDto?> GetDetailForAdmin(long withdrawalRequestId);
 }

@@ -20,6 +20,7 @@ using MealSync.Application.UseCases.Orders.Queries.GetDeliveryInfoFail;
 using MealSync.Application.UseCases.Orders.Queries.ModeratorManage.GetOrderDetailForModerator;
 using MealSync.Application.UseCases.Orders.Queries.ModeratorManage.GetOrderForModerator;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailCustomer;
+using MealSync.Application.UseCases.Orders.Queries.OrderDetailForAdmin;
 using MealSync.Application.UseCases.Orders.Queries.OrderDetailForShop;
 using MealSync.Application.UseCases.Orders.Queries.OrderHistory;
 using MealSync.Application.UseCases.Orders.Queries.ShopOrderByStatus;
@@ -250,5 +251,15 @@ public class OrderController : BaseApiController
     {
         command.OrderId = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_ORDER_DETAIL_FOR_ADMIN)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> GetOrderDetailForAdmin(long id)
+    {
+        return HandleResult(await Mediator.Send(new OrderDetailForAdminQuery()
+        {
+            Id = id,
+        }).ConfigureAwait(false));
     }
 }
