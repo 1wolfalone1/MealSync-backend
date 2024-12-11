@@ -1,10 +1,12 @@
 ﻿using System.Net;
+using AutoMapper;
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
+using MealSync.Application.UseCases.Moderators.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
@@ -23,8 +25,9 @@ public class CreateModeratorHandler : ICommandHandler<CreateModeratorCommand, Re
     private readonly IDormitoryRepository _dormitoryRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IEmailService _emailService;
+    private readonly IMapper _mapper;
 
-    public CreateModeratorHandler(IUnitOfWork unitOfWork, IModeratorRepository moderatorRepository, ILogger<CreateModeratorHandler> logger, IAccountRepository accountRepository, IModeratorDormitoryRepository moderatorDormitoryRepository, ISystemResourceRepository systemResourceRepository, IEmailService emailService, IDormitoryRepository dormitoryRepository)
+    public CreateModeratorHandler(IUnitOfWork unitOfWork, IModeratorRepository moderatorRepository, ILogger<CreateModeratorHandler> logger, IAccountRepository accountRepository, IModeratorDormitoryRepository moderatorDormitoryRepository, ISystemResourceRepository systemResourceRepository, IEmailService emailService, IDormitoryRepository dormitoryRepository, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _moderatorRepository = moderatorRepository;
@@ -34,6 +37,7 @@ public class CreateModeratorHandler : ICommandHandler<CreateModeratorCommand, Re
         _systemResourceRepository = systemResourceRepository;
         _emailService = emailService;
         _dormitoryRepository = dormitoryRepository;
+        _mapper = mapper;
     }
 
     public async Task<Result<Result>> Handle(CreateModeratorCommand request, CancellationToken cancellationToken)
@@ -82,12 +86,10 @@ public class CreateModeratorHandler : ICommandHandler<CreateModeratorCommand, Re
             }
 
             _emailService.SendCreatedAccountModerator(request.Email, request.FullName, request.Email, password);
-            return Result.Success(new
-            {
-                Message = _systemResourceRepository.GetByResourceCode(MessageCode.E_ACCOUNT_MODERATOR_CREATED.GetDescription()),
-                Code = MessageCode.E_ACCOUNT_MODERATOR_CREATED.GetDescription(),
-            });
+            var moderatorResponse = _moderatorRepository.GetById(accountTemp.Id);
+            return Result.Success(_mapper.Map<ModeratorResponse>(moderatorResponse));
         }
+        long accountId = 0;
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
@@ -119,6 +121,7 @@ public class CreateModeratorHandler : ICommandHandler<CreateModeratorCommand, Re
 
             await _accountRepository.AddAsync(account).ConfigureAwait(false);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
+            accountId = account.Id;
         }
         catch (Exception e)
         {
@@ -128,11 +131,8 @@ public class CreateModeratorHandler : ICommandHandler<CreateModeratorCommand, Re
         }
 
         _emailService.SendCreatedAccountModerator(request.Email, request.FullName, request.Email, password);
-        return Result.Success(new
-        {
-            Message = _systemResourceRepository.GetByResourceCode(MessageCode.E_ACCOUNT_MODERATOR_CREATED.GetDescription()),
-            Code = MessageCode.E_ACCOUNT_MODERATOR_CREATED.GetDescription(),
-        });
+        var moderatorResult = _moderatorRepository.GetById(accountId);
+        return Result.Success(_mapper.Map<ModeratorResponse>(moderatorResult));
     }
 
     public static string GeneratePassword(int length = 8)
