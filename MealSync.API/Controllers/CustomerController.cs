@@ -1,4 +1,5 @@
 using MealSync.Application.UseCases.Accounts.Commands.BanUnBanCustomerByMod;
+using MealSync.Application.UseCases.Accounts.Queries.AdminManage.GetDetailAccount;
 using MealSync.Application.UseCases.Accounts.Queries.ModeratorManage.GetDetailAccount;
 using MealSync.Application.UseCases.Accounts.Queries.ModeratorManage.GetListAccount;
 using MealSync.Application.UseCases.Customers.Commands.UpdateAvatar;
@@ -58,5 +59,12 @@ public class CustomerController : BaseApiController
     public async Task<IActionResult> BanOrUnban([FromBody] BanUnBanCustomerByModCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_CUSTOMER_DETAIL_ADMIN)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> GetCustomerDetailForAdmin(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetDetailAccountAdminQuery() { AccountId = id }).ConfigureAwait(false));
     }
 }
