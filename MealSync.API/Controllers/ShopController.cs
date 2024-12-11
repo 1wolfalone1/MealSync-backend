@@ -16,6 +16,7 @@ using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatistics;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatisticSummary;
 using MealSync.Application.UseCases.Shops.Commands.ModeratorManage.UpdateShopStatus;
+using MealSync.Application.UseCases.Shops.Queries.AdminManage.GetShopDetailForAdmin;
 using MealSync.Application.UseCases.Shops.Queries.GetMaxCarryWeightOfShop;
 using MealSync.Application.UseCases.Shops.Queries.GetShopInCart;
 using MealSync.Application.UseCases.Shops.Queries.ModeratorManage.GetListShop;
@@ -205,5 +206,12 @@ public class ShopController : BaseApiController
     public async Task<IActionResult> GetShopMaxCarryWeight()
     {
         return HandleResult(await Mediator.Send(new GetMaxCarryWeightOfShopQuery()).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MANAGE_SHOP_DETAIL_ADMIN)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> GetShopDetailForAdmin(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetShopDetailForAdminQuery { ShopId = id }).ConfigureAwait(false));
     }
 }

@@ -268,4 +268,11 @@ public static class Endpoints
     public const string CREATE_MODERATOR_ACCOUNT = "admin/moderator/account";
     public const string UPDATE_MODERATOR_ACCOUNT = "admin/moderator/account/{id:long}";
     public const string GET_MODERATOR_ACCOUNT = "admin/moderator";
+    public const string GET_MODERATOR_ACTIVITY_LOG = "admin/moderator/activity-log";
+    public const string GET_MODERATOR_ACTIVITY_LOG_DETAIL = "admin/moderator/activity-log/{id:long}";
+    public const string ADMIN_MANAGE_WITHDRAWAL_REQUEST_DETAIL = "admin/withdrawal-request/{id:long}";
+    public const string GET_ORDER_DETAIL_FOR_ADMIN = "admin/order/{id:long}";
+    public const string MANAGE_REPORT_DETAIL_ADMIN = "admin/report/{id:long}";
+    public const string MANAGE_SHOP_DETAIL_ADMIN = "admin/shop/{id:long}";
+    public const string MANAGE_CUSTOMER_DETAIL_ADMIN = "admin/customer/{id:long}";
 }

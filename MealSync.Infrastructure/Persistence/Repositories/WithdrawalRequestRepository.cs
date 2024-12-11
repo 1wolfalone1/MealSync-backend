@@ -240,6 +240,31 @@ public class WithdrawalRequestRepository : BaseRepository<WithdrawalRequest>, IW
             }).FirstOrDefaultAsync();
     }
 
+    public Task<WithdrawalRequestDetailManageDto?> GetDetailForAdmin(long withdrawalRequestId)
+    {
+        return DbSet
+            .Where(w => w.Id == withdrawalRequestId && w.Wallet.Shop != default
+                                                    && w.Status != WithdrawalRequestStatus.Cancelled
+                                                    && w.Wallet.Shop.Status != ShopStatus.Deleted
+            ).Select(w => new WithdrawalRequestDetailManageDto
+            {
+                Id = w.Id,
+                ShopName = w.Wallet.Shop!.Name,
+                ShopOwnerName = w.Wallet.Shop.Account.FullName ?? string.Empty,
+                Email = w.Wallet.Shop.Account.Email,
+                RequestAmount = w.Amount,
+                AvailableAmount = w.Wallet.AvailableAmount,
+                BankCode = w.BankCode,
+                BankShortName = w.BankShortName,
+                BankAccountNumber = w.BankAccountNumber,
+                BankAccountName = w.BankAccountName,
+                Reason = w.Reason,
+                Status = w.Status,
+                CreatedDate = w.CreatedDate,
+                UpdatedDate = w.UpdatedDate,
+            }).FirstOrDefaultAsync();
+    }
+
     public Task<WithdrawalRequest?> GetForManageIncludeWalletAndShop(List<long> dormitoryIds, long withdrawalRequestId)
     {
         return DbSet
