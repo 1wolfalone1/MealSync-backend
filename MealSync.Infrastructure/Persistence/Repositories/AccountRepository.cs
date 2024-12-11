@@ -54,4 +54,9 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
     {
         return DbSet.Where(a => ids.Contains(a.Id)).ToList();
     }
+
+    public bool CheckExistEmailWhenUpdate(long id, string email)
+    {
+        return DbSet.Any(a => a.Email == email && a.Id != id);
+    }
 }

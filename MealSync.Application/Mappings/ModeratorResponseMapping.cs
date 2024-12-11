@@ -23,6 +23,8 @@ public class ModeratorResponseMapping : Profile
             .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(
                 src => src.Account != default ? src.Account.AvatarUrl : string.Empty))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(
-                src => src.Account != default ? src.Account.Email : string.Empty));
+                src => src.Account != default ? src.Account.Email : string.Empty))
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(
+                src => src.Account != default ? src.Account.FullName : string.Empty));
     }
 }

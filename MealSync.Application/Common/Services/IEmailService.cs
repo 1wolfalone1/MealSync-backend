@@ -35,4 +35,6 @@ public interface IEmailService
     bool SendUnBanCustomerWithReason(string email, string? fullName, string reason);
 
     bool SendCreatedAccountModerator(string email, string? fullName, string userName, string password);
+
+    bool SendChangeEmailAccountModerator(string oldEmail, string newEmail, string? fullName);
 }
