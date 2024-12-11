@@ -30,9 +30,6 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
     private readonly INotifierService _notifierService;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IDepositRepository _depositRepository;
-    private readonly IOrderRepository _orderRepository;
-    private readonly IChatService _chatService;
-    private readonly IAccountRepository _accountRepository;
 
     public UpdatePaymentStatusIPNHandler(
         IVnPayPaymentService paymentService, IPaymentRepository paymentRepository,
@@ -52,9 +49,6 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
         _notifierService = notifierService;
         _systemResourceRepository = systemResourceRepository;
         _depositRepository = depositRepository;
-        _orderRepository = orderRepository;
-        _chatService = chatService;
-        _accountRepository = accountRepository;
     }
 
     public async Task<Result<VnPayIPNResponse>> Handle(UpdatePaymentStatusIPNCommand request, CancellationToken cancellationToken)
@@ -173,27 +167,6 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                             {
                                 // Do nothing
                             }
-
-                            // Send notification for open chat
-                            var order = _orderRepository.GetById(payment.OrderId);
-                            var shopAccount = _accountRepository.GetById(order.ShopId);
-                            var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shopAccount);
-
-                            _chatService.OpenOrCloseRoom(new AddChat()
-                            {
-                                IsOpen = true,
-                                RoomId = order.Id,
-                                UserId = order.CustomerId,
-                                Notification = null,
-                            });
-
-                            _chatService.OpenOrCloseRoom(new AddChat()
-                            {
-                                IsOpen = true,
-                                RoomId = order.Id,
-                                UserId = order.ShopId,
-                                Notification = notificationJoinRoom,
-                            });
                         }
                         else
                         {

@@ -6,6 +6,7 @@ using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace MealSync.Infrastructure.Persistence.Repositories;
 
@@ -584,6 +585,12 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         if (order.DeliveryPackageId.HasValue && order.DeliveryPackage.ShopDeliveryStaffId.HasValue)
         {
             accountIds.Add(order.DeliveryPackage.ShopDeliveryStaffId.Value);
+        }
+
+        if (order.HistoryAssignJson != null)
+        {
+            var histories = JsonConvert.DeserializeObject<List<HistoryAssign>>(order.HistoryAssignJson);
+            accountIds.AddRange(histories.Select(h => h.Id).ToList());
         }
 
         return accountIds;

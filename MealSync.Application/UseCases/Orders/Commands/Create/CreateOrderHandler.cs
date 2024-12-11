@@ -38,8 +38,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly INotificationFactory _notificationFactory;
     private readonly INotifierService _notifierService;
-    private readonly IChatService _chatService;
-    private readonly IAccountRepository _accountRepository;
 
     public CreateOrderHandler(
         ILogger<CreateOrderCommand> logger, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository,
@@ -68,8 +66,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         _systemResourceRepository = systemResourceRepository;
         _notificationFactory = notificationFactory;
         _notifierService = notifierService;
-        _chatService = chatService;
-        _accountRepository = accountRepository;
     }
 
     public async Task<Result<Result>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -255,25 +251,6 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 {
                     // Do nothing
                 }
-
-                var shopAccount = _accountRepository.GetById(order.ShopId);
-                var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shopAccount);
-
-                _chatService.OpenOrCloseRoom(new AddChat()
-                {
-                    IsOpen = true,
-                    RoomId = order.Id,
-                    UserId = order.CustomerId,
-                    Notification = null,
-                });
-
-                _chatService.OpenOrCloseRoom(new AddChat()
-                {
-                    IsOpen = true,
-                    RoomId = order.Id,
-                    UserId = order.ShopId,
-                    Notification = notificationJoinRoom,
-                });
             }
 
             return Result.Create(response);
