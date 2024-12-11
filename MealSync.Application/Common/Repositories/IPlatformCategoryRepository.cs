@@ -15,4 +15,6 @@ public interface IPlatformCategoryRepository : IBaseRepository<PlatformCategory>
     bool CheckExsitUpdateName(string requestName, long requestId);
 
     List<PlatformCategory> GetByIds(long[] ids);
+
+    (int TotalCount, List<PlatformCategory> Result) GetPlatformCategoryForAdmin(string? searchValue, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize);
 }

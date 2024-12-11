@@ -127,6 +127,7 @@ public static class Endpoints
     public const string CREATE_PLATFORM_CATEGORY = "admin/platform-category";
     public const string UPDATE_PLATFORM_CATEGORY = "admin/platform-category/{id:long}";
     public const string REARRANGE_PLATFORM_CATEGORY = "admin/platform-category/re-arrange";
+    public const string GET_PLATFORM_CATEGORY = "admin/platform-category/get-all";
 
     // Customer Building
     public const string UPDATE_CUSTOMER_BUILDING = "customer/building/update";

@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.PlatformCategory.Commands.ReArrangePlatformC
 using MealSync.Application.UseCases.PlatformCategory.Commands.UpdatePlatformCategory;
 using Microsoft.AspNetCore.Mvc;
 using MealSync.Application.UseCases.PlatformCategory.Queries.GetAll;
+using MealSync.Application.UseCases.PlatformCategory.Queries.GetAllPlatformCategoryForAdmin;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MealSync.API.Controllers;
@@ -38,5 +39,12 @@ public class PlatformCategoryController : BaseApiController
     public async Task<IActionResult> ReArrangePlatformCategory([FromBody] ReArrangePlatformCategoryCommand command)
     {
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_PLATFORM_CATEGORY)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> ReArrangePlatformCategory([FromQuery] GetAllForAdminQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }

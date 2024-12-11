@@ -5,6 +5,7 @@ using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Chat;
 using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
@@ -38,10 +39,11 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
     private readonly IStorageService _storageService;
     private const string QR_KEY = "QR_KEY";
     private readonly IConfiguration _configuration;
+    private readonly IChatService _chatService;
 
     public ShopAssignOrderHandler(IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IUnitOfWork unitOfWork, ILogger<ShopAssignOrderCommand> logger,
         IDeliveryPackageRepository deliveryPackageRepository, INotificationFactory notificationFactory, INotifierService notifierService, IShopRepository shopRepository, IAccountRepository accountRepository,
-        ISystemResourceRepository systemResourceRepository, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapper mapper, IStorageService storageService, IConfiguration configuration)
+        ISystemResourceRepository systemResourceRepository, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapper mapper, IStorageService storageService, IConfiguration configuration, IChatService chatService)
     {
         _orderRepository = orderRepository;
         _currentPrincipalService = currentPrincipalService;
@@ -57,6 +59,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
         _mapper = mapper;
         _storageService = storageService;
         _configuration = configuration;
+        _chatService = chatService;
     }
 
     public async Task<Result<Result>> Handle(ShopAssignOrderCommand request, CancellationToken cancellationToken)
@@ -114,13 +117,37 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-
-            // Todo: Check if reassign staff need to re generate qrcode
             DeliveryPackage dp;
             if (order.DeliveryPackageId == null)
             {
                 // Get delivery package of shipper in this frame if not exist create
                 dp = await CreateOrAddOrderInDeliveryPackageAsync(order, request).ConfigureAwait(false);
+
+                // Save an history assign
+                var history = JsonConvert.DeserializeObject<List<HistoryAssign>>(order.HistoryAssignJson);
+                var shipperId = dp.ShopId.HasValue ? dp.ShopId.Value : dp.ShopDeliveryStaffId.Value;
+                history.Add(new HistoryAssign()
+                {
+                    Id = shipperId,
+                    AssignDate = DateTimeOffset.Now,
+                });
+                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+                _orderRepository.Update(order);
+
+                // Send noti to add shipper
+                if (shipperId != order.ShopId)
+                {
+                    var shipperAccount = _accountRepository.GetById(shipperId);
+                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                    _chatService.OpenOrCloseRoom(new AddChat()
+                    {
+                        IsOpen = true,
+                        RoomId = order.Id,
+                        UserId = shipperId,
+                        Notification = notificationJoinRoom,
+                    });
+                }
             }
             else
             {
@@ -135,6 +162,59 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                     var qrCode = await GenerateOrderQRCodeBitmapAsync(order, token, shipperId).ConfigureAwait(false);
                     var imageUrl = await _storageService.UploadFileAsync(qrCode).ConfigureAwait(false);
                     order.QrScanToDeliveried = imageUrl;
+
+                    // Save an history assign
+                    if (order.HistoryAssignJson != null)
+                    {
+                        var history = JsonConvert.DeserializeObject<List<HistoryAssign>>(order.HistoryAssignJson);
+                        history.Add(new HistoryAssign()
+                        {
+                            Id = shipperId,
+                            AssignDate = DateTimeOffset.Now,
+                        });
+                        order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                        // Send noti to add shipper
+                        if (shipperId != order.ShopId && history.All(h => h.Id != shipperId))
+                        {
+                            var shipperAccount = _accountRepository.GetById(shipperId);
+                            var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                            _chatService.OpenOrCloseRoom(new AddChat()
+                            {
+                                IsOpen = true,
+                                RoomId = order.Id,
+                                UserId = shipperId,
+                                Notification = notificationJoinRoom,
+                            });
+                        }
+                    }
+                    else
+                    {
+                        var history = new List<HistoryAssign>();
+                        history.Add(new HistoryAssign()
+                        {
+                            Id = shipperId,
+                            AssignDate = DateTimeOffset.Now,
+                        });
+                        order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                        // Send noti to add shipper
+                        if (shipperId != order.ShopId)
+                        {
+                            var shipperAccount = _accountRepository.GetById(shipperId);
+                            var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                            _chatService.OpenOrCloseRoom(new AddChat()
+                            {
+                                IsOpen = true,
+                                RoomId = order.Id,
+                                UserId = shipperId,
+                                Notification = notificationJoinRoom,
+                            });
+                        }
+                    }
+
                     _orderRepository.Update(order);
                 }
             }

@@ -9,4 +9,6 @@ public class PlatformCategoryResponse
     public string? Description { get; set; }
 
     public string? ImageUrl { get; set; }
+
+    public DateTimeOffset CreatedDate { get; set; }
 }
