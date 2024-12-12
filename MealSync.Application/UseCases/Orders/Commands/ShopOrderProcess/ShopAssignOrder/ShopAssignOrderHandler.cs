@@ -122,32 +122,6 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
             {
                 // Get delivery package of shipper in this frame if not exist create
                 dp = await CreateOrAddOrderInDeliveryPackageAsync(order, request).ConfigureAwait(false);
-
-                // Save an history assign
-                var history = new List<HistoryAssign>();
-                var shipperId = dp.ShopId.HasValue ? dp.ShopId.Value : dp.ShopDeliveryStaffId.Value;
-                history.Add(new HistoryAssign()
-                {
-                    Id = shipperId,
-                    AssignDate = DateTimeOffset.Now,
-                });
-                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
-                _orderRepository.Update(order);
-
-                // Send noti to add shipper
-                if (shipperId != order.ShopId)
-                {
-                    var shipperAccount = _accountRepository.GetById(shipperId);
-                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
-
-                    _chatService.OpenOrCloseRoom(new AddChat()
-                    {
-                        IsOpen = true,
-                        RoomId = order.Id,
-                        UserId = shipperId,
-                        Notification = notificationJoinRoom,
-                    });
-                }
             }
             else
             {
@@ -162,63 +136,63 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                     var qrCode = await GenerateOrderQRCodeBitmapAsync(order, token, shipperId).ConfigureAwait(false);
                     var imageUrl = await _storageService.UploadFileAsync(qrCode).ConfigureAwait(false);
                     order.QrScanToDeliveried = imageUrl;
-
-                    // Save an history assign
-                    if (order.HistoryAssignJson != null)
-                    {
-                        var history = JsonConvert.DeserializeObject<List<HistoryAssign>>(order.HistoryAssignJson);
-                        history.Add(new HistoryAssign()
-                        {
-                            Id = shipperId,
-                            AssignDate = DateTimeOffset.Now,
-                        });
-                        order.HistoryAssignJson = JsonConvert.SerializeObject(history);
-
-                        // Send noti to add shipper
-                        if (shipperId != order.ShopId && history.All(h => h.Id != shipperId))
-                        {
-                            var shipperAccount = _accountRepository.GetById(shipperId);
-                            var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
-
-                            _chatService.OpenOrCloseRoom(new AddChat()
-                            {
-                                IsOpen = true,
-                                RoomId = order.Id,
-                                UserId = shipperId,
-                                Notification = notificationJoinRoom,
-                            });
-                        }
-                    }
-                    else
-                    {
-                        var history = new List<HistoryAssign>();
-                        history.Add(new HistoryAssign()
-                        {
-                            Id = shipperId,
-                            AssignDate = DateTimeOffset.Now,
-                        });
-                        order.HistoryAssignJson = JsonConvert.SerializeObject(history);
-
-                        // Send noti to add shipper
-                        if (shipperId != order.ShopId)
-                        {
-                            var shipperAccount = _accountRepository.GetById(shipperId);
-                            var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
-
-                            _chatService.OpenOrCloseRoom(new AddChat()
-                            {
-                                IsOpen = true,
-                                RoomId = order.Id,
-                                UserId = shipperId,
-                                Notification = notificationJoinRoom,
-                            });
-                        }
-                    }
-
-                    _orderRepository.Update(order);
                 }
             }
 
+            // Save an history assign
+            var shipperIdAssign = dp.ShopId.HasValue ? dp.ShopId.Value : dp.ShopDeliveryStaffId.Value;
+            if (order.HistoryAssignJson != null)
+            {
+                var history = JsonConvert.DeserializeObject<List<HistoryAssign>>(order.HistoryAssignJson);
+                history.Add(new HistoryAssign()
+                {
+                    Id = shipperIdAssign,
+                    AssignDate = DateTimeOffset.Now,
+                });
+                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                // Send noti to add shipper
+                if (shipperIdAssign != order.ShopId && history.All(h => h.Id != shipperIdAssign))
+                {
+                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
+                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                    _chatService.OpenOrCloseRoom(new AddChat()
+                    {
+                        IsOpen = true,
+                        RoomId = order.Id,
+                        UserId = shipperIdAssign,
+                        Notification = notificationJoinRoom,
+                    });
+                }
+            }
+            else
+            {
+                var history = new List<HistoryAssign>();
+                history.Add(new HistoryAssign()
+                {
+                    Id = shipperIdAssign,
+                    AssignDate = DateTimeOffset.Now,
+                });
+                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                // Send noti to add shipper
+                if (shipperIdAssign != order.ShopId)
+                {
+                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
+                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                    _chatService.OpenOrCloseRoom(new AddChat()
+                    {
+                        IsOpen = true,
+                        RoomId = order.Id,
+                        UserId = shipperIdAssign,
+                        Notification = notificationJoinRoom,
+                    });
+                }
+            }
+
+            _orderRepository.Update(order);
             await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
 
             var listNoti = new List<Notification>();
@@ -273,9 +247,9 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 Status = DeliveryPackageStatus.InProcess,
 
             };
-            dp.Orders.Add(order);
             await _deliveryPackageRepository.AddAsync(dp).ConfigureAwait(false);
-
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            order.DeliveryPackageId = dp.Id;
             if (request.ShopDeliveryStaffId != null)
             {
                 var shopDeliveryStaff = _shopDeliveryStaffRepository.GetById(request.ShopDeliveryStaffId.Value);
