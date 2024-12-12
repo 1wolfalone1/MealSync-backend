@@ -124,7 +124,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 dp = await CreateOrAddOrderInDeliveryPackageAsync(order, request).ConfigureAwait(false);
 
                 // Save an history assign
-                var history = JsonConvert.DeserializeObject<List<HistoryAssign>>(order.HistoryAssignJson);
+                var history = new List<HistoryAssign>();
                 var shipperId = dp.ShopId.HasValue ? dp.ShopId.Value : dp.ShopDeliveryStaffId.Value;
                 history.Add(new HistoryAssign()
                 {
