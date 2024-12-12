@@ -56,7 +56,7 @@ public class CreateModeratorHandler : ICommandHandler<CreateModeratorCommand, Re
             {
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
                 accountTemp.PhoneNumber = request.PhoneNumber;
-                accountTemp.Password = password;
+                accountTemp.Password = BCrypUnitls.Hash(password);
                 accountTemp.Status = request.Status;
                 var moderatorDormitories = new List<ModeratorDormitory>();
                 foreach (var id in request.DormitoryIds)
