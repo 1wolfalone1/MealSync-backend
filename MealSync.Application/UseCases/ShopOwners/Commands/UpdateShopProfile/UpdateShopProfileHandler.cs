@@ -4,6 +4,7 @@ using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Map;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Domain.Entities;
@@ -24,8 +25,9 @@ public class UpdateShopProfileHandler : ICommandHandler<UpdateShopProfileCommand
     private readonly IDormitoryRepository _dormitoryRepository;
     private readonly IShopDormitoryRepository _shopDormitoryRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly IMapApiService _mapApiService;
 
-    public UpdateShopProfileHandler(IUnitOfWork unitOfWork, IShopRepository shopRepository, ICurrentPrincipalService currentPrincipalService, ILogger<UpdateShopProfileHandler> logger, IMapper mapper, IDormitoryRepository dormitoryRepository, IShopDormitoryRepository shopDormitoryRepository, IAccountRepository accountRepository)
+    public UpdateShopProfileHandler(IUnitOfWork unitOfWork, IShopRepository shopRepository, ICurrentPrincipalService currentPrincipalService, ILogger<UpdateShopProfileHandler> logger, IMapper mapper, IDormitoryRepository dormitoryRepository, IShopDormitoryRepository shopDormitoryRepository, IAccountRepository accountRepository, IMapApiService mapApiService)
     {
         _unitOfWork = unitOfWork;
         _shopRepository = shopRepository;
@@ -35,6 +37,7 @@ public class UpdateShopProfileHandler : ICommandHandler<UpdateShopProfileCommand
         _dormitoryRepository = dormitoryRepository;
         _shopDormitoryRepository = shopDormitoryRepository;
         _accountRepository = accountRepository;
+        _mapApiService = mapApiService;
     }
 
     public async Task<Result<Result>> Handle(UpdateShopProfileCommand request, CancellationToken cancellationToken)
@@ -92,18 +95,25 @@ public class UpdateShopProfileHandler : ICommandHandler<UpdateShopProfileCommand
         shop.LogoUrl = request.LogoUrl;
         shop.BannerUrl = request.BannerUrl;
 
-        // Update shop dormitory
-        var shopDormitories = request.DormitoryIds.Select(d => new ShopDormitory()
-        {
-            ShopId = shop.Id,
-            DormitoryId = d,
-        }).ToList();
-        shop.ShopDormitories = shopDormitories;
-
         // Update shop location
         shop.Location.Address = request.Location.Address;
         shop.Location.Latitude = request.Location.Latitude;
         shop.Location.Longitude = request.Location.Longitude;
+
+        // Update shop dormitory
+        var shopDormitories = new List<ShopDormitory>();
+        foreach (var id in request.DormitoryIds)
+        {
+            var dormitoryLocation = _dormitoryRepository.GetLocationByDormitoryId(id);
+            var distanceOfMap = await _mapApiService.GetDistanceOneDestinationAsync(shop.Location, dormitoryLocation, VehicleMaps.Car).ConfigureAwait(false);
+            shopDormitories.Add(new ShopDormitory()
+            {
+                DormitoryId = id,
+                Distance = distanceOfMap.Distance.Value / 1000,
+                Duration = distanceOfMap.Duration.Value / 60,
+            });
+        }
+        shop.ShopDormitories = shopDormitories;
 
         _shopRepository.Update(shop);
     }
