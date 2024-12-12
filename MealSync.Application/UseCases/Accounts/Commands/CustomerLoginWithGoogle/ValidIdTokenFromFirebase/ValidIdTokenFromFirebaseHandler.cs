@@ -39,6 +39,11 @@ public class ValidIdTokenFromFirebaseHandler : ICommandHandler<ValidIdTokenFromF
         {
             var account = _accountRepository.GetAccountByEmail(firebaseUser.Email);
 
+            if (account != null && account.RoleId != (int)Domain.Enums.Roles.Customer)
+            {
+                throw new InvalidBusinessException(MessageCode.E_ACCOUNT_INVALID_ROLE.GetDescription());
+            }
+
             // 1.1 Return an error if the account exist and verify will by pass login
             if (account != null && account.Status == AccountStatus.Verify && account.RoleId == (int)Domain.Enums.Roles.Customer)
             {

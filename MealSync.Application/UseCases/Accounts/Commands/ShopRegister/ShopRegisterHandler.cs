@@ -5,12 +5,14 @@ using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Map;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Accounts.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Ocsp;
 
@@ -29,11 +31,12 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
     private readonly IEmailService _emailService;
     private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
+    private readonly IMapApiService _mapApiService;
 
     public ShopRegisterHandler(IUnitOfWork unitOfWork, IAccountRepository accountRepository, IShopRepository shopRepository
         , IMapper mapper, IDormitoryRepository dormitoryRepository,
         IShopDormitoryRepository shopDormitoryRepository, ISystemResourceRepository systemResourceRepository, IOperatingSlotRepository operatingSlotRepository, ILogger<ShopRegisterHandler> logger, IEmailService emailService,
-        ICacheService cacheService)
+        ICacheService cacheService, IMapApiService mapApiService)
     {
         _unitOfWork = unitOfWork;
         _accountRepository = accountRepository;
@@ -46,24 +49,52 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
         _logger = logger;
         _emailService = emailService;
         _cacheService = cacheService;
+        _mapApiService = mapApiService;
     }
 
     public async Task<Result<Result>> Handle(ShopRegisterCommand request, CancellationToken cancellationToken)
     {
         // Validate Business
         Validate(request);
+        // Todo: Validate 3km radius
 
         var accountTemp = _accountRepository.GetAccountByEmail(request.Email);
 
         // If account exist
         if (accountTemp != default && accountTemp.Status == AccountStatus.UnVerify && accountTemp.RoleId == (int)Domain.Enums.Roles.ShopOwner)
         {
+            var shop = _shopRepository.Get(shop => shop.Id == accountTemp.Id)
+                .Include(shop => shop.ShopDormitories)
+                .Include(shop => shop.Location).Single();
+
+            shop.Location.Address = request.Address;
+            shop.Location.Latitude = request.Latitude;
+            shop.Location.Longitude = request.Longitude;
+            shop.Name = request.ShopName;
+            shop.PhoneNumber = request.PhoneNumber;
+
+            // Call api to get and duration and infor
+            var shopDormitores = new List<ShopDormitory>();
+            foreach (var id in request.DormitoryIds)
+            {
+                var dormitoryLocation = _dormitoryRepository.GetLocationByDormitoryId(id);
+                var distanceOfMap = await _mapApiService.GetDistanceOneDestinationAsync(shop.Location, dormitoryLocation, VehicleMaps.Car).ConfigureAwait(false);
+                shopDormitores.Add(new ShopDormitory()
+                {
+                    DormitoryId = id,
+                    Distance = distanceOfMap.Distance.Value / 1000,
+                    Duration = distanceOfMap.Duration.Value / 60,
+                });
+            }
+            shop.ShopDormitories = shopDormitores;
+
             accountTemp.PhoneNumber = request.PhoneNumber;
             accountTemp.Password = BCrypUnitls.Hash(request.Password);
             try
             {
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
                 _accountRepository.Update(accountTemp);
+                _shopRepository.Update(shop);
                 SendAndSaveVerificationCode(request.Email);
                 await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
                 return Result.Create(new RegisterResponse()
@@ -86,7 +117,7 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
                 await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
                 var account = await CreateAccountAsync(request);
                 var shop = await CreateShopAsync(account.Id, request).ConfigureAwait(false);
-                var shopDormitories = await CreateShopDormitoryAsync(shop.Id, request.DormitoryIds).ConfigureAwait(false);
+                var shopDormitories = await CreateShopDormitoryAsync(shop.Id, request.DormitoryIds, shop.Location).ConfigureAwait(false);
                 await CreateOperatingDayAndFrameAsync(shop.Id).ConfigureAwait(false);
                 SendAndSaveVerificationCode(request.Email);
 
@@ -181,16 +212,25 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
         return shop;
     }
 
-    private async Task<List<ShopDormitory>> CreateShopDormitoryAsync(long shopId, long[] dormitoryIds)
+    private async Task<List<ShopDormitory>> CreateShopDormitoryAsync(long shopId, long[] dormitoryIds, Location shopLocation)
     {
-        var shopDormitories = dormitoryIds.Select(d => new ShopDormitory()
+        // Call api to get and duration and infor
+        var shopDormitores = new List<ShopDormitory>();
+        foreach (var id in dormitoryIds)
         {
-            ShopId = shopId,
-            DormitoryId = d,
-        }).ToList();
+            var dormitoryLocation = _dormitoryRepository.GetLocationByDormitoryId(id);
+            var distanceOfMap = await _mapApiService.GetDistanceOneDestinationAsync(shopLocation, dormitoryLocation, VehicleMaps.Car).ConfigureAwait(false);
+            shopDormitores.Add(new ShopDormitory()
+            {
+                ShopId = shopId,
+                DormitoryId = id,
+                Distance = distanceOfMap.Distance.Value / 1000,
+                Duration = distanceOfMap.Duration.Value / 60,
+            });
+        }
 
-        await _shopDormitoryRepository.AddRangeAsync(shopDormitories).ConfigureAwait(false);
-        return shopDormitories;
+        await _shopDormitoryRepository.AddRangeAsync(shopDormitores).ConfigureAwait(false);
+        return shopDormitores;
     }
 
     private async Task CreateOperatingDayAndFrameAsync(long shopId)
