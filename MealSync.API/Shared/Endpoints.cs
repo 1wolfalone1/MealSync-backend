@@ -118,6 +118,10 @@ public static class Endpoints
     public const string DELETE_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit/{id:long}";
     public const string UPDATE_FOOD_PACKING_UNIT = "shop-onwer/food-packing-unit/{id:long}";
 
+    public const string ADMIN_CREATE_FOOD_PACKING_UNIT = "admin/food-packing-unit";
+    public const string ADMIN_UPDATE_FOOD_PACKING_UNIT = "admin/food-packing-unit/{id:long}";
+    public const string ADMIN_FOOD_PACKING_UNIT = "admin/food-packing-unit";
+
     // Storage
     public const string UPLOAD_FILE = "storage/file/upload";
     public const string DELETE_FILE = "storage/file/delete";
