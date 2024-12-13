@@ -32,6 +32,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly ICommissionConfigRepository _commissionConfigRepository;
     private readonly IOrderRepository _orderRepository;
+    private readonly IAccountRepository _accountRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IVnPayPaymentService _paymentService;
@@ -45,7 +46,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         IOperatingSlotRepository operatingSlotRepository, IFoodOptionGroupRepository foodOptionGroupRepository, IOptionRepository optionRepository,
         IPromotionRepository promotionRepository, ICurrentPrincipalService currentPrincipalService, ICommissionConfigRepository commissionConfigRepository,
         IOrderRepository orderRepository, IUnitOfWork unitOfWork, IMapper mapper, IVnPayPaymentService paymentService,
-        ISystemResourceRepository systemResourceRepository, INotificationFactory notificationFactory, INotifierService notifierService, IChatService chatService, IAccountRepository accountRepository)
+        ISystemResourceRepository systemResourceRepository, INotificationFactory notificationFactory, INotifierService notifierService, IAccountRepository accountRepository)
     {
         _logger = logger;
         _shopRepository = shopRepository;
@@ -66,6 +67,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         _systemResourceRepository = systemResourceRepository;
         _notificationFactory = notificationFactory;
         _notifierService = notifierService;
+        _accountRepository = accountRepository;
     }
 
     public async Task<Result<Result>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
