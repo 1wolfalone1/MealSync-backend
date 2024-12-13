@@ -1,4 +1,5 @@
-﻿using MealSync.Application.Common.Abstractions.Messaging;
+﻿using System.Net;
+using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
@@ -55,7 +56,7 @@ public class ShopDeletePackingUnitHandler : ICommandHandler<ShopDeletePackingUni
     {
         if (_foodPackingUnitRepository.Get(fpu => fpu.Id == request.Id && fpu.ShopId == _currentPrincipalService.CurrentPrincipalId).SingleOrDefault() == null)
         {
-            throw new InvalidBusinessException(MessageCode.E_FOOD_PACKING_UNIT_NOT_FOUND.GetDescription(), new object[] { request.Id });
+            throw new InvalidBusinessException(MessageCode.E_FOOD_PACKING_UNIT_NOT_FOUND.GetDescription(), new object[] { request.Id }, HttpStatusCode.NotFound);
         }
 
         if (_foodPackingUnitRepository.Get(fpu => fpu.Id == request.Id && fpu.ShopId == _currentPrincipalService.CurrentPrincipalId && fpu.Foods.Count() > 0).SingleOrDefault() != null)
