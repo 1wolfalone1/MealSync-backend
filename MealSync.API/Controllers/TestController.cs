@@ -8,6 +8,7 @@ using MealSync.Application.UseCases.Roles.Commands.CreateRole;
 using MealSync.Application.UseCases.Roles.Commands.UpdateRole;
 using MealSync.Application.UseCases.Test.Commands.TestFirebase;
 using MealSync.Application.UseCases.Test.Commands.TestModeratorCreateLog;
+using MealSync.Application.UseCases.Test.Commands.TestOpenRoom;
 using MealSync.Application.UseCases.Test.Commands.TestPushNotiKafkas;
 using MealSync.Application.UseCases.Test.Commands.TestValidateError;
 using MealSync.Application.UseCases.Test.Queries.TestError;
@@ -102,6 +103,12 @@ public class TestController : BaseApiController
 
     [HttpPost("/api/v1/test/push-noti-firebase")]
     public async Task<IActionResult> TestPushNotiKafka([FromBody] TestFirebaseCommand command)
+    {
+        return this.HandleResult(await this.Mediator.Send(command));
+    }
+
+    [HttpPost("/api/v1/test/open-room-chat")]
+    public async Task<IActionResult> TestPushNotiKafka([FromBody] TestOpenRoomCommand command)
     {
         return this.HandleResult(await this.Mediator.Send(command));
     }

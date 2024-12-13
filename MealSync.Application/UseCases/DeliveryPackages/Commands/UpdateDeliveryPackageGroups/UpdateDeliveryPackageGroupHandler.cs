@@ -469,21 +469,6 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
                     AssignDate = DateTimeOffset.UtcNow,
                 });
                 order.HistoryAssignJson = JsonConvert.SerializeObject(history);
-
-                // Send noti to add shipper
-                if (shipperIdAssign != order.ShopId && history.All(h => h.Id != shipperIdAssign))
-                {
-                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
-                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
-
-                    _chatService.OpenOrCloseRoom(new AddChat()
-                    {
-                        IsOpen = true,
-                        RoomId = order.Id,
-                        UserId = shipperIdAssign,
-                        Notification = notificationJoinRoom,
-                    });
-                }
             }
             else
             {
@@ -494,21 +479,6 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
                     AssignDate = DateTimeOffset.UtcNow,
                 });
                 order.HistoryAssignJson = JsonConvert.SerializeObject(history);
-
-                // Send noti to add shipper
-                if (shipperIdAssign != order.ShopId)
-                {
-                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
-                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
-
-                    _chatService.OpenOrCloseRoom(new AddChat()
-                    {
-                        IsOpen = true,
-                        RoomId = order.Id,
-                        UserId = shipperIdAssign,
-                        Notification = notificationJoinRoom,
-                    });
-                }
             }
         }
 
