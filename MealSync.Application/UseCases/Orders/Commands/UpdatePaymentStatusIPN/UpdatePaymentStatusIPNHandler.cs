@@ -36,7 +36,8 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
         ILogger<UpdatePaymentStatusIPNHandler> logger, IUnitOfWork unitOfWork,
         IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository,
         IShopRepository shopRepository, INotificationFactory notificationFactory,
-        INotifierService notifierService, ISystemResourceRepository systemResourceRepository, IDepositRepository depositRepository, IOrderRepository orderRepository, IChatService chatService, IAccountRepository accountRepository)
+        INotifierService notifierService, ISystemResourceRepository systemResourceRepository, IDepositRepository depositRepository, IOrderRepository orderRepository, IChatService chatService,
+        IAccountRepository accountRepository)
     {
         _paymentService = paymentService;
         _paymentRepository = paymentRepository;
@@ -160,8 +161,12 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
                             }
                             else if (payment.Order.Status == OrderStatus.Confirmed)
                             {
-                                var notification = _notificationFactory.CreateOrderConfirmedNotification(payment.Order, shop);
-                                _notifierService.NotifyAsync(notification);
+                                var notificationToCustomer = _notificationFactory.CreateOrderConfirmedNotification(payment.Order, shop);
+                                var customerAccount = _accountRepository.GetById(payment.Order.CustomerId)!;
+                                var notificationToShop = _notificationFactory.CreateOrderAutoConfirmedNotification(payment.Order, customerAccount);
+
+                                _notifierService.NotifyAsync(notificationToCustomer);
+                                _notifierService.NotifyAsync(notificationToShop);
                             }
                             else
                             {

@@ -61,6 +61,26 @@ public class NotificationFactory : INotificationFactory
         };
     }
 
+    public Notification CreateOrderAutoConfirmedNotification(Order order, Account account)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        return new Notification
+        {
+            AccountId = order.ShopId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.ORDER_TITLE,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_ORDER_AUTO_CONFIRMED.GetDescription(), order.Id),
+            ImageUrl = account.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToShop,
+            EntityType = NotificationEntityTypes.Order,
+            IsSave = true,
+        };
+    }
+
     public Notification CreateOrderRejectedNotification(Order order, Shop shop)
     {
         using var scope = _serviceScopeFactory.CreateScope();
