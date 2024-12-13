@@ -102,13 +102,8 @@ public class UpdateShopOperatingSlotHandler : ICommandHandler<UpdateShopOperatin
         if (listOperatingSlot != null && listOperatingSlot.Count > 1)
         {
             listOperatingSlot.Remove(listOperatingSlot.SingleOrDefault(x => x.Id == request.Id));
-            listOperatingSlot.Add(new OperatingSlot()
-            {
-                StartTime = request.StartTime,
-                EndTime = request.EndTime,
-            });
             var listSlot = listOperatingSlot.Select(op => (op.StartTime, op.EndTime)).ToList();
-            if (TimeUtils.HasOverlappingTimeSegment(listSlot))
+            if (TimeFrameUtils.CheckOverlap(listSlot, request.StartTime, request.EndTime))
             {
                 throw new InvalidBusinessException(MessageCode.E_OPERATING_SLOT_OVERLAP.GetDescription(), new object[]
                 {
