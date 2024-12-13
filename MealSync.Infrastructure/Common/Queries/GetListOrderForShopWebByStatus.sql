@@ -98,6 +98,18 @@ SELECT
     o.end_time AS EndTime,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
+    (
+        SELECT
+            CASE
+                WHEN p.status = 2 THEN 1 -- Success
+                ELSE 0
+            END
+        FROM
+            payment p
+        WHERE
+            p.order_id = o.id
+            AND p.`type` = 1 -- payment
+    ) AS IsCustomerPaid,
     o.TotalPages AS TotalPages,
     -- Customer
     accCus.id AS CustomerSection,
@@ -126,23 +138,23 @@ SELECT
     CASE
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN dp.shop_delivery_staff_id
         ELSE 0
-        END AS Id,
+    END AS Id,
     CASE
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.full_name
         ELSE accShop.full_name
-        END AS FullName,
+    END AS FullName,
     CASE
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.avatar_url
         ELSE accShop.avatar_url
-        END AS AvatarUrl,
+    END AS AvatarUrl,
     CASE
         WHEN dp.shop_delivery_staff_id IS NOT NULL THEN accShip.email
         ELSE accShop.email
-        END AS Email,
+    END AS Email,
     CASE
         WHEN dp.shop_delivery_staff_id IS NULL THEN TRUE
         ELSE FALSE
-        END AS IsShopOwnerShip,
+    END AS IsShopOwnerShip,
     -- OrderDetail
     od.id AS OrderDetailSection,
     od.id AS Id,

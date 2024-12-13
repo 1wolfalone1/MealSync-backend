@@ -87,6 +87,18 @@ SELECT
     o.lastest_delivery_fail_at AS LatestDeliveryFailAt,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
+    (
+        SELECT
+            CASE
+                WHEN p.status = 2 THEN 1 -- Success
+                ELSE 0
+            END
+        FROM
+            payment p
+        WHERE
+            p.order_id = o.id
+            AND p.`type` = 1 -- payment
+    ) AS IsCustomerPaid,
     -- Customer
     a.id AS CustomerSection,
     a.id AS Id,
