@@ -30,14 +30,14 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
     private readonly INotifierService _notifierService;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IDepositRepository _depositRepository;
+    private readonly IAccountRepository _accountRepository;
 
     public UpdatePaymentStatusIPNHandler(
         IVnPayPaymentService paymentService, IPaymentRepository paymentRepository,
         ILogger<UpdatePaymentStatusIPNHandler> logger, IUnitOfWork unitOfWork,
         IWalletRepository walletRepository, IWalletTransactionRepository walletTransactionRepository,
         IShopRepository shopRepository, INotificationFactory notificationFactory,
-        INotifierService notifierService, ISystemResourceRepository systemResourceRepository, IDepositRepository depositRepository, IOrderRepository orderRepository, IChatService chatService,
-        IAccountRepository accountRepository)
+        INotifierService notifierService, ISystemResourceRepository systemResourceRepository, IDepositRepository depositRepository, IAccountRepository accountRepository)
     {
         _paymentService = paymentService;
         _paymentRepository = paymentRepository;
@@ -50,6 +50,7 @@ public class UpdatePaymentStatusIPNHandler : ICommandHandler<UpdatePaymentStatus
         _notifierService = notifierService;
         _systemResourceRepository = systemResourceRepository;
         _depositRepository = depositRepository;
+        _accountRepository = accountRepository;
     }
 
     public async Task<Result<VnPayIPNResponse>> Handle(UpdatePaymentStatusIPNCommand request, CancellationToken cancellationToken)
