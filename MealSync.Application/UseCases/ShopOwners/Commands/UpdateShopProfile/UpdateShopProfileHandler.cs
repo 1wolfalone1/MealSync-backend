@@ -109,7 +109,7 @@ public class UpdateShopProfileHandler : ICommandHandler<UpdateShopProfileCommand
             shopDormitories.Add(new ShopDormitory()
             {
                 DormitoryId = id,
-                Distance = distanceOfMap.Distance.Value / 1000,
+                Distance = (double)distanceOfMap.Distance.Value / 1000,
                 Duration = distanceOfMap.Duration.Value / 60,
             });
         }

@@ -82,7 +82,7 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
                 shopDormitores.Add(new ShopDormitory()
                 {
                     DormitoryId = id,
-                    Distance = distanceOfMap.Distance.Value / 1000,
+                    Distance = (double)distanceOfMap.Distance.Value / 1000,
                     Duration = distanceOfMap.Duration.Value / 60,
                 });
             }
@@ -224,7 +224,7 @@ public class ShopRegisterHandler : ICommandHandler<ShopRegisterCommand, Result>
             {
                 ShopId = shopId,
                 DormitoryId = id,
-                Distance = distanceOfMap.Distance.Value / 1000,
+                Distance = (double)distanceOfMap.Distance.Value / 1000,
                 Duration = distanceOfMap.Duration.Value / 60,
             });
         }
