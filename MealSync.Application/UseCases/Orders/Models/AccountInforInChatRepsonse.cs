@@ -27,18 +27,20 @@ public static class AccountInformationChatConverter
             { "id", orderId } // Add the OrderId as the first key-value pair
         };
 
+        var shopAccount = accounts.Where(a => a.RoleId == (int)Domain.Enums.Roles.ShopOwner).FirstOrDefault();
+        var shop = shopRepository.GetById(shopAccount.Id);
         // Add account data to the dictionary
         foreach (var account in accounts)
         {
             if (account.RoleId == (int)Domain.Enums.Roles.ShopOwner)
             {
-                var shop = shopRepository.GetById(account.Id);
                 account.FullName = shop.Name;
                 account.AvatarUrl = shop.LogoUrl;
             }
             else if (account.RoleId == (int)Domain.Enums.Roles.ShopDelivery)
             {
                 account.FullName = "Shipper - " + account.FullName;
+                account.AvatarUrl = shop.LogoUrl;
             }
 
             result[account.Id] = new Dictionary<string, object?>
