@@ -8,6 +8,8 @@ public interface INotificationFactory
 
     Notification CreateOrderConfirmedNotification(Order order, Shop shop);
 
+    Notification CreateOrderAutoConfirmedNotification(Order order, Account account);
+
     Notification CreateOrderRejectedNotification(Order order, Shop shop);
 
     Notification CreateOrderCancelNotification(Order order, Shop shop);

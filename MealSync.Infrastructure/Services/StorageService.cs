@@ -83,16 +83,26 @@ public class StorageService : IStorageService, IBaseService
 
     private async Task CheckImageViolation(MemoryStream ms, bool isCheckFoodDrink)
     {
-        var responseDetectModeration = await _rekognitionClient.DetectModerationLabelsAsync(new DetectModerationLabelsRequest
-        {
-            Image = new Amazon.Rekognition.Model.Image
-            {
-                Bytes = new MemoryStream(ms.ToArray()),
-            },
-            MinConfidence = 50,
-        }).ConfigureAwait(false);
+        DetectModerationLabelsResponse? responseDetectModeration;
 
-        if (responseDetectModeration.ModerationLabels.Count != 0)
+        try
+        {
+            responseDetectModeration = await _rekognitionClient.DetectModerationLabelsAsync(new DetectModerationLabelsRequest
+            {
+                Image = new Amazon.Rekognition.Model.Image
+                {
+                    Bytes = new MemoryStream(ms.ToArray()),
+                },
+                MinConfidence = 50,
+            }).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            return;
+        }
+
+        if (responseDetectModeration != default && responseDetectModeration.ModerationLabels.Count != 0)
         {
             var categorizedViolations = new Dictionary<string, List<Violation>>();
             foreach (var label in responseDetectModeration.ModerationLabels)
@@ -116,15 +126,25 @@ public class StorageService : IStorageService, IBaseService
 
         if (isCheckFoodDrink)
         {
-            var responseDetectLabels = await _rekognitionClient.DetectLabelsAsync(new DetectLabelsRequest
+            DetectLabelsResponse? responseDetectLabels;
+
+            try
             {
-                Image = new Amazon.Rekognition.Model.Image
+                responseDetectLabels = await _rekognitionClient.DetectLabelsAsync(new DetectLabelsRequest
                 {
-                    Bytes = new MemoryStream(ms.ToArray()),
-                },
-                MinConfidence = 70,
-                MaxLabels = 50, // Adjust as needed
-            }).ConfigureAwait(false);
+                    Image = new Amazon.Rekognition.Model.Image
+                    {
+                        Bytes = new MemoryStream(ms.ToArray()),
+                    },
+                    MinConfidence = 70,
+                    MaxLabels = 50,
+                }).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return;
+            }
 
             var isFood = false;
             foreach (var label in responseDetectLabels.Labels)
