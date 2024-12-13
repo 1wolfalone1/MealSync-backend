@@ -67,6 +67,18 @@ SELECT
     o.end_time AS EndTime,
     d.id AS DormitoryId,
     d.name AS DormitoryName,
+    (
+        SELECT
+            CASE
+                WHEN p.status = 2 THEN 1 -- Success
+                ELSE 0
+            END
+        FROM
+            payment p
+        WHERE
+            p.order_id = o.id
+            AND p.`type` = 1 -- payment
+    ) AS IsCustomerPaid,
     -- Customer
     accCus.id AS CustomerSection,
     accCus.id AS Id,

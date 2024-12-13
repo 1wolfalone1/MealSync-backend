@@ -102,6 +102,8 @@ public class OrderDetailForShopResponse
 
     public string DormitoryName { get; set; }
 
+    public bool IsCustomerPaid { get; set; }
+
     [System.Text.Json.Serialization.JsonIgnore]
     public int TotalPages { get; set; }
 
