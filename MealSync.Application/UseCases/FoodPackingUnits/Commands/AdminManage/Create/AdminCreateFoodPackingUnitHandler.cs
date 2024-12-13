@@ -2,35 +2,31 @@
 using MealSync.Application.Common.Abstractions.Messaging;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
-using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.FoodPackingUnits.Models;
-using MealSync.Application.UseCases.FoodPackingUnits.Queries.GetListFoodPackingUnitForShop;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.Extensions.Logging;
 
-namespace MealSync.Application.UseCases.FoodPackingUnits.Commands.Create.ShopCreate;
+namespace MealSync.Application.UseCases.FoodPackingUnits.Commands.AdminManage.Create;
 
-public class ShopCreateFoodPackingUnitHandler : ICommandHandler<ShopCreateFoodPackingUnitCommand, Result>
+public class AdminCreateFoodPackingUnitHandler : ICommandHandler<AdminCreateFoodPackingUnitCommand, Result>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IFoodPackingUnitRepository _foodPackingUnitRepository;
-    private readonly ICurrentPrincipalService _currentPrincipalService;
-    private readonly ILogger<GetListFoodPackingUnitForShopHandler> _logger;
+    private readonly ILogger<AdminCreateFoodPackingUnitHandler> _logger;
     private readonly IMapper _mapper;
 
-    public ShopCreateFoodPackingUnitHandler(IUnitOfWork unitOfWork, IFoodPackingUnitRepository foodPackingUnitRepository, ICurrentPrincipalService currentPrincipalService, ILogger<GetListFoodPackingUnitForShopHandler> logger, IMapper mapper)
+    public AdminCreateFoodPackingUnitHandler(IUnitOfWork unitOfWork, IFoodPackingUnitRepository foodPackingUnitRepository, ILogger<AdminCreateFoodPackingUnitHandler> logger, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _foodPackingUnitRepository = foodPackingUnitRepository;
-        _currentPrincipalService = currentPrincipalService;
         _logger = logger;
         _mapper = mapper;
     }
 
-    public async Task<Result<Result>> Handle(ShopCreateFoodPackingUnitCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Result>> Handle(AdminCreateFoodPackingUnitCommand request, CancellationToken cancellationToken)
     {
         // Validate
         Validate(request);
@@ -39,8 +35,7 @@ public class ShopCreateFoodPackingUnitHandler : ICommandHandler<ShopCreateFoodPa
         {
             Name = request.Name,
             Weight = request.Weight,
-            Type = FoodPackingUnitType.Shop,
-            ShopId = _currentPrincipalService.CurrentPrincipalId,
+            Type = FoodPackingUnitType.System,
         };
         try
         {
@@ -55,12 +50,12 @@ public class ShopCreateFoodPackingUnitHandler : ICommandHandler<ShopCreateFoodPa
             throw;
         }
 
-        return Result.Success(_mapper.Map<FoodPackingUnitResponse>(fpu));
+        return Result.Success(_mapper.Map<FoodPackingUnitAdminResponse>(fpu));
     }
 
-    private void Validate(ShopCreateFoodPackingUnitCommand request)
+    private void Validate(AdminCreateFoodPackingUnitCommand request)
     {
-        if (_foodPackingUnitRepository.Get(x => x.Name == request.Name && x.ShopId == _currentPrincipalService.CurrentPrincipalId).FirstOrDefault() != null)
+        if (_foodPackingUnitRepository.Get(x => x.Name == request.Name && x.Type == FoodPackingUnitType.System).FirstOrDefault() != null)
         {
             throw new InvalidBusinessException(MessageCode.E_FOOD_PACKING_UNIT_DOUBLE_NAME.GetDescription(), new object[] { request.Name });
         }

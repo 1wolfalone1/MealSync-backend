@@ -1,8 +1,11 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
+using MealSync.Application.UseCases.FoodPackingUnits.Commands.AdminManage.Create;
+using MealSync.Application.UseCases.FoodPackingUnits.Commands.AdminManage.Update;
 using MealSync.Application.UseCases.FoodPackingUnits.Commands.Create.ShopCreate;
 using MealSync.Application.UseCases.FoodPackingUnits.Commands.Delete;
 using MealSync.Application.UseCases.FoodPackingUnits.Commands.Update.ShopUpdateFPU;
+using MealSync.Application.UseCases.FoodPackingUnits.Queries.GetFPUForAdmin;
 using MealSync.Application.UseCases.FoodPackingUnits.Queries.GetListFoodPackingUnitForShop;
 using MealSync.Application.UseCases.Foods.Queries.TopFood;
 using Microsoft.AspNetCore.Authorization;
@@ -43,5 +46,27 @@ public class FoodPackingUnitController : BaseApiController
     {
         command.Id = id;
         return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPost(Endpoints.ADMIN_CREATE_FOOD_PACKING_UNIT)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> AdminCreateFoodPackingUnit([FromBody] AdminCreateFoodPackingUnitCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.ADMIN_UPDATE_FOOD_PACKING_UNIT)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> AdminUpdateFoodPackingUnit([FromBody] AdminUpdateFPUCommand command, int id)
+    {
+        command.Id = id;
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.ADMIN_FOOD_PACKING_UNIT)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> AdminCreateFoodPackingUnit([FromQuery] GetFPUForAdminQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }
