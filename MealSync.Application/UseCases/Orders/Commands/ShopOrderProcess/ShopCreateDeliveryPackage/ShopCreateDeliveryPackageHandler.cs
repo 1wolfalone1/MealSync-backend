@@ -6,6 +6,7 @@ using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Chat;
 using MealSync.Application.Common.Services.Dapper;
 using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Utils;
@@ -17,6 +18,7 @@ using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCreateDeliveryPackage;
 
@@ -35,10 +37,11 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IDapperService _dapperService;
     private readonly IMapper _mapper;
+    private readonly IChatService _chatService;
 
     public ShopCreateDeliveryPackageHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, IDeliveryPackageRepository deliveryPackageRepository, ILogger<ShopCreateDeliveryPackageHandler> logger,
         INotificationFactory notificationFactory, INotifierService notifierService, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IShopRepository shopRepository,
-        IAccountRepository accountRepository, ISystemResourceRepository systemResourceRepository, IDapperService dapperService, IMapper mapper)
+        IAccountRepository accountRepository, ISystemResourceRepository systemResourceRepository, IDapperService dapperService, IMapper mapper, IChatService chatService)
     {
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
@@ -53,6 +56,7 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         _systemResourceRepository = systemResourceRepository;
         _dapperService = dapperService;
         _mapper = mapper;
+        _chatService = chatService;
     }
 
     public async Task<Result<Result>> Handle(ShopCreateDeliveryPackageCommand request, CancellationToken cancellationToken)
@@ -133,6 +137,63 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
     private async Task<DeliveryPackage> CreateOrderSaveDeliveryPackageAsync(DeliveryPackageRequest request)
     {
         var orders = _orderRepository.Get(o => request.OrderIds.Contains(o.Id)).ToList();
+
+        // Update orders history
+        // Save an history assign
+        var shipperIdAssign = request.ShopDeliveryStaffId.HasValue ? request.ShopDeliveryStaffId.Value : _currentPrincipalService.CurrentPrincipalId.Value;
+        foreach (var order in orders)
+        {
+            if (order.HistoryAssignJson != null)
+            {
+                var history = JsonConvert.DeserializeObject<List<HistoryAssign>>(order.HistoryAssignJson);
+                history.Add(new HistoryAssign()
+                {
+                    Id = shipperIdAssign,
+                    AssignDate = DateTimeOffset.UtcNow,
+                });
+                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                // Send noti to add shipper
+                if (shipperIdAssign != order.ShopId && history.All(h => h.Id != shipperIdAssign))
+                {
+                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
+                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                    _chatService.OpenOrCloseRoom(new AddChat()
+                    {
+                        IsOpen = true,
+                        RoomId = order.Id,
+                        UserId = shipperIdAssign,
+                        Notification = notificationJoinRoom,
+                    });
+                }
+            }
+            else
+            {
+                var history = new List<HistoryAssign>();
+                history.Add(new HistoryAssign()
+                {
+                    Id = shipperIdAssign,
+                    AssignDate = DateTimeOffset.UtcNow,
+                });
+                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                // Send noti to add shipper
+                if (shipperIdAssign != order.ShopId)
+                {
+                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
+                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                    _chatService.OpenOrCloseRoom(new AddChat()
+                    {
+                        IsOpen = true,
+                        RoomId = order.Id,
+                        UserId = shipperIdAssign,
+                        Notification = notificationJoinRoom,
+                    });
+                }
+            }
+        }
 
         // Need create new delivery package
         var dp = new DeliveryPackage()
