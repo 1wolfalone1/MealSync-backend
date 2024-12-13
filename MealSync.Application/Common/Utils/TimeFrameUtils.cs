@@ -181,4 +181,16 @@ public class TimeFrameUtils
 
         return hh * 100 + mm;                  // Combine hours and minutes in hhmm format
     }
+
+    public static bool CheckOverlap(List<(int StartTime, int EndTime)> list, int startTime, int endTime)
+    {
+        if (list.Count > 0)
+        {
+            return list.Any(list => list.StartTime >= startTime && list.StartTime < endTime ||
+                                    list.EndTime > startTime && list.EndTime <= endTime||
+                                    list.StartTime <= startTime && list.EndTime >= endTime);
+        }
+
+        return false;
+    }
 }
