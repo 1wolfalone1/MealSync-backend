@@ -4,7 +4,9 @@ using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
+using MealSync.Application.Common.Services.Chat;
 using MealSync.Application.Common.Services.Dapper;
+using MealSync.Application.Common.Services.Notifications;
 using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.DeliveryPackages.Models;
@@ -14,6 +16,7 @@ using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace MealSync.Application.UseCases.DeliveryPackages.Commands.UpdateDeliveryPackageGroups;
 
@@ -26,9 +29,14 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly ILogger<UpdateDeliveryPackageGroupHandler> _logger;
     private readonly IDapperService _dapperService;
+    private readonly INotificationFactory _notificationFactory;
+    private readonly IChatService _chatService;
+    private readonly IAccountRepository _accountRepository;
+    private readonly IShopRepository _shopRepository;
+    private readonly INotifierService _notifierService;
 
     public UpdateDeliveryPackageGroupHandler(IUnitOfWork unitOfWork, ICurrentPrincipalService currentPrincipalService, IDeliveryPackageRepository deliveryPackageRepository, IOrderRepository orderRepository,
-        IShopDeliveryStaffRepository shopDeliveryStaffRepository, ILogger<UpdateDeliveryPackageGroupHandler> logger, IDapperService dapperService)
+        IShopDeliveryStaffRepository shopDeliveryStaffRepository, ILogger<UpdateDeliveryPackageGroupHandler> logger, IDapperService dapperService, INotificationFactory notificationFactory, IChatService chatService, IAccountRepository accountRepository, IShopRepository shopRepository, INotifierService notifierService)
     {
         _unitOfWork = unitOfWork;
         _currentPrincipalService = currentPrincipalService;
@@ -37,6 +45,11 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
         _logger = logger;
         _dapperService = dapperService;
+        _notificationFactory = notificationFactory;
+        _chatService = chatService;
+        _accountRepository = accountRepository;
+        _shopRepository = shopRepository;
+        _notifierService = notifierService;
     }
 
     public async Task<Result<Result>> Handle(UpdateDeliveryPackageGroupCommand request, CancellationToken cancellationToken)
@@ -269,6 +282,10 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
                 var oIdsUpOfDp = request.DeliveryPackages.Where(dp => dpO.ShopId.HasValue && !dp.ShopDeliveryStaffId.HasValue ||
                                                                       !dpO.ShopId.HasValue && dpO.ShopDeliveryStaffId.Value == dp.ShopDeliveryStaffId.Value).First();
                 var ordersUpdate = _orderRepository.GetByIds(oIdsUpOfDp.OrderIds.ToList());
+
+                // Add history assign to order
+                var shipperIdAssign = dpO.ShopDeliveryStaffId.HasValue ? dpO.ShopDeliveryStaffId.Value : _currentPrincipalService.CurrentPrincipalId.Value;
+                ordersUpdate = UpdateOrderHistoryAssign(ordersUpdate, shipperIdAssign);
                 dpO.Orders = ordersUpdate;
                 deliveryPackageUpdateSaveChange.Add(dpO);
             }
@@ -306,6 +323,10 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
             };
 
             var ordersUpdateToNewDelvieryPackage = _orderRepository.GetByIds(dpRequest.OrderIds.ToList());
+
+            // Add history assign to order
+            var shipperIdAssign = dpRequest.ShopDeliveryStaffId.HasValue ? dpRequest.ShopDeliveryStaffId.Value : _currentPrincipalService.CurrentPrincipalId.Value;
+            ordersUpdateToNewDelvieryPackage = UpdateOrderHistoryAssign(ordersUpdateToNewDelvieryPackage, shipperIdAssign);
             dp.Orders = ordersUpdateToNewDelvieryPackage;
 
             deliveryPackageAddNewSaveChange.Add(dp);
@@ -325,6 +346,23 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
 
         // Delete physic delivery package
         _deliveryPackageRepository.RemoveRange(deliveryPackageRemoveSaveChange);
+
+        // Noti to shop staff about delivery package
+        var deliveryPackageHaveChange = deliveryPackageAddNewSaveChange;
+        deliveryPackageHaveChange.AddRange(deliveryPackageUpdateSaveChange);
+        var shop = _shopRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
+        var listNoti = new List<Notification>();
+        foreach (var dp in deliveryPackageHaveChange)
+        {
+            if (dp.ShopDeliveryStaffId.HasValue)
+            {
+                var accShip = _accountRepository.GetById(dp.ShopDeliveryStaffId.Value);
+                var notiShopStaff = _notificationFactory.CreateOrderAssignedToStaffNotification(dp, accShip, shop);
+                listNoti.Add(notiShopStaff);
+            }
+        }
+
+        _notifierService.NotifyRangeAsync(listNoti);
     }
 
     private void Validate(UpdateDeliveryPackageGroupCommand request)
@@ -416,5 +454,64 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
 
         // Return the list of different orders, or null if there are none
         return differentOrders.Any() ? differentOrders : null;
+    }
+
+    private List<Order> UpdateOrderHistoryAssign(List<Order> orders, long shipperIdAssign)
+    {
+        foreach (var order in orders)
+        {
+            if (order.HistoryAssignJson != null)
+            {
+                var history = JsonConvert.DeserializeObject<List<HistoryAssign>>(order.HistoryAssignJson);
+                history.Add(new HistoryAssign()
+                {
+                    Id = shipperIdAssign,
+                    AssignDate = DateTimeOffset.UtcNow,
+                });
+                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                // Send noti to add shipper
+                if (shipperIdAssign != order.ShopId && history.All(h => h.Id != shipperIdAssign))
+                {
+                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
+                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                    _chatService.OpenOrCloseRoom(new AddChat()
+                    {
+                        IsOpen = true,
+                        RoomId = order.Id,
+                        UserId = shipperIdAssign,
+                        Notification = notificationJoinRoom,
+                    });
+                }
+            }
+            else
+            {
+                var history = new List<HistoryAssign>();
+                history.Add(new HistoryAssign()
+                {
+                    Id = shipperIdAssign,
+                    AssignDate = DateTimeOffset.UtcNow,
+                });
+                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                // Send noti to add shipper
+                if (shipperIdAssign != order.ShopId)
+                {
+                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
+                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                    _chatService.OpenOrCloseRoom(new AddChat()
+                    {
+                        IsOpen = true,
+                        RoomId = order.Id,
+                        UserId = shipperIdAssign,
+                        Notification = notificationJoinRoom,
+                    });
+                }
+            }
+        }
+
+        return orders;
     }
 }

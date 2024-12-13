@@ -147,7 +147,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 history.Add(new HistoryAssign()
                 {
                     Id = shipperIdAssign,
-                    AssignDate = DateTimeOffset.Now,
+                    AssignDate = DateTimeOffset.UtcNow,
                 });
                 order.HistoryAssignJson = JsonConvert.SerializeObject(history);
 
@@ -172,7 +172,7 @@ public class ShopAssignOrderHandler : ICommandHandler<ShopAssignOrderCommand, Re
                 history.Add(new HistoryAssign()
                 {
                     Id = shipperIdAssign,
-                    AssignDate = DateTimeOffset.Now,
+                    AssignDate = DateTimeOffset.UtcNow,
                 });
                 order.HistoryAssignJson = JsonConvert.SerializeObject(history);
 
