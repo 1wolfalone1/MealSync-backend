@@ -24,6 +24,48 @@ public class ModeratorActivityLogResponse
 
     public AccountInActivityLog Account { get; set; }
 
+    public string Description
+    {
+        get
+        {
+            var target = string.Empty;
+            switch (TargetType)
+            {
+                case ModeratorTargetTypes.Order:
+                    target = "đơn hàng";
+                    break;
+                case ModeratorTargetTypes.Customer:
+                    target = "khách hàng";
+                    break;
+                case ModeratorTargetTypes.Report:
+                    target = "báo cáo";
+                    break;
+                case ModeratorTargetTypes.Shop:
+                    target = "cửa hàng";
+                    break;
+                case ModeratorTargetTypes.Withdrawal:
+                    target = "yêu cầu rút tiền";
+                    break;
+            }
+
+            var action = string.Empty;
+            switch (ActionType)
+            {
+                case ModeratorActionTypes.Create:
+                    action = "tạo mới";
+                    break;
+                case ModeratorActionTypes.Delete:
+                    action = "xóa";
+                    break;
+                case ModeratorActionTypes.Update:
+                    action = "cập nhật";
+                    break;
+            }
+
+            return $"Moderator vừa {action} {target} vào lúc {CreatedDate.ToString("dd-MM-yyyy hh:mm:ss")}";
+        }
+    }
+
     public class AccountInActivityLog
     {
         public long Id { get; set; }
