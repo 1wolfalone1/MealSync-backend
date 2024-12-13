@@ -244,8 +244,12 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
                 }
                 else if (order.Status == OrderStatus.Confirmed)
                 {
-                    var notification = _notificationFactory.CreateOrderConfirmedNotification(order, shop);
-                    _notifierService.NotifyAsync(notification);
+                    var customerAccount = _accountRepository.GetById(customerId)!;
+                    var notificationToCustomer = _notificationFactory.CreateOrderConfirmedNotification(order, shop);
+                    var notificationToShop = _notificationFactory.CreateOrderAutoConfirmedNotification(order, customerAccount);
+
+                    _notifierService.NotifyAsync(notificationToCustomer);
+                    _notifierService.NotifyAsync(notificationToShop);
                 }
                 else
                 {
