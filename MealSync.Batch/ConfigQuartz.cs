@@ -38,6 +38,21 @@ public static class ConfigQuartz
                     .ForJob(JobKey.Create(nameof(HaftHourlyBatchPlusIncomingShopWallet)))
                     .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
 
+            options.AddJob<UpdateCompletedOrderJob>(JobKey.Create(nameof(UpdateCompletedOrderJob)))
+                .AddTrigger(trigger => trigger
+                    .ForJob(JobKey.Create(nameof(UpdateCompletedOrderJob)))
+                    .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
+
+            options.AddJob<UpdateFlagReceiveOrderPauseAndSoldOutJob>(JobKey.Create(nameof(UpdateFlagReceiveOrderPauseAndSoldOutJob)))
+                .AddTrigger(trigger => trigger
+                    .ForJob(JobKey.Create(nameof(UpdateFlagReceiveOrderPauseAndSoldOutJob)))
+                    .WithCronSchedule("0 0 17 * * ?"));
+
+            options.AddJob<HalfHourlyBatchMarkOrderOverTimeFrame>(JobKey.Create(nameof(HalfHourlyBatchMarkOrderOverTimeFrame)))
+                .AddTrigger(trigger => trigger
+                    .ForJob(JobKey.Create(nameof(HalfHourlyBatchMarkOrderOverTimeFrame)))
+                    .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
+
             options.AddJob<HaftHourlyBatchCloseChat>(JobKey.Create(nameof(HaftHourlyBatchCloseChat)))
                 .AddTrigger(trigger => trigger
                     .ForJob(JobKey.Create(nameof(HaftHourlyBatchCloseChat)))
