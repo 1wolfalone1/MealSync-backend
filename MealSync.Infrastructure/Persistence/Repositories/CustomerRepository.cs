@@ -133,7 +133,7 @@ public class CustomerRepository : BaseRepository<Customer>, ICustomerRepository
                 FullName = c.Account.FullName,
                 AvatarUrl = c.Account.AvatarUrl,
                 Genders = c.Account.Genders,
-                Status = c.Account.Status,
+                Status = c.Status,
                 NumOfFlag = c.Account.NumOfFlag,
                 CreatedDate = c.CreatedDate,
                 AccountFlags = c.Account.AccountFlags.Select(af => new AccountDetailForModManageDto.AccountFlagDetailDto
