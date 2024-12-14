@@ -11,4 +11,6 @@ public class PlatformCategoryResponse
     public string? ImageUrl { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }
+
+    public int NumberFoodLinked { get; set; }
 }

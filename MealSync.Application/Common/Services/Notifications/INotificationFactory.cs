@@ -81,4 +81,6 @@ public interface INotificationFactory
     Notification CreateOrderCancelAutoByBatchToShopNotification(Order order, Shop shop);
 
     Notification CreateJoinRoomToCustomerNotification(Order order, Account accountJoin);
+
+    Notification CreateCloseRoomToCustomerNotification(Order order, Account accountJoin);
 }

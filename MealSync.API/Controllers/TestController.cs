@@ -6,6 +6,7 @@ using MealSync.Application.UseCases.Accounts.Queries;
 using MealSync.Application.UseCases.Orders.Queries.ShopGetQrCodeOfOrders;
 using MealSync.Application.UseCases.Roles.Commands.CreateRole;
 using MealSync.Application.UseCases.Roles.Commands.UpdateRole;
+using MealSync.Application.UseCases.Test.Commands.TestCloseRoom;
 using MealSync.Application.UseCases.Test.Commands.TestFirebase;
 using MealSync.Application.UseCases.Test.Commands.TestModeratorCreateLog;
 using MealSync.Application.UseCases.Test.Commands.TestOpenRoom;
@@ -109,6 +110,12 @@ public class TestController : BaseApiController
 
     [HttpPost("/api/v1/test/open-room-chat")]
     public async Task<IActionResult> TestPushNotiKafka([FromBody] TestOpenRoomCommand command)
+    {
+        return this.HandleResult(await this.Mediator.Send(command));
+    }
+
+    [HttpPost("/api/v1/test/close-room-chat")]
+    public async Task<IActionResult> TestPushNotiKafkaClose([FromBody] TestCloseRoomCommand command)
     {
         return this.HandleResult(await this.Mediator.Send(command));
     }

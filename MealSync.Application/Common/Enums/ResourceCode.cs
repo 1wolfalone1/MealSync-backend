@@ -232,4 +232,7 @@ public enum ResourceCode
 
     [Description("Notification-JoinRoomToCustomer")]
     NOTIFICATION_JOIN_ROOM_TO_CUSTOMER,
+
+    [Description("Notification-CloseRoomToCustomer")]
+    NOTIFICATION_CLOSE_ROOM_TO_CUSTOMER,
 }
