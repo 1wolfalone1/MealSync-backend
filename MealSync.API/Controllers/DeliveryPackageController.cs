@@ -114,4 +114,11 @@ public class DeliveryPackageController : BaseApiController
     {
         return HandleResult(await Mediator.Send(query));
     }
+
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}, {IdentityConst.ShopDeliveryClaimName}")]
+    [HttpGet(Endpoints.GET_DELIVERY_PACKAGE_CALCULATE_TIME_SUGGEST_SHOP_STAFF)]
+    public async Task<IActionResult> GetDeliveryPackageHistoryForShopAndStaff([FromQuery] GetDeliveryStatisticInfoQuery  query)
+    {
+        return HandleResult(await Mediator.Send(query));
+    }
 }
