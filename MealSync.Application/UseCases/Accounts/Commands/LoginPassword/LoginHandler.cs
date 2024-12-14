@@ -121,6 +121,12 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
                             Id = customerBuilding.Building.Id,
                             Name = customerBuilding.Building.Name,
                         };
+
+                        if (customerBuilding.Building.Location != null)
+                        {
+                            loginResponse.AccountResponse.Building.Longitude = customerBuilding.Building.Location.Longitude;
+                            loginResponse.AccountResponse.Building.Latitude = customerBuilding.Building.Location.Latitude;
+                        }
                     }
                 }
 

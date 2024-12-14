@@ -21,10 +21,11 @@ public class CustomerRegisterWithGoogleHandler : ICommandHandler<CustomerRegiste
     private readonly ICustomerRepository _customerRepository;
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly ICustomerBuildingRepository _customerBuildingRepository;
 
     private const string KEY_CACHE = "{0}-Code-Login-GG";
 
-    public CustomerRegisterWithGoogleHandler(ICacheService cacheService, IAccountRepository accountRepository, IUnitOfWork unitOfWork, ILogger<CustomerRegisterWithGoogleCommand> logger, IBuildingRepository buildingRepository, ICustomerRepository customerRepository, ISystemResourceRepository systemResourceRepository, IJwtTokenService jwtTokenService)
+    public CustomerRegisterWithGoogleHandler(ICacheService cacheService, IAccountRepository accountRepository, IUnitOfWork unitOfWork, ILogger<CustomerRegisterWithGoogleCommand> logger, IBuildingRepository buildingRepository, ICustomerRepository customerRepository, ISystemResourceRepository systemResourceRepository, IJwtTokenService jwtTokenService, ICustomerBuildingRepository customerBuildingRepository)
     {
         _cacheService = cacheService;
         _accountRepository = accountRepository;
@@ -34,6 +35,7 @@ public class CustomerRegisterWithGoogleHandler : ICommandHandler<CustomerRegiste
         _customerRepository = customerRepository;
         _systemResourceRepository = systemResourceRepository;
         _jwtTokenService = jwtTokenService;
+        _customerBuildingRepository = customerBuildingRepository;
     }
 
     public async Task<Result<Result>> Handle(CustomerRegisterWithGoogleCommand request, CancellationToken cancellationToken)
@@ -161,6 +163,24 @@ public class CustomerRegisterWithGoogleHandler : ICommandHandler<CustomerRegiste
             AvatarUrl = accountResponse.AvatarUrl,
             FullName = accountResponse.FullName,
         };
+
+        var customerBuildingTemp = _customerBuildingRepository.GetDefaultByCustomerId(accountResponse.Id);
+        loginResponse.AccountResponse.IsSelectedBuilding = customerBuildingTemp != default;
+        if (customerBuildingTemp != default)
+        {
+            loginResponse.AccountResponse.Building = new AccountResponse.BuildingInAccount()
+            {
+                Id = customerBuildingTemp.Building.Id,
+                Name = customerBuildingTemp.Building.Name,
+            };
+
+            if (customerBuildingTemp.Building.Location != null)
+            {
+                loginResponse.AccountResponse.Building.Longitude = customerBuildingTemp.Building.Location.Longitude;
+                loginResponse.AccountResponse.Building.Latitude = customerBuildingTemp.Building.Location.Latitude;
+            }
+        }
+
         return Result.Success(loginResponse);
     }
 
