@@ -108,11 +108,20 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
                     RoleName = account.Role.Name,
                     AvatarUrl = account.AvatarUrl,
                     FullName = account.FullName,
+                    Genders = account.Genders,
                 };
                 if (account.RoleId == (int)Domain.Enums.Roles.Customer)
                 {
                     var customerBuilding = _customerBuildingRepository.GetDefaultByCustomerId(account.Id);
                     loginResponse.AccountResponse.IsSelectedBuilding = customerBuilding != default;
+                    if (customerBuilding != default)
+                    {
+                        loginResponse.AccountResponse.Building = new AccountResponse.BuildingInAccount()
+                        {
+                            Id = customerBuilding.Building.Id,
+                            Name = customerBuilding.Building.Name,
+                        };
+                    }
                 }
 
                 return Result.Success(loginResponse);
