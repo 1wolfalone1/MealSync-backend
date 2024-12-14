@@ -9,4 +9,5 @@ public enum NotificationEntityTypes
     WithdrawalRequest = 4,
     Wallet = 5,
     Chat = 6,
+    Review = 7,
 }
