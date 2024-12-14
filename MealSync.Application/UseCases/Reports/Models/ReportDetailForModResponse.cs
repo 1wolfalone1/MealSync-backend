@@ -8,9 +8,13 @@ public class ReportDetailForModResponse
 
     public bool IsUnderReview { get; set; }
 
+    public bool IsNotAllowReject { get; set; }
+
     public CustomerInfoForModResponse CustomerInfo { get; set; }
 
     public ShopInfoForModResponse ShopInfo { get; set; }
+
+    public OrderInfoForModResponse OrderInfo { get; set; }
 
     public List<ReportResponse> Reports { get; set; }
 
@@ -67,5 +71,12 @@ public class ReportDetailForModResponse
         public string PhoneNumber { get; set; } = null!;
 
         public ShopStatus Status { get; set; }
+    }
+
+    public class OrderInfoForModResponse
+    {
+        public OrderStatus Status { get; set; }
+
+        public string? ReasonIdentity { get; set; }
     }
 }
