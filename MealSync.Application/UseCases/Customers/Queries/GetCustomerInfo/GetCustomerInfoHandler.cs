@@ -52,6 +52,12 @@ public class GetCustomerInfoHandler : IQueryHandler<GetCustomerInfoQuery, Result
                 Name = customerBuilding.Building.Name,
             };
 
+            if (customerBuilding.Building.Location != null)
+            {
+                result.Building.Longitude = customerBuilding.Building.Location.Longitude;
+                result.Building.Latitude = customerBuilding.Building.Location.Latitude;
+            }
+
             return Result.Success(result);
         }
     }
