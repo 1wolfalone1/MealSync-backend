@@ -19,10 +19,11 @@ public class ValidIdTokenFromFirebaseHandler : ICommandHandler<ValidIdTokenFromF
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ValidIdTokenFromFirebaseHandler> _logger;
+    private readonly ICustomerBuildingRepository _customerBuildingRepository;
 
     private const string KEY_CACHE = "{0}-Code-Login-GG";
 
-    public ValidIdTokenFromFirebaseHandler(IFirebaseAuthenticateService firebaseAuthenticateService, ICacheService cacheService, IAccountRepository accountRepository, IJwtTokenService jwtTokenService, IUnitOfWork unitOfWork, ILogger<ValidIdTokenFromFirebaseHandler> logger)
+    public ValidIdTokenFromFirebaseHandler(IFirebaseAuthenticateService firebaseAuthenticateService, ICacheService cacheService, IAccountRepository accountRepository, IJwtTokenService jwtTokenService, IUnitOfWork unitOfWork, ILogger<ValidIdTokenFromFirebaseHandler> logger, ICustomerBuildingRepository customerBuildingRepository)
     {
         _firebaseAuthenticateService = firebaseAuthenticateService;
         _cacheService = cacheService;
@@ -30,6 +31,7 @@ public class ValidIdTokenFromFirebaseHandler : ICommandHandler<ValidIdTokenFromF
         _jwtTokenService = jwtTokenService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _customerBuildingRepository = customerBuildingRepository;
     }
 
     public async Task<Result<Result>> Handle(ValidIdTokenFromFirebaseCommand request, CancellationToken cancellationToken)
@@ -78,6 +80,17 @@ public class ValidIdTokenFromFirebaseHandler : ICommandHandler<ValidIdTokenFromF
                     AvatarUrl = account.AvatarUrl,
                     FullName = account.FullName,
                 };
+                var customerBuilding = _customerBuildingRepository.GetDefaultByCustomerId(account.Id);
+                loginResponse.AccountResponse.IsSelectedBuilding = customerBuilding != default;
+                if (customerBuilding != default)
+                {
+                    loginResponse.AccountResponse.Building = new AccountResponse.BuildingInAccount()
+                    {
+                        Id = customerBuilding.Building.Id,
+                        Name = customerBuilding.Building.Name,
+                    };
+                }
+
                 return Result.Success(loginResponse);
             }
             else if (account == null || account.Status == AccountStatus.UnVerify && account.RoleId == (int)Domain.Enums.Roles.Customer)

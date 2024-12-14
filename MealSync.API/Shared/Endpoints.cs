@@ -199,6 +199,7 @@ public static class Endpoints
     public const string SUGGEST_UPDATE_ASSIGN_ORDER = "shop-owner/delivery-package/suggest-update";
     public const string GET_DELIVERY_PACKAGE_HISTORY = "web/shop-owner/delivery-package/history";
     public const string GET_DELIVERY_PACKAGE_CALCULATE_TIME_SUGGEST = "web/shop-owner/delivery-package/calculate-time-suggest";
+    public const string GET_DELIVERY_PACKAGE_CALCULATE_TIME_SUGGEST_SHOP_STAFF = "shop-owner-staff/delivery-package/calculate-time-suggest";
 
     // Review
     public const string REVIEW_ORDER = "customer/order/review";

@@ -18,9 +18,11 @@ public class GetDeliveryStatisticInfoHandler : ICommandHandler<GetDeliveryStatis
     private readonly ICurrentPrincipalService _currentPrincipalService;
     private readonly IShopRepository _shopRepository;
     private readonly IShopDormitoryRepository _shopDormitoryRepository;
+    private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly IMapApiService _apiService;
+    private readonly IAccountRepository _accountRepository;
 
-    public GetDeliveryStatisticInfoHandler(IDapperService dapperService, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository, IMapApiService apiService)
+    public GetDeliveryStatisticInfoHandler(IDapperService dapperService, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository, IMapApiService apiService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IAccountRepository accountRepository)
     {
         _dapperService = dapperService;
         _orderRepository = orderRepository;
@@ -28,6 +30,8 @@ public class GetDeliveryStatisticInfoHandler : ICommandHandler<GetDeliveryStatis
         _shopRepository = shopRepository;
         _shopDormitoryRepository = shopDormitoryRepository;
         _apiService = apiService;
+        _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
+        _accountRepository = accountRepository;
     }
 
     public async Task<Result<Result>> Handle(GetDeliveryStatisticInfoQuery request, CancellationToken cancellationToken)
@@ -46,8 +50,10 @@ public class GetDeliveryStatisticInfoHandler : ICommandHandler<GetDeliveryStatis
         int totalMinutestToMove = 0;
         int totalMinutesToWaitCustomer = 0;
         var ordersGroup = orders.GroupBy(o => o.DormitoryId).ToDictionary(g => g.Key, g => g.ToList());
-        var shopLocationsDormitory = await _shopDormitoryRepository.GetByShopId(_currentPrincipalService.CurrentPrincipalId.Value).ConfigureAwait(false);
-        var shopLocation = await _shopRepository.GetByIdIncludeLocation(_currentPrincipalService.CurrentPrincipalId.Value).ConfigureAwait(false);
+        var account = _accountRepository.GetById(_currentPrincipalService.CurrentPrincipalId);
+        long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
+        var shopLocationsDormitory = await _shopDormitoryRepository.GetByShopId(shopId).ConfigureAwait(false);
+        var shopLocation = await _shopRepository.GetByIdIncludeLocation(shopId).ConfigureAwait(false);
         foreach (var orderKey in ordersGroup)
         {
             // Delivery Weight
