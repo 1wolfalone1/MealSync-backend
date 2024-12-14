@@ -162,6 +162,7 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
                     else
                     {
                         shopAccount.Status = AccountStatus.Banned;
+                        shop.Status = ShopStatus.Banned;
                         _accountRepository.Update(shopAccount);
                     }
                 }
