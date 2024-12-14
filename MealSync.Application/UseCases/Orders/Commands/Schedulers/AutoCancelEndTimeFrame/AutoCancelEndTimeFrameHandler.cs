@@ -228,6 +228,7 @@ public class AutoCancelEndTimeFrameHandler : ICommandHandler<AutoCancelEndTimeFr
         foreach (var order in orders)
         {
             order.Status = OrderStatus.FailDelivery;
+            order.ReasonIdentity = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription();
             order.LastestDeliveryFailAt = TimeFrameUtils.GetCurrentDate();
             numberOrderDeliveryFail++;
             notfications.AddRange(SendNotificationDeliveryFail(order));
