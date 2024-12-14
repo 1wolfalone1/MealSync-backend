@@ -24,4 +24,7 @@ public enum BatchCodes
 
     [Description("BatchCheduleCancelOrderOverTimeFrame")]
     BatchCheduleCancelOrderOverTimeFrame = 7,
+
+    [Description("BatchCheduleCloseRoomChat")]
+    BatchCheduleCloseRoomChat = 8,
 }
