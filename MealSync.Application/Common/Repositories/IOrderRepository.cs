@@ -59,4 +59,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     Dictionary<long, List<long>> GetDictionaryAccountIdRelated(List<long> orderIds);
 
     List<Order> GetByIdsWithBuilding(List<long> ids);
+
+    List<Order> GetListOrderOverTwoHour(DateTime currentDateTime);
 }
