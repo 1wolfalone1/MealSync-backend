@@ -167,6 +167,7 @@ public class UpdateShopStatusInactiveActiveHandler : ICommandHandler<UpdateShopS
                             else
                             {
                                 account.Status = AccountStatus.Banned;
+                                shop.Status = ShopStatus.Banned;
                                 _accountRepository.Update(account);
                             }
                         }

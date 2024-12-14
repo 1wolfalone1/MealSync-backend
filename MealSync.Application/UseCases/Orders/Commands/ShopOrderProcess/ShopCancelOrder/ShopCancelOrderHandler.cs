@@ -292,6 +292,7 @@ public class ShopCancelOrderHandler : ICommandHandler<ShopCancelOrderCommand, Re
                     else
                     {
                         account.Status = AccountStatus.Banned;
+                        shop.Status = ShopStatus.Banned;
                         _accountRepository.Update(account);
                     }
                 }
