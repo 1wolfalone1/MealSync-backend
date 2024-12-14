@@ -816,4 +816,29 @@ public class NotificationFactory : INotificationFactory
             IsSave = false,
         };
     }
+
+    public Notification CreateCloseRoomToCustomerNotification(Order order, Account accountJoin)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var systemResourceRepository = scope.ServiceProvider.GetRequiredService<ISystemResourceRepository>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var shopRepository = scope.ServiceProvider.GetRequiredService<IShopRepository>();
+        var orderNotification = mapper.Map<OrderNotification>(order);
+        var identityRoleName = accountJoin.RoleId == (int)Roles.ShopDelivery ? "Shipper" : (accountJoin.RoleId == (int)Roles.ShopOwner ? "Cửa Hàng" : "Khách Hàng");
+        var nameMessageFrom = accountJoin.RoleId == (int)Roles.ShopOwner ? shopRepository.GetById(accountJoin.Id).Name : accountJoin.FullName;
+
+        return new Notification
+        {
+            AccountId = order.CustomerId,
+            ReferenceId = order.Id,
+            Title = NotificationConstant.OPEN_CHAT,
+            Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_CLOSE_ROOM_TO_CUSTOMER.GetDescription(),
+                new object[] { string.Concat(identityRoleName, nameMessageFrom), order.Id }),
+            ImageUrl = accountJoin.AvatarUrl,
+            Data = JsonConvert.SerializeObject(orderNotification),
+            Type = NotificationTypes.SendToCustomer,
+            EntityType = NotificationEntityTypes.Chat,
+            IsSave = false,
+        };
+    }
 }

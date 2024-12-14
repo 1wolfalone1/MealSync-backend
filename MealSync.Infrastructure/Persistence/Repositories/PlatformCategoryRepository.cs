@@ -49,7 +49,7 @@ public class PlatformCategoryRepository : BaseRepository<PlatformCategory>, IPla
 
     public (int TotalCount, List<PlatformCategory> Result) GetPlatformCategoryForAdmin(string? searchValue, DateTime? dateFrom, DateTime? dateTo, int pageIndex, int pageSize)
     {
-        var query = DbSet.AsQueryable();
+        var query = DbSet.Include(pl => pl.Foods).AsQueryable();
 
         if (searchValue != null)
         {

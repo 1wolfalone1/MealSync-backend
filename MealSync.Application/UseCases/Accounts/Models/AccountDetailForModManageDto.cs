@@ -1,3 +1,4 @@
+using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Accounts.Models;
@@ -16,7 +17,7 @@ public class AccountDetailForModManageDto
 
     public Genders Genders { get; set; }
 
-    public AccountStatus Status { get; set; }
+    public CustomerStatus Status { get; set; }
 
     public int NumOfFlag { get; set; }
 

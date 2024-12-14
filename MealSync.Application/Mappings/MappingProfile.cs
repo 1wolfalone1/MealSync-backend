@@ -104,7 +104,9 @@ public class MappingProfile : Profile
         CreateMap<Promotion, PromotionSummaryResponse>()
             .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.ToUnixTimeMilliseconds()))
             .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToUnixTimeMilliseconds()));
-        CreateMap<PlatformCategory, PlatformCategoryResponse>();
+        CreateMap<PlatformCategory, PlatformCategoryResponse>()
+            .ForMember(dest => dest.NumberFoodLinked, opt => opt.MapFrom(
+                src => src.Foods != null ? src.Foods.Count : 0));
         CreateMap<CustomerBuilding, CustomerBuildingResponse>()
             .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
             .ForMember(dest => dest.BuildingId, opt => opt.MapFrom(src => src.BuildingId))
