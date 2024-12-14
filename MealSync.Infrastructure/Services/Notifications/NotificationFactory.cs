@@ -485,7 +485,7 @@ public class NotificationFactory : INotificationFactory
             ImageUrl = shop.LogoUrl,
             Data = JsonConvert.SerializeObject(orderNotification),
             Type = NotificationTypes.SendToCustomer,
-            EntityType = NotificationEntityTypes.Order,
+            EntityType = NotificationEntityTypes.Report,
             IsSave = true,
         };
     }
@@ -519,13 +519,13 @@ public class NotificationFactory : INotificationFactory
         return new Notification
         {
             AccountId = order.CustomerId,
-            ReferenceId = order.Id,
+            ReferenceId = shop.Id,
             Title = NotificationConstant.REVIEW_ORDER,
             Content = systemResourceRepository.GetByResourceCode(ResourceCode.NOTIFICATION_SHOP_REPLY_REVIEW.GetDescription(), order.Id) ?? string.Empty,
             ImageUrl = shop.LogoUrl,
             Data = JsonConvert.SerializeObject(orderNotification),
             Type = NotificationTypes.SendToCustomer,
-            EntityType = NotificationEntityTypes.Order,
+            EntityType = NotificationEntityTypes.Review,
             IsSave = true,
         };
     }
