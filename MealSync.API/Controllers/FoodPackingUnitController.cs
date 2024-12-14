@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.FoodPackingUnits.Commands.AdminManage.Update
 using MealSync.Application.UseCases.FoodPackingUnits.Commands.Create.ShopCreate;
 using MealSync.Application.UseCases.FoodPackingUnits.Commands.Delete;
 using MealSync.Application.UseCases.FoodPackingUnits.Commands.Update.ShopUpdateFPU;
+using MealSync.Application.UseCases.FoodPackingUnits.Queries.GetFPUDetailForAdmin;
 using MealSync.Application.UseCases.FoodPackingUnits.Queries.GetFPUForAdmin;
 using MealSync.Application.UseCases.FoodPackingUnits.Queries.GetListFoodPackingUnitForShop;
 using MealSync.Application.UseCases.Foods.Queries.TopFood;
@@ -68,5 +69,15 @@ public class FoodPackingUnitController : BaseApiController
     public async Task<IActionResult> AdminCreateFoodPackingUnit([FromQuery] GetFPUForAdminQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.ADMIN_FOOD_PACKING_UNIT_DETAIL)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> AdminCreateFoodPackingUnitDetail(long id)
+    {
+        return HandleResult(await Mediator.Send(new GetFPUDetailQuery()
+        {
+            Id = id,
+        }).ConfigureAwait(false));
     }
 }

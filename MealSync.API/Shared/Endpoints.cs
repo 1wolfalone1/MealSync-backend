@@ -121,6 +121,7 @@ public static class Endpoints
     public const string ADMIN_CREATE_FOOD_PACKING_UNIT = "admin/food-packing-unit";
     public const string ADMIN_UPDATE_FOOD_PACKING_UNIT = "admin/food-packing-unit/{id:long}";
     public const string ADMIN_FOOD_PACKING_UNIT = "admin/food-packing-unit";
+    public const string ADMIN_FOOD_PACKING_UNIT_DETAIL = "admin/food-packing-unit/{id:long}";
 
     // Storage
     public const string UPLOAD_FILE = "storage/file/upload";
@@ -132,6 +133,7 @@ public static class Endpoints
     public const string UPDATE_PLATFORM_CATEGORY = "admin/platform-category/{id:long}";
     public const string REARRANGE_PLATFORM_CATEGORY = "admin/platform-category/re-arrange";
     public const string GET_PLATFORM_CATEGORY = "admin/platform-category/get-all";
+    public const string GET_DETAIL_PLATFORM_CATEGORY = "admin/platform-category/{id:long}";
 
     // Customer Building
     public const string UPDATE_CUSTOMER_BUILDING = "customer/building/update";
