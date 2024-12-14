@@ -409,22 +409,41 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
 
     private async Task TransactionWithdrawalReportingForRefund(Payment payment, Order order, Shop shop, Wallet shopWallet)
     {
+        var systemTotalWallet = await _walletRepository.GetByType(WalletTypes.SystemTotal).ConfigureAwait(false);
         var reportAmountOrder = payment.Amount - order.ChargeFee;
+        var transactions = new List<WalletTransaction>();
+
         var transactionWithdrawalReportingForRefund = new WalletTransaction
         {
             WalletFromId = shop.WalletId,
+            WalletToId = systemTotalWallet.Id,
             AvaiableAmountBefore = shopWallet.AvailableAmount,
             IncomingAmountBefore = shopWallet.IncomingAmount,
             ReportingAmountBefore = shopWallet.ReportingAmount,
             Amount = -reportAmountOrder,
             Type = WalletTransactionType.Withdrawal,
-            Description = $"Rút tiền từ tiền đang bị báo cáo {MoneyUtils.FormatMoneyWithDots(reportAmountOrder)} VNĐ để hoàn tiền cho khách hàng đơn hàng MS-{order.Id}",
+            Description = $"Rút tiền từ tiền đang bị báo cáo {MoneyUtils.FormatMoneyWithDots(reportAmountOrder)} VNĐ về ví tổng hệ thống để hoàn tiền cho khách hàng đơn hàng MS-{order.Id}",
         };
-
+        transactions.Add(transactionWithdrawalReportingForRefund);
         shopWallet.ReportingAmount -= reportAmountOrder;
 
-        await _walletTransactionRepository.AddAsync(transactionWithdrawalReportingForRefund).ConfigureAwait(false);
+        var transactionTransferReportingForRefund = new WalletTransaction
+        {
+            WalletFromId = shop.WalletId,
+            WalletToId = systemTotalWallet.Id,
+            AvaiableAmountBefore = systemTotalWallet.AvailableAmount,
+            IncomingAmountBefore = systemTotalWallet.IncomingAmount,
+            ReportingAmountBefore = systemTotalWallet.ReportingAmount,
+            Amount = -reportAmountOrder,
+            Type = WalletTransactionType.Transfer,
+            Description = $"Tiền từ tiền đang bị báo cáo {MoneyUtils.FormatMoneyWithDots(reportAmountOrder)} VNĐ về ví tổng hệ thống để hoàn tiền cho khách hàng đơn hàng MS-{order.Id}",
+        };
+        transactions.Add(transactionTransferReportingForRefund);
+        systemTotalWallet.AvailableAmount += reportAmountOrder;
+
+        await _walletTransactionRepository.AddRangeAsync(transactions).ConfigureAwait(false);
         _walletRepository.Update(shopWallet);
+        _walletRepository.Update(systemTotalWallet);
     }
 
     private async Task TransactionReportingToAvailable(Payment payment, Order order, Shop shop, Wallet shopWallet)
