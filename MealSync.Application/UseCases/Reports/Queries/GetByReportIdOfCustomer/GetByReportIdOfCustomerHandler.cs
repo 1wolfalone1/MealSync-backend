@@ -57,10 +57,44 @@ public class GetByReportIdOfCustomerHandler : IQueryHandler<GetByReportIdOfCusto
             }
 
             var customerInfoResponse = _mapper.Map<ReportDetailShopWebResponse.CustomerInfoResponse>(_accountRepository.GetById(order.CustomerId));
+            var receiveDateStartTime = new DateTime(
+                order.IntendedReceiveDate.Year,
+                order.IntendedReceiveDate.Month,
+                order.IntendedReceiveDate.Day,
+                order.StartTime / 100,
+                order.StartTime % 100,
+                0);
+            DateTime receiveDateEndTime;
+            if (order.EndTime == 2400)
+            {
+                receiveDateEndTime = new DateTime(
+                        order.IntendedReceiveDate.Year,
+                        order.IntendedReceiveDate.Month,
+                        order.IntendedReceiveDate.Day,
+                        0,
+                        0,
+                        0)
+                    .AddDays(1);
+            }
+            else
+            {
+                receiveDateEndTime = new DateTime(
+                    order.IntendedReceiveDate.Year,
+                    order.IntendedReceiveDate.Month,
+                    order.IntendedReceiveDate.Day,
+                    order.EndTime / 100,
+                    order.EndTime % 100,
+                    0);
+            }
+
+            var startTime = new DateTimeOffset(receiveDateStartTime, TimeSpan.FromHours(7));
+            var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
+            var now = DateTimeOffset.UtcNow;
 
             reportDetailShopWebResponses.ForEach(report =>
             {
                 report.CustomerInfo = customerInfoResponse;
+                report.IsAllowShopReply = reports.Count == 1 && now >= startTime && now <= endTime.AddHours(20);
             });
 
             return Result.Success(reportDetailShopWebResponses);
