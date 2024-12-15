@@ -22,6 +22,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             .ThenInclude(od => od.Food)
             .Include(o => o.Promotion)
             .Include(o => o.CustomerLocation)
+            .Include(o => o.ShopLocation)
             .Include(o => o.Payments)
             .Include(o => o.Shop)
             .ThenInclude(s => s.Location)
@@ -342,14 +343,14 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
         var result = DbSet.Where(o => o.Status == OrderStatus.FailDelivery && (o.ReasonIdentity == null || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription()) &&
                                       (
-                                      o.EndTime == 2400
-                                      ? o.IntendedReceiveDate.AddDays(1)
-                                      : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
+                                          o.EndTime == 2400
+                                              ? o.IntendedReceiveDate.AddDays(1)
+                                              : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
                                       ).AddHours(OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON) <= currentDateTime
                                       && (
                                           o.EndTime == 2400
-                                          ? o.IntendedReceiveDate.AddDays(1)
-                                          : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
+                                              ? o.IntendedReceiveDate.AddDays(1)
+                                              : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
                                       ) >= currentDateTime.AddHours(-OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON))
             .ToList();
         return result;
@@ -363,8 +364,8 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                                       && o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.Status == PaymentStatus.PaidSuccess && p.PaymentMethods == PaymentMethods.VnPay)
                                       &&
                                       (o.EndTime == 2400
-                                      ? o.IntendedReceiveDate.AddDays(1)
-                                      : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
+                                          ? o.IntendedReceiveDate.AddDays(1)
+                                          : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)
                                       ).AddHours(OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON) <= currentDateTime)
             .ToList();
         return result;
@@ -574,9 +575,9 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
     public async Task<List<Order>> GetOrderOverEndFrameAsync(DateTime currentDateTime)
     {
         return await DbSet.Where(o => OrderConstant.LIST_ORDER_STATUS_IN_PROCESSING.Contains(o.Status) &&
-                                (o.EndTime == 2400
-                                        ? o.IntendedReceiveDate.AddDays(1)
-                                        : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)) <= currentDateTime).ToListAsync();
+                                      (o.EndTime == 2400
+                                          ? o.IntendedReceiveDate.AddDays(1)
+                                          : o.IntendedReceiveDate.AddHours(o.EndTime / 100).AddMinutes(o.EndTime % 100)) <= currentDateTime).ToListAsync();
     }
 
     public List<long> GetListAccountIdRelatedToOrder(long orderId)
@@ -611,7 +612,7 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         return result;
     }
 
-    public List<Order> GetListOrderOverTwoHour( DateTime currentDateTime)
+    public List<Order> GetListOrderOverTwoHour(DateTime currentDateTime)
     {
         var result = DbSet.Where(o => o.Status != OrderStatus.Rejected && o.Status != OrderStatus.PendingPayment &&
                                       (
