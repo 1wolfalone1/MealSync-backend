@@ -8,6 +8,7 @@ using MealSync.Application.Common.Utils;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Orders.Models;
 using MealSync.Domain.Entities;
+using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Orders.Queries.GetDeliveryStatisticInfo;
 
@@ -21,8 +22,9 @@ public class GetDeliveryStatisticInfoHandler : ICommandHandler<GetDeliveryStatis
     private readonly IShopDeliveryStaffRepository _shopDeliveryStaffRepository;
     private readonly IMapApiService _apiService;
     private readonly IAccountRepository _accountRepository;
+    private readonly IDormitoryDistanceRepository _dormitoryDistanceRepository;
 
-    public GetDeliveryStatisticInfoHandler(IDapperService dapperService, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository, IMapApiService apiService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IAccountRepository accountRepository)
+    public GetDeliveryStatisticInfoHandler(IDapperService dapperService, IOrderRepository orderRepository, ICurrentPrincipalService currentPrincipalService, IShopRepository shopRepository, IShopDormitoryRepository shopDormitoryRepository, IMapApiService apiService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IAccountRepository accountRepository, IDormitoryDistanceRepository dormitoryDistanceRepository)
     {
         _dapperService = dapperService;
         _orderRepository = orderRepository;
@@ -32,6 +34,7 @@ public class GetDeliveryStatisticInfoHandler : ICommandHandler<GetDeliveryStatis
         _apiService = apiService;
         _shopDeliveryStaffRepository = shopDeliveryStaffRepository;
         _accountRepository = accountRepository;
+        _dormitoryDistanceRepository = dormitoryDistanceRepository;
     }
 
     public async Task<Result<Result>> Handle(GetDeliveryStatisticInfoQuery request, CancellationToken cancellationToken)
@@ -54,6 +57,7 @@ public class GetDeliveryStatisticInfoHandler : ICommandHandler<GetDeliveryStatis
         long shopId = account.RoleId == (int)Domain.Enums.Roles.ShopOwner ? account.Id : _shopDeliveryStaffRepository.GetById(account.Id).ShopId;
         var shopLocationsDormitory = await _shopDormitoryRepository.GetByShopId(shopId).ConfigureAwait(false);
         var shopLocation = await _shopRepository.GetByIdIncludeLocation(shopId).ConfigureAwait(false);
+        var dormitoryNeedToDelivery = new List<long>();
         foreach (var orderKey in ordersGroup)
         {
             // Delivery Weight
@@ -61,11 +65,21 @@ public class GetDeliveryStatisticInfoHandler : ICommandHandler<GetDeliveryStatis
             currentTaskLoad = deliveryPackageWeight;
 
             // Time move and distance
-            var shopDormitory = shopLocationsDormitory.Where(sd => sd.DormitoryId == orderKey.Key).FirstOrDefault();
-            if (shopDormitory != null)
+            if (dormitoryNeedToDelivery.Count == 0)
             {
-                currentDistance += shopDormitory.Distance;
-                totalMinutestToMove += shopDormitory.Duration;
+                var shopDormitory = shopLocationsDormitory.Where(sd => sd.DormitoryId == orderKey.Key).FirstOrDefault();
+                if (shopDormitory != null)
+                {
+                    currentDistance += shopDormitory.Distance;
+                    totalMinutestToMove += shopDormitory.Duration;
+                    dormitoryNeedToDelivery.Add(orderKey.Key);
+                }
+            }
+            else
+            {
+                var dormitory = _dormitoryDistanceRepository.GetByIds(orderKey.Key, dormitoryNeedToDelivery[dormitoryNeedToDelivery.Count - 1]);
+                totalMinutestToMove += dormitory.Duration;
+                currentDistance += dormitory.Distance;
             }
 
             // Minutes wait customer
@@ -75,35 +89,37 @@ public class GetDeliveryStatisticInfoHandler : ICommandHandler<GetDeliveryStatis
                 Latitude = o.CustomerLatitude,
                 Longitude = o.CustomerLongitude,
             }).ToList();
-            totalMinutesToWaitCustomer += await AverageTimeToWaitCustomer(shopLocation.Location, customerLocation).ConfigureAwait(false) / 60;
+            totalMinutesToWaitCustomer += await AverageTimeToWaitCustomer(shopLocation.Location, customerLocation).ConfigureAwait(false);
         }
 
+        var totalNumberOrderInDeliveringAndPreparing = orders.Count();
+        totalMinutesHandleDelivery = (int)(totalMinutesToWaitCustomer + totalNumberOrderInDeliveringAndPreparing * 0.5 + totalMinutestToMove);
+        var endTime = TimeFrameUtils.GetStartTimeToDateTime(DateTime.Now, request.EndTime);
+        endTime = endTime.AddMinutes(-totalMinutesHandleDelivery);
+        suggestStartTimeDelivery = int.Parse(endTime.ToString("HHmm"));
 
-            totalMinutesHandleDelivery = totalMinutesToWaitCustomer + DevidedOrderConstant.MinutesAddWhenOrderMoreThanFive + (request.OrderIds.Length / 5 * DevidedOrderConstant.MinutesAddWhenOrderMoreThanFive) + totalMinutestToMove;
-            var endTime = TimeFrameUtils.GetStartTimeToDateTime(DateTime.Now, request.EndTime);
-            endTime = endTime.AddMinutes(-totalMinutesHandleDelivery);
-            suggestStartTimeDelivery = int.Parse(endTime.ToString("HHmm"));
-
-            return Result.Success(new
-            {
-                SuggestStartTimeDelivery = suggestStartTimeDelivery,
-                TotalMinutesHandleDelivery = totalMinutesHandleDelivery,
-                CurrentDistance = currentDistance,
-                CurrentTaskLoad = currentTaskLoad,
-                DeliveryPackageWeight = deliveryPackageWeight,
-                TotalMinutestToMove = totalMinutestToMove,
-                TotalMinutesToWaitCustomer = totalMinutesToWaitCustomer,
-            });
+        return Result.Success(new
+        {
+            SuggestStartTimeDelivery = suggestStartTimeDelivery,
+            TotalMinutesHandleDelivery = totalMinutesHandleDelivery,
+            CurrentDistance = currentDistance,
+            CurrentTaskLoad = currentTaskLoad,
+            DeliveryPackageWeight = deliveryPackageWeight,
+            TotalMinutestToMove = totalMinutestToMove,
+            TotalMinutesToWaitCustomer = totalMinutesToWaitCustomer,
+        });
     }
 
     private async Task<int> AverageTimeToWaitCustomer(Location origin, List<Location> destinations)
     {
-        var matrix = await _apiService.GetDistanceMatrixAsync(origin, destinations, VehicleMaps.Bike).ConfigureAwait(false);
-        if (matrix != null)
+        var currentDate = TimeFrameUtils.GetCurrentDateInUTC7();
+
+        // In hot time
+        if (currentDate.Hour >= 11 && currentDate.Hour <= 13)
         {
-            return matrix.Rows.First().AverageDuration;
+            return 8;
         }
 
-        return 5 * 60;
+        return 5;
     }
 }

@@ -49,9 +49,10 @@ public class DeliveryPackageForAssignResponse
     {
         get
         {
-            return TotalMinutesToWaitCustomer
-                   + (int)(Math.Ceiling((double)Total / 5) * DevidedOrderConstant.MinutesAddWhenOrderMoreThanFive)
+            var totalHanlde = TotalMinutesToWaitCustomer
+                   + Total * 0.5
                    + TotalMinutestToMove;
+            return (int)totalHanlde;
         }
     }
 

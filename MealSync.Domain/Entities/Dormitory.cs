@@ -21,4 +21,8 @@ public class Dormitory : BaseEntity
     public virtual ICollection<ShopDormitory> ShopDormitories { get; set; } = new List<ShopDormitory>();
 
     public virtual ICollection<ModeratorDormitory> ModeratorDormitories { get; set; } = new List<ModeratorDormitory>();
+
+    public virtual ICollection<DormitoryDistance> DormitoryDistanceTos { get; set; } = new List<DormitoryDistance>();
+
+    public virtual ICollection<DormitoryDistance> DormitoryDistanceFroms { get; set; } = new List<DormitoryDistance>();
 }

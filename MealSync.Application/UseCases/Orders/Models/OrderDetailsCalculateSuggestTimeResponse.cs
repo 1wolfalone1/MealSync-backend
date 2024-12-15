@@ -4,6 +4,8 @@ public class OrderDetailsCalculateSuggestTimeResponse
 {
     public long Id { get; set; }
 
+    public int Status { get; set; }
+
     public long CustomerId { get; set; }
 
     public long ShopId { get; set; }
