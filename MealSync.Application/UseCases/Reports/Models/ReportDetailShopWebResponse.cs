@@ -8,6 +8,8 @@ public class ReportDetailShopWebResponse
 
     public long OrderId { get; set; }
 
+    public bool IsAllowShopReply { get; set; }
+
     public string Title { get; set; }
 
     public string Content { get; set; }
