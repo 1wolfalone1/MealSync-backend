@@ -5,11 +5,13 @@ WITH OrderFilter AS (
         o.building_id,
         o.customer_id,
         o.shop_id,
-        o.customer_location_id
+        o.customer_location_id,
+        o.status
     FROM
         `order` o
     WHERE
         o.id IN @OrderIds
+        AND o.status IN (5, 6)
 ),
 OrderDetailGroup AS (
     SELECT
@@ -25,6 +27,7 @@ OrderDetailGroup AS (
 )
 SELECT
     o.id AS Id,
+    o.status AS Status,
     o.customer_id AS CustomerId,
     o.shop_id AS ShopId,
     o.building_id AS BuildingId,

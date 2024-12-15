@@ -30,8 +30,10 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
     private readonly IDormitoryRepository _dormitoryRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SuggestAssignDeliveryPackageHandler> _logger;
+    private readonly IDormitoryDistanceRepository _dormitoryDistanceRepository;
+    private readonly IShopDormitoryRepository _shopDormitoryRepository;
 
-    public SuggestAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapApiService mapApiService, IShopRepository shopRepository, IBuildingRepository buildingRepository, IDormitoryRepository dormitoryRepository, IUnitOfWork unitOfWork, ILogger<SuggestAssignDeliveryPackageHandler> logger)
+    public SuggestAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapApiService mapApiService, IShopRepository shopRepository, IBuildingRepository buildingRepository, IDormitoryRepository dormitoryRepository, IUnitOfWork unitOfWork, ILogger<SuggestAssignDeliveryPackageHandler> logger, IDormitoryDistanceRepository dormitoryDistanceRepository, IShopDormitoryRepository shopDormitoryRepository)
     {
         _dapperService = dapperService;
         _deliveryPackageRepository = deliveryPackageRepository;
@@ -43,6 +45,8 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         _dormitoryRepository = dormitoryRepository;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _dormitoryDistanceRepository = dormitoryDistanceRepository;
+        _shopDormitoryRepository = shopDormitoryRepository;
     }
 
     public async Task<Result<Result>> Handle(SuggestAssignDeliveryPackageQuery request, CancellationToken cancellationToken)
@@ -151,6 +155,27 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                     }
                 }
 
+                // Check have any staff receive order from this customer
+                if (staff.Orders.All(o => o.Customer.Id != order.Customer.Id) && staff.Total > 0)
+                {
+                    var staffWithMinTotalOrder = listStaff.Where(s => s.Orders.Any(o => o.Customer.Id == order.Customer.Id
+                                                                                        && o.DormitoryId == order.DormitoryId)).OrderBy(d => d.Total).FirstOrDefault();
+                    // It mean other staff have zero order
+                    if (staffWithMinTotalOrder == default && listStaff.Count > 1)
+                    {
+                        salt = int.MaxValue;
+                    }
+                    // It mean order staff have order so need to check number of task
+                    else if (staffWithMinTotalOrder != default)
+                    {
+                        var percentTaskCompare = staffWithMinTotalOrder.Total / staff.Total;
+                        if (percentTaskCompare < DevidedOrderConstant.PercentOverTaskCanAccept)
+                        {
+                            salt = int.MaxValue;
+                        }
+                    }
+                }
+
                 // Check time
                 if (staff.Total > 0 && staff.TotalMinutesHandleDelivery >= FrameConstant.TIME_FRAME_IN_MINUTES)
                 {
@@ -204,9 +229,10 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                         Address = order.Customer.Address,
                     };
 
-                    var element = await _mapApiService.GetDistanceOneDestinationAsync(shopLocation, dormitoryLocation, VehicleMaps.Car).ConfigureAwait(false);
-                    bestStaff.CurrentDistance = element.Distance.Value / 1000; // Convert to km
-                    bestStaff.TotalMinutestToMove += ((int)element.Duration.Value / 60);
+                    // var element = await _mapApiService.GetDistanceOneDestinationAsync(shopLocation, dormitoryLocation, VehicleMaps.Car).ConfigureAwait(false);
+                    var shopDormitory = _shopDormitoryRepository.GetShopDormitory(shop.Id, order.DormitoryId);
+                    bestStaff.CurrentDistance = shopDormitory.Distance; // Convert to km
+                    bestStaff.TotalMinutestToMove += shopDormitory.Duration;
 
                     bestStaff.Orders.Add(order);
                     bestStaff.Waiting++;
@@ -220,7 +246,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                         Successful = 0,
                         Delivering = 0,
                         Failed = 0,
-                        MinutesMoveTo = element.Duration.Value / 60,
+                        MinutesMoveTo = shopDormitory.Duration,
                         ShopDeliveryStaff = new DeliveryPackageForAssignResponse.ShopStaffInforResponse()
                         {
                             Id = bestStaff.ShopDeliveryStaff.Id,
@@ -250,12 +276,12 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                     else
                     {
                         // Need call google to calculate time and distance to delivery
-                        var dormitoryLocation = _dormitoryRepository.GetLocationByDormitoryId(order.DormitoryId);
-
-                        var buildingLocation = _dormitoryRepository.GetLocationByDormitoryId(staff.Dormitories[staff.Dormitories.Count - 1].Id);
-                        var element = await _mapApiService.GetDistanceOneDestinationAsync(buildingLocation, dormitoryLocation, VehicleMaps.Car).ConfigureAwait(false);
-                        staff.CurrentDistance += element.Distance.Value / 1000; // Convert to km
-                        staff.TotalMinutestToMove += ((int)element.Duration.Value / 60);
+                        // var dormitoryLocation = _dormitoryRepository.GetLocationByDormitoryId(order.DormitoryId);
+                        // var buildingLocation = _dormitoryRepository.GetLocationByDormitoryId(staff.Dormitories[staff.Dormitories.Count - 1].Id);
+                        // var element = await _mapApiService.GetDistanceOneDestinationAsync(buildingLocation, dormitoryLocation, VehicleMaps.Car).ConfigureAwait(false);
+                        var dormitory = _dormitoryDistanceRepository.GetByIds(order.DormitoryId, staff.Dormitories[staff.Dormitories.Count - 1].Id);
+                        staff.CurrentDistance += dormitory.Distance; // Convert to km
+                        staff.TotalMinutestToMove += dormitory.Duration;
 
                         staff.Dormitories.Add(new DeliveryPackageForAssignResponse.DormitoryStasisticForEachStaff()
                         {
@@ -266,7 +292,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                             Successful = 0,
                             Delivering = 0,
                             Failed = 0,
-                            MinutesMoveTo = element.Duration.Value / 60,
+                            MinutesMoveTo = dormitory.Duration,
                             ShopDeliveryStaff = new DeliveryPackageForAssignResponse.ShopStaffInforResponse()
                             {
                                 Id = staff.ShopDeliveryStaff.Id,
@@ -314,7 +340,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         {
             var originLocation = _dormitoryRepository.GetLocationByDormitoryId(order.Key);
             var destinations = _buildingRepository.GetListLocationBaseOnBuildingIds(order.Value.ToList());
-            average += await AverageTimeToWaitCustomer(originLocation, destinations).ConfigureAwait(false) / 60;
+            average += await AverageTimeToWaitCustomer(originLocation, destinations).ConfigureAwait(false);
         }
 
         staff.TotalMinutesToWaitCustomer = average;
@@ -323,13 +349,15 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
 
     private async Task<int> AverageTimeToWaitCustomer(Location origin, List<Location> destinations)
     {
-        var matrix = await _mapApiService.GetDistanceMatrixAsync(origin, destinations, VehicleMaps.Bike).ConfigureAwait(false);
-        if (matrix != null)
+        var currentDate = TimeFrameUtils.GetCurrentDateInUTC7();
+
+        // In hot time
+        if (currentDate.Hour >= 11 && currentDate.Hour <= 13)
         {
-            return matrix.Rows.First().AverageDuration;
+            return 8;
         }
 
-        return 5 * 60;
+        return 5;
     }
 
     private DeliveryPackageForAssignResponse AssignOrderToStaff(DeliveryPackageForAssignResponse staff, List<OrderDetailForShopResponse> orders)
@@ -340,7 +368,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             staff.Waiting++;
             staff.Total = staff.Waiting + staff.Delivering + staff.Failed + staff.Successful;
 
-            // Check if order located in order dormitory will inscrease currentDistance
+            // Check if order located in order dormitory will increase currentDistance
             if (staff.Dormitories.All(d => d.Id != order.DormitoryId))
             {
                 staff.CurrentDistance++;
