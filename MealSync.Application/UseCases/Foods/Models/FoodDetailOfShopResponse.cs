@@ -10,6 +10,15 @@ public class FoodDetailOfShopResponse
 
     public long ShopCategoryId { get; set; }
 
+    public long FoodPackingUnitId
+    {
+        get
+        {
+            return FoodPackingUnit.Id;
+        }
+    }
+
+
     public string Name { get; set; }
 
     public string? Description { get; set; }
@@ -22,7 +31,7 @@ public class FoodDetailOfShopResponse
 
     public bool IsSoldOut { get; set; }
 
-    public FoodPackingUnitOfShopResponse FoodPackingUnit { get; set; }
+    public FoodPackingUnitOfShopResponse FoodPackingUnit { get; set; } = new();
 
     public List<OperatingSlotOfShopResponse> OperatingSlots { get; set; }
 
