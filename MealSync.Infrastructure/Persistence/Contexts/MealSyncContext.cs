@@ -29,6 +29,8 @@ public class MealSyncContext : DbContext
 
     public virtual DbSet<Deposit> Deposits { get; set; }
 
+    public virtual DbSet<DormitoryDistance> DormitoryDistances { get; set; }
+
     public virtual DbSet<Shop> Shops { get; set; }
 
     public virtual DbSet<Moderator> Moderators { get; set; }
@@ -192,6 +194,21 @@ public class MealSyncContext : DbContext
             .WithOne(l => l.Dormitory)
             .HasForeignKey<Dormitory>(d => d.LocationId)
             .HasConstraintName("FK_Dormitory_Location");
+
+        modelBuilder.Entity<DormitoryDistance>()
+            .HasKey(d => new { d.DormitoryFromId, d.DormitoryToId });
+
+        modelBuilder.Entity<DormitoryDistance>()
+            .HasOne(d => d.DormitoryFrom)
+            .WithMany(d => d.DormitoryDistanceFroms)
+            .HasForeignKey(d => d.DormitoryFromId)
+            .HasConstraintName("FK_DormitoryDistance_DormitoryFrom");
+
+        modelBuilder.Entity<DormitoryDistance>()
+            .HasOne(d => d.DormitoryTo)
+            .WithMany(d => d.DormitoryDistanceTos)
+            .HasForeignKey(d => d.DormitoryToId)
+            .HasConstraintName("FK_DormitoryDistance_DormitoryTo");
 
         modelBuilder.Entity<Moderator>()
             .HasOne(so => so.Account)
