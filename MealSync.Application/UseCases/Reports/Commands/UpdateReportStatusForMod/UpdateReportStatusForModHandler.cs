@@ -125,6 +125,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
             }
             else if (
                 order.Status == OrderStatus.IssueReported
+                && (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription() || order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription())
                 && customerReport.Status == ReportStatus.Pending
                 && request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.UnderReview
                 && ((reports.Count > 1 && (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() || now > endTime.AddHours(2))) || now > endTime.AddHours(20))
@@ -153,6 +154,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
             }
             else if (
                 order.Status == OrderStatus.UnderReview
+                && (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription() || order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription())
                 && customerReport.Status == ReportStatus.Pending
                 && (
                     request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.Approved
@@ -170,8 +172,7 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                     {
                         await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
 
-                        if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()
-                            || order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription())
+                        if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription())
                         {
                             // Fail delivery
                             if (payment.PaymentMethods == PaymentMethods.COD)
@@ -226,11 +227,6 @@ public class UpdateReportStatusForModHandler : ICommandHandler<UpdateReportStatu
                 }
                 else if (request.Status == UpdateReportStatusForModCommand.ProcessReportStatus.Rejected)
                 {
-                    if (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription())
-                    {
-                        throw new InvalidBusinessException(MessageCode.E_MODERATOR_ONLY_APPROVE_REPORT.GetDescription());
-                    }
-
                     var isFlagCustomer = false;
                     try
                     {

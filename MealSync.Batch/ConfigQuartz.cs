@@ -57,6 +57,11 @@ public static class ConfigQuartz
                 .AddTrigger(trigger => trigger
                     .ForJob(JobKey.Create(nameof(HaftHourlyBatchCloseChat)))
                     .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
+
+            options.AddJob<ApproveCustomerReportFailDeliveryByShopJob>(JobKey.Create(nameof(ApproveCustomerReportFailDeliveryByShopJob)))
+                .AddTrigger(trigger => trigger
+                    .ForJob(JobKey.Create(nameof(ApproveCustomerReportFailDeliveryByShopJob)))
+                    .WithCronSchedule("0 0/30 * * * ?")); // Runs every 30 minutes
         });
 
         services.AddQuartzHostedService();

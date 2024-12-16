@@ -61,4 +61,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     List<Order> GetByIdsWithBuilding(List<long> ids);
 
     List<Order> GetListOrderOverTwoHour(DateTime currentDateTime);
+
+    Task<List<Order>> GetReportOrderFailByShop(DateTime intendedReceiveDate, int endTime);
 }

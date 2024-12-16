@@ -265,4 +265,15 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
 
         return (data, totalCount);
     }
+
+    public Task<List<Food>> GetActiveFood(long operatingSlotId)
+    {
+        return DbSet.Include(f => f.FoodOperatingSlots)
+            .ThenInclude(fos => fos.OperatingSlot)
+            .AsSplitQuery()
+            .Where(f => f.Status == FoodStatus.Active
+                        && !f.IsSoldOut
+                        && f.FoodOptionGroups.Count == 0
+                        && f.FoodOperatingSlots.Any(fo => fo.OperatingSlot.Id == operatingSlotId)).ToListAsync();
+    }
 }

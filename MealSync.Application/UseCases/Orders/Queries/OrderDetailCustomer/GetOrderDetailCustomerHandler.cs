@@ -5,8 +5,11 @@ using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Services;
 using MealSync.Application.Shared;
 using MealSync.Application.UseCases.Orders.Models;
+using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 using MealSync.Domain.Exceptions.Base;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace MealSync.Application.UseCases.Orders.Queries.OrderDetailCustomer;
 
@@ -34,7 +37,21 @@ public class GetOrderDetailCustomerHandler : IQueryHandler<GetOrderDetailCustome
         }
         else
         {
-            return Result.Success(_mapper.Map<DetailOrderCustomerResponse>(order));
+            var detailOrderCustomerResponse = _mapper.Map<DetailOrderCustomerResponse>(order);
+            var evidence = string.IsNullOrEmpty(order.EvidenceDeliveryFailJson)
+                ? default
+                : JsonConvert.DeserializeObject<List<ShopDeliveyFailEvidence>>(order.EvidenceDeliveryFailJson, new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                });
+
+            if (evidence != default)
+            {
+                var shopDeliveryFailEvidenceResponses = _mapper.Map<List<DetailOrderCustomerResponse.ShopDeliveryFailEvidenceResponse>>(evidence);
+                detailOrderCustomerResponse.ShopDeliveryFailEvidence = shopDeliveryFailEvidenceResponses;
+            }
+
+            return Result.Success(detailOrderCustomerResponse);
         }
     }
 }

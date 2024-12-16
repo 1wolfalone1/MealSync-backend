@@ -27,4 +27,7 @@ public enum BatchCodes
 
     [Description("BatchCheduleCloseRoomChat")]
     BatchCheduleCloseRoomChat = 8,
+
+    [Description("BatchApproveCustomerReportFailDeliveryByShop")]
+    BatchApproveCustomerReportFailDeliveryByShop = 9,
 }

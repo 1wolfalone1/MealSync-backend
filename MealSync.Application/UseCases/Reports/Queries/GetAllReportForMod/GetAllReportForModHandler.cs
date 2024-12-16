@@ -80,6 +80,7 @@ public class GetAllReportForModHandler : IQueryHandler<GetAllReportForModQuery, 
         var reports = await _dapperService.SelectAsync<ReportManageDto>(QueryName.GetListReportForMod, new
         {
             DeliveredReportedByCustomer = OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription(),
+            DeliveryFailByCustomerReportedByCustomer = OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription(),
             Now = now,
             DormitoryIds = dormitoryIds,
             SearchValue = request.SearchValue,
