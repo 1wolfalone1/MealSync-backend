@@ -65,4 +65,11 @@ public class NotificationController : BaseApiController
     {
         return HandleResult(await Mediator.Send(new GetTotalUnreadCustomerNotificationQuery()).ConfigureAwait(false));
     }
+
+    [HttpGet(Endpoints.MODERATOR_NOTIFICATION)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> GetModeratorNotifcation()
+    {
+        return HandleResult(await Mediator.Send(new GetTotalUnreadCustomerNotificationQuery()).ConfigureAwait(false));
+    }
 }
