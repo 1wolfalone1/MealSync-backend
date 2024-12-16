@@ -94,7 +94,8 @@ WitNumberOrderIn2HoursAdvance AS (
         INNER JOIN `order` o ON od.order_id = o.id
     WHERE
         o.start_time >= @StartLastTwoHour
-        and DATE_FORMAT(o.intended_receive_date, '%Y-%m-%d') >= DATE_FORMAT(@CurrentDate, '%Y-%m-%d')
+        AND DATE_FORMAT(o.intended_receive_date, '%Y-%m-%d') >= DATE_FORMAT(@CurrentDate, '%Y-%m-%d')
+        AND o.status IN (1, 3, 5, 6) -- pending, confirmed, preparing, delivering
     GROUP BY
         o.id,
         f.id
