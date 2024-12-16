@@ -33,13 +33,26 @@ public class GetOrderChartForAdminHandler : IQueryHandler<GetOrderChartForAdminQ
         var result = new List<PointOfOrderChart>();
         for (var i = 0; i < maxPoints; i++)
         {
-            var point = GetOrderChart(request.DateFrom.AddDays(step * i));
-            if (i >= maxLabels)
+            if (i == maxLabels - 1)
             {
-                point.LabelDate = null;
-            }
+                var point = GetOrderChart(request.DateTo);
+                if (i >= maxLabels)
+                {
+                    point.LabelDate = null;
+                }
 
-            result.Add(point);
+                result.Add(point);
+            }
+            else
+            {
+                var point = GetOrderChart(request.DateFrom.AddDays(step * i));
+                if (i >= maxLabels)
+                {
+                    point.LabelDate = null;
+                }
+
+                result.Add(point);
+            }
         }
 
         return Result.Success(result);

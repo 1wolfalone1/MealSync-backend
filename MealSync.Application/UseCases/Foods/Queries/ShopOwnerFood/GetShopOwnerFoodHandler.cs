@@ -97,6 +97,7 @@ public class GetShopOwnerFoodHandler : IQueryHandler<GetShopOwnerFoodQuery, Resu
                 CurrentHours = TimeFrameUtils.GetCurrentDateInUTC7().ToString("HHmm"),
                 StartLastTwoHour = TimeFrameUtils.GetCurrentDateInUTC7().AddHours(2).ToString("HHmm"),
                 FilterMode = request.FilterMode,
+                CurrentDate = TimeFrameUtils.GetCurrentDateInUTC7().ToString("yyyy-MM-dd"),
             },
             "FoodId, FoodPackingUnitSection, OperatingSection");
 

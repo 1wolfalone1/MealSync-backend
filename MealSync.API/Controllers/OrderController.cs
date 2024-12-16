@@ -10,6 +10,7 @@ using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaf
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess.ShopAndStaffDeliverySuccessByQR;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess.ShopAndStaffDeliverySuccessWithProof;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopCancelOrder;
+using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopConfirmListOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopConfirmOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopDeliveringOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopPreparingOrder;
@@ -269,5 +270,12 @@ public class OrderController : BaseApiController
         {
             Id = id,
         }).ConfigureAwait(false));
+    }
+
+    [HttpPut(Endpoints.SHOP_CONFIRM_LIST_ORDERS)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> ShopConfirmListOrders([FromBody] ShopConfirmListOrderCommand command)
+    {
+        return HandleResult(await Mediator.Send(command).ConfigureAwait(false));
     }
 }

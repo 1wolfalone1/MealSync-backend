@@ -174,6 +174,7 @@ public static class Endpoints
     public const string SHOP_AND_STAFF_DELIVERED_INFOR_EVIDENCE = "shop-owner-staff/order/{id:long}/delivery-infor";
     public const string RE_ORDER = "customer/re-order/food";
     public const string SHOP_UN_ASSIGN_ORDER = "shop-owner/order/{id:long}/un-assign";
+    public const string SHOP_CONFIRM_LIST_ORDERS = "shop-owner/order/confirm";
 
 
     // Report
@@ -268,6 +269,8 @@ public static class Endpoints
     public const string NOTIFICATION_MARK_ALL_READ = "notification/mark-all-read";
     public const string CUSTOMER_NOTIFICATION = "customer/notification";
     public const string CUSTOMER_NOTIFICATION_TOTAL_UNREAD = "customer/notification/total-unread";
+    public const string MODERATOR_NOTIFICATION = "moderator/notification";
+    public const string MODERATOR_TOTAL_UNREAD = "moderator/notification/total-unread";
 
     // Chat
     public const string ORDER_INFOR_CHAT = "order/{id:long}/chat-info";

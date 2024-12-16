@@ -5,6 +5,7 @@ using MealSync.Application.UseCases.Notifications.Commands.MarkAllReads;
 using MealSync.Application.UseCases.Notifications.Commands.UpdateReadedNotification;
 using MealSync.Application.UseCases.Notifications.Queries;
 using MealSync.Application.UseCases.Notifications.Queries.GetCustomerNotification;
+using MealSync.Application.UseCases.Notifications.Queries.GetModeratorNotification;
 using MealSync.Application.UseCases.Notifications.Queries.GetNotificationForShopAndStaff;
 using MealSync.Application.UseCases.Notifications.Queries.GetTotalUnreadCustomerNotification;
 using MealSync.Application.UseCases.Notifications.Queries.GetTotalUnreadNotification;
@@ -64,5 +65,19 @@ public class NotificationController : BaseApiController
     public async Task<IActionResult> CustomerTotalUnread()
     {
         return HandleResult(await Mediator.Send(new GetTotalUnreadCustomerNotificationQuery()).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MODERATOR_NOTIFICATION)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> GetModeratorNotification()
+    {
+        return HandleResult(await Mediator.Send(new GetModeratorNotificationQuery()).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.MODERATOR_TOTAL_UNREAD)]
+    [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
+    public async Task<IActionResult> ModeratorTotalUnread()
+    {
+        return HandleResult(await Mediator.Send(new GetTotalUnreadNotificationQuery()).ConfigureAwait(false));
     }
 }
