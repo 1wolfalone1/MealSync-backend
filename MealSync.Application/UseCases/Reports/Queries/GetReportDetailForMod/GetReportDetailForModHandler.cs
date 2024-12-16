@@ -79,10 +79,18 @@ public class GetReportDetailForModHandler : IQueryHandler<GetReportDetailForModQ
             }
 
             var endTime = new DateTimeOffset(receiveDateEndTime, TimeSpan.FromHours(7));
-            if (customerReport.Status == ReportStatus.Pending && ((reports.Count > 1 && (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() || now > endTime.AddHours(2))) || now > endTime.AddHours(20)))
+            if (customerReport.Status == ReportStatus.Pending && ((reports.Count > 1 && (order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() || now > endTime.AddHours(2)))
+                                                                  || now > endTime.AddHours(20)))
             {
                 reportDetailShopWebResponses.IsAllowAction = true;
+                reportDetailShopWebResponses.IsNotAllowReject = order.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription();
             }
+
+            reportDetailShopWebResponses.OrderInfo = new ReportDetailForModResponse.OrderInfoForModResponse()
+            {
+                Status = order.Status,
+                ReasonIdentity = order.ReasonIdentity,
+            };
 
             reportDetailShopWebResponses.IsUnderReview = order.Status == OrderStatus.UnderReview;
 

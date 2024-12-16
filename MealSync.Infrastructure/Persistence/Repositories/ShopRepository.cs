@@ -38,6 +38,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
         // The shop must be active and not paused for receiving orders
         var query = DbSet
             .Include(shop => shop.ShopDormitories)
+            .Include(shop => shop.Location)
             .Where(
                 shop => shop.ShopDormitories.Select(shopDormitory => shopDormitory.DormitoryId).Contains(dormitoryId)
                         && !shop.IsReceivingOrderPaused
@@ -445,7 +446,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
 
     public Task<List<Shop>> GetShopByIds(List<long> ids)
     {
-        return DbSet.Where(s => ids.Contains(s.Id) && s.Status == ShopStatus.Active).ToListAsync();
+        return DbSet.Include(shop => shop.Location).Where(s => ids.Contains(s.Id) && s.Status == ShopStatus.Active).ToListAsync();
     }
 
     private static string EscapeLikeParameter(string input)

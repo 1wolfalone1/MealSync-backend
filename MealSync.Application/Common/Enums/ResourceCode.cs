@@ -137,6 +137,9 @@ public enum ResourceCode
     [Description("Notification-Order-Confirmed")]
     NOTIFICATION_ORDER_CONFIRMED,
 
+    [Description("Notification-Order-Auto-Confirmed")]
+    NOTIFICATION_ORDER_AUTO_CONFIRMED,
+
     [Description("Notification-Order-Reject")]
     NOTIFICATION_ORDER_REJECT,
 

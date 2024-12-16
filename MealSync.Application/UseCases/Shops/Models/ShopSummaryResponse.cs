@@ -17,4 +17,6 @@ public class ShopSummaryResponse
     public double AverageRating { get; set; }
 
     public int TotalOrder { get; set; }
+
+    public string Address { get; set; }
 }
