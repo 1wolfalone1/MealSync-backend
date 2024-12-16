@@ -69,9 +69,9 @@ public class NotificationController : BaseApiController
 
     [HttpGet(Endpoints.MODERATOR_NOTIFICATION)]
     [Authorize(Roles = $"{IdentityConst.ModeratorClaimName}")]
-    public async Task<IActionResult> GetModeratorNotification()
+    public async Task<IActionResult> GetModeratorNotification([FromQuery] GetModeratorNotificationQuery query)
     {
-        return HandleResult(await Mediator.Send(new GetModeratorNotificationQuery()).ConfigureAwait(false));
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 
     [HttpGet(Endpoints.MODERATOR_TOTAL_UNREAD)]
