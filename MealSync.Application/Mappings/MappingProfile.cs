@@ -175,7 +175,7 @@ public class MappingProfile : Profile
                 opt => opt.MapFrom(src =>
                     new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeMilliseconds())
             )
-            .ForMember(dest => dest.IsOrderNextDay, opt => opt.MapFrom(src => src.OrderDate.Day != src.IntendedReceiveDate.Day))
+            .ForMember(dest => dest.IsOrderNextDay, opt => opt.MapFrom(src => src.OrderDate.ToOffset(TimeSpan.FromHours(7)).Day != src.IntendedReceiveDate.Day))
             .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.CustomerLocation.Longitude))
@@ -226,7 +226,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt.HasValue ? src.ReceiveAt.Value.ToUnixTimeMilliseconds() : 0))
             .ForMember(
                 dest => dest.IsOrderTomorrow,
-                opt => opt.MapFrom(src => src.IntendedReceiveDate.Day != src.OrderDate.Day)
+                opt => opt.MapFrom(src => src.IntendedReceiveDate.Day != src.OrderDate.ToOffset(TimeSpan.FromHours(7)).Day)
             )
             // .ForMember(dest => dest.TotalOrderDetail, opt => opt.MapFrom(src => src.OrderDetails.Count))
             .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
@@ -249,7 +249,7 @@ public class MappingProfile : Profile
             )
             .ForMember(
                 dest => dest.IsOrderTomorrow,
-                opt => opt.MapFrom(src => src.IntendedReceiveDate.Day != src.OrderDate.Day)
+                opt => opt.MapFrom(src => src.IntendedReceiveDate.Day != new DateTimeOffset(src.OrderDate, TimeSpan.Zero).ToOffset(TimeSpan.FromHours(7)).Day)
             );
 
         CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();

@@ -104,10 +104,10 @@ public class ApproveCustomerReportFailDeliveryByShopHandler : ICommandHandler<Ap
                 order.Status = OrderStatus.Resolved;
                 _orderRepository.Update(order);
 
-                await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
-
                 NotifyApproveOrReject(customer.Account, shop, customerReport);
             }
+
+            await _unitOfWork.CommitTransactionAsync().ConfigureAwait(false);
         }
         catch (Exception e)
         {
