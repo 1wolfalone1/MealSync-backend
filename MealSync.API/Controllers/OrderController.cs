@@ -3,6 +3,7 @@ using MealSync.API.Shared;
 using MealSync.Application.UseCases.Orders.Commands.CancelOrderCustomer;
 using MealSync.Application.UseCases.Orders.Commands.CompleteOrder;
 using MealSync.Application.UseCases.Orders.Commands.Create;
+using MealSync.Application.UseCases.Orders.Commands.CreateOrderDataSample;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveringOrders;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliveryFailOrder;
 using MealSync.Application.UseCases.Orders.Commands.ShopOrderProcess.ShopAndStaffDeliverySuccess;
@@ -37,6 +38,13 @@ public class OrderController : BaseApiController
     [HttpPost(Endpoints.CREATE_ORDER)]
     [Authorize(Roles = $"{IdentityConst.CustomerClaimName}")]
     public async Task<IActionResult> CreateOrder(CreateOrderCommand request)
+    {
+        return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
+    }
+
+    [HttpPost(Endpoints.CREATE_ORDER_DUMMY)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> CreateOrderDummy(CreateOrderDataSampleCommand request)
     {
         return HandleResult(await Mediator.Send(request).ConfigureAwait(false));
     }

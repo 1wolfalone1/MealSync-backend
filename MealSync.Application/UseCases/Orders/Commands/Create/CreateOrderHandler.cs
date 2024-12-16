@@ -72,7 +72,16 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
 
     public async Task<Result<Result>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var customerId = _currentPrincipalService.CurrentPrincipalId!;
+        long? customerId;
+        if (request.IsDummy)
+        {
+            customerId = request.CustomerId;
+        }
+        else
+        {
+            customerId = _currentPrincipalService.CurrentPrincipalId!;
+        }
+
         var shop = await _shopRepository.GetByIdIncludeLocation(request.ShopId).ConfigureAwait(false);
         var buildingOrder = await _buildingRepository.GetByIdIncludeLocation(request.BuildingId).ConfigureAwait(false);
         var now = DateTimeOffset.UtcNow;

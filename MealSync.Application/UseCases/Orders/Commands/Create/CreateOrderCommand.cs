@@ -6,6 +6,10 @@ namespace MealSync.Application.UseCases.Orders.Commands.Create;
 
 public class CreateOrderCommand : ICommand<Result>
 {
+    public bool IsDummy { get; set; }
+
+    public long CustomerId { get; set; }
+
     public long ShopId { get; set; }
 
     public string FullName { get; set; } = null!;
