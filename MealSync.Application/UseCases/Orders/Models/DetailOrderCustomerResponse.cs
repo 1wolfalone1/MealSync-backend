@@ -24,6 +24,8 @@ public class DetailOrderCustomerResponse
 
     public string? Note { get; set; }
 
+    public string? Reason { get; set; }
+
     public double ShippingFee { get; set; }
 
     public double TotalPrice { get; set; }
