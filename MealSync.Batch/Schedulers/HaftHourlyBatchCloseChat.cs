@@ -1,4 +1,5 @@
 ﻿using MealSync.Application.Common.Utils;
+using MealSync.Application.UseCases.Orders.Commands.Schedulers.AutoCloseChatAfterTwoHour;
 using MealSync.Application.UseCases.Orders.Commands.Schedulers.TransferIncomingAmountForShopAfterTwoHour;
 using MediatR;
 using Quartz;
@@ -19,7 +20,7 @@ public class HaftHourlyBatchCloseChat : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         _logger.LogInformation($"[BATCH CODE 8: START AT: {TimeFrameUtils.GetCurrentDate()}]");
-        await _mediator.Send(new TransferIncomingAmountForShopAfterTwoHourCommand()).ConfigureAwait(false);
+        await _mediator.Send(new AutoCloseChatAfterTwoHourCommand()).ConfigureAwait(false);
         _logger.LogInformation($"[BATCH CODE 8: END AT: {TimeFrameUtils.GetCurrentDate()}]");
     }
 }
