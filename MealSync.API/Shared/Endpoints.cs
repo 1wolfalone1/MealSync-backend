@@ -267,6 +267,7 @@ public static class Endpoints
     public const string NOTIFICATION_MARK_ALL_READ = "notification/mark-all-read";
     public const string CUSTOMER_NOTIFICATION = "customer/notification";
     public const string CUSTOMER_NOTIFICATION_TOTAL_UNREAD = "customer/notification/total-unread";
+    public const string MODERATOR_NOTIFICATION = "moderator/notification";
 
     // Chat
     public const string ORDER_INFOR_CHAT = "order/{id:long}/chat-info";
