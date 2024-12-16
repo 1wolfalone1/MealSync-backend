@@ -28,7 +28,7 @@ public class GetWalletSummaryHandler : IQueryHandler<GetWalletSummaryQuery, Resu
     {
         var shopId = _currentPrincipalService.CurrentPrincipalId!.Value;
         var shop = await _shopRepository.GetByAccountId(shopId).ConfigureAwait(false);
-        var wallet = _walletRepository.GetById(shop.WalletId);
+        var wallet = await _walletRepository.GetIncludeWithdrawalRequest(shop.WalletId).ConfigureAwait(false);
         return Result.Success(_mapper.Map<WalletSummaryResponse>(wallet));
     }
 }
