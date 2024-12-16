@@ -39,7 +39,7 @@ public class AutoCloseChatAfterTwoHourHandler : ICommandHandler<AutoCloseChatAft
         var startTime = TimeFrameUtils.GetCurrentDate();
         var endTime = TimeFrameUtils.GetCurrentDate();
 
-        var orders = _orderRepository.GetListOrderOverTwoHour(TimeFrameUtils.GetCurrentDateInUTC7().DateTime);
+        var orders = _orderRepository.GetListOrderOverTwoHour(TimeFrameUtils.GetDateTimeInUTC7Round());
         foreach (var order in orders)
         {
             var accountIds = _orderRepository.GetListAccountIdRelatedToOrder(order.Id);

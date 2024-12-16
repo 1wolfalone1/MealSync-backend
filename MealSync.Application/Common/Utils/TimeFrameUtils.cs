@@ -68,6 +68,13 @@ public class TimeFrameUtils
         return utcTime.ToOffset(TimeSpan.FromHours(7));
     }
 
+    public static DateTime GetDateTimeInUTC7Round()
+    {
+        var dateTime = GetCurrentDateInUTC7().DateTime;
+        int adjustedMinutes = dateTime.Minute < 30 ? 0 : 30;
+        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, adjustedMinutes, 0);
+    }
+
     public static int ConvertEndTime(int endTime)
     {
         // if (endTime == 2400)

@@ -68,7 +68,7 @@ public class OrderMarkDeliveryFailSchedualerHandler : ICommandHandler<OrderMarkD
         try
         {
             await _unitOfWork.BeginTransactionAsync().ConfigureAwait(false);
-            var listOrderOverTimeFrame = _orderRepository.GetListOrderOnStatusDeliveringButOverTimeFrame(OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON, TimeFrameUtils.GetCurrentDateInUTC7().DateTime);
+            var listOrderOverTimeFrame = _orderRepository.GetListOrderOnStatusDeliveringButOverTimeFrame(OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON, TimeFrameUtils.GetDateTimeInUTC7Round());
             totalRecord = listOrderOverTimeFrame != null ? listOrderOverTimeFrame.Count : 0;
             var notifications = new List<Notification>();
             var ordersUpdate = new List<Order>();
