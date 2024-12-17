@@ -1,5 +1,7 @@
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
+using MealSync.Application.Common.Utils;
+using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Application.UseCases.Shops.Models;
 using MealSync.Application.UseCases.Shops.Queries.ModeratorManage.GetListShop;
 using MealSync.Application.UseCases.Shops.Queries.SearchShop;
@@ -384,6 +386,273 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             .ToList();
 
         return (shops, totalCount);
+    }
+
+    public async Task<List<ShopRevenueDto>> GetShopRevenueEachMonthById(long id)
+    {
+        var year = TimeFrameUtils.GetCurrentDateInUTC7().Year;
+        var allMonths = Enumerable.Range(1, 12)
+            .Select(month => new ShopRevenueDto
+            {
+                Month = month,
+                Revenue = 0,
+            }).ToList();
+
+        var monthlyRevenue = await DbSet
+            .Where(s => s.Id == id)
+            .SelectMany(s => s.Orders
+                .Where(o => (o.Status == OrderStatus.Completed || o.Status == OrderStatus.Resolved) && o.IntendedReceiveDate.Year == year)
+            )
+            .GroupBy(o => new
+            {
+                Month = o.IntendedReceiveDate.Month,
+            })
+            .Select(g => new ShopRevenueDto
+            {
+                Month = g.Key.Month,
+                Revenue = g.Sum(o =>
+                    o.Status == OrderStatus.Completed && o.ReasonIdentity == null
+                        ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                        : o.Status == OrderStatus.Completed &&
+                          o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription() &&
+                          o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.PaymentMethods == PaymentMethods.VnPay)
+                            ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                            : o.Status == OrderStatus.Resolved &&
+                              o.IsReport &&
+                              o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
+                                ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                                : o.Status == OrderStatus.Resolved &&
+                                  o.IsReport &&
+                                  (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()
+                                   || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription()) &&
+                                  !o.IsRefund &&
+                                  o.Payments.Any(p =>
+                                      p.PaymentMethods == PaymentMethods.VnPay &&
+                                      p.Type == PaymentTypes.Payment &&
+                                      p.Status == PaymentStatus.PaidSuccess)
+                                    ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                                    : 0),
+            })
+            .ToListAsync().ConfigureAwait(false);
+
+        var finalResult = allMonths
+            .GroupJoin(
+                monthlyRevenue,
+                defaultMonth => defaultMonth.Month,
+                revenueMonth => revenueMonth.Month,
+                (defaultMonth, revenueGroup) => new ShopRevenueDto
+                {
+                    Month = defaultMonth.Month,
+                    Revenue = revenueGroup.Sum(r => r.Revenue),
+                })
+            .OrderBy(dto => dto.Month)
+            .ToList();
+
+        return finalResult;
+    }
+
+    public async Task<List<ShopOrderStatisticDto>> GetShopOrderStatistic(long id)
+    {
+        var year = TimeFrameUtils.GetCurrentDateInUTC7().Year;
+        var allMonths = Enumerable.Range(1, 12)
+            .Select(month => new ShopOrderStatisticDto
+            {
+                Month = month,
+                OrderStatisticDetail = new ShopOrderStatisticDto.OrderStatisticDetailDto(),
+            }).ToList();
+
+        var monthlyOrderStatistic = await DbSet
+            .Where(s => s.Id == id)
+            .SelectMany(s => s.Orders)
+            .Where(o => o.IntendedReceiveDate.Year == year)
+            .GroupBy(o => new
+            {
+                Month = o.IntendedReceiveDate.Month,
+            })
+            .Select(g => new ShopOrderStatisticDto
+            {
+                Month = g.Key.Month,
+                OrderStatisticDetail = new ShopOrderStatisticDto.OrderStatisticDetailDto
+                {
+                    Total = g.Count(),
+                    TotalOrderInProcess = g.Count(o => o.Status != OrderStatus.Rejected && o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Completed && o.Status != OrderStatus.Resolved),
+                    TotalSuccess = g.Count(o =>
+                        (o.Status == OrderStatus.Completed && o.ReasonIdentity == default)
+                        || (o.Status == OrderStatus.Resolved && o.Reports.Count > 0 && o.Reports.Any(r => r.CustomerId != default && r.Status == ReportStatus.Rejected))
+                    ),
+                    TotalFailOrRefund = g.Count(o =>
+                        (o.Status == OrderStatus.Completed && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription())
+                        || (o.Status == OrderStatus.Completed && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription())
+                        || (o.Status == OrderStatus.Resolved && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() && o.Reports.Count > 0
+                            && o.Reports.Any(r => r.CustomerId != default && r.Status == ReportStatus.Approved))
+                        || (o.Status == OrderStatus.Resolved && (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()
+                                                                 || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription()))
+                    ),
+                    TotalCancelOrReject = g.Count(o =>
+                        (o.Status == OrderStatus.Cancelled && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription())
+                        || (o.Status == OrderStatus.Cancelled && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription())
+                        || (o.Status == OrderStatus.Rejected)
+                    ),
+                },
+            })
+            .ToListAsync().ConfigureAwait(false);
+
+        var finalResult = allMonths
+            .GroupJoin(
+                monthlyOrderStatistic,
+                defaultMonth => defaultMonth.Month,
+                statistic => statistic.Month,
+                (defaultMonth, statistics) =>
+                {
+                    var detail = statistics.FirstOrDefault()?.OrderStatisticDetail;
+
+                    return new ShopOrderStatisticDto
+                    {
+                        Month = defaultMonth.Month,
+                        OrderStatisticDetail = new ShopOrderStatisticDto.OrderStatisticDetailDto
+                        {
+                            Total = detail?.Total ?? 0,
+                            TotalOrderInProcess = detail?.TotalOrderInProcess ?? 0,
+                            TotalSuccess = detail?.TotalSuccess ?? 0,
+                            TotalFailOrRefund = detail?.TotalFailOrRefund ?? 0,
+                            TotalCancelOrReject = detail?.TotalCancelOrReject ?? 0,
+                        },
+                    };
+                })
+            .OrderBy(dto => dto.Month)
+            .ToList();
+
+        return finalResult;
+    }
+
+    public Task<StatisticSummaryWeb> GetShopWebStatisticSummary(long id, DateTime? dateFrom, DateTime? dateTo)
+    {
+        return DbSet.Where(s => s.Id == id).Select(shop => new StatisticSummaryWeb
+        {
+            Revenue = shop.Orders
+                .Where(o => (o.Status == OrderStatus.Completed || o.Status == OrderStatus.Resolved) && (dateFrom == default || o.IntendedReceiveDate >= dateFrom.Value.Date)
+                                                                                                    && (dateTo == default || o.IntendedReceiveDate <= dateTo.Value.Date))
+                .Sum(o =>
+                    o.Status == OrderStatus.Completed && o.ReasonIdentity == null
+                        ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                        : o.Status == OrderStatus.Completed &&
+                          o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription() &&
+                          o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.PaymentMethods == PaymentMethods.VnPay)
+                            ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                            : o.Status == OrderStatus.Resolved &&
+                              o.IsReport &&
+                              o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()
+                                ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                                : o.Status == OrderStatus.Resolved &&
+                                  o.IsReport &&
+                                  (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()
+                                   || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription()) &&
+                                  !o.IsRefund &&
+                                  o.Payments.Any(p =>
+                                      p.PaymentMethods == PaymentMethods.VnPay &&
+                                      p.Type == PaymentTypes.Payment &&
+                                      p.Status == PaymentStatus.PaidSuccess)
+                                    ? o.TotalPrice - o.TotalPromotion - o.ChargeFee
+                                    : 0),
+            TotalOrder = shop.Orders.Count(o => (dateFrom == default || o.IntendedReceiveDate >= dateFrom.Value.Date)
+                                                && (dateTo == default || o.IntendedReceiveDate <= dateTo.Value.Date)),
+            TotalPromotion = shop.Orders.Sum(o => (dateFrom == default || o.IntendedReceiveDate >= dateFrom.Value.Date)
+                                                  && (dateTo == default || o.IntendedReceiveDate <= dateTo.Value.Date)
+                ? o.TotalPromotion
+                : 0),
+            TotalCustomer = shop.Orders.Where(o => (dateFrom == default || o.IntendedReceiveDate >= dateFrom.Value.Date)
+                                                   && (dateTo == default || o.IntendedReceiveDate <= dateTo.Value.Date)).Select(o => o.CustomerId).Distinct().Count(),
+        }).SingleAsync();
+    }
+
+    public async Task<List<ShopFoodStatisticDto>> GetFoodOrderStatistic(long id, DateTime? dateFrom, DateTime? dateTo)
+    {
+        // Fetch the revenue data for all foods in the shop's orders
+        var foodStatistics = await DbSet.Where(s => s.Id == id)
+            .SelectMany(s => s.Orders
+                .Where(o => (
+                                (o.Status == OrderStatus.Completed && o.ReasonIdentity == null) ||
+                                (o.Status == OrderStatus.Completed &&
+                                 o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription() &&
+                                 o.Payments.Any(p => p.Type == PaymentTypes.Payment && p.PaymentMethods == PaymentMethods.VnPay)) ||
+                                (o.Status == OrderStatus.Resolved &&
+                                 o.IsReport &&
+                                 o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription()) ||
+                                (o.Status == OrderStatus.Resolved && o.IsReport &&
+                                 (o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription()
+                                  || o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription()) && !o.IsRefund &&
+                                 o.Payments.Any(p =>
+                                     p.PaymentMethods == PaymentMethods.VnPay &&
+                                     p.Type == PaymentTypes.Payment &&
+                                     p.Status == PaymentStatus.PaidSuccess))
+                            ) &&
+                            (dateFrom == null || o.IntendedReceiveDate >= dateFrom.Value.Date) &&
+                            (dateTo == null || o.IntendedReceiveDate <= dateTo.Value.Date))
+                .SelectMany(o => o.OrderDetails)) // Flatten OrderDetails
+            .GroupBy(od => new { od.FoodId, od.Food.Name }) // Group by FoodId and include Food.Name
+            .Select(g => new
+            {
+                FoodId = g.Key.FoodId,
+                FoodName = g.Key.Name, // Select the Food Name
+                TotalRevenue = g.Sum(od => od.TotalPrice), // Calculate total revenue per food
+            })
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        // Calculate the total revenue of all foods
+        double totalRevenue = foodStatistics.Sum(f => f.TotalRevenue);
+
+        // Step 1: Calculate raw percentages
+        var rawPercentages = foodStatistics
+            .Select(f => new
+            {
+                f.FoodName,
+                Percent = totalRevenue > 0 ? (f.TotalRevenue / totalRevenue) * 100 : 0,
+            })
+            .ToList();
+
+        // Step 2: Round percentages to 2 decimal places
+        var roundedPercentages = rawPercentages
+            .Select(f => new
+            {
+                f.FoodName,
+                RoundedPercent = Math.Round(f.Percent, 2) // Round to 2 decimal places
+            })
+            .ToList();
+
+        // Step 3: Adjust the largest percentage to ensure the sum equals 100
+        double totalRounded = roundedPercentages.Sum(f => f.RoundedPercent);
+        double difference = 100 - totalRounded;
+
+        if (roundedPercentages.Any() && Math.Abs(difference) > 0.0001)
+        {
+            // Find the item with the largest percentage
+            var largestContributor = roundedPercentages
+                .OrderByDescending(f => f.RoundedPercent)
+                .First();
+
+            roundedPercentages = roundedPercentages
+                .Select(f => new
+                {
+                    f.FoodName,
+                    RoundedPercent = f.FoodName == largestContributor.FoodName
+                        ? Math.Round(f.RoundedPercent + difference, 2) // Adjust only the largest
+                        : f.RoundedPercent,
+                })
+                .ToList();
+        }
+
+        // Step 4: Map the results to the DTO
+        var result = roundedPercentages
+            .Select(f => new ShopFoodStatisticDto
+            {
+                FoodName = f.FoodName,
+                Percent = f.RoundedPercent,
+            })
+            .OrderByDescending(f => f.Percent)
+            .ToList();
+
+        return result;
     }
 
     public Task<Shop?> GetShopManageDetail(long shopId, List<long> dormitoriesIdMod)
