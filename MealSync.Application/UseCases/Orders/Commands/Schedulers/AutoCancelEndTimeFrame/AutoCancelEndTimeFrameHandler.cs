@@ -233,8 +233,6 @@ public class AutoCancelEndTimeFrameHandler : ICommandHandler<AutoCancelEndTimeFr
             order.LastestDeliveryFailAt = TimeFrameUtils.GetCurrentDate();
             numberOrderDeliveryFail++;
             notfications.AddRange(SendNotificationDeliveryFail(order));
-            var isRefund = await RefundOrderAsync(order).ConfigureAwait(false);
-            order.IsRefund = isRefund;
         }
 
         return (orders, notfications);
