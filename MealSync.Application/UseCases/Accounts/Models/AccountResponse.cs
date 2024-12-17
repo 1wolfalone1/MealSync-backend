@@ -20,6 +20,8 @@ public class AccountResponse
 
     public bool IsSelectedBuilding { get; set; }
 
+    public string PhoneNumber { get; set; }
+
     public BuildingInAccount Building { get; set; }
 
     public class BuildingInAccount

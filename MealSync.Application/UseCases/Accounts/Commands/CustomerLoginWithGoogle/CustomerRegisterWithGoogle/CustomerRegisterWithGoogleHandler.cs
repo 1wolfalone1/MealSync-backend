@@ -162,6 +162,7 @@ public class CustomerRegisterWithGoogleHandler : ICommandHandler<CustomerRegiste
             RoleName = accountResponse.Role.Name,
             AvatarUrl = accountResponse.AvatarUrl,
             FullName = accountResponse.FullName,
+            PhoneNumber = accountResponse.PhoneNumber,
         };
 
         var customerBuildingTemp = _customerBuildingRepository.GetDefaultByCustomerId(accountResponse.Id);

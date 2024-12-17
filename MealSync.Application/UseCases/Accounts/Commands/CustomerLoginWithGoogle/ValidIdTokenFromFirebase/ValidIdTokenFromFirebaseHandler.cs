@@ -79,6 +79,7 @@ public class ValidIdTokenFromFirebaseHandler : ICommandHandler<ValidIdTokenFromF
                     RoleName = account.Role.Name,
                     AvatarUrl = account.AvatarUrl,
                     FullName = account.FullName,
+                    PhoneNumber = account.PhoneNumber,
                 };
                 var customerBuilding = _customerBuildingRepository.GetDefaultByCustomerId(account.Id);
                 loginResponse.AccountResponse.IsSelectedBuilding = customerBuilding != default;
