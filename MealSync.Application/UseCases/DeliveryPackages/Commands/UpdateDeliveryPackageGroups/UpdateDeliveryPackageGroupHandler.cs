@@ -463,12 +463,6 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
             if (order.HistoryAssignJson != null)
             {
                 var history = JsonConvert.DeserializeObject<List<HistoryAssign>>(order.HistoryAssignJson);
-                history.Add(new HistoryAssign()
-                {
-                    Id = shipperIdAssign,
-                    AssignDate = DateTimeOffset.UtcNow,
-                });
-                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
 
                 // Send noti to add shipper
                 if (shipperIdAssign != order.ShopId && history.All(h => h.Id != shipperIdAssign))
@@ -484,6 +478,13 @@ public class UpdateDeliveryPackageGroupHandler : ICommandHandler<UpdateDeliveryP
                         Notification = notificationJoinRoom,
                     });
                 }
+
+                history.Add(new HistoryAssign()
+                {
+                    Id = shipperIdAssign,
+                    AssignDate = DateTimeOffset.UtcNow,
+                });
+                order.HistoryAssignJson = JsonConvert.SerializeObject(history);
             }
             else
             {
