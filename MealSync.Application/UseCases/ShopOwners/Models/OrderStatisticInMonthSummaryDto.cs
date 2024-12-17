@@ -12,9 +12,13 @@ public class OrderStatisticInMonthSummaryDto
 
     public int TotalDeliveredCompleted { get; set; }
 
+    public int TotalDeliveredResolvedRejectReport { get; set; }
+
     public int TotalFailDeliveredByCustomerCompleted { get; set; }
 
     public int TotalFailDeliveredByShopCompleted { get; set; }
 
     public int TotalReportResolvedHaveRefund { get; set; }
+
+    public int TotalReportResolvedNotHaveRefund { get; set; }
 }

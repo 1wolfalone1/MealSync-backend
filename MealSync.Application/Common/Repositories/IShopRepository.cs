@@ -1,4 +1,5 @@
-﻿using MealSync.Application.UseCases.Shops.Models;
+﻿using MealSync.Application.UseCases.ShopOwners.Models;
+using MealSync.Application.UseCases.Shops.Models;
 using MealSync.Application.UseCases.Shops.Queries.ModeratorManage.GetListShop;
 using MealSync.Application.UseCases.Shops.Queries.SearchShop;
 using MealSync.Domain.Entities;
@@ -40,4 +41,12 @@ public interface IShopRepository : IBaseRepository<Shop>
     Task<double> GetShopRevenue(long shopId);
 
     Task<List<Shop>> GetShopByIds(List<long> ids);
+
+    Task<List<ShopRevenueDto>> GetShopRevenueEachMonthById(long id);
+
+    Task<List<ShopOrderStatisticDto>> GetShopOrderStatistic(long id);
+
+    Task<StatisticSummaryWeb> GetShopWebStatisticSummary(long id, DateTime? dateFrom, DateTime? dateTo);
+
+    Task<List<ShopFoodStatisticDto>> GetFoodOrderStatistic(long id, DateTime? dateFrom, DateTime? dateTo);
 }
