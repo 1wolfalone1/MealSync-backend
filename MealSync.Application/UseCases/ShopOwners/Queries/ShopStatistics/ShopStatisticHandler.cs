@@ -57,8 +57,8 @@ public class ShopStatisticHandler : IQueryHandler<ShopStatisticQuery, Result>
             TotalOrderInProcess = orderStatistic.TotalOrderInProcess,
             SuccessfulOrderPercentage = orderStatistic.SuccessfulOrderPercentage,
             Revenue = orderStatistic.Revenue,
-            TotalSuccess = orderStatistic.TotalDeliveredCompleted,
-            TotalFailOrRefund = orderStatistic.TotalFailDeliveredByCustomerCompleted + orderStatistic.TotalFailDeliveredByShopCompleted + orderStatistic.TotalReportResolvedHaveRefund,
+            TotalSuccess = orderStatistic.TotalDeliveredCompleted + orderStatistic.TotalDeliveredResolvedRejectReport,
+            TotalFailOrRefund = orderStatistic.TotalFailDeliveredByCustomerCompleted + orderStatistic.TotalFailDeliveredByShopCompleted + orderStatistic.TotalReportResolvedHaveRefund + orderStatistic.TotalReportResolvedNotHaveRefund,
             TotalCancelOrReject = orderStatistic.TotalCancelByCustomer + orderStatistic.TotalCancelByShop + orderStatistic.TotalReject,
             Foods = foods.ToList(),
         });

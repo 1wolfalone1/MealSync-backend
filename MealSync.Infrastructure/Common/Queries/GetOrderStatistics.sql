@@ -43,6 +43,23 @@ SELECT
     ) AS TotalDeliveredCompleted,
     SUM(
         CASE
+            WHEN o.status = 12 -- Resolved
+            AND o.reason_identity = @DeliveredReportedByCustomer
+            AND EXISTS (
+                SELECT
+                    1
+                FROM
+                    report r
+                WHERE
+                    r.order_id = o.id
+                    AND r.customer_id IS NOT NULL
+                    AND r.status = 3 -- Rejected
+            ) THEN 1
+            ELSE 0
+        END
+    ) AS TotalDeliveredResolvedRejectReport,
+    SUM(
+        CASE
             WHEN o.status = 9 -- Completed
             AND o.reason_identity = @DeliveryFailByCustomer THEN 1
             ELSE 0
@@ -60,7 +77,19 @@ SELECT
             WHEN o.status = 12 -- Resolved
             AND o.is_report = TRUE
             AND (
-                o.reason_identity = @DeliveredReportedByCustomer
+                (
+                    o.reason_identity = @DeliveredReportedByCustomer
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            report r
+                        WHERE
+                            r.order_id = o.id
+                            AND r.customer_id IS NOT NULL
+                            AND r.status = 2 -- Approved
+                    )
+                )
                 OR o.reason_identity = @DeliveryFailByCustomerReportedByCustomer
                 OR o.reason_identity = @DeliveryFailByShopReportedByCustomer
             )
@@ -73,7 +102,19 @@ SELECT
             WHEN o.status = 12 -- Resolved
             AND o.is_report = TRUE
             AND (
-                o.reason_identity = @DeliveredReportedByCustomer
+                (
+                    o.reason_identity = @DeliveredReportedByCustomer
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            report r
+                        WHERE
+                            r.order_id = o.id
+                            AND r.customer_id IS NOT NULL
+                            AND r.status = 2 -- Approved
+                    )
+                )
                 OR o.reason_identity = @DeliveryFailByCustomerReportedByCustomer
                 OR o.reason_identity = @DeliveryFailByShopReportedByCustomer
             )
