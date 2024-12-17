@@ -71,12 +71,9 @@ public class CheckBanningMiddleware
 
     private void ValidateRequest(CustomerStatus accountStatus, string requestUri, string httpMethod)
     {
-        if (accountStatus == CustomerStatus.Banning && IsHttpMethodAllowed(httpMethod))
+        if (accountStatus == CustomerStatus.Banning)
         {
-            if (!_whiteListedUris.Any(uri => IsUriMatch(uri, requestUri)))
-            {
-                throw new InvalidBusinessException(MessageCode.E_ACCOUNT_IN_BANNING.GetDescription(), HttpStatusCode.Forbidden);
-            }
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_IN_BANNING.GetDescription(), HttpStatusCode.Forbidden);
         }
 
         if (accountStatus == CustomerStatus.Banned)
