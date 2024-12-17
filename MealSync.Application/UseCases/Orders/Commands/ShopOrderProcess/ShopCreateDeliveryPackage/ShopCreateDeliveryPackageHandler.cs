@@ -37,10 +37,11 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
     private readonly ISystemResourceRepository _systemResourceRepository;
     private readonly IDapperService _dapperService;
     private readonly IMapper _mapper;
+    private readonly IChatService _chatService;
 
     public ShopCreateDeliveryPackageHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, IDeliveryPackageRepository deliveryPackageRepository, ILogger<ShopCreateDeliveryPackageHandler> logger,
         INotificationFactory notificationFactory, INotifierService notifierService, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IShopRepository shopRepository,
-        IAccountRepository accountRepository, ISystemResourceRepository systemResourceRepository, IDapperService dapperService, IMapper mapper)
+        IAccountRepository accountRepository, ISystemResourceRepository systemResourceRepository, IDapperService dapperService, IMapper mapper, IChatService chatService)
     {
         _unitOfWork = unitOfWork;
         _orderRepository = orderRepository;
@@ -55,6 +56,7 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
         _systemResourceRepository = systemResourceRepository;
         _dapperService = dapperService;
         _mapper = mapper;
+        _chatService = chatService;
     }
 
     public async Task<Result<Result>> Handle(ShopCreateDeliveryPackageCommand request, CancellationToken cancellationToken)
@@ -150,6 +152,21 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
                     AssignDate = DateTimeOffset.UtcNow,
                 });
                 order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                // Send noti to add shipper
+                if (shipperIdAssign != order.ShopId && history.All(h => h.Id != shipperIdAssign))
+                {
+                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
+                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                    _chatService.OpenOrCloseRoom(new AddChat()
+                    {
+                        IsOpen = true,
+                        RoomId = order.Id,
+                        UserId = shipperIdAssign,
+                        Notification = notificationJoinRoom,
+                    });
+                }
             }
             else
             {
@@ -160,6 +177,21 @@ public class ShopCreateDeliveryPackageHandler : ICommandHandler<ShopCreateDelive
                     AssignDate = DateTimeOffset.UtcNow,
                 });
                 order.HistoryAssignJson = JsonConvert.SerializeObject(history);
+
+                // Send noti to add shipper
+                if (shipperIdAssign != order.ShopId)
+                {
+                    var shipperAccount = _accountRepository.GetById(shipperIdAssign);
+                    var notificationJoinRoom = _notificationFactory.CreateJoinRoomToCustomerNotification(order, shipperAccount);
+
+                    _chatService.OpenOrCloseRoom(new AddChat()
+                    {
+                        IsOpen = true,
+                        RoomId = order.Id,
+                        UserId = shipperIdAssign,
+                        Notification = notificationJoinRoom,
+                    });
+                }
             }
         }
 
