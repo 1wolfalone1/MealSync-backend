@@ -109,6 +109,7 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
                     AvatarUrl = account.AvatarUrl,
                     FullName = account.FullName,
                     Genders = account.Genders,
+                    PhoneNumber = account.PhoneNumber,
                 };
                 if (account.RoleId == (int)Domain.Enums.Roles.Customer)
                 {
