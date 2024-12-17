@@ -78,6 +78,11 @@ public class CheckBanningMiddleware
                 throw new InvalidBusinessException(MessageCode.E_ACCOUNT_IN_BANNING.GetDescription(), HttpStatusCode.Forbidden);
             }
         }
+
+        if (accountStatus == CustomerStatus.Banned)
+        {
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_BANNED.GetDescription(), HttpStatusCode.Forbidden);
+        }
     }
 
     private void ValidateRequest(ShopStatus accountStatus, string requestUri, string httpMethod)
@@ -88,6 +93,11 @@ public class CheckBanningMiddleware
             {
                 throw new InvalidBusinessException(MessageCode.E_ACCOUNT_IN_BANNING.GetDescription(), HttpStatusCode.Forbidden);
             }
+        }
+
+        if (accountStatus == ShopStatus.Banned)
+        {
+            throw new InvalidBusinessException(MessageCode.E_ACCOUNT_BANNED.GetDescription(), HttpStatusCode.Forbidden);
         }
     }
 
