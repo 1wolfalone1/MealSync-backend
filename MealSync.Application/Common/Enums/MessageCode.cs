@@ -359,6 +359,9 @@ public enum MessageCode
     [Description("E-Order-DeliveryEndTimeExceeded")]
     E_ORDER_DELIVERY_END_TIME_EXCEEDED,
 
+    [Description("E-Order-OrderExceededInOneFrame")]
+    E_ORDER_ORDER_EXCEEDED_IN_ONE_FRAME,
+
     [Description("E-Order-IncorrectDiscountAmount")]
     E_ORDER_INCORRECT_DISCOUNT_AMOUNT,
 
