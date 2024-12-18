@@ -741,11 +741,10 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         };
     }
 
-    public Task<int> CountOrderInOrderInOneFrame(long shopId, long customerId, DateTime intendedReceiveDate, int startTime, int endTime)
+    public Task<int> CountOrderInOrderInOneFrame(long customerId, DateTime intendedReceiveDate, int startTime, int endTime)
     {
         return DbSet.CountAsync(o =>
-            o.ShopId == shopId
-            && o.CustomerId == customerId
+            o.CustomerId == customerId
             && o.IntendedReceiveDate == intendedReceiveDate
             && o.StartTime == startTime && o.EndTime == endTime
             && (o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Preparing || o.Status == OrderStatus.Delivering));
