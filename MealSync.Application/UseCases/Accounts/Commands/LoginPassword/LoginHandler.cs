@@ -68,11 +68,7 @@ public class LoginHandler : ICommandHandler<LoginCommand, Result>
         }
         else
         {
-            if (account.RoleId == (int)Domain.Enums.Roles.ShopOwner && _shopRepository.GetById(account.Id)!.Status == ShopStatus.UnApprove)
-            {
-                throw new InvalidBusinessException(MessageCode.E_SHOP_UN_APPROVE.GetDescription());
-            }
-            else if (account.RoleId == (int)Domain.Enums.Roles.ShopDelivery && !_shopDeliveryStaffRepository.CheckStaffOfShopActiveAndStaffActive(account.Id))
+            if (account.RoleId == (int)Domain.Enums.Roles.ShopDelivery && !_shopDeliveryStaffRepository.CheckStaffOfShopActiveAndStaffActive(account.Id))
             {
                 throw new InvalidBusinessException(MessageCode.E_SHOP_DELIVERY_STAFF_CAN_NOT_LOGIN.GetDescription());
             }
