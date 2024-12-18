@@ -290,7 +290,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
             request.OrderTime.StartTime,
             request.OrderTime.EndTime).ConfigureAwait(false);
 
-        if (totalOrderInOneFrame > 6)
+        if (totalOrderInOneFrame == 6)
         {
             throw new InvalidBusinessException(MessageCode.E_ORDER_ORDER_EXCEEDED_IN_ONE_FRAME.GetDescription());
         }
