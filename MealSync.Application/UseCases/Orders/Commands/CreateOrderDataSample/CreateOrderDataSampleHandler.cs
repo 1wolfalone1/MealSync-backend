@@ -77,7 +77,7 @@ public class CreateOrderDataSampleHandler : ICommandHandler<CreateOrderDataSampl
                     ShopId = request.ShopId,
                     FullName = accounts[i].FullName ?? "Nguyen Van A",
                     PhoneNumber = accounts[i].PhoneNumber,
-                    BuildingId = j % 2 == 0 ? 9 : 25,
+                    BuildingId = i % 2 == 0 ? 9 : 25,
                     Foods = foodsOrder,
                     OrderTime = new CreateOrderCommand.OrderTimeFrame
                     {
