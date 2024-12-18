@@ -314,7 +314,7 @@ public class GetFoodReorderQueryHandler : IQueryHandler<GetFoodReorderQuery, Res
                 else
                 {
                     foodReOrderResponse.IsAllowReOrder = false;
-                    foodReOrderResponse.MessageNotAllow = "Cửa hàng không còn bán một số thức ăn/đồ uống trong đơn hàng này.";
+                    foodReOrderResponse.MessageNotAllow = "Cửa hàng không còn bán một số thức ăn/đồ uống trong đơn hàng này hoặc không còn bán trong khung giờ này.";
                     foodReOrderResponse.Note = default;
                     foodReOrderResponse.ShopInfo = default;
                     foodReOrderResponse.Foods = default;
