@@ -42,28 +42,27 @@ public class CheckOnlinePaymentStatusHandler : IQueryHandler<CheckOnlinePaymentS
                 var message = string.Empty;
                 if (payment.Status == PaymentStatus.Pending)
                 {
-                    message = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_PENDING.GetDescription());
+                    throw new InvalidBusinessException(MessageCode.I_PAYMENT_PENDING.GetDescription());
                 }
                 else if (payment.Status == PaymentStatus.PaidCancel)
                 {
-                    message = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_CANCEL.GetDescription());
+                    throw new InvalidBusinessException(MessageCode.I_PAYMENT_CANCEL.GetDescription());
                 }
                 else if (payment.Status == PaymentStatus.PaidFail)
                 {
-                    message = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_FAIL.GetDescription());
+                    throw new InvalidBusinessException(MessageCode.I_PAYMENT_FAIL.GetDescription());
                 }
                 else
                 {
                     message = _systemResourceRepository.GetByResourceCode(MessageCode.I_PAYMENT_SUCCESS.GetDescription());
+                    return Result.Success(new
+                    {
+                        OrderId = request.Id,
+                        PaymentMethod = payment.PaymentMethods,
+                        PaymentStatus = payment.Status,
+                        Message = message,
+                    });
                 }
-
-                return Result.Success(new
-                {
-                    OrderId = request.Id,
-                    PaymentMethod = payment.PaymentMethods,
-                    PaymentStatus = payment.Status,
-                    Message = message,
-                });
             }
         }
         else

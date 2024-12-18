@@ -53,7 +53,7 @@ public class CreateOrderDataSampleHandler : ICommandHandler<CreateOrderDataSampl
                 var foodsOrder = new List<CreateOrderCommand.FoodOrderCommand>();
                 var selectedIndices = new HashSet<int>();
 
-                while (foodsOrder.Count < 2 && foodsOrder.Count < foods.Count)
+                while (foodsOrder.Count < 1 && foodsOrder.Count < foods.Count)
                 {
                     int randomIndex = random.Next(foods.Count);
 
