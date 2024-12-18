@@ -647,10 +647,14 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
         // Tổng số ngày giữa startDate và endDate
         var totalDays = (endDate - startDate).Days;
 
-        // Nếu chỉ có 1 ngày hoặc khoảng cách rất nhỏ
-        if (totalDays < 1)
+        // Nếu khoảng thời gian giữa startDate và endDate nhỏ hơn 10 ngày
+        if (totalDays < 9)
         {
-            dateLabel.Add(startDate);
+            // Thêm tất cả các ngày từ startDate đến endDate
+            for (var i = 0; i <= totalDays; i++)
+            {
+                dateLabel.Add(startDate.AddDays(i));
+            }
         }
         else
         {
