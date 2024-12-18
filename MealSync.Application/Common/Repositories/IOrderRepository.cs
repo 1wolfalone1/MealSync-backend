@@ -1,4 +1,5 @@
-﻿using MealSync.Application.UseCases.ShopOwners.Models;
+﻿using MealSync.Application.UseCases.Dashboards.Models;
+using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 
@@ -63,4 +64,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     List<Order> GetListOrderOverTwoHour(DateTime currentDateTime);
 
     Task<List<Order>> GetReportOrderFailByShop(DateTime intendedReceiveDate, int endTime);
+
+    Task<List<OrderStatusChartDto>> GetOrderStatusChart(DateTime dateFrom, DateTime dateTo);
 }

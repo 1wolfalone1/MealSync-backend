@@ -1,5 +1,6 @@
 ﻿using MealSync.API.Identites;
 using MealSync.API.Shared;
+using MealSync.Application.UseCases.Dashboards.Queries.GetOrderChartAdminWeb;
 using MealSync.Application.UseCases.Dashboards.Queries.GetOrderChartForAdmin;
 using MealSync.Application.UseCases.Dashboards.Queries.GetOverviewAdminChart;
 using MealSync.Application.UseCases.Dashboards.Queries.GetRevenueAdminChart;
@@ -28,6 +29,13 @@ public class DashboardController : BaseApiController
     [HttpGet(Endpoints.ADMIN_REVENUE_CHART)]
     [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
     public async Task<IActionResult> GetOverviewChart([FromQuery] GetRevenueAdminChartQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.ADMIN_ORDER_CHART_UPDATE)]
+    [Authorize(Roles = $"{IdentityConst.AdminClaimName}")]
+    public async Task<IActionResult> GetOrderStatusChart([FromQuery] GetOrderChartAdminWebQuery query)
     {
         return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
