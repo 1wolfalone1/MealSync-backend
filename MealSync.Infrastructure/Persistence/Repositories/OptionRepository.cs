@@ -22,7 +22,7 @@ public class OptionRepository : BaseRepository<Option>, IOptionRepository
             o => ids.Contains(o.Id)
                  && o.Status == OptionStatus.Active
                  && o.OptionGroup.Status == OptionGroupStatus.Active).ConfigureAwait(false);
-        return totalActiveOption == ids.Count;
+        return totalActiveOption == ids.Distinct().ToList().Count;
     }
 
     public Task<Option> GetIncludeOptionGroupById(long id)
