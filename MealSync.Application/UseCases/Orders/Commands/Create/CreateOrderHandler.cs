@@ -89,7 +89,7 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         // Validate business rules for the shop.
         await ValidateShopRequest(request, shop, buildingOrder).ConfigureAwait(false);
 
-        await ValidateNumberOfOrder(request, shop, customerId, now).ConfigureAwait(false);
+        await ValidateNumberOfOrder(request, customerId, now).ConfigureAwait(false);
 
         // Validate order time
         ValidateOrderTime(request, now);
@@ -281,10 +281,9 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         }
     }
 
-    private async Task ValidateNumberOfOrder(CreateOrderCommand request, Shop? shop, long? customerId, DateTimeOffset now)
+    private async Task ValidateNumberOfOrder(CreateOrderCommand request, long? customerId, DateTimeOffset now)
     {
         var totalOrderInOneFrame = await _orderRepository.CountOrderInOrderInOneFrame(
-            shop.Id,
             customerId.Value,
             request.OrderTime.IsOrderNextDay ? now.ToOffset(TimeSpan.FromHours(7)).AddDays(1).Date : now.ToOffset(TimeSpan.FromHours(7)).Date,
             request.OrderTime.StartTime,
