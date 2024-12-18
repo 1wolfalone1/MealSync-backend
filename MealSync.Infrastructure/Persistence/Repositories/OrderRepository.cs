@@ -2,6 +2,7 @@ using MealSync.Application.Common.Constants;
 using MealSync.Application.Common.Enums;
 using MealSync.Application.Common.Repositories;
 using MealSync.Application.Common.Utils;
+using MealSync.Application.UseCases.Dashboards.Models;
 using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
@@ -627,5 +628,125 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                                       ) >= currentDateTime.AddHours(-OrderConstant.HOUR_ACCEPT_SHOP_FILL_REASON))
             .ToList();
         return result;
+    }
+
+    public Task<List<Order>> GetReportOrderFailByShop(DateTime intendedReceiveDate, int endTime)
+    {
+        return DbSet.Include(o => o.Payments).Where(
+            o => o.Status == OrderStatus.IssueReported
+                 && o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription()
+                 && ((o.IntendedReceiveDate == intendedReceiveDate && o.EndTime <= endTime) || (o.IntendedReceiveDate < intendedReceiveDate))).ToListAsync();
+    }
+
+    public async Task<List<OrderStatusChartDto>> GetOrderStatusChart(DateTime dateFrom, DateTime dateTo)
+    {
+        var startDate = dateFrom.Date;
+        var endDate = dateTo.Date;
+        var dateLabel = new List<DateTime>();
+
+        // Tổng số ngày giữa startDate và endDate
+        var totalDays = (endDate - startDate).Days;
+
+        // Nếu khoảng thời gian giữa startDate và endDate nhỏ hơn 10 ngày
+        if (totalDays < 9)
+        {
+            // Thêm tất cả các ngày từ startDate đến endDate
+            for (var i = 0; i <= totalDays; i++)
+            {
+                dateLabel.Add(startDate.AddDays(i));
+            }
+        }
+        else
+        {
+            // Bước chia (chia khoảng thời gian thành 9 khoảng, để tạo 10 ngày)
+            double step = totalDays / 9.0;
+
+            for (int i = 0; i < 10; i++)
+            {
+                // Tính toán ngày hiện tại dựa trên bước chia
+                var currentDay = startDate.AddDays(Math.Round(i * step));
+                dateLabel.Add(currentDay);
+            }
+        }
+
+        var results = new List<OrderStatusChartDto>();
+
+        foreach (var date in dateLabel)
+        {
+            var data = await FetchOrderDataForInterval(date).ConfigureAwait(false);
+            results.Add(new OrderStatusChartDto
+            {
+                LabelDate = date,
+                TotalOfOrder = data.TotalOfOrder,
+                TotalSuccess = data.TotalSuccess,
+                TotalOrderInProcess = data.TotalOrderInProcess,
+                TotalFailOrRefund = data.TotalFailOrRefund,
+                TotalCancelOrReject = data.TotalCancelOrReject,
+            });
+        }
+
+        return results;
+    }
+
+    private async Task<OrderStatusChartDto> FetchOrderDataForInterval(DateTime date)
+    {
+        var data = await DbSet
+            .Where(o => o.IntendedReceiveDate.Date == date)
+            .GroupBy(_ => 1)
+            .Select(g => new OrderStatusChartDto
+            {
+                TotalOfOrder = g.Count(),
+                TotalOrderInProcess = g.Count(o =>
+                    o.Status != OrderStatus.Rejected &&
+                    o.Status != OrderStatus.Cancelled &&
+                    o.Status != OrderStatus.Completed &&
+                    o.Status != OrderStatus.Resolved),
+                TotalSuccess = g.Count(o =>
+                    (o.Status == OrderStatus.Completed && o.ReasonIdentity == default) ||
+                    (o.Status == OrderStatus.Resolved && o.Reports.Count > 0 &&
+                     o.Reports.Any(r => r.CustomerId != default && r.Status == ReportStatus.Rejected))),
+                TotalFailOrRefund = g.Count(o =>
+                    (o.Status == OrderStatus.Completed &&
+                     o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER.GetDescription()) ||
+                    (o.Status == OrderStatus.Completed &&
+                     o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP.GetDescription()) ||
+                    (o.Status == OrderStatus.Resolved &&
+                     o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_DELIVERED_REPORTED_BY_CUSTOMER.GetDescription() &&
+                     o.Reports.Count > 0 &&
+                     o.Reports.Any(r => r.CustomerId != default && r.Status == ReportStatus.Approved)) ||
+                    (o.Status == OrderStatus.Resolved &&
+                     (o.ReasonIdentity ==
+                      OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_CUSTOMER_REPORTED_BY_CUSTOMER.GetDescription() ||
+                      o.ReasonIdentity ==
+                      OrderIdentityCode.ORDER_IDENTITY_DELIVERY_FAIL_BY_SHOP_REPORTED_BY_CUSTOMER.GetDescription()))),
+                TotalCancelOrReject = g.Count(o =>
+                    (o.Status == OrderStatus.Cancelled &&
+                     o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_CUSTOMER_CANCEL.GetDescription()) ||
+                    (o.Status == OrderStatus.Cancelled &&
+                     o.ReasonIdentity == OrderIdentityCode.ORDER_IDENTITY_SHOP_CANCEL.GetDescription()) ||
+                    o.Status == OrderStatus.Rejected),
+                LabelDate = date,
+            })
+            .FirstOrDefaultAsync()
+            .ConfigureAwait(false);
+
+        return data ?? new OrderStatusChartDto
+        {
+            LabelDate = date,
+            TotalOfOrder = 0,
+            TotalSuccess = 0,
+            TotalOrderInProcess = 0,
+            TotalFailOrRefund = 0,
+            TotalCancelOrReject = 0,
+        };
+    }
+
+    public Task<int> CountOrderInOrderInOneFrame(long customerId, DateTime intendedReceiveDate, int startTime, int endTime)
+    {
+        return DbSet.CountAsync(o =>
+            o.CustomerId == customerId
+            && o.IntendedReceiveDate == intendedReceiveDate
+            && o.StartTime == startTime && o.EndTime == endTime
+            && (o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Preparing || o.Status == OrderStatus.Delivering));
     }
 }

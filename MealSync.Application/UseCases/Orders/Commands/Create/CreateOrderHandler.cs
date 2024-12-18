@@ -72,13 +72,24 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
 
     public async Task<Result<Result>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var customerId = _currentPrincipalService.CurrentPrincipalId!;
+        long? customerId;
+        if (request.IsDummy)
+        {
+            customerId = request.CustomerId;
+        }
+        else
+        {
+            customerId = _currentPrincipalService.CurrentPrincipalId!;
+        }
+
         var shop = await _shopRepository.GetByIdIncludeLocation(request.ShopId).ConfigureAwait(false);
         var buildingOrder = await _buildingRepository.GetByIdIncludeLocation(request.BuildingId).ConfigureAwait(false);
         var now = DateTimeOffset.UtcNow;
 
         // Validate business rules for the shop.
         await ValidateShopRequest(request, shop, buildingOrder).ConfigureAwait(false);
+
+        await ValidateNumberOfOrder(request, customerId, now).ConfigureAwait(false);
 
         // Validate order time
         ValidateOrderTime(request, now);
@@ -270,11 +281,25 @@ public class CreateOrderHandler : ICommandHandler<CreateOrderCommand, Result>
         }
     }
 
+    private async Task ValidateNumberOfOrder(CreateOrderCommand request, long? customerId, DateTimeOffset now)
+    {
+        var totalOrderInOneFrame = await _orderRepository.CountOrderInOrderInOneFrame(
+            customerId.Value,
+            request.OrderTime.IsOrderNextDay ? now.ToOffset(TimeSpan.FromHours(7)).AddDays(1).Date : now.ToOffset(TimeSpan.FromHours(7)).Date,
+            request.OrderTime.StartTime,
+            request.OrderTime.EndTime).ConfigureAwait(false);
+
+        if (totalOrderInOneFrame == 6)
+        {
+            throw new InvalidBusinessException(MessageCode.E_ORDER_ORDER_EXCEEDED_IN_ONE_FRAME.GetDescription());
+        }
+    }
+
     private void ValidateOrderTime(CreateOrderCommand request, DateTimeOffset now)
     {
         var endTimeInMinutes = TimeUtils.ConvertToMinutes(request.OrderTime.EndTime);
         var currentTimeMinutes = (now.ToOffset(TimeSpan.FromHours(7)).Hour * 60) + now.ToOffset(TimeSpan.FromHours(7)).Minute;
-        if (!request.OrderTime.IsOrderNextDay && request.OrderTime.EndTime != 2400 && currentTimeMinutes >= endTimeInMinutes)
+        if (!request.OrderTime.IsOrderNextDay && request.OrderTime.EndTime != 2400 && currentTimeMinutes >= endTimeInMinutes - 15)
         {
             throw new InvalidBusinessException(MessageCode.E_ORDER_DELIVERY_END_TIME_EXCEEDED.GetDescription());
         }

@@ -15,6 +15,10 @@ using MealSync.Application.UseCases.ShopOwners.Commands.VerifyAccountForUpdate;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopConfigurations;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatistics;
 using MealSync.Application.UseCases.ShopOwners.Queries.ShopStatisticSummary;
+using MealSync.Application.UseCases.ShopOwners.Queries.Web.FoodOrderStatistic;
+using MealSync.Application.UseCases.ShopOwners.Queries.Web.OrderStatusStatistic;
+using MealSync.Application.UseCases.ShopOwners.Queries.Web.ShopRevenueStatistic;
+using MealSync.Application.UseCases.ShopOwners.Queries.Web.StatisticSummary;
 using MealSync.Application.UseCases.Shops.Commands.ModeratorManage.UpdateShopStatus;
 using MealSync.Application.UseCases.Shops.Queries.AdminManage.GetShopDetailForAdmin;
 using MealSync.Application.UseCases.Shops.Queries.GetMaxCarryWeightOfShop;
@@ -213,5 +217,33 @@ public class ShopController : BaseApiController
     public async Task<IActionResult> GetShopDetailForAdmin(long id)
     {
         return HandleResult(await Mediator.Send(new GetShopDetailForAdminQuery { ShopId = id }).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_SHOP_WEB_STATISTIC_SUMMARY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetShopWebStatisticSummary([FromQuery] StatisticSummaryQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_SHOP_REVENUE_STATISTIC_SUMMARY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetShopRevenueStatistic()
+    {
+        return HandleResult(await Mediator.Send(new ShopRevenueStatisticQuery()).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_SHOP_ORDER_STATISTIC_SUMMARY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetShopOrderStatistic()
+    {
+        return HandleResult(await Mediator.Send(new OrderStatusStatisticQuery()).ConfigureAwait(false));
+    }
+
+    [HttpGet(Endpoints.GET_SHOP_FOOD_STATISTIC_SUMMARY)]
+    [Authorize(Roles = $"{IdentityConst.ShopClaimName}")]
+    public async Task<IActionResult> GetShopFoodStatistic([FromQuery] FoodOrderStatisticQuery query)
+    {
+        return HandleResult(await Mediator.Send(query).ConfigureAwait(false));
     }
 }

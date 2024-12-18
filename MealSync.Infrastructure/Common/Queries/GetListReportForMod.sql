@@ -62,6 +62,7 @@
             )
         )
         AND r.status IN @StatusList
+        AND (o.reason_identity = @DeliveredReportedByCustomer OR o.reason_identity = @DeliveryFailByCustomerReportedByCustomer)
         AND (
             @DormitoryId IS NULL
             OR @DormitoryId = 0

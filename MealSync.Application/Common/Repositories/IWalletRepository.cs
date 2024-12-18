@@ -6,4 +6,6 @@ namespace MealSync.Application.Common.Repositories;
 public interface IWalletRepository : IBaseRepository<Wallet>
 {
     Task<Wallet> GetByType(WalletTypes type);
+
+    Task<Wallet> GetIncludeWithdrawalRequest(long id);
 }

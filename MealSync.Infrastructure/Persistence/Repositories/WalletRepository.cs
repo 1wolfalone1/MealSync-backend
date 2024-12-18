@@ -15,4 +15,9 @@ public class WalletRepository : BaseRepository<Wallet>, IWalletRepository
     {
         return DbSet.FirstAsync(w => w.Type == type);
     }
+
+    public Task<Wallet> GetIncludeWithdrawalRequest(long id)
+    {
+        return DbSet.Include(w => w.WithdrawalRequests).FirstAsync(w => w.Id == id);
+    }
 }

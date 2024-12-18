@@ -57,8 +57,8 @@ public class ShopStatisticSummaryHandler : IQueryHandler<ShopStatisticSummaryQue
                 StartDate = startDate,
                 EndDate = endDate,
                 Revenue = orderStatisticInMonth.Revenue,
-                TotalSuccess = orderStatisticInMonth.TotalDeliveredCompleted,
-                TotalFailOrRefund = orderStatisticInMonth.TotalFailDeliveredByCustomerCompleted + orderStatisticInMonth.TotalFailDeliveredByShopCompleted + orderStatisticInMonth.TotalReportResolvedHaveRefund,
+                TotalSuccess = orderStatisticInMonth.TotalDeliveredCompleted + orderStatisticInMonth.TotalDeliveredResolvedRejectReport,
+                TotalFailOrRefund = orderStatisticInMonth.TotalFailDeliveredByCustomerCompleted + orderStatisticInMonth.TotalFailDeliveredByShopCompleted + orderStatisticInMonth.TotalReportResolvedHaveRefund + orderStatisticInMonth.TotalReportResolvedNotHaveRefund,
                 TotalCancelOrReject = orderStatisticInMonth.TotalCancelByCustomer + orderStatisticInMonth.TotalCancelByShop + orderStatisticInMonth.TotalReject,
             },
         });

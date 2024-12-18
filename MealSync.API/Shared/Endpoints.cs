@@ -41,6 +41,10 @@ public static class Endpoints
     public const string UPDATE_SHOP_STAFF_INFO = "shop-staff/info/update";
     public const string CREATE_DEPOSIT_PAYMENT_URL = "shop-owner/deposit";
     public const string GET_SHOPM_MAX_CARRY_WEIGHT = "shop-owner/max-carry-weight";
+    public const string GET_SHOP_REVENUE_STATISTIC_SUMMARY = "shop-owner/revenue/statistic/web";
+    public const string GET_SHOP_ORDER_STATISTIC_SUMMARY = "shop-owner/order/statistic/web";
+    public const string GET_SHOP_WEB_STATISTIC_SUMMARY = "shop-owner/statistic/summary/web";
+    public const string GET_SHOP_FOOD_STATISTIC_SUMMARY = "shop-owner/food/statistic/web";
 
     // Shop Owner For Web
     public const string GET_FOOD_FOR_WEB = "web/shop-owner/food";
@@ -146,6 +150,7 @@ public static class Endpoints
 
     // Order
     public const string CREATE_ORDER = "customer/order";
+    public const string CREATE_ORDER_DUMMY = "customer/order/dummy";
     public const string CANCEL_ORDER = "customer/order/{id:long}/cancel";
     public const string CREATE_REFUND = "customer/order/refund";
     public const string GET_IPN = "customer/order/IPN";
@@ -233,6 +238,7 @@ public static class Endpoints
     public const string ADMIN_ORDER_CHART = "admin/dashboard/order";
     public const string ADMIN_OVERVIEW_CHART = "admin/dashboard/overview";
     public const string ADMIN_REVENUE_CHART = "admin/dashboard/revenue-profit";
+    public const string ADMIN_ORDER_CHART_UPDATE = "admin/dashboard/order/status";
 
     // Commission Config
     public const string GET_COMMISSION_CONFIG = "admin/commission-config";

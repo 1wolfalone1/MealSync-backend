@@ -1,3 +1,4 @@
+using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
 
 namespace MealSync.Application.UseCases.Orders.Models;
@@ -23,6 +24,10 @@ public class DetailOrderCustomerResponse
     public bool IsRefund { get; set; }
 
     public string? Note { get; set; }
+
+    public string? Reason { get; set; }
+
+    public List<ShopDeliveryFailEvidenceResponse> ShopDeliveryFailEvidence { get; set; }
 
     public double ShippingFee { get; set; }
 
@@ -59,6 +64,13 @@ public class DetailOrderCustomerResponse
     public ShopInfoResponse ShopInfo { get; set; }
 
     public PromotionOrderResponse? Promotion { get; set; }
+
+    public class ShopDeliveryFailEvidenceResponse
+    {
+        public string ImageUrl { get; set; }
+
+        public long TakePictureDateTime { get; set; }
+    }
 
     public class OrderDetailCustomerResponse
     {
@@ -97,6 +109,8 @@ public class DetailOrderCustomerResponse
         public long Id { get; set; }
 
         public string Name { get; set; }
+
+        public string PhoneNumber { get; set; }
 
         public string? LogoUrl { get; set; }
 

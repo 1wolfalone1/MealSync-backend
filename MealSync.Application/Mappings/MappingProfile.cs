@@ -21,6 +21,9 @@ using MealSync.Application.UseCases.ShopOwners.Models;
 using MealSync.Application.UseCases.Shops.Models;
 using MealSync.Domain.Entities;
 using MealSync.Domain.Enums;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace MealSync.Application.Mappings;
 
@@ -63,7 +66,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.PlatformCategory, opt => opt.MapFrom(src => src.PlatformCategory))
             .ForMember(dest => dest.ShopCategory, opt => opt.MapFrom(src => src.ShopCategory))
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.FoodOperatingSlots))
-            .ForMember(dest => dest.OptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups));
+            .ForMember(dest => dest.OptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups.OrderBy(fo => fo.DisplayOrder)));
         CreateMap<PlatformCategory, FoodDetailResponse.PlatformCategoryResponse>();
         CreateMap<ShopCategory, FoodDetailResponse.ShopCategoryResponse>();
         CreateMap<OperatingSlot, FoodDetailResponse.OperatingSlotResponse>();
@@ -89,7 +92,8 @@ public class MappingProfile : Profile
                     src => src.Account != default ? src.Account.FullName : string.Empty));
         CreateMap<Shop, ShopSummaryResponse>()
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0))
-            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Location.Address)); CreateMap<Order, OrderNotification>();
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Location.Address));
+        CreateMap<Order, OrderNotification>();
         CreateMap<Food, FoodSummaryResponse>();
         CreateMap<Shop, ShopFavouriteResponse>();
         CreateMap<Location, ShopInfoResponse.ShopLocationResponse>();
@@ -98,7 +102,7 @@ public class MappingProfile : Profile
         CreateMap<Shop, ShopInfoResponse>()
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.TotalReview > 0 ? Math.Round((double)src.TotalRating / src.TotalReview, 1) : 0))
             .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location))
-            .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.OperatingSlots))
+            .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.OperatingSlots.OrderBy(os => os.StartTime)))
             .ForMember(dest => dest.Dormitories, opt => opt.MapFrom(src => src.ShopDormitories.Select(sd => sd.Dormitory)));
         CreateMap<Food, ShopFoodResponse.FoodResponse>();
         CreateMap<Promotion, PromotionSummaryResponse>()
@@ -118,7 +122,7 @@ public class MappingProfile : Profile
         CreateMap<FoodPackingUnit, FoodDetailOfShopResponse.FoodPackingUnitOfShopResponse>();
         CreateMap<Food, FoodDetailOfShopResponse>()
             .ForMember(dest => dest.OperatingSlots, opt => opt.MapFrom(src => src.FoodOperatingSlots))
-            .ForMember(dest => dest.OptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups));
+            .ForMember(dest => dest.OptionGroups, opt => opt.MapFrom(src => src.FoodOptionGroups.OrderBy(fo => fo.DisplayOrder)));
         CreateMap<FoodOperatingSlot, FoodDetailOfShopResponse.OperatingSlotOfShopResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.OperatingSlot.Id))
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.OperatingSlot.Title))
@@ -171,7 +175,7 @@ public class MappingProfile : Profile
                 opt => opt.MapFrom(src =>
                     new DateTimeOffset(src.IntendedReceiveDate, TimeSpan.Zero).ToUnixTimeMilliseconds())
             )
-            .ForMember(dest => dest.IsOrderNextDay, opt => opt.MapFrom(src => src.OrderDate.Day != src.IntendedReceiveDate.Day))
+            .ForMember(dest => dest.IsOrderNextDay, opt => opt.MapFrom(src => src.OrderDate.ToOffset(TimeSpan.FromHours(7)).Day != src.IntendedReceiveDate.Day))
             .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt != default ? src.ReceiveAt.Value.ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt != default ? src.CompletedAt.Value.ToUnixTimeMilliseconds() : default))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.CustomerLocation.Longitude))
@@ -200,6 +204,7 @@ public class MappingProfile : Profile
         CreateMap<Order, DetailOrderCustomerResponse.ShopInfoResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Shop.Id))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Shop.Name))
+            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Shop.PhoneNumber))
             .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.Shop.LogoUrl))
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.ShopLocation.Address))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.ShopLocation.Longitude))
@@ -208,6 +213,9 @@ public class MappingProfile : Profile
         CreateMap<Promotion, DetailOrderCustomerResponse.PromotionOrderResponse>()
             .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.ToUnixTimeMilliseconds()))
             .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToUnixTimeMilliseconds()));
+
+        CreateMap<ShopDeliveyFailEvidence, DetailOrderCustomerResponse.ShopDeliveryFailEvidenceResponse>()
+            .ForMember(dest => dest.TakePictureDateTime, opt => opt.MapFrom(src => src.TakePictureDateTime.ToUnixTimeMilliseconds()));
 
         CreateMap<Order, OrderSummaryResponse>()
             .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate.ToUnixTimeMilliseconds()))
@@ -219,7 +227,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.ReceiveAt, opt => opt.MapFrom(src => src.ReceiveAt.HasValue ? src.ReceiveAt.Value.ToUnixTimeMilliseconds() : 0))
             .ForMember(
                 dest => dest.IsOrderTomorrow,
-                opt => opt.MapFrom(src => src.IntendedReceiveDate.Day != src.OrderDate.Day)
+                opt => opt.MapFrom(src => src.IntendedReceiveDate.Day != src.OrderDate.ToOffset(TimeSpan.FromHours(7)).Day)
             )
             // .ForMember(dest => dest.TotalOrderDetail, opt => opt.MapFrom(src => src.OrderDetails.Count))
             .ForMember(dest => dest.ShopName, opt => opt.MapFrom(src => src.Shop.Name))
@@ -242,7 +250,7 @@ public class MappingProfile : Profile
             )
             .ForMember(
                 dest => dest.IsOrderTomorrow,
-                opt => opt.MapFrom(src => src.IntendedReceiveDate.Day != src.OrderDate.Day)
+                opt => opt.MapFrom(src => src.IntendedReceiveDate.Day != new DateTimeOffset(src.OrderDate, TimeSpan.Zero).ToOffset(TimeSpan.FromHours(7)).Day)
             );
 
         CreateMap<Food, ShopCategoryDetailResponse.ShopCategoryFoodResponse>();
