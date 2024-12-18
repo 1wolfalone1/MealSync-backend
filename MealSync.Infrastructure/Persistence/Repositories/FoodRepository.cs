@@ -239,7 +239,7 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
                                                           && f.Status == FoodStatus.Active
                                                           && f.FoodOperatingSlots.Any(fos => fos.OperatingSlotId == operatingSlotId))
             .ConfigureAwait(false);
-        return totalActiveFood == ids.Count;
+        return totalActiveFood == ids.Distinct().ToList().Count;
     }
 
     public async Task<bool> CheckActiveFoodByIds(List<long> ids)
@@ -247,7 +247,7 @@ public class FoodRepository : BaseRepository<Food>, IFoodRepository
         var totalActiveFood = await DbSet.CountAsync(f => ids.Contains(f.Id)
                                                           && f.Status == FoodStatus.Active)
             .ConfigureAwait(false);
-        return totalActiveFood == ids.Count;
+        return totalActiveFood == ids.Distinct().ToList().Count;
     }
 
     public Task<List<Food>> GetAllFoodIsSoldOut()
