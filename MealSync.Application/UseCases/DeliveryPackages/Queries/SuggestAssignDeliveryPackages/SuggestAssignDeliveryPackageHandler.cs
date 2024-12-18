@@ -33,7 +33,9 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
     private readonly IDormitoryDistanceRepository _dormitoryDistanceRepository;
     private readonly IShopDormitoryRepository _shopDormitoryRepository;
 
-    public SuggestAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService, IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapApiService mapApiService, IShopRepository shopRepository, IBuildingRepository buildingRepository, IDormitoryRepository dormitoryRepository, IUnitOfWork unitOfWork, ILogger<SuggestAssignDeliveryPackageHandler> logger, IDormitoryDistanceRepository dormitoryDistanceRepository, IShopDormitoryRepository shopDormitoryRepository)
+    public SuggestAssignDeliveryPackageHandler(IDapperService dapperService, IDeliveryPackageRepository deliveryPackageRepository, ICurrentPrincipalService currentPrincipalService,
+        IShopDeliveryStaffRepository shopDeliveryStaffRepository, IMapApiService mapApiService, IShopRepository shopRepository, IBuildingRepository buildingRepository, IDormitoryRepository dormitoryRepository,
+        IUnitOfWork unitOfWork, ILogger<SuggestAssignDeliveryPackageHandler> logger, IDormitoryDistanceRepository dormitoryDistanceRepository, IShopDormitoryRepository shopDormitoryRepository)
     {
         _dapperService = dapperService;
         _deliveryPackageRepository = deliveryPackageRepository;
@@ -81,7 +83,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             s.EndTime = request.EndTime;
         });
 
-        var assignOrder = await AssignOrderByFormularAsync(shopStaffs, unAssignOrders, request.StaffMaxCarryWeight).ConfigureAwait(false);
+        var assignOrder = await AssignOrder(shopStaffs, unAssignOrders, request).ConfigureAwait(false);
 
         return Result.Success(new
         {
@@ -115,6 +117,47 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             if (shopDeliveryStaff.Status == ShopDeliveryStaffStatus.InActive && shopDeliveryStaff.Account.Status != AccountStatus.Deleted)
                 throw new InvalidBusinessException(MessageCode.E_DELIVERY_PACKAGE_STAFF_IN_ACTIVE.GetDescription(), new object[] { id });
         }
+    }
+
+    private async Task<(List<DeliveryPackageForAssignResponse> AssignedStaff, List<OrderDetailForShopResponse> UnAssignOrder)> AssignOrder(List<DeliveryPackageForAssignResponse> listStaff, List<OrderDetailForShopResponse> orders,
+        SuggestAssignDeliveryPackageQuery request)
+    {
+        var ordersByDormitory = orders.GroupBy(o => o.DormitoryId)
+            .ToDictionary(g => g.Key, g => (g.Count(), g.ToList()));
+
+        List<(long DormitoryId, long NumberOfOrder)> dormitoryIdsSatisfyCondition = new();
+        foreach (var orderDormitory in ordersByDormitory)
+        {
+            if (orderDormitory.Value.Item2.Sum(o => o.TotalWeight) <= (request.StaffMaxCarryWeight + DevidedOrderConstant.VariantKgCanBeAccept))
+            {
+                dormitoryIdsSatisfyCondition.Add((orderDormitory.Key, orderDormitory.Value.Item1));
+            }
+        }
+
+        for (var i = 0; i < listStaff.Count(); i++)
+        {
+            // Assign for staff until not left
+            if (dormitoryIdsSatisfyCondition.Count > 0)
+            {
+                // Get out list order can add full for a staff
+                var dormitoryIdContainsNearestEquallyOrder = dormitoryIdsSatisfyCondition.OrderByDescending(x => x.NumberOfOrder).First();
+                dormitoryIdsSatisfyCondition.Remove(dormitoryIdContainsNearestEquallyOrder);
+
+                var listOrderOfDormitoryCanAssignAllToStaff = ordersByDormitory[dormitoryIdContainsNearestEquallyOrder.DormitoryId].Item2;
+                ordersByDormitory.Remove(dormitoryIdContainsNearestEquallyOrder.DormitoryId);
+                listStaff[i] = await AssignOrderToStaff(listStaff[i], listOrderOfDormitoryCanAssignAllToStaff).ConfigureAwait(false);
+            }
+        }
+
+        // Assign left orders to shop delivery staff base on formular
+        var listOrderLeft = ordersByDormitory.Values.SelectMany(x => x.Item2).ToList();
+        if (listOrderLeft != null && listOrderLeft.Count() > 0)
+        {
+            var result = await AssignOrderByFormularAsync(listStaff, listOrderLeft, request.StaffMaxCarryWeight).ConfigureAwait(false);
+            return (result.AssignedStaff, result.UnAssignOrder);
+        }
+
+        return (listStaff, new List<OrderDetailForShopResponse>());
     }
 
     private async Task<(List<DeliveryPackageForAssignResponse> AssignedStaff, List<OrderDetailForShopResponse> UnAssignOrder)> AssignOrderByFormularAsync(List<DeliveryPackageForAssignResponse> listStaff,
@@ -181,23 +224,23 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                 {
                     // Check if time wait customer + min time move to other dormitory over 30p will not let it receive
                     var minTime = staff.Dormitories.Min(d => d.MinutesMoveTo);
-                    if (staff.TotalMinutesHandleDelivery - minTime >= (FrameConstant.TIME_FRAME_IN_MINUTES + DevidedOrderConstant.MinutesAddWhenOrderMoreThanFive))
+                    if (staff.TotalMinutesHandleDelivery - minTime >= FrameConstant.TIME_FRAME_IN_MINUTES + DevidedOrderConstant.MinutesAddWhenOrderMoreThanFive)
                     {
                         salt = int.MaxValue;
                     }
                 }
 
-                if ((staff.CurrentTaskLoad + order.TotalWeight) > staffMaxWeightCarry)
+                if (staff.CurrentTaskLoad + order.TotalWeight > staffMaxWeightCarry)
                 {
                     // Check have any staff can carry this order
-                    if (listStaff.Any(s => (s.CurrentTaskLoad + order.TotalWeight) < staffMaxWeightCarry))
+                    if (listStaff.Any(s => s.CurrentTaskLoad + order.TotalWeight < staffMaxWeightCarry))
                     {
                         salt = int.MaxValue;
                     }
                     else
                     {
                         // If no staff can carry this order. Will check variant 1 kg + current taskload
-                        if ((staff.CurrentTaskLoad + order.TotalWeight) > (staffMaxWeightCarry + DevidedOrderConstant.VariantKgCanBeAccept))
+                        if (staff.CurrentTaskLoad + order.TotalWeight > staffMaxWeightCarry + DevidedOrderConstant.VariantKgCanBeAccept)
                         {
                             salt = int.MaxValue;
                         }
@@ -335,7 +378,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
     {
         var orderGroupBy = staff.Orders.GroupBy(o => o.DormitoryId)
             .ToDictionary(g => g.Key, g => g.Select(o => o.BuildingId).Distinct().ToList());
-        int average = 0;
+        var average = 0;
         foreach (var order in orderGroupBy)
         {
             var originLocation = _dormitoryRepository.GetLocationByDormitoryId(order.Key);
@@ -360,19 +403,13 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
         return 5;
     }
 
-    private DeliveryPackageForAssignResponse AssignOrderToStaff(DeliveryPackageForAssignResponse staff, List<OrderDetailForShopResponse> orders)
+    private async Task<DeliveryPackageForAssignResponse> AssignOrderToStaff(DeliveryPackageForAssignResponse staff, List<OrderDetailForShopResponse> orders)
     {
         foreach (var order in orders)
         {
             staff.Orders.Add(order);
             staff.Waiting++;
             staff.Total = staff.Waiting + staff.Delivering + staff.Failed + staff.Successful;
-
-            // Check if order located in order dormitory will increase currentDistance
-            if (staff.Dormitories.All(d => d.Id != order.DormitoryId))
-            {
-                staff.CurrentDistance++;
-            }
 
             var dormitoryExist = staff.Dormitories.FirstOrDefault(d => d.Id == order.DormitoryId);
             if (dormitoryExist != null)
@@ -384,6 +421,10 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             }
             else
             {
+                var shopDormitory = _shopDormitoryRepository.GetShopDormitory(_currentPrincipalService.CurrentPrincipalId.Value, order.DormitoryId);
+                staff.CurrentDistance = shopDormitory.Distance; // Convert to km
+                staff.TotalMinutestToMove += shopDormitory.Duration;
+
                 staff.Dormitories.Add(new DeliveryPackageForAssignResponse.DormitoryStasisticForEachStaff()
                 {
                     Id = order.DormitoryId,
@@ -393,6 +434,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
                     Successful = 0,
                     Delivering = 0,
                     Failed = 0,
+                    MinutesMoveTo = shopDormitory.Duration,
                     ShopDeliveryStaff = new DeliveryPackageForAssignResponse.ShopStaffInforResponse()
                     {
                         Id = staff.ShopDeliveryStaff.Id,
@@ -404,6 +446,7 @@ public class SuggestAssignDeliveryPackageHandler : IQueryHandler<SuggestAssignDe
             }
         }
 
+        staff = await CalculateAverageWaitForStaff(staff).ConfigureAwait(false);
         return staff;
     }
 
