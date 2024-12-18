@@ -204,6 +204,7 @@ public class MappingProfile : Profile
         CreateMap<Order, DetailOrderCustomerResponse.ShopInfoResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Shop.Id))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Shop.Name))
+            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Shop.PhoneNumber))
             .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.Shop.LogoUrl))
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.ShopLocation.Address))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.ShopLocation.Longitude))
