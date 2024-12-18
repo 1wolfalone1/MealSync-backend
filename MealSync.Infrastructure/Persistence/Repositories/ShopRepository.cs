@@ -43,7 +43,6 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
             .Include(shop => shop.Location)
             .Where(
                 shop => shop.ShopDormitories.Select(shopDormitory => shopDormitory.DormitoryId).Contains(dormitoryId)
-                        && !shop.IsReceivingOrderPaused
                         && shop.Status == ShopStatus.Active
                         && shop.OperatingSlots.Any(os => os.IsActive)
             );
@@ -85,8 +84,7 @@ public class ShopRepository : BaseRepository<Shop>, IShopRepository
         var query = DbSet
             .Where(shop =>
                 shop.ShopDormitories.Any(sd => sd.DormitoryId == dormitoryId) &&
-                shop.Status == ShopStatus.Active &&
-                !shop.IsReceivingOrderPaused && shop.OperatingSlots.Any(os => os.IsActive)
+                shop.Status == ShopStatus.Active && shop.OperatingSlots.Any(os => os.IsActive)
             ).AsQueryable();
 
         if (platformCategoryId.HasValue && platformCategoryId.Value > 0)
