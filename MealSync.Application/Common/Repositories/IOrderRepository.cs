@@ -66,4 +66,6 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<List<Order>> GetReportOrderFailByShop(DateTime intendedReceiveDate, int endTime);
 
     Task<List<OrderStatusChartDto>> GetOrderStatusChart(DateTime dateFrom, DateTime dateTo);
+
+    Task<int> CountOrderInOrderInOneFrame(long shopId, long customerId, DateTime intendedReceiveDate, int startTime, int endTime);
 }

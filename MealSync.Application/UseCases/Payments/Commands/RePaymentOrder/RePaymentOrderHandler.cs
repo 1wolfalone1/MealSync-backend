@@ -48,7 +48,7 @@ public class RePaymentOrderHandler : ICommandHandler<RePaymentOrderCommand, Resu
                         0,
                         0,
                         0)
-                    .AddDays(1);
+                    .AddDays(1).AddMinutes(-15);
             }
             else
             {
@@ -58,7 +58,7 @@ public class RePaymentOrderHandler : ICommandHandler<RePaymentOrderCommand, Resu
                     order.IntendedReceiveDate.Day,
                     order.EndTime / 100,
                     order.EndTime % 100,
-                    0);
+                    0).AddMinutes(-15);
             }
             var endTimeDateTimeOffset = new DateTimeOffset(intendedReceiveEndDateTime, TimeSpan.FromHours(7));
 
